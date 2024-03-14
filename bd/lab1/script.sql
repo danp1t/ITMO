@@ -9,9 +9,9 @@ DROP TYPE group_enum CASCADE;
 DROP TYPE issue_enum CASCADE;
 DROP TYPE type_enum CASCADE;
 
-CREATE TYPE group_enum AS ENUM('Positive', 'Negative');
-CREATE TYPE issue_enum AS ENUM('Resolved', 'Relevant', 'Not resolved');
-CREATE TYPE type_enum AS ENUM('Resolved', 'Relevant', 'Not resolved');
+CREATE TYPE group_enum AS ENUM('Positive', 'Negative', 'NULL');
+CREATE TYPE issue_enum AS ENUM('Resolved', 'Relevant', 'Not resolved', 'NULL');
+CREATE TYPE type_enum AS ENUM('Resolved', 'Relevant', 'Not resolved', 'NULL');
 
 CREATE TABLE TYPE_INFO(
 	ID SERIAL PRIMARY KEY,
@@ -111,7 +111,7 @@ INSERT INTO GROUP_PERSON VALUES(DEFAULT, 12, 3);
 
 
 INSERT INTO DEBATE VALUES(DEFAULT, 1, 1, 2, 1);
-INSERT INTO DEBATE VALUES(DEFAULT, 2, 2, 4, 2);
+INSERT INTO DEBATE VALUES(DEFAULT, 2, 3, 4, 2);
 INSERT INTO DEBATE VALUES(DEFAULT, 3, 5, 6, 3);
 
 
