@@ -45,13 +45,12 @@ public class Main {
         XYSeries rectangle_method_random = new XYSeries("rectangle_method_random");
         XYSeries trapezoid_method = new XYSeries("trapezoid_method");
         XYSeries simson_method = new XYSeries("simson_method");
-        XYSeries mseSeries = new XYSeries("MSE");
         for (int k=1; k < (n+1); k+=1){
             double sum = 0;
             for (int i=1; i < (k+1); i++) {
                 double y_ideal = 2*Math.sqrt(Math.E) - 2;
                 double y = rectangle_method_left(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.abs(y_ideal - y);
+                double res = Math.pow(y_ideal - y, 2);
                 sum = sum + res;
             }
             sum = sum / k;
@@ -62,7 +61,7 @@ public class Main {
             for (int i=1; i < (k+1); i++) {
                 double y_ideal = 2*Math.sqrt(Math.E) - 2;
                 double y = rectangle_method_right(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.abs(y_ideal - y);
+                double res = Math.pow(y_ideal - y, 2);
                 sum = sum + res;
             }
             sum = sum / k;
@@ -73,7 +72,7 @@ public class Main {
             for (int i=1; i < (k+1); i++) {
                 double y_ideal = 2*Math.sqrt(Math.E) - 2;
                 double y = rectangle_method_random(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.abs(y_ideal - y);
+                double res = Math.pow(y_ideal - y, 2);
                 sum = sum + res;
             }
             sum = sum / k;
@@ -84,7 +83,7 @@ public class Main {
             for (int i=1; i < (k+1); i++) {
                 double y_ideal = 2*Math.sqrt(Math.E) - 2;
                 double y = trapezoid_method(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.abs(y_ideal - y);
+                double res = Math.pow(y_ideal - y, 2);
                 sum = sum + res;
             }
             sum = sum / k;
@@ -95,26 +94,12 @@ public class Main {
             for (int i=1; i < (k+1); i++) {
                 double y_ideal = 2*Math.sqrt(Math.E) - 2;
                 double y = simson_method(i, getArray(i, start, end), getDelta(i, start, end), end);
-                double res = Math.abs(y_ideal - y);
+                double res = Math.pow(y_ideal - y, 2);
                 sum = sum + res;
             }
             sum = sum / k;
             simson_method.add(k, sum);
         }
-
-
-
-        // Добавляем данные для MAE
-//        maeSeries.add(1, 0.5);
-//        maeSeries.add(2, 0.3);
-//        maeSeries.add(3, 0.2);
-//        maeSeries.add(4, 0.1);
-
-        // Добавляем данные для MSE
-        mseSeries.add(1, 0.3);
-        mseSeries.add(2, 0.2);
-        mseSeries.add(3, 0.15);
-        mseSeries.add(4, 0.1);
 
         XYSeriesCollection dataset = new XYSeriesCollection();
         dataset.addSeries(rectangle_method_left);
@@ -124,7 +109,7 @@ public class Main {
         dataset.addSeries(simson_method);
 
         JFreeChart chart = ChartFactory.createXYLineChart(
-                "MAE", "Epochs", "Error", dataset, PlotOrientation.VERTICAL, true, true, false);
+                "MSE", "Epochs", "Error", dataset, PlotOrientation.VERTICAL, true, true, false);
 
         XYPlot plot = chart.getXYPlot();
         XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
@@ -134,7 +119,7 @@ public class Main {
         renderer.setSeriesShapesVisible(1, true);
         plot.setRenderer(renderer);
 
-        JFrame frame = new JFrame("MAE");
+        JFrame frame = new JFrame("MSE");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 600);
 
