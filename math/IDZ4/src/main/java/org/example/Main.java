@@ -18,6 +18,7 @@ public class Main {
         System.out.print("Введите количество равномерных промежутков: ");
         Scanner scanner = new Scanner(System.in);
         Integer n = scanner.nextInt();
+        long startTime = System.currentTimeMillis();
         //Начала промежутка
         double start = 1;
 
@@ -39,93 +40,95 @@ public class Main {
 
         //Метод Симпсона
         System.out.println("Площадь при рассчете с помошью метода Симсона: " + simson_method(n, getArray(n, start, end), getDelta(n, start, end), end));
-
-        XYSeries rectangle_method_left = new XYSeries("rectangle_method_left");
-        XYSeries rectangle_method_right = new XYSeries("rectangle_method_right");
-        XYSeries rectangle_method_random = new XYSeries("rectangle_method_random");
-        XYSeries trapezoid_method = new XYSeries("trapezoid_method");
-        XYSeries simson_method = new XYSeries("simson_method");
-        for (int k=1; k < (n+1); k+=1){
-            double sum = 0;
-            for (int i=1; i < (k+1); i++) {
-                double y_ideal = 2*Math.sqrt(Math.E) - 2;
-                double y = rectangle_method_left(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.pow(y_ideal - y, 2);
-                sum = sum + res;
-            }
-            sum = sum / k;
-            rectangle_method_left.add(k, sum);
-        }
-        for (int k=1; k < (n+1); k+=1){
-            double sum = 0;
-            for (int i=1; i < (k+1); i++) {
-                double y_ideal = 2*Math.sqrt(Math.E) - 2;
-                double y = rectangle_method_right(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.pow(y_ideal - y, 2);
-                sum = sum + res;
-            }
-            sum = sum / k;
-            rectangle_method_right.add(k, sum);
-        }
-        for (int k=1; k < (n+1); k+=1){
-            double sum = 0;
-            for (int i=1; i < (k+1); i++) {
-                double y_ideal = 2*Math.sqrt(Math.E) - 2;
-                double y = rectangle_method_random(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.pow(y_ideal - y, 2);
-                sum = sum + res;
-            }
-            sum = sum / k;
-            rectangle_method_random.add(k, sum);
-        }
-        for (int k=1; k < (n+1); k+=1){
-            double sum = 0;
-            for (int i=1; i < (k+1); i++) {
-                double y_ideal = 2*Math.sqrt(Math.E) - 2;
-                double y = trapezoid_method(i, getArray(i, start, end), getDelta(i, start, end));
-                double res = Math.pow(y_ideal - y, 2);
-                sum = sum + res;
-            }
-            sum = sum / k;
-            trapezoid_method.add(k, sum);
-        }
-        for (int k=1; k < (n+1); k+=1){
-            double sum = 0;
-            for (int i=1; i < (k+1); i++) {
-                double y_ideal = 2*Math.sqrt(Math.E) - 2;
-                double y = simson_method(i, getArray(i, start, end), getDelta(i, start, end), end);
-                double res = Math.pow(y_ideal - y, 2);
-                sum = sum + res;
-            }
-            sum = sum / k;
-            simson_method.add(k, sum);
-        }
-
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        dataset.addSeries(rectangle_method_left);
-        dataset.addSeries(rectangle_method_right);
-        dataset.addSeries(rectangle_method_random);
-        dataset.addSeries(trapezoid_method);
-        dataset.addSeries(simson_method);
-
-        JFreeChart chart = ChartFactory.createXYLineChart(
-                "MSE", "Epochs", "Error", dataset, PlotOrientation.VERTICAL, true, true, false);
-
-        XYPlot plot = chart.getXYPlot();
-        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        renderer.setSeriesLinesVisible(0, true);
-        renderer.setSeriesShapesVisible(0, true);
-        renderer.setSeriesLinesVisible(1, true);
-        renderer.setSeriesShapesVisible(1, true);
-        plot.setRenderer(renderer);
-
-        JFrame frame = new JFrame("MSE");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 600);
-
-        ChartPanel chartPanel = new ChartPanel(chart);
-        frame.setContentPane(chartPanel);
-        frame.setVisible(true);
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        System.out.println("Время выполнения алгоритма: " + duration + " мс");
+//        XYSeries rectangle_method_left = new XYSeries("rectangle_method_left");
+//        XYSeries rectangle_method_right = new XYSeries("rectangle_method_right");
+//        XYSeries rectangle_method_random = new XYSeries("rectangle_method_random");
+//        XYSeries trapezoid_method = new XYSeries("trapezoid_method");
+//        XYSeries simson_method = new XYSeries("simson_method");
+//        for (int k=1; k < (n+1); k+=1){
+//            double sum = 0;
+//            for (int i=1; i < (k+1); i++) {
+//                double y_ideal = 2*Math.sqrt(Math.E) - 2;
+//                double y = rectangle_method_left(i, getArray(i, start, end), getDelta(i, start, end));
+//                double res = Math.pow(y_ideal - y, 2);
+//                sum = sum + res;
+//            }
+//            sum = sum / k;
+//            rectangle_method_left.add(k, sum);
+//        }
+//        for (int k=1; k < (n+1); k+=1){
+//            double sum = 0;
+//            for (int i=1; i < (k+1); i++) {
+//                double y_ideal = 2*Math.sqrt(Math.E) - 2;
+//                double y = rectangle_method_right(i, getArray(i, start, end), getDelta(i, start, end));
+//                double res = Math.pow(y_ideal - y, 2);
+//                sum = sum + res;
+//            }
+//            sum = sum / k;
+//            rectangle_method_right.add(k, sum);
+//        }
+//        for (int k=1; k < (n+1); k+=1){
+//            double sum = 0;
+//            for (int i=1; i < (k+1); i++) {
+//                double y_ideal = 2*Math.sqrt(Math.E) - 2;
+//                double y = rectangle_method_random(i, getArray(i, start, end), getDelta(i, start, end));
+//                double res = Math.pow(y_ideal - y, 2);
+//                sum = sum + res;
+//            }
+//            sum = sum / k;
+//            rectangle_method_random.add(k, sum);
+//        }
+//        for (int k=1; k < (n+1); k+=1){
+//            double sum = 0;
+//            for (int i=1; i < (k+1); i++) {
+//                double y_ideal = 2*Math.sqrt(Math.E) - 2;
+//                double y = trapezoid_method(i, getArray(i, start, end), getDelta(i, start, end));
+//                double res = Math.pow(y_ideal - y, 2);
+//                sum = sum + res;
+//            }
+//            sum = sum / k;
+//            trapezoid_method.add(k, sum);
+//        }
+//        for (int k=1; k < (n+1); k+=1){
+//            double sum = 0;
+//            for (int i=1; i < (k+1); i++) {
+//                double y_ideal = 2*Math.sqrt(Math.E) - 2;
+//                double y = simson_method(i, getArray(i, start, end), getDelta(i, start, end), end);
+//                double res = Math.pow(y_ideal - y, 2);
+//                sum = sum + res;
+//            }
+//            sum = sum / k;
+//            simson_method.add(k, sum);
+//        }
+//
+//        XYSeriesCollection dataset = new XYSeriesCollection();
+//        dataset.addSeries(rectangle_method_left);
+//        dataset.addSeries(rectangle_method_right);
+//        dataset.addSeries(rectangle_method_random);
+//        dataset.addSeries(trapezoid_method);
+//        dataset.addSeries(simson_method);
+//
+//        JFreeChart chart = ChartFactory.createXYLineChart(
+//                "MSE", "Epochs", "Error", dataset, PlotOrientation.VERTICAL, true, true, false);
+//
+//        XYPlot plot = chart.getXYPlot();
+//        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+//        renderer.setSeriesLinesVisible(0, true);
+//        renderer.setSeriesShapesVisible(0, true);
+//        renderer.setSeriesLinesVisible(1, true);
+//        renderer.setSeriesShapesVisible(1, true);
+//        plot.setRenderer(renderer);
+//
+//        JFrame frame = new JFrame("MSE");
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setSize(800, 600);
+//
+//        ChartPanel chartPanel = new ChartPanel(chart);
+//        frame.setContentPane(chartPanel);
+//        frame.setVisible(true);
     }
 
     private static double function(double x){
