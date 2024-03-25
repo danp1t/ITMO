@@ -60,7 +60,30 @@ public class Main {
         System.out.println("Площадь при выборе рандомных точек из отрезка: " + sum);
 
 
-        //
+        //Метод трапеций
+        sum = 0;
+        for (int i=0; i < n; i++) {
+            double f_i_1 = array[i][0];
+            double f_i = array[i][1];
+            sum = sum + (function(f_i) + function(f_i_1)) * (delta / 2);
+        }
+        System.out.println("Площадь при рассчете с помошью метода трапеции: " + sum);
+
+        //Метод Симпсона
+        sum = 0;
+        for (int i=0; i < n; i++) {
+            double f_i_1 = array[i][0];
+            double f_i = array[i][1];
+            double f_i1;
+            if (n != (i+1)) {
+                f_i1 = array[i+1][0];
+            }
+            else {
+                f_i1 = end;
+            }
+            sum = sum + (function(f_i_1) + 4*function((f_i + f_i1) / 2) + function(f_i)) * delta / 6;
+        }
+        System.out.println("Площадь при рассчете с помошью метода Симсона: " + sum);
     }
 
     private static double function(double x){
