@@ -18,55 +18,47 @@ public class Main {
         System.out.print("Введите количество равномерных промежутков: ");
         Scanner scanner = new Scanner(System.in);
         Integer n = scanner.nextInt();
-        Double[][] array = new Double[n][2];
         //Начала промежутка
         double start = 1;
-        double start_i = 1;
+
         //Конец промежутка
         double end = Math.E;
-        double delta = (end - start) / n;
 
 
-        double end_i = 1;
-        for (int i=0; i < n; i++){
-            Double part[] = new Double[2];
-            part[0] = start_i;
-            end_i = start_i + (delta);
-
-            if (i == (n-1)) {
-                part[1] = end;
-            }
-            else {
-                part[1] = end_i;
-            }
-            start_i = end_i;
-            array[i] = part;
-        }
         //Метод прямоугольников
         //Выбираем левую точку отрезка
-        System.out.println("Площадь при выборе левых точек: " + rectangle_method_left(n, array, delta));
+        System.out.println("Площадь при выборе левых точек: " + rectangle_method_left(n, getArray(n, start, end), getDelta(n, start, end)));
 
-        System.out.println("Площадь при выборе правых точек: " + rectangle_method_right(n, array, delta));
+        System.out.println("Площадь при выборе правых точек: " + rectangle_method_right(n, getArray(n, start, end), getDelta(n, start, end)));
         //Выбираем рандомную точку из отрезка
-        System.out.println("Площадь при выборе рандомных точек из отрезка: " + rectangle_method_random(n, array, delta));
+        System.out.println("Площадь при выборе рандомных точек из отрезка: " + rectangle_method_random(n, getArray(n, start, end), getDelta(n, start, end)));
 
 
         //Метод трапеций
-        System.out.println("Площадь при рассчете с помошью метода трапеции: " + trapezoid_method(n, array, delta));
+        System.out.println("Площадь при рассчете с помошью метода трапеции: " + trapezoid_method(n, getArray(n, start, end), getDelta(n, start, end)));
 
         //Метод Симпсона
-        System.out.println("Площадь при рассчете с помошью метода Симсона: " + simson_method(n, array, delta, end));
+        System.out.println("Площадь при рассчете с помошью метода Симсона: " + simson_method(n, getArray(n, start, end), getDelta(n, start, end), end));
 
         XYSeries maeSeries = new XYSeries("MAE");
         XYSeries mseSeries = new XYSeries("MSE");
-        for (int i=0; i < n; i++) {
-
+        for (int k=1; k < (n+1); k++){
+            double sum = 0;
+            for (int i=1; i < (k+1); i++) {
+                double y_ideal = 2*Math.sqrt(Math.E) - 2;
+                double y = rectangle_method_left(i, getArray(i, start, end), getDelta(i, start, end));
+                double res = Math.abs(y_ideal - y);
+                sum = sum + res;
+            }
+            sum = sum / k;
+            maeSeries.add(k, sum);
         }
+
         // Добавляем данные для MAE
-        maeSeries.add(1, 0.5);
-        maeSeries.add(2, 0.3);
-        maeSeries.add(3, 0.2);
-        maeSeries.add(4, 0.1);
+//        maeSeries.add(1, 0.5);
+//        maeSeries.add(2, 0.3);
+//        maeSeries.add(3, 0.2);
+//        maeSeries.add(4, 0.1);
 
         // Добавляем данные для MSE
         mseSeries.add(1, 0.3);
@@ -158,5 +150,29 @@ public class Main {
             sum = sum + (function(f_i_1) + 4*function((f_i + f_i1) / 2) + function(f_i)) * delta / 6;
         }
         return sum;
+    }
+    private static Double[][] getArray(int n, double start, double end){
+        Double[][] array = new Double[n][2];
+        double delta = (end - start) / n;
+        double start_i = 1;
+        double end_i;
+        for (int i=0; i < n; i++){
+            Double part[] = new Double[2];
+            part[0] = start_i;
+            end_i = start_i + (delta);
+
+            if (i == (n-1)) {
+                part[1] = end;
+            }
+            else {
+                part[1] = end_i;
+            }
+            start_i = end_i;
+            array[i] = part;
+        }
+        return array;
+    }
+    private static double getDelta(int n, double start, double end){
+        return (end - start) / n;
     }
 }
