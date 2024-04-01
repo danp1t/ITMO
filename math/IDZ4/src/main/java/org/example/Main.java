@@ -2,16 +2,6 @@ package org.example;
 import java.lang.Math;
 import java.util.Random;
 import java.util.Scanner;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-
-import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -21,30 +11,28 @@ public class Main {
         Integer n = Integer.parseInt(line);
         long startTime = System.currentTimeMillis();
         //Начала промежутка
-        //System.out.print("Введите начало промежутка интегрирования: ");
-        //line = scanner.nextLine();
-        //Double start = Double.parseDouble(line);
-        double start = 1;
-        //System.out.print("Введите конец промежутка интегрирования: ");
-        //line = scanner.nextLine();
+        System.out.print("Введите начало промежутка интегрирования: ");
+        line = scanner.nextLine();
+        Double start = Double.parseDouble(line);
+        System.out.print("Введите конец промежутка интегрирования: ");
+        line = scanner.nextLine();
         //Конец промежутка
-        //Double end = Double.parseDouble(line);
-        Double end = Math.E;
+        Double end = Double.parseDouble(line);
 
         //Метод прямоугольников
         //Выбираем левую точку отрезка
-        System.out.println("Площадь при выборе левых точек: " + rectangle_method_left(n, getArray(n, start, end), getDelta(n, start, end)));
+        System.out.println("Площадь при выборе левых точек: " + rectangleMethodLeft(n, getArray(n, start, end), getDelta(n, start, end)));
 
-        System.out.println("Площадь при выборе правых точек: " + rectangle_method_right(n, getArray(n, start, end), getDelta(n, start, end)));
+        System.out.println("Площадь при выборе правых точек: " + rectangleMethodRight(n, getArray(n, start, end), getDelta(n, start, end)));
         //Выбираем рандомную точку из отрезка
-        System.out.println("Площадь при выборе рандомных точек из отрезка: " + rectangle_method_random(n, getArray(n, start, end), getDelta(n, start, end)));
+        System.out.println("Площадь при выборе рандомных точек из отрезка: " + rectangleMethodRandom(n, getArray(n, start, end), getDelta(n, start, end)));
 
 
         //Метод трапеций
-        System.out.println("Площадь при рассчете с помошью метода трапеции: " + trapezoid_method(n, getArray(n, start, end), getDelta(n, start, end)));
+        System.out.println("Площадь при рассчете с помошью метода трапеции: " + trapezoidMethod(n, getArray(n, start, end), getDelta(n, start, end)));
 
         //Метод Симпсона
-        System.out.println("Площадь при рассчете с помошью метода Симсона: " + simson_method(n, getArray(n, start, end), getDelta(n, start, end), end));
+        System.out.println("Площадь при рассчете с помошью метода Симсона: " + simsonMethod(n, getArray(n, start, end), getDelta(n, start, end), end));
         long endTime = System.currentTimeMillis();
         long duration = endTime - startTime;
         System.out.println("Время выполнения алгоритма: " + duration + " мс");
@@ -54,7 +42,7 @@ public class Main {
         return 1 / Math.sqrt(x);
     }
 
-    private static double rectangle_method_left(int n, Double[][] array, double delta){
+    private static double rectangleMethodLeft(int n, Double[][] array, double delta){
         double sum = 0;
         //Выбираем левую точку отрезка
         for (int i = 0; i < n; i++) {
@@ -64,7 +52,7 @@ public class Main {
         return sum;
     }
 
-    private static double rectangle_method_right(int n, Double[][] array, double delta){
+    private static double rectangleMethodRight(int n, Double[][] array, double delta){
         double sum = 0;
         //Выбираем правую точку отрезка
         for (int i = 0; i < n; i++) {
@@ -74,7 +62,7 @@ public class Main {
         return sum;
     }
 
-    private static double rectangle_method_random(int n, Double[][] array, double delta){
+    private static double rectangleMethodRandom(int n, Double[][] array, double delta){
         double sum = 0;
         Random random = new Random();
         for (int i = 0; i < n; i++) {
@@ -86,7 +74,7 @@ public class Main {
         }
         return sum;
     }
-    private static double trapezoid_method(int n, Double[][] array, double delta){
+    private static double trapezoidMethod(int n, Double[][] array, double delta){
         double sum = 0;
         for (int i=0; i < n; i++) {
             double f_i_1 = array[i][0];
@@ -95,7 +83,7 @@ public class Main {
         }
         return sum;
     }
-    private static double simson_method(int n, Double[][] array, double delta, double end){
+    private static double simsonMethod(int n, Double[][] array, double delta, double end){
         double sum = 0;
         for (int i=0; i < n; i++) {
             double f_i_1 = array[i][0];
