@@ -1,11 +1,41 @@
 ORG 0x0 ; Инициализация векторов прерывания
 V0: WORD $DEFAULT, 0x180 ; Вектор прерывания #0
-V1: WORD $DEFAULT, 0x180 ; Вектор прерывания #1
-V2: WORD $DEFAULT, 0x180 ; Вектор прерывания #2
-V3: WORD $DEFAULT, 0x180 ; Вектор прерывания #3
+V1: WORD $DEFAULT, 0x180 ; Вектор прерывания #1  
+V2: WORD $DEFAULT, 0x180 ; Вектор прерывания #2  222
+V3: WORD $DEFAULT, 0x180 ; Вектор прерывания #3  222
 V4: WORD $DEFAULT, 0x180 ; Вектор прерывания #4
 V5: WORD $DEFAULT, 0x180 ; Вектор прерывания #5
 V6: WORD $DEFAULT, 0x180 ; Вектор прерывания #6
 V7: WORD $DEFAULT, 0x180 ; Вектор прерывания #7
 
 DEFAULT: IRET ; Просто возврат
+
+ORG 0x00E
+X: WORD ?
+
+ORG 	0x020
+START:	DI
+		CLA
+		OUT 0x1
+		OUT 0x3
+		OUT 0xB
+		OUT 0xE
+		OUT 0x12
+		OUT 0x16
+		OUT 0x1A
+		OUT 0x1E
+		LD #0xA; разрешить прерывания и вектор №2 (1000|0010 = 1010)
+		OUT 0x5
+		LD 0xB;  разрешить прерывание и вектор №3 (1000|0011 = 1011)
+		OUT 0x7
+		JUMP PROG
+
+PROG: 	EI
+		CLA
+
+MINUS3: LD $X
+		SUB 3
+		ST $X
+
+INT1: 	NOP
+		PUSH
