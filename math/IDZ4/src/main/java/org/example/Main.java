@@ -13,11 +13,28 @@ public class Main {
         //Начала промежутка
         System.out.print("Введите начало промежутка интегрирования: ");
         line = scanner.nextLine();
-        Double start = Double.parseDouble(line);
+        Double start;
+        if (line.toLowerCase().equals("e")) {
+            start = Math.E;
+        }
+        else if (line.toLowerCase().equals("pi")) {
+            start = Math.PI;
+        }
+        else {
+            start = Double.parseDouble(line);
+        }
         System.out.print("Введите конец промежутка интегрирования: ");
         line = scanner.nextLine();
-        //Конец промежутка
-        Double end = Double.parseDouble(line);
+        Double end;
+        if (line.toLowerCase().equals("e")) {
+            end = Math.E;
+        }
+        else if (line.toLowerCase().equals("pi")) {
+            end = Math.PI;
+        }
+        else {
+            end = Double.parseDouble(line);
+        }
 
         //Метод прямоугольников
         //Выбираем левую точку отрезка
