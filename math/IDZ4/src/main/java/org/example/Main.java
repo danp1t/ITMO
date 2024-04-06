@@ -133,7 +133,7 @@ public class Main {
     private static Double[][] getArray(int n, double start, double end){
         Double[][] array = new Double[n][2];
         double delta = (end - start) / n;
-        double start_i = 1;
+        double start_i = start;
         double end_i;
         for (int i=0; i < n; i++){
             Double part[] = new Double[2];
