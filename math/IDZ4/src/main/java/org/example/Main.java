@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Введите функцию в формате f(x) = выражение (для выхода введите 'exit'): ");
+        System.out.print("Введите функцию в формате f(x) = выражение: ");
         String input = scanner.nextLine();
         String[] parts = input.split("=");
         if (parts.length != 2) {
