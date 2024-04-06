@@ -1,40 +1,47 @@
 package org.example;
 import java.lang.Math;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+import net.objecthunter.exp4j.Expression;
+import net.objecthunter.exp4j.ExpressionBuilder;
 
 public class Main {
+    public static Expression function;
     public static void main(String[] args) {
-        System.out.print("Введите количество равномерных промежутков: ");
+
         Scanner scanner = new Scanner(System.in);
+        System.out.print("Введите функцию в формате f(x) = выражение (для выхода введите 'exit'): ");
+        String input = scanner.nextLine();
+        String[] parts = input.split("=");
+        if (parts.length != 2) {
+            System.out.println("Неверный формат функции. Попробуйте снова.");
+        }
+        ;
+        String functionExpression = parts[1].trim();
+
+
+        function = new ExpressionBuilder(functionExpression).variables("x").build();
+
+
+
+        System.out.print("Введите количество равномерных промежутков: ");
+
         String line = scanner.nextLine();
         Integer n = Integer.parseInt(line);
         long startTime = System.currentTimeMillis();
         //Начала промежутка
         System.out.print("Введите начало промежутка интегрирования: ");
         line = scanner.nextLine();
-        Double start;
-        if (line.toLowerCase().equals("e")) {
-            start = Math.E;
-        }
-        else if (line.toLowerCase().equals("pi")) {
-            start = Math.PI;
-        }
-        else {
-            start = Double.parseDouble(line);
-        }
+        Expression expression = new ExpressionBuilder(line).build();
+
+        double start = expression.evaluate();
         System.out.print("Введите конец промежутка интегрирования: ");
         line = scanner.nextLine();
-        Double end;
-        if (line.toLowerCase().equals("e")) {
-            end = Math.E;
-        }
-        else if (line.toLowerCase().equals("pi")) {
-            end = Math.PI;
-        }
-        else {
-            end = Double.parseDouble(line);
-        }
+        expression = new ExpressionBuilder(line).build();
+
+        Double end = expression.evaluate();
 
         //Метод прямоугольников
         //Выбираем левую точку отрезка
@@ -63,7 +70,8 @@ public class Main {
         double sum = 0;
         //Выбираем левую точку отрезка
         for (int i = 0; i < n; i++) {
-            double f = function(array[i][0]);
+            function.setVariable("x", array[i][0]);
+            double f = function.evaluate();
             sum = sum + f*delta;
         }
         return sum;
@@ -73,7 +81,9 @@ public class Main {
         double sum = 0;
         //Выбираем правую точку отрезка
         for (int i = 0; i < n; i++) {
-            double f = function(array[i][1]);
+
+            function.setVariable("x", array[i][1]);
+            double f = function.evaluate();
             sum = sum + f*delta;
         }
         return sum;
@@ -86,7 +96,8 @@ public class Main {
             double minRange = array[i][0];
             double maxRange = array[i][1];
             double randomNumInRange = minRange + (maxRange - minRange) * random.nextDouble();
-            double f = function(randomNumInRange);
+            function.setVariable("x", randomNumInRange);
+            double f = function.evaluate();
             sum = sum + f*delta;
         }
         return sum;
@@ -96,7 +107,11 @@ public class Main {
         for (int i=0; i < n; i++) {
             double f_i_1 = array[i][0];
             double f_i = array[i][1];
-            sum = sum + (function(f_i) + function(f_i_1)) * (delta / 2);
+            function.setVariable("x", f_i);
+            f_i = function.evaluate();
+            function.setVariable("x", f_i_1);
+            f_i_1 = function.evaluate();
+            sum = sum + (f_i + f_i_1) * (delta / 2);
         }
         return sum;
     }
@@ -105,7 +120,13 @@ public class Main {
         for (int i=0; i < n; i++) {
             double f_i_1 = array[i][0];
             double f_i = array[i][1];
-            sum = sum + (function(f_i_1) + 4*function((f_i + f_i_1) / 2) + function(f_i)) * delta / 6;
+            function.setVariable("x", (f_i + f_i_1) / 2);
+            double f_1 = function.evaluate();
+            function.setVariable("x", f_i);
+            double f_2 = function.evaluate();
+            function.setVariable("x", f_i_1);
+            double f_3 = function.evaluate();
+            sum = sum + (f_3 + 4*f_1 + f_2) * delta / 6;
         }
         return sum;
     }
