@@ -12,12 +12,12 @@
 <body>
 	<table width="100%">
 		<tr>
-			<th>Путинцев Данил Денисович</th>
-			<th>P3207</th>
-			<th>Вариант №409425</th>
+			<th width="40%">Путинцев Данил Денисович</th>
+			<th width="30%">P3207</th>
+			<th width="30%">Вариант №409425</th>
 		</tr>
 		<tr>
-      		<td>
+      		<td style="background-color: #abcde0;" align="center" padding="10px">
       			
           		<img src="img.jpg" alt="Изображение" class="responsive-image">
           		<p id="north-top" class="overlay-label">R</p>
@@ -29,7 +29,8 @@
           		<p id="east-right" class="overlay-label">R</p>
           		<p id="east-middle" class="overlay-label">R/2</p>
       		</td>
-      		<td>
+      		<td style="background-color: #abcde0;">
+      			<p><b>Ввод данных:</b></p>
       			<form>
 	      			<label for="coor_x">Введите координату X (от -3 до 3):</label>
 					<input type="text" id="coor_x" name="coor_x" required minlength="-3" maxlength="3" size="2">
@@ -63,9 +64,9 @@
 	    			
     			</form>
       		</td>
-      		<td>
-      			<table border="1">
-      				<p>Введенные данные</p>
+      		<td align="center" style="background-color: #abcde0;">
+      			<table border="1" width="175px">
+      				<p><b>Введенные данные:</b></p>
 
                 	<tr>
                     	<td>X:</td>
@@ -79,7 +80,7 @@
                     	<td>R:</td>
                     	<td id="form_r">Значение R</td>
             	</table>
-            	<button type="button">Отправить</button>
+            	<button type="button" id="main_button">Отправить</button>
         	</td>
     	</tr>
 	</table>
@@ -89,7 +90,7 @@
 
             if (input < -3 || input > 3) {
             	this.value = null;
-               	alert('Ошибка ввода координаты X')
+               	alert('Ошибка ввода координаты X. X должен быть (от -3 до 3)')
             } else {
             	const form_x = document.getElementById('form_x');
             	form_x.textContent = input;
@@ -122,25 +123,18 @@
             //Изменение для надписей у рисунка
             const north_top = document.getElementById('north-top');
             north_top.textContent = label;
-
             const north_middle = document.getElementById('north-middle');
             north_middle.textContent = floatValue;
-
             const south_buttom = document.getElementById('south-buttom');
             south_buttom.textContent = "-" + label;
-
             const south_middle = document.getElementById('south-middle');
             south_middle.textContent = "-" + floatValue;
-
             const west_left = document.getElementById('west-left');
             west_left.textContent = "-" + label;
-
             const west_middle = document.getElementById('west-middle');
             west_middle.textContent = "-" + floatValue;
-
             const east_right = document.getElementById('east-right');
             east_right.textContent = label
-
             const east_middle = document.getElementById('east-middle');
             east_middle.textContent = floatValue;
         }

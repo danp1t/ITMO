@@ -1,9 +1,11 @@
 .responsive-image {
     align: center;
-    padding-left: 30px;
-    padding-top: 30px;
+    padding: 30px;
 }
 
+body {
+    background-color: #9bcde0;
+}
 .overlay-label {
     position: absolute;
     font-weight: 700;
@@ -14,40 +16,47 @@
 
 #north-top {
     top: 95px; 
-    left: 275px;
+    left: 385px;
 }
 
 #north-middle {
     top: 170px;
-    left: 275px;
+    left: 385px;
 }
 
 #south-buttom {
     top: 410px;
-    left: 275px;
+    left: 385px;
 }
 
 #south-middle {
     top: 330px;
-    left: 275px;
+    left: 385px;
 }
 
 #west-left {
     top: 235px;
-    left: 82px;
+    left: 192px;
 }
 
 #west-middle {
     top: 235px;
-    left: 160px;
+    left: 270px;
 }
 
 #east-right {
     top: 235px;
-    left: 435px;
+    left: 545px;
 }
 
 #east-middle {
     top: 235px;
-    left: 340px;
+    left: 450px;
+}
+
+#main_button {
+  width: 175px;
+  background-color: #ddd;
+  font-size: 16px;
+  text-align: center;
 }
