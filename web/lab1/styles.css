@@ -1,0 +1,53 @@
+.responsive-image {
+    align: center;
+    padding-left: 30px;
+    padding-top: 30px;
+}
+
+.overlay-label {
+    position: absolute;
+    font-weight: 700;
+    font-size: 22px;
+    padding: 5px;
+
+}
+
+#north-top {
+    top: 95px; 
+    left: 275px;
+}
+
+#north-middle {
+    top: 170px;
+    left: 275px;
+}
+
+#south-buttom {
+    top: 410px;
+    left: 275px;
+}
+
+#south-middle {
+    top: 330px;
+    left: 275px;
+}
+
+#west-left {
+    top: 235px;
+    left: 82px;
+}
+
+#west-middle {
+    top: 235px;
+    left: 160px;
+}
+
+#east-right {
+    top: 235px;
+    left: 435px;
+}
+
+#east-middle {
+    top: 235px;
+    left: 340px;
+}
