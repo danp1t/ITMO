@@ -31,34 +31,36 @@
       		</td>
       		<td>
       			<form>
-	      			<label for="x">Введите координату X (от -3 до 3):</label>
-					<input type="text" id="name" name="x" required minlength="-3" maxlength="3" size="2">
+	      			<label for="coor_x">Введите координату X (от -3 до 3):</label>
+					<input type="text" id="coor_x" name="coor_x" required minlength="-3" maxlength="3" size="2">
 					<br>
 					<label for="y">Выберите значение для координаты Y:</label>
-					<button type="button">-5</button> 
-					<button type="button">-4</button> 
-					<button type="button">-3</button> 
-					<button type="button">-2</button> 
-					<button type="button">-1</button> 
-					<button type="button">0</button> 
-					<button type="button">1</button> 
-					<button type="button">2</button> 
-					<button type="button">3</button> 
+					<button type="button" class="coor_y">-5</button> 
+					<button type="button" class="coor_y">-4</button> 
+					<button type="button" class="coor_y">-3</button> 
+					<button type="button" class="coor_y">-2</button> 
+					<button type="button" class="coor_y">-1</button> 
+					<button type="button" class="coor_y">0</button> 
+					<button type="button" class="coor_y">1</button> 
+					<button type="button" class="coor_y">2</button> 
+					<button type="button" class="coor_y">3</button> 
 					<br>
 					<label for="r">Выберите значение R:</label>
-					<input id="r1" type="radio" name="question">
-	    			<label for="r1">1</label>
-
-	    			<input id="r2" type="radio" name="question">
-	    			<label for="r2">2</label>
-
-	    			<input id="r3" type="radio" name="question">
+					<label for="r1">1</label>
+					<input id="r1" type="radio" class="coor_r" name="question">
+	    			
+					<label for="r2">2</label>
+	    			<input id="r2" type="radio" class="coor_r" name="question">
+	    			
 	    			<label for="r3">3</label>
-
-	    			<input id="r4" type="radio" name="question">
+	    			<input id="r3" type="radio" class="coor_r" name="question">
+	    			
 	    			<label for="r4">4</label>
-	    			<input id="r5" type="radio" name="question">
+	    			<input id="r4" type="radio" class="coor_r" name="question">
+	    			
 	    			<label for="r5">5</label>
+	    			<input id="r5" type="radio" class="coor_r" name="question">
+	    			
     			</form>
       		</td>
       		<td>
@@ -67,19 +69,58 @@
 
                 	<tr>
                     	<td>X:</td>
-                    	<td>Значение X</td>
+                    	<td id="form_x">Значение X</td>
                 	</tr>
                 	<tr>
                     	<td>Y:</td>
-                    	<td>Значение Y</td>
+                    	<td id="form_y">Значение Y</td>
                 	</tr>
                 	<tr>
                     	<td>R:</td>
-                    	<td>Значение R</td>
+                    	<td id="form_r">Значение R</td>
             	</table>
             	<button type="button">Отправить</button>
         	</td>
     	</tr>
 	</table>
+	 <script>
+        document.getElementById('coor_x').addEventListener('input', function() {
+            const input = this.value;
+
+            if (input < -3 || input > 3) {
+            	this.value = null;
+               	alert('Ошибка ввода координаты X')
+            } else {
+            	const form_x = document.getElementById('form_x');
+            	form_x.textContent = input;
+            }
+        });
+
+        const buttons = document.querySelectorAll('.coor_y');
+
+		buttons.forEach(button => {
+    	button.addEventListener('click', function() {
+        
+        const value = this.textContent; 
+        
+        const form_y = document.getElementById('form_y');
+        
+        form_y.textContent = value;
+    });
+});
+		const radioButtons = document.querySelectorAll('.coor_r');
+
+		radioButtons.forEach(radio => {
+    	radio.addEventListener('change', function() {
+        if (this.checked) {
+            const label = document.querySelector(`label[for="${this.id}"]`).textContent; // Исправлено
+            const form_r = document.getElementById('form_r');
+            form_r.textContent = label;
+
+
+        }
+    });
+});
+    </script>
 </body>
 </html>
