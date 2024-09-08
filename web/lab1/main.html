@@ -17,18 +17,69 @@
 			<th>Вариант №409425</th>
 		</tr>
 		<tr>
-      <td colspan="2">
-          <img src="img.jpg" alt="Изображение" class="responsive-image">
-          <p id="north-top" class="overlay-label">R</p>
-          <p id="north-middle" class="overlay-label">R/2</p>
-          <p id="south-buttom" class="overlay-label">-R</p>
-          <p id="south-middle" class="overlay-label">-R/2</p>
-          <p id="west-left" class="overlay-label">-R</p>
-          <p id="west-middle" class="overlay-label">-R/2</p>
-          <p id="east-right" class="overlay-label">R</p>
-          <p id="east-middle" class="overlay-label">R/2</p>
-      </td>
-    </tr>
+      		<td>
+      			
+          		<img src="img.jpg" alt="Изображение" class="responsive-image">
+          		<p id="north-top" class="overlay-label">R</p>
+         	 	<p id="north-middle" class="overlay-label">R/2</p>
+          		<p id="south-buttom" class="overlay-label">-R</p>
+          		<p id="south-middle" class="overlay-label">-R/2</p>
+          		<p id="west-left" class="overlay-label">-R</p>
+          		<p id="west-middle" class="overlay-label">-R/2</p>
+          		<p id="east-right" class="overlay-label">R</p>
+          		<p id="east-middle" class="overlay-label">R/2</p>
+      		</td>
+      		<td>
+      			<form>
+	      			<label for="x">Введите координату X (от -3 до 3):</label>
+					<input type="text" id="name" name="x" required minlength="-3" maxlength="3" size="2">
+					<br>
+					<label for="y">Выберите значение для координаты Y:</label>
+					<button type="button">-5</button> 
+					<button type="button">-4</button> 
+					<button type="button">-3</button> 
+					<button type="button">-2</button> 
+					<button type="button">-1</button> 
+					<button type="button">0</button> 
+					<button type="button">1</button> 
+					<button type="button">2</button> 
+					<button type="button">3</button> 
+					<br>
+					<label for="r">Выберите значение R:</label>
+					<input id="r1" type="radio" name="question">
+	    			<label for="r1">1</label>
+
+	    			<input id="r2" type="radio" name="question">
+	    			<label for="r2">2</label>
+
+	    			<input id="r3" type="radio" name="question">
+	    			<label for="r3">3</label>
+
+	    			<input id="r4" type="radio" name="question">
+	    			<label for="r4">4</label>
+	    			<input id="r5" type="radio" name="question">
+	    			<label for="r5">5</label>
+    			</form>
+      		</td>
+      		<td>
+      			<table border="1">
+      				<p>Введенные данные</p>
+
+                	<tr>
+                    	<td>X:</td>
+                    	<td>Значение X</td>
+                	</tr>
+                	<tr>
+                    	<td>Y:</td>
+                    	<td>Значение Y</td>
+                	</tr>
+                	<tr>
+                    	<td>R:</td>
+                    	<td>Значение R</td>
+            	</table>
+            	<button type="button">Отправить</button>
+        	</td>
+    	</tr>
 	</table>
 </body>
 </html>
