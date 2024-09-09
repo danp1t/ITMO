@@ -29,7 +29,7 @@
           		<p id="east-right" class="overlay-label">R</p>
           		<p id="east-middle" class="overlay-label">R/2</p>
       		</td>
-      		<td style="background-color: #abcde0;">
+      		<td style="background-color: #abcde0;" border="1">
       			<p><b>Ввод данных:</b></p>
       			<form>
 	      			<label for="coor_x">Введите координату X (от -3 до 3):</label>
@@ -140,6 +140,37 @@
         }
     });
 });
+	document.getElementById('main_button').addEventListener('click', function() {
+      const x = document.getElementById('form_x').textContent;
+      const y = document.getElementById('form_y').textContent;
+      const r = document.getElementById('form_r').textContent;
+
+      if (r == 'Значение R') {
+      	alert("Выберите значение для числа R");
+      	r.textContent = "";
+      }
+
+      else if (y == 'Значение Y') {
+      	alert("Выберите значение для числа Y");
+      	y.textContent = "";
+      }
+
+      else if (x == 'Значение X') {
+      	alert("Выберите значение для числа X");
+      	x.textContent = "";
+      }
+
+      $.ajax({
+      	type: "POST",
+      	url: "lab.jar",
+      	data: {coor_x: x, coor_y: y, coor_r: r},
+      	success: function(msg){
+      		alert("Data Saved: " + msg);
+      	}
+      })
+    });
+
+
     </script>
 </body>
 </html>
