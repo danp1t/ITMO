@@ -1,4 +1,7 @@
 import com.fastcgi.FCGIInterface;
+//24712
+
+//24821
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -7,23 +10,58 @@ public class Main {
     public static void main(String[] args) {
         var fcgiInterface = new FCGIInterface();
         while (fcgiInterface.FCGIaccept() >= 0) {
-            String requestBody = "";
             try {
-                requestBody = readRequestBody();
-            } catch (IOException | NullPointerException e) {
+                // Чтение тела запроса
+                String requestBody = readRequestBody();
+                //coor_x=1&coor_y=-5&coor_r=2
+                var coordinates = requestBody.split("&");
+                int x = Integer.parseInt(coordinates[0].split("=")[1]);
+                int y = Integer.parseInt(coordinates[1].split("=")[1]);
+                int r = Integer.parseInt(coordinates[2].split("=")[1]);
+
+                if (x >= 0 && y >= 0) {
+                    if (r <= x*x + y*y)  {
+                        requestBody = "Попал";
+                    }
+                    else ()
+                }
+                else if (x <= 0 && y >= 0) {
+                    requestBody = "Вторая четверть";
+                }
+                else if (x <= 0 && y <= 0) {
+                    requestBody = "Третья четверть";
+                }
+                else if (x >= 0 && y <= 0) {
+                    requestBody = "Четвертая четверть";
+                }
+
+
+                // Обработка данных (в данном случае просто выводим их)
+                System.out.println("Received data: " + requestBody);
+
+                // Формируем ответ
+                String content = """
+                        <head><title>Java FastCGI Response</title></head>
+                        <body><h1>Data Received</h1><p>%s</p></body>
+                        </html>""".formatted(requestBody);
+
+                // Формирование HTTP-ответа
+                String httpResponse = """
+                        HTTP/1.1 200 OK
+                        Content-Type: text/html
+                        Content-Length: %d
+                    
+                        %s
+                        """.formatted(content.getBytes(StandardCharsets.UTF_8).length, content);
+
+                System.out.println(httpResponse);
+
+                // Отправка ответа обратно через FastCGI
+                FCGIInterface.request.outStream.write(httpResponse.getBytes(StandardCharsets.UTF_8));
+
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            String content = generateResponse(requestBody);
-            var httpResponse = """
-                HTTP/1.1 200 OK
-                Content-Type: text/html
-                Content-Length: %d
-
-                %s
-                """.formatted(content.getBytes(StandardCharsets.UTF_8).length, content);
-
-            System.out.println(httpResponse);
         }
     }
 
@@ -39,51 +77,5 @@ public class Main {
         buffer.clear();
 
         return new String(requestBodyRaw, StandardCharsets.UTF_8);
-    }
-
-    private static String generateResponse(String requestBody) {
-        // Разбор данных из requestBody
-        String[] params = requestBody.split("&");
-        String formX = "", formY = "", formZ = "";
-
-        for (String param : params) {
-            String[] keyValue = param.split("=");
-            if (keyValue.length == 2) {
-                switch (keyValue[0]) {
-                    case "form_x" -> formX = keyValue[1];
-                    case "form_y" -> formY = keyValue[1];
-                    case "form_z" -> formZ = keyValue[1];
-                }
-            }
-        }
-
-        // Генерация HTML-контента с таблицей
-        return """
-            <html>
-                <head><title>Java FastCGI Hello World</title></head>
-                <body>
-                    <h1>Hello, World!</h1>
-                    <h2>Submitted Data:</h2>
-                    <table border="1">
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Value</th>
-                        </tr>
-                        <tr>
-                            <td>form_x</td>
-                            <td>%s</td>
-                        </tr>
-                        <tr>
-                            <td>form_y</td>
-                            <td>%s</td>
-                        </tr>
-                        <tr>
-                            <td>form_z</td>
-                            <td>%s</td>
-                        </tr>
-                    </table>
-                </body>
-            </html>
-            """.formatted(formX, formY, formZ);
     }
 }

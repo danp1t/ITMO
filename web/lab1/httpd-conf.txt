@@ -49,7 +49,7 @@ Mutex default:/home/studs/s409425/httpd-root/mutex-dir/
 # prevent Apache from glomming onto all bound IP addresses.
 #
 #Listen 12.34.56.78:80
-Listen 24405
+Listen 24712
 
 #
 # Dynamic Shared Object (DSO) Support
@@ -203,7 +203,7 @@ ServerAdmin you@example.com
 #
 # If your host doesn't have a registered DNS name, enter its IP address here.
 #
-ServerName helios.cs.ifmo.ru:24405
+ServerName helios.cs.ifmo.ru:24821
 
 #
 # Deny access to the entirety of your server's filesystem. You must
@@ -516,9 +516,9 @@ SSLRandomSeed startup builtin
 SSLRandomSeed connect builtin
 </IfModule>
 
-FastCgiExternalServer "/home/studs/s409425/web/lab1/backend.jar" -host localhost:24405 -nph
-Alias /fcgi-bin/ "/home/studs/s409425/web/lab1/"
-<Directory "/home/studs/s409425/web/lab1">
+FastCgiExternalServer "/home/studs/s409425/httpd-root/fcgi-bin/lab1.jar" -host localhost:24821 -nph
+Alias /fcgi-bin/ "/home/studs/s409425/httpd-root/fcgi-bin/"
+<Directory "/home/studs/s409425/httpd-root/fcgi-bin">
      AllowOverride None
      Options None
      Require all granted

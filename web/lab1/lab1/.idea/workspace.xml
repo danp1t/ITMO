@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="ArtifactsWorkspaceSettings">
+    <artifacts-to-build>
+      <artifact name="lab1:jar" />
+    </artifacts-to-build>
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6be0196e-d178-48c6-a18a-e7027c13d62c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../fastcgi-lib.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../httpd-conf-template.conf.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/fastcgi_lib.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/lab1.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/artifacts/lab1_jar.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../httpd-conf-template.conf.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/META-INF/maven/archetype.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/archetype-resources/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/archetype-resources/src/main/java/App.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/archetype-resources/src/test/java/AppTest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../main.html" beforeDir="false" afterPath="$PROJECT_DIR$/../main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../main.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../ЯП/lab1/lib.asm" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ЯП/lab1/lib.asm" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../ЯП/lab1/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ЯП/lab1/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../../ЯП/lab1/xmlrunner.py" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ЯП/lab1/xmlrunner.py" afterDir="false" />
@@ -61,7 +57,7 @@
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/danp1t/github/ITMO/web/lab1/fastcgi-lib.jar",
     "onboarding.tips.debug.path": "/home/danp1t/github/ITMO/web/lab1/lab1/src/Main.java",
-    "project.structure.last.edited": "Libraries",
+    "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2"
   }

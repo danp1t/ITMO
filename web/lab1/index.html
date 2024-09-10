@@ -8,6 +8,7 @@
 	<style type="text/css">
 		th {font-family: monospace; background-color: #acdef1; font-size:22px;}
 	</style>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
 	<table width="100%">
@@ -159,16 +160,17 @@
       	alert("Выберите значение для числа X");
       	x.textContent = "";
       }
-
-      $.ajax({
+      	$.ajax({
       	type: "POST",
-      	url: "lab.jar",
-      	data: {coor_x: x, coor_y: y, coor_r: r},
+      	url: "/fcgi-bin/lab1.jar",
+      	data: {coor_x: document.getElementById('form_x').textContent, coor_y: document.getElementById('form_y').textContent, coor_r: document.getElementById('form_r').textContent},
       	success: function(msg){
       		alert("Data Saved: " + msg);
       	}
-      })
+      });
     });
+
+    
 
 
     </script>
