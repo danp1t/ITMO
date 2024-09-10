@@ -1,4 +1,6 @@
 global _start
+section .data
+message: db 76
 
 section .text
 
@@ -8,21 +10,37 @@ exit:
     mov rax, 60
     xor rsi, rsi
     syscall
-    ret 
 
 ; Принимает указатель на нуль-терминированную строку, возвращает её длину
 string_length:
-    mov 
-    xor rax, rax
+    mov  rax, rdi
+  .counter:
+    cmp  byte[rdi], 0
+    je   .end
+    inc  rdi
+    jmp  .counter
+  .end:
+    sub  rdi, rax
+    mov  rax, rdi
     ret
 
 ; Принимает указатель на нуль-терминированную строку, выводит её в stdout
 print_string:
+    mov  rsi, rdi
+    call string_length
+    mov rdx, rax
+    mov rax, 1
+    mov rdi, 1
+    syscall  
     ret
 
 ; Принимает код символа и выводит его в stdout
 print_char:
-    xor rax, rax
+    mov rsi, rdi
+    mov rax, 1
+    mov rdi, 1
+    mov rdx, 1
+    syscall
     ret
 
 ; Переводит строку (выводит символ с кодом 0xA)
@@ -96,4 +114,6 @@ string_copy:
     ret
 
 _start:
-    call print_newline
+    mov  rdi, message
+    call print_char
+    call exit

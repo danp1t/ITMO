@@ -9,7 +9,6 @@ import os
 import sys
 import time
 import codecs
-
 try:
     from unittest2.runner import TextTestRunner
     from unittest2.runner import TextTestResult as _TextTestResult

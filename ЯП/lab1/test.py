@@ -7,7 +7,6 @@ import re
 import unittest
 import xmlrunner
 from subprocess import CalledProcessError, Popen, PIPE
-from collections.abc import MutableMapping
 
 #-------helpers---------------
 
@@ -45,7 +44,7 @@ before_all="""
 mov rax, rsp
 and rax, 15
 test rax, rax
-jz alignment_error
+jnz alignment_error
 mov rax, -1
 push rbx
 push rbp
@@ -149,9 +148,7 @@ str: db '""" + input + """', 0
 section .text
 _start:
     mov rdi, str
-    sub rsp, 8
     call string_length
-    add rsp, 8
     mov rdi, rax
     mov rax, 60
     syscall
@@ -170,10 +167,8 @@ str: db '""" + input + """', 0
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, str
     call print_string
-    add rsp, 8
     xor rdi, rdi
     mov rax, 60
     syscall
@@ -193,14 +188,12 @@ arg2: times """ + str(len(input) + 1) + """ db  66
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, arg1
     mov rsi, arg2
     mov rdx, """ + str(len(input) + 1) + """
     call string_copy
     mov rdi, arg2 
     call print_string
-    add rsp, 8
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -223,7 +216,6 @@ arg2: times """ + str(len(input)//2) + """ db  66
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, arg1
     mov rsi, arg2
     mov rdx, """ + str(len(input)//2) + """
@@ -237,7 +229,6 @@ _start:
     mov rdi, arg2 
     call print_string
 _exit:
-    add rsp, 8
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -253,10 +244,8 @@ _exit:
             text = """
 section .text
 _start:
-    sub rsp, 8
     mov rdi, '""" + input + """'
     call print_char
-    add rsp, 8
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -272,10 +261,8 @@ _start:
             text = """
 section .text
 _start:
-    sub rsp, 8
     mov rdi, """ + input + """
     call print_uint
-    add rsp, 8
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -292,10 +279,8 @@ _start:
             text = """
 section .text
 _start:
-    sub rsp, 8
     mov rdi, """ + input + """
     call print_int
-    add rsp, 8
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -311,9 +296,7 @@ _start:
             text = """
 section .text
 _start:
-    sub rsp, 8
     call read_char
-    add rsp, 8
     mov rdi, rax
     mov rax, 60
     syscall
@@ -336,13 +319,11 @@ word_buf: times 20 db 0xca
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, word_buf
     mov rsi, 20 
     call read_word
     mov rdi, rax
     call print_string
-    add rsp, 8
     mov rax, 60
     xor rdi, rdi
     syscall
@@ -362,11 +343,9 @@ word_buf: times 20 db 0xca
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, word_buf
     mov rsi, 20 
     call read_word
-    add rsp, 8
     mov rax, 60
     mov rdi, rdx
     syscall
@@ -387,11 +366,9 @@ word_buf: times 20 db 0xca
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, word_buf
     mov rsi, 20 
     call read_word
-    add rsp, 8
     mov rdi, rax
     mov rax, 60
     syscall
@@ -414,12 +391,13 @@ input: db '""" + input  + """', 0
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, input
     call parse_uint
-    mov [rsp], rdx
+    push rdx
     mov rdi, rax
+    sub rsp, 8
     call print_uint
+    add rsp, 8
     mov rax, 60
     pop rdi
     syscall
@@ -441,12 +419,13 @@ input: db '""" + input  + """', 0
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, input
     call parse_int
-    mov [rsp], rdx
+    push rdx
     mov rdi, rax
+    sub rsp, 8
     call print_int
+    add rsp, 8
     mov rax, 60
     pop rdi
     syscall
@@ -472,11 +451,9 @@ str2: db '""" + input + """',0
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, str1
     mov rsi, str2
     call string_equals
-    add rsp, 8
     mov rdi, rax
     mov rax, 60
     syscall
@@ -496,11 +473,9 @@ str2: db '""" + input + """!!',0
 
 section .text
 _start:
-    sub rsp, 8
     mov rdi, str1
     mov rsi, str2
     call string_equals
-    add rsp, 8
     mov rdi, rax
     mov rax, 60
     syscall
