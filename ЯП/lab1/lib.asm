@@ -31,12 +31,22 @@ print_string:
 
 ; Принимает код символа и выводит его в stdout
 print_char:
-
-    xor rax, rax
+    push rdi
+    mov rax, 1
+    mov rsi, rsp
+    pop r9
+    mov r9, 0
+    mov rdi, 1
+    mov rdx, 1
+    syscall
     ret
 ; Переводит строку (выводит символ с кодом 0xA)
 print_newline:
-    xor rax, rax
+    mov rax, 1
+    mov rsi, 0xA
+    mov rdi, 1
+    mov rdx, 1
+    syscall
     ret
 
 ; Выводит беззнаковое 8-байтовое число в десятичном формате 
