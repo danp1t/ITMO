@@ -1,55 +1,36 @@
-global _start
-section .data
-message: db 76
-
-section .text
-
- 
 ; Принимает код возврата и завершает текущий процесс
 exit: 
     mov rax, 60
-    xor rsi, rsi
+    mov rdi, 0
     syscall
+    ret 
 
 ; Принимает указатель на нуль-терминированную строку, возвращает её длину
 string_length:
-    mov  rax, rdi
-  .counter:
-    cmp  byte[rdi], 0
-    je   .end
-    inc  rdi
-    jmp  .counter
-  .end:
-    sub  rdi, rax
-    mov  rax, rdi
-    ret
+    mov rax, 0
+    .loop:
+        cmp byte[rax + rdi], 0
+        jz .end
+    .counter: 
+        inc rax
+        jmp .loop
+    .end:
+        ret
 
 ; Принимает указатель на нуль-терминированную строку, выводит её в stdout
 print_string:
-    mov  rsi, rdi
-    call string_length
-    mov rdx, rax
-    mov rax, 1
-    mov rdi, 1
-    syscall  
+    xor rax, rax
     ret
 
 ; Принимает код символа и выводит его в stdout
 print_char:
-    mov rsi, rdi
-    mov rax, 1
-    mov rdi, 1
-    mov rdx, 1
-    syscall
+
+    xor rax, rax
     ret
 
 ; Переводит строку (выводит символ с кодом 0xA)
 print_newline:
-    mov rax, 1
-    mov rdi, 1
-    mov rsi, 10
-    mov rdx, 1
-    syscall
+    xor rax, rax
     ret
 
 ; Выводит беззнаковое 8-байтовое число в десятичном формате 
@@ -112,8 +93,3 @@ parse_int:
 string_copy:
     xor rax, rax
     ret
-
-_start:
-    mov  rdi, message
-    call print_char
-    call exit
