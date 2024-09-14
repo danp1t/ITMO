@@ -1,3 +1,4 @@
+section .text
 ; Принимает код возврата и завершает текущий процесс
 exit: 
     mov rax, 60
@@ -19,7 +20,13 @@ string_length:
 
 ; Принимает указатель на нуль-терминированную строку, выводит её в stdout
 print_string:
-    xor rax, rax
+    push rdi
+    call string_length
+    mov rdx, rax
+    mov rax, 1
+    pop rsi
+    mov rdi, 1
+    syscall
     ret
 
 ; Принимает код символа и выводит его в stdout
@@ -27,7 +34,6 @@ print_char:
 
     xor rax, rax
     ret
-
 ; Переводит строку (выводит символ с кодом 0xA)
 print_newline:
     xor rax, rax
