@@ -1,58 +1,28 @@
 import com.fastcgi.FCGIInterface;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         var fcgiInterface = new FCGIInterface();
         while (fcgiInterface.FCGIaccept() >= 0) {
-            try {
-                // Чтение строки запроса
-                String requestQuery = readRequestQuery();
-
-                // Обработка данных
-                System.out.println("Received data: " + requestQuery);
-
-                // Формируем ответ
-                String content = """
-                        <head><title>Java FastCGI Response</title></head>
-                        <body><h1>Data Received</h1><p>%s</p></body>
-                        </html>""".formatted(requestQuery);
-
-                // Формирование HTTP-ответа
-                String httpResponse = """
-                        HTTP/1.1 200 OK
-                        Content-Type: text/html
-                        Content-Length: %d
+            FCGIInterface.request.inStream.fill();
+            String content = (String) FCGIInterface.request.params.get("QUERY_STRING");
+            //coor_x=1&coor_y=0&coor_r=
+            String[] coors = content.split("&");
+            Integer coor_x = Integer.parseInt(coors[0].split("=")[1]);
+            Integer coor_y = Integer.parseInt(coors[1].split("=")[1]);
+            Integer coor_z = Integer.parseInt(coors[2].split("=")[1]);
+            var httpResponse = """
+                    HTTP/1.1 200 OK
+                    Content-Type: text/plain
+                    Content-Length: %d
                     
-                        %s
-                        """.formatted(content.getBytes(StandardCharsets.UTF_8).length, content);
-
-                System.out.println(httpResponse);
-
-                // Отправка ответа обратно через FastCGI
-                FCGIInterface.request.outStream.write(httpResponse.getBytes(StandardCharsets.UTF_8));
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                    
+                    %s
+                    
+                    """.formatted(content.length(), content);
+            System.out.println(httpResponse);
         }
     }
 
-    private static String readRequestQuery() throws IOException {
-        FCGIInterface.request.inStream.fill();
-
-        // Чтение заголовков
-        StringBuilder headers = new StringBuilder();
-        while (true) {
-            int ch = FCGIInterface.request.inStream.read();
-            if (ch == -1 || ch == '\0') break;
-            headers.append((char) ch);
-        }
-
-        // Извлечение строки запроса из заголовков
-        String requestLine = headers.toString().split("\n")[0];
-        return requestLine.split(" ")[1]; // Получаем только часть с параметрами
-    }
 }

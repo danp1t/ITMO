@@ -1,3 +1,5 @@
+global _start
+
 section .text
 ; Принимает код возврата и завершает текущий процесс
 exit: 
@@ -53,8 +55,39 @@ print_newline:
 ; Совет: выделите место в стеке и храните там результаты деления
 ; Не забудьте перевести цифры в их ASCII коды.
 print_uint:
-    xor rax, rax
-    ret
+    mov r10, 0 ; Счетчик
+    mov rbx, 16 ; Делим на это число
+    mov rax, 16 ; Степень
+    mov r15, 16
+
+    .loop:
+    mov r9, rdi
+    and rdi, 0xf ; Находим последнюю цифру числа
+    push rdi
+
+    inc r10
+    cmp r10, 16
+    push rax
+    mov rax, r9
+    sub rax, rdi
+    div rbx         ; Разбиваем число по цифрам
+    mov rdi, rax
+    cmp rax, 0
+    jz .end
+    pop rax 
+    jmp .loop
+
+    
+
+
+
+
+
+
+    .end:
+        mov rax, r11
+        ret
+    
 
 ; Выводит знаковое 8-байтовое число в десятичном формате 
 print_int:
@@ -63,12 +96,31 @@ print_int:
 
 ; Принимает два указателя на нуль-терминированные строки, возвращает 1 если они равны, 0 иначе
 string_equals:
-    xor rax, rax
-    ret
+    xor rcx, rcx
+    .loop:
+        mov al, byte[rsi + rcx]
+        cmp byte[rdi + rcx], al
+        jne .false
+        inc rcx
+        cmp al, 0
+        jz .end
+        jmp .loop
+    .false:
+        mov rax, 0
+        ret
+    .end:
+        mov rax, 1
+        ret
 
 ; Читает один символ из stdin и возвращает его. Возвращает 0 если достигнут конец потока
 read_char:
-    xor rax, rax
+    mov rax, 0
+    push ax
+    mov rdi, 0
+    mov rsi, rsp
+    mov rdx, 1
+    syscall
+    pop ax
     ret 
 
 ; Принимает: адрес начала буфера, размер буфера
@@ -109,3 +161,9 @@ parse_int:
 string_copy:
     xor rax, rax
     ret
+_start:
+    mov rdi, -1
+    call print_uint
+    mov rax, 60
+    xor rdi, rdi
+    syscall

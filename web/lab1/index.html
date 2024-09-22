@@ -82,6 +82,8 @@
                     	<td id="form_r">Значение R</td>
             	</table>
             	<button type="button" id="main_button">Отправить</button>
+            
+            	
         	</td>
     	</tr>
 	</table>
@@ -161,9 +163,18 @@
       	x.textContent = "";
       }
       
-      	$.get('/fcgi-bin/lab1.jar', {text: 'test'}, function(data){
+      	
+      //Написать GET запрос, который передает данные на сервер
+      $.ajax({
 
-	alert(data);
+	url: '/fcgi-bin/lab1.jar',         /* Куда пойдет запрос */
+	method: 'get',             /* Метод передачи (post или get) */
+	dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
+	data: {coor_x: document.getElementById('form_x').textContent, coor_y: document.getElementById('form_y').textContent, coor_r: document.getElementById('form_r').textContent},     /* Параметры передаваемые в запросе. */
+	success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
+		alert(data);            /* В переменной data содержится ответ от index.php. */
+
+	}
 
 });
     });
