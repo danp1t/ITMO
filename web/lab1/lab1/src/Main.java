@@ -49,7 +49,7 @@ public class Main {
                     
                     %s
                     
-                    """.formatted(content.length(), content);
+                    """.formatted(content.getBytes(StandardCharsets.UTF_8).length, content);
             System.out.println(httpResponse);
         }
     }
