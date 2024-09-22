@@ -1,7 +1,12 @@
 import com.fastcgi.FCGIInterface;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
+    private static List<Result> results = new ArrayList<>();
+
     public static void main(String[] args) throws IOException {
         var fcgiInterface = new FCGIInterface();
         while (fcgiInterface.FCGIaccept() >= 0) {
@@ -9,12 +14,36 @@ public class Main {
             String content = (String) FCGIInterface.request.params.get("QUERY_STRING");
             //coor_x=1&coor_y=0&coor_r=
             String[] coors = content.split("&");
-            Integer coor_x = Integer.parseInt(coors[0].split("=")[1]);
-            Integer coor_y = Integer.parseInt(coors[1].split("=")[1]);
-            Integer coor_z = Integer.parseInt(coors[2].split("=")[1]);
+            Double coor_x = Double.parseDouble(coors[0].split("=")[1]);
+            Double coor_y = Double.parseDouble(coors[1].split("=")[1]);
+            Double coor_r = Double.parseDouble(coors[2].split("=")[1]);
+            boolean status = getStatus(coor_x, coor_y, coor_r);
+            String statusMessage = status ? "Попал" : "Не попал";
+
+            // Добавляем результат в список
+            results.add(new Result(coor_x, coor_y, coor_r, statusMessage));
+
+            // Формируем HTML-таблицу
+            StringBuilder tableBuilder = new StringBuilder();
+            tableBuilder.append("<table border='1'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>status</th></tr>");
+            for (int i = 0; i < results.size(); i++) {
+                Result result = results.get(i);
+                tableBuilder.append("<tr>")
+                        .append("<td>").append(i + 1).append("</td>")
+                        .append("<td>").append(result.getX()).append("</td>")
+                        .append("<td>").append(result.getY()).append("</td>")
+                        .append("<td>").append(result.getR()).append("</td>")
+                        .append("<td>").append(result.getStatus()).append("</td>")
+                        .append("</tr>");
+            }
+            tableBuilder.append("</table>");
+
+            content = tableBuilder.toString();
+
+
             var httpResponse = """
                     HTTP/1.1 200 OK
-                    Content-Type: text/plain
+                    Content-Type: text/html
                     Content-Length: %d
                     
                     
@@ -23,6 +52,42 @@ public class Main {
                     """.formatted(content.length(), content);
             System.out.println(httpResponse);
         }
+    }
+
+    private static boolean getStatus(double coor_x, double coor_y, double coor_r) {
+        //Разделить на координатные четверти
+        //Первая четверть
+        if (coor_x >= 0 && coor_y >= 0) {
+            return false;
+        }
+        //Вторая четверть
+        else if (coor_x <= 0 && coor_y >= 0) {
+            if (coor_x*coor_x + coor_y*coor_y <= coor_r*coor_r) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        //Третья четверть
+        else if (coor_x <= 0 && coor_y <= 0) {
+            if (coor_x <= coor_r && coor_y <= coor_r) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        //Четвертая четверть
+        else if (coor_x >= 0 && coor_y <= 0) {
+            if (coor_x + coor_y <= coor_r) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        return false;
     }
 
 }

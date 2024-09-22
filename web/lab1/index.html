@@ -86,6 +86,7 @@
             	
         	</td>
     	</tr>
+    	<tr ><td id="resultTable"></td></tr>
 	</table>
 	 <script>
         document.getElementById('coor_x').addEventListener('input', function() {
@@ -172,8 +173,7 @@
 	dataType: 'html',          /* Тип данных в ответе (xml, json, script, html). */
 	data: {coor_x: document.getElementById('form_x').textContent, coor_y: document.getElementById('form_y').textContent, coor_r: document.getElementById('form_r').textContent},     /* Параметры передаваемые в запросе. */
 	success: function(data){   /* функция которая будет выполнена после успешного запроса.  */
-		alert(data);            /* В переменной data содержится ответ от index.php. */
-
+		document.getElementById('resultTable').innerHTML = data;            /* В переменной data содержится ответ от index.php. */
 	}
 
 });
