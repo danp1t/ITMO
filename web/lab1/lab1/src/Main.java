@@ -1,5 +1,6 @@
 import com.fastcgi.FCGIInterface;
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,44 +14,57 @@ public class Main {
             FCGIInterface.request.inStream.fill();
             String content = (String) FCGIInterface.request.params.get("QUERY_STRING");
             //coor_x=1&coor_y=0&coor_r=
-            String[] coors = content.split("&");
-            Double coor_x = Double.parseDouble(coors[0].split("=")[1]);
-            Double coor_y = Double.parseDouble(coors[1].split("=")[1]);
-            Double coor_r = Double.parseDouble(coors[2].split("=")[1]);
-            boolean status = getStatus(coor_x, coor_y, coor_r);
-            String statusMessage = status ? "Попал" : "Не попал";
+            Double coor_x = 0.0;
+            Double coor_y = 0.0;
+            Double coor_r = 0.0;
+            try {
+                String[] coors = content.split("&");
+                if (coors.length != 3 || !(coors[0].split("=")[0].equals("coor_x")) || !(coors[1].split("=")[0].equals("coor_y")) || !(coors[2].split("=")[0].equals("coor_r"))) {
+                    throw new IllegalArgumentException("Неверный формат запроса... Ты кого собираешься надурить, Мамкин Хакер?");
+                }
+                coor_x = Double.parseDouble(coors[0].split("=")[1]);
+                coor_y = Double.parseDouble(coors[1].split("=")[1]);
+                coor_r = Double.parseDouble(coors[2].split("=")[1]);
 
-            // Добавляем результат в список
-            results.add(new Result(coor_x, coor_y, coor_r, statusMessage));
 
-            // Формируем HTML-таблицу
-            StringBuilder tableBuilder = new StringBuilder();
-            tableBuilder.append("<table border='1'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>status</th></tr>");
-            for (int i = 0; i < results.size(); i++) {
-                Result result = results.get(i);
-                tableBuilder.append("<tr>")
-                        .append("<td>").append(i + 1).append("</td>")
-                        .append("<td>").append(result.getX()).append("</td>")
-                        .append("<td>").append(result.getY()).append("</td>")
-                        .append("<td>").append(result.getR()).append("</td>")
-                        .append("<td>").append(result.getStatus()).append("</td>")
-                        .append("</tr>");
+                boolean status = getStatus(coor_x, coor_y, coor_r);
+                String statusMessage = status ? "Попал" : "Не попал";
+
+                // Добавляем результат в список
+                results.add(new Result(coor_x, coor_y, coor_r, statusMessage));
+
+                // Формируем HTML-таблицу
+                StringBuilder tableBuilder = new StringBuilder();
+                tableBuilder.append("<table border='1'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>status</th></tr>");
+                for (int i = 0; i < results.size(); i++) {
+                    Result result = results.get(i);
+                    tableBuilder.append("<tr>")
+                            .append("<td>").append(i + 1).append("</td>")
+                            .append("<td>").append(result.getX()).append("</td>")
+                            .append("<td>").append(result.getY()).append("</td>")
+                            .append("<td>").append(result.getR()).append("</td>")
+                            .append("<td>").append(result.getStatus()).append("</td>")
+                            .append("</tr>");
+                }
+                tableBuilder.append("</table>");
+
+                content = tableBuilder.toString();
+
+
+                var httpResponse = """
+                        HTTP/1.1 200 OK
+                        Content-Type: text/html; charset=UTF-8
+                        Content-Length: %d
+                                            
+                                            
+                        %s
+                                            
+                        """.formatted(content.getBytes(StandardCharsets.UTF_8).length, content);
+                System.out.println(httpResponse);
             }
-            tableBuilder.append("</table>");
-
-            content = tableBuilder.toString();
-
-
-            var httpResponse = """
-                    HTTP/1.1 200 OK
-                    Content-Type: text/html
-                    Content-Length: %d
-                    
-                    
-                    %s
-                    
-                    """.formatted(content.getBytes(StandardCharsets.UTF_8).length, content);
-            System.out.println(httpResponse);
+            catch (IllegalArgumentException e) {
+                sendErrorResponse(e.getMessage());
+            }
         }
     }
 
@@ -88,6 +102,21 @@ public class Main {
             }
         }
         return false;
+    }
+
+    private static void sendErrorResponse(String message){
+        message = URLDecoder.decode(message, StandardCharsets.UTF_8);
+
+        var httpResponse = """
+                    HTTP/1.1 400 Bad Request
+                    Content-Type: text/plain; charset=UTF-8
+                    Content-Length: %d
+                    
+                    
+                    %s
+                    
+                    """.formatted(message.getBytes(StandardCharsets.UTF_8).length, message);
+        System.out.println(httpResponse);
     }
 
 }
