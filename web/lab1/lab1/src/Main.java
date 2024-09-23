@@ -19,7 +19,8 @@ public class Main {
             Double coor_r = 0.0;
             try {
                 String[] coors = content.split("&");
-                if (coors.length != 3 || !(coors[0].split("=")[0].equals("coor_x")) || !(coors[1].split("=")[0].equals("coor_y")) || !(coors[2].split("=")[0].equals("coor_r"))) {
+                if (coors.length != 3 || !(coors[0].split("=")[0].equals("coor_x")) || !(coors[1].split("=")[0].equals("coor_y")) || !(coors[2].split("=")[0].equals("coor_r"))
+                || (coors[0].split("=")[1] == null) || (coors[1].split("=")[1] == null) || (coors[2].split("=")[1] == null)) {
                     throw new IllegalArgumentException("Неверный формат запроса... Ты кого собираешься надурить, Мамкин Хакер?");
                 }
                 coor_x = Double.parseDouble(coors[0].split("=")[1]);
@@ -35,7 +36,7 @@ public class Main {
 
                 // Формируем HTML-таблицу
                 StringBuilder tableBuilder = new StringBuilder();
-                tableBuilder.append("<table border='1'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>status</th></tr>");
+                tableBuilder.append("<table border='1' id='resultTable123'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>status</th></tr>");
                 for (int i = 0; i < results.size(); i++) {
                     Result result = results.get(i);
                     tableBuilder.append("<tr>")
@@ -64,6 +65,9 @@ public class Main {
             }
             catch (IllegalArgumentException e) {
                 sendErrorResponse(e.getMessage());
+            }
+            catch (ArrayIndexOutOfBoundsException e) {
+                sendErrorResponse("Неверный формат запроса... Ты кого собираешься надурить, Мамкин Хакер?");
             }
         }
     }

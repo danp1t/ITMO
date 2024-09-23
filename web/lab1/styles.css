@@ -1,8 +1,12 @@
 .responsive-image {
-    align: center;
+    text-align: center;
     padding: 30px;
 }
-
+th {
+    font-family: monospace; 
+    background-color: #acdef1; 
+    font-size:22px;
+}
 body {
     background-color: #9bcde0;
 }
@@ -59,4 +63,41 @@ body {
   background-color: #ddd;
   font-size: 16px;
   text-align: center;
+}
+
+#cat1 {
+    text-align: center;
+}
+
+#cat2 {
+    text-align: center;
+    padding-top: 14px;
+}
+
+#resultTable {
+    text-align: center;
+}
+
+#resultTable123 {
+    width: 100%;
+}
+
+#picture {
+    background-color: #abcde0;"
+    padding: "10px";
+}
+
+#input_data {
+    background-color: #abcde0;
+    border: 1;
+}
+
+#output_data {
+    align: center; 
+    background-color: #abcde0;
+}
+
+#message {
+    display: none; 
+    color: red;"
 }

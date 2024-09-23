@@ -5,9 +5,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Лабораторная работа №1</title>
 	<link rel="stylesheet" href="styles.css">
-	<style type="text/css">
-		th {font-family: monospace; background-color: #acdef1; font-size:22px;}
-	</style>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
@@ -18,7 +15,7 @@
 			<th width="30%">Вариант №409425</th>
 		</tr>
 		<tr>
-      		<td style="background-color: #abcde0;" align="center" padding="10px">
+      		<td id="picture" align="center">
       			
           		<img src="img.jpg" alt="Изображение" class="responsive-image">
           		<p id="north-top" class="overlay-label">R</p>
@@ -30,7 +27,7 @@
           		<p id="east-right" class="overlay-label">R</p>
           		<p id="east-middle" class="overlay-label">R/2</p>
       		</td>
-      		<td style="background-color: #abcde0;" border="1">
+      		<td id="input_data">
       			<p><b>Ввод данных:</b></p>
       			<form>
 
@@ -66,7 +63,7 @@
 	    			
     			</form>
       		</td>
-      		<td align="center" style="background-color: #abcde0;">
+      		<td id="output_data">
       			<table border="1" width="175px">
       				<p><b>Введенные данные:</b></p>
 
@@ -83,130 +80,17 @@
                     	<td id="form_r">Значение R</td>
             	</table>
             	<button type="button" id="main_button">Отправить</button>
-            	<div id="message" style="display:none; color: red;"></div>
+            	<div id="message"></div>
             
             	
         	</td>
     	</tr>
-    	<tr ><td id="resultTable"></td></tr>
+    	<tr>
+    		<td id="cat1"><img src="cat1.gif"/></td>
+    		<td id="resultTable"></td>
+    		<td id="cat2"><img src="cat2.gif"/></td>
+    	</tr>
 	</table>
-	 <script>
-        document.getElementById('coor_x').addEventListener('input', function() {
-    const input = this.value;
-    const form_x = document.getElementById('form_x');
-    const errorMessage = document.getElementById('error_message');
-
-    // Проверяем, является ли введенное значение числом
-    const isNumber = /^-?\d*\.?\d*$/.test(input); // Регулярное выражение для проверки числа
-
-    if (!isNumber) {
-        this.style.backgroundColor = 'lightcoral'; // Красим поле в светло-красный
-        form_x.textContent = ''; // Не передаем данные в форму
-        errorMessage.textContent = 'Ошибка: введите число.'; // Сообщение об ошибке
-    } else if (input < -3 || input > 3) {
-        this.value = null; // Очищаем поле
-        this.style.backgroundColor = 'lightcoral'; // Красим поле в светло-красный
-        form_x.textContent = ''; // Не передаем данные в форму
-        errorMessage.textContent = 'Ошибка ввода координаты X. X должен быть от -3 до 3'; // Сообщение об ошибке
-    } else {
-        this.style.backgroundColor = ''; // Сбрасываем цвет поля
-        form_x.textContent = input; // Передаем данные в форму
-        errorMessage.textContent = ''; // Очищаем сообщение об ошибке
-    }
-});
-
-        const buttons = document.querySelectorAll('.coor_y');
-
-		buttons.forEach(button => {
-    	button.addEventListener('click', function() {
-        
-        const value = this.textContent; 
-        
-        const form_y = document.getElementById('form_y');
-        
-        form_y.textContent = value;
-    });
-});
-		const radioButtons = document.querySelectorAll('.coor_r');
-
-		radioButtons.forEach(radio => {
-    	radio.addEventListener('change', function() {
-        if (this.checked) {
-            const label = document.querySelector(`label[for="${this.id}"]`).textContent;
-            const form_r = document.getElementById('form_r');
-            const floatValue = parseFloat(label) / 2;
-
-            form_r.textContent = label;
-
-            //Изменение для надписей у рисунка
-            const north_top = document.getElementById('north-top');
-            north_top.textContent = label;
-            const north_middle = document.getElementById('north-middle');
-            north_middle.textContent = floatValue;
-            const south_buttom = document.getElementById('south-buttom');
-            south_buttom.textContent = "-" + label;
-            const south_middle = document.getElementById('south-middle');
-            south_middle.textContent = "-" + floatValue;
-            const west_left = document.getElementById('west-left');
-            west_left.textContent = "-" + label;
-            const west_middle = document.getElementById('west-middle');
-            west_middle.textContent = "-" + floatValue;
-            const east_right = document.getElementById('east-right');
-            east_right.textContent = label
-            const east_middle = document.getElementById('east-middle');
-            east_middle.textContent = floatValue;
-        }
-    });
-});
-	document.getElementById('main_button').addEventListener('click', function() {
-    const x = document.getElementById('form_x').textContent;
-    const y = document.getElementById('form_y').textContent;
-    const r = document.getElementById('form_r').textContent;
-    const messageDiv = document.getElementById('message');
-
-    // Сбрасываем сообщение перед проверкой
-    messageDiv.style.display = 'none';
-    messageDiv.textContent = '';
-
-    if (r == 'Значение R') {
-        messageDiv.textContent = "Выберите значение для числа R";
-        messageDiv.style.display = 'block';
-        return; // Прерываем выполнение функции
-    }
-
-    if (y == 'Значение Y') {
-        messageDiv.textContent = "Выберите значение для числа Y";
-        messageDiv.style.display = 'block';
-        return; // Прерываем выполнение функции
-    }
-
-    if (x == 'Значение X') {
-        messageDiv.textContent = "Выберите значение для числа X";
-        messageDiv.style.display = 'block';
-        return; // Прерываем выполнение функции
-    }
-
-      
-      	
-      //Написать GET запрос, который передает данные на сервер
-      $.ajax({
-    url: '/fcgi-bin/lab1.jar',
-    method: 'GET',
-    dataType: 'html',
-    data: {
-        coor_x: document.getElementById('form_x').textContent,
-        coor_y: document.getElementById('form_y').textContent,
-        coor_r: document.getElementById('form_r').textContent
-    },
-    success: function(data, textStatus, jqXHR) {
-        document.getElementById('resultTable').innerHTML = data;
-    }
-});
-    });
-
-    
-
-
-    </script>
+	<script src="script.js"></script>
 </body>
 </html>
