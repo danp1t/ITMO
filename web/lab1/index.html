@@ -33,9 +33,10 @@
       		<td style="background-color: #abcde0;" border="1">
       			<p><b>Ввод данных:</b></p>
       			<form>
+
 	      			<label for="coor_x">Введите координату X (от -3 до 3):</label>
-					<input type="text" id="coor_x" name="coor_x" required minlength="-3" maxlength="3" size="2">
-					<br>
+					<input type="text" id="coor_x" name="coor_x" required minlength="-3" maxlength="10" size="7">
+					<div id="error_message" style="color: red;"></div>
 					<label for="y">Выберите значение для координаты Y:</label>
 					<button type="button" class="coor_y">-5</button> 
 					<button type="button" class="coor_y">-4</button> 
@@ -82,6 +83,7 @@
                     	<td id="form_r">Значение R</td>
             	</table>
             	<button type="button" id="main_button">Отправить</button>
+            	<div id="message" style="display:none; color: red;"></div>
             
             	
         	</td>
@@ -90,16 +92,28 @@
 	</table>
 	 <script>
         document.getElementById('coor_x').addEventListener('input', function() {
-            const input = this.value;
+    const input = this.value;
+    const form_x = document.getElementById('form_x');
+    const errorMessage = document.getElementById('error_message');
 
-            if (input < -3 || input > 3) {
-            	this.value = null;
-               	alert('Ошибка ввода координаты X. X должен быть (от -3 до 3)')
-            } else {
-            	const form_x = document.getElementById('form_x');
-            	form_x.textContent = input;
-            }
-        });
+    // Проверяем, является ли введенное значение числом
+    const isNumber = /^-?\d*\.?\d*$/.test(input); // Регулярное выражение для проверки числа
+
+    if (!isNumber) {
+        this.style.backgroundColor = 'lightcoral'; // Красим поле в светло-красный
+        form_x.textContent = ''; // Не передаем данные в форму
+        errorMessage.textContent = 'Ошибка: введите число.'; // Сообщение об ошибке
+    } else if (input < -3 || input > 3) {
+        this.value = null; // Очищаем поле
+        this.style.backgroundColor = 'lightcoral'; // Красим поле в светло-красный
+        form_x.textContent = ''; // Не передаем данные в форму
+        errorMessage.textContent = 'Ошибка ввода координаты X. X должен быть от -3 до 3'; // Сообщение об ошибке
+    } else {
+        this.style.backgroundColor = ''; // Сбрасываем цвет поля
+        form_x.textContent = input; // Передаем данные в форму
+        errorMessage.textContent = ''; // Очищаем сообщение об ошибке
+    }
+});
 
         const buttons = document.querySelectorAll('.coor_y');
 
@@ -145,24 +159,33 @@
     });
 });
 	document.getElementById('main_button').addEventListener('click', function() {
-      const x = document.getElementById('form_x').textContent;
-      const y = document.getElementById('form_y').textContent;
-      const r = document.getElementById('form_r').textContent;
+    const x = document.getElementById('form_x').textContent;
+    const y = document.getElementById('form_y').textContent;
+    const r = document.getElementById('form_r').textContent;
+    const messageDiv = document.getElementById('message');
 
-      if (r == 'Значение R') {
-      	alert("Выберите значение для числа R");
-      	r.textContent = "";
-      }
+    // Сбрасываем сообщение перед проверкой
+    messageDiv.style.display = 'none';
+    messageDiv.textContent = '';
 
-      else if (y == 'Значение Y') {
-      	alert("Выберите значение для числа Y");
-      	y.textContent = "";
-      }
+    if (r == 'Значение R') {
+        messageDiv.textContent = "Выберите значение для числа R";
+        messageDiv.style.display = 'block';
+        return; // Прерываем выполнение функции
+    }
 
-      else if (x == 'Значение X') {
-      	alert("Выберите значение для числа X");
-      	x.textContent = "";
-      }
+    if (y == 'Значение Y') {
+        messageDiv.textContent = "Выберите значение для числа Y";
+        messageDiv.style.display = 'block';
+        return; // Прерываем выполнение функции
+    }
+
+    if (x == 'Значение X') {
+        messageDiv.textContent = "Выберите значение для числа X";
+        messageDiv.style.display = 'block';
+        return; // Прерываем выполнение функции
+    }
+
       
       	
       //Написать GET запрос, который передает данные на сервер
