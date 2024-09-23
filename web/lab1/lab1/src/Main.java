@@ -54,10 +54,10 @@ public class Main {
         }
     }
 
-    private static boolean getStatus(double coor_x, double coor_y, double coor_r) {
+    public static boolean getStatus(double coor_x, double coor_y, double coor_r) {
         //Разделить на координатные четверти
         //Первая четверть
-        if (coor_x >= 0 && coor_y >= 0) {
+        if (coor_x > 0 && coor_y > 0) {
             return false;
         }
         //Вторая четверть
@@ -71,7 +71,7 @@ public class Main {
         }
         //Третья четверть
         else if (coor_x <= 0 && coor_y <= 0) {
-            if (coor_x <= coor_r && coor_y <= coor_r) {
+            if (-coor_x <= coor_r && -coor_y <= coor_r) {
                 return true;
             }
             else {
@@ -80,7 +80,7 @@ public class Main {
         }
         //Четвертая четверть
         else if (coor_x >= 0 && coor_y <= 0) {
-            if (coor_x + coor_y <= coor_r) {
+            if (Math.abs(coor_x) + Math.abs(coor_y) <= coor_r) {
                 return true;
             }
             else {
