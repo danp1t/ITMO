@@ -7,6 +7,18 @@ th {
     background-color: #acdef1; 
     font-size:22px;
 }
+
+.red {
+    color: red;
+}
+
+.green {
+    color: green;
+}
+
+td p {
+    font-weight: 700;
+}
 body {
     background-color: #9bcde0;
 }
@@ -100,4 +112,9 @@ body {
 #message {
     display: none; 
     color: red;"
+}
+
+::placeholder {
+  color: blue;
+  font-size: 1.5em;
 }

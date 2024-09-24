@@ -110,3 +110,15 @@ document.getElementById('coor_x').addEventListener('input', function() {
     }
 });
     });
+
+function changeColor() {
+    const input = document.getElementById('resultStatus');
+    const value = input.value;
+
+    // Изменяем цвет в зависимости от значения
+    if (value === 'Попал') {
+        input.classList.add('green');
+    } else if (value === 'Не попал') {
+        input.classList.add('red');
+    }
+}

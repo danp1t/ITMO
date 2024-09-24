@@ -2,6 +2,8 @@ import com.fastcgi.FCGIInterface;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,9 @@ public class Main {
     public static void main(String[] args) throws IOException {
         var fcgiInterface = new FCGIInterface();
         while (fcgiInterface.FCGIaccept() >= 0) {
+            LocalDateTime now = LocalDateTime.now();
+            long startTime = System.nanoTime();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             FCGIInterface.request.inStream.fill();
             String content = (String) FCGIInterface.request.params.get("QUERY_STRING");
             //coor_x=1&coor_y=0&coor_r=
@@ -32,20 +37,39 @@ public class Main {
                 String statusMessage = status ? "Попал" : "Не попал";
 
                 // Добавляем результат в список
-                results.add(new Result(coor_x, coor_y, coor_r, statusMessage));
+                long elapsedTime = (System.nanoTime() - startTime);
+                results.add(new Result(coor_x, coor_y, coor_r, statusMessage, now.format(formatter), elapsedTime));
 
                 // Формируем HTML-таблицу
                 StringBuilder tableBuilder = new StringBuilder();
-                tableBuilder.append("<table border='1' id='resultTable123'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>status</th></tr>");
+                 // Время работы скрипта
+                tableBuilder.append("<table border='1' id='resultTable123'><tr><th>№</th><th>x</th><th>y</th><th>r</th><th>Результат</th><th>Текущее время</th><th>Время работы (нс)</th></tr>");
                 for (int i = 0; i < results.size(); i++) {
                     Result result = results.get(i);
+                    if (result.getStatus().equals("Попал")) {
+
                     tableBuilder.append("<tr>")
                             .append("<td>").append(i + 1).append("</td>")
                             .append("<td>").append(result.getX()).append("</td>")
                             .append("<td>").append(result.getY()).append("</td>")
                             .append("<td>").append(result.getR()).append("</td>")
-                            .append("<td>").append(result.getStatus()).append("</td>")
+                            .append("<td id='resultStatus' class='green'>").append(result.getStatus()).append("</td>")
+                            .append("<td>").append(result.getNow()).append("</td>") // Текущее время
+                            .append("<td>").append(result.getTime()).append("</td>") // Время работы
                             .append("</tr>");
+                    }
+                    else {
+                        tableBuilder.append("<tr>")
+                                .append("<td>").append(i + 1).append("</td>")
+                                .append("<td>").append(result.getX()).append("</td>")
+                                .append("<td>").append(result.getY()).append("</td>")
+                                .append("<td>").append(result.getR()).append("</td>")
+                                .append("<td id='resultStatus' class='red'>").append(result.getStatus()).append("</td>")
+                                .append("<td>").append(result.getNow()).append("</td>") // Текущее время
+                                .append("<td>").append(result.getTime()).append("</td>") // Время работы
+                                .append("</tr>");
+                    }
+
                 }
                 tableBuilder.append("</table>");
 
