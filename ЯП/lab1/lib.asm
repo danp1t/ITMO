@@ -212,11 +212,35 @@ read_word:
 ; Возвращает в rax: число, rdx : его длину в символах
 ; rdx = 0 если число прочитать не удалось
 parse_uint:
-
+    ; В rdi указатель на строку
+    xor rcx, rcx
     xor rax, rax
-    ret
+    mov rsi, 10 ; Множитель
 
+    .loop:
+    mov r11b, byte[rdi + rcx]
+    ; Проверка, что это число
+    cmp r11b, 0
+    jz .end
+    cmp r11b, 0x30
+    jb .end
+    cmp r11b, 0x39
+    ja .end
+    inc rcx
+    sub r11b, 0x30 ; Перевод в цифру
+    mul rsi
+    add rax, r11
+    jmp .loop
 
+    .end:
+        cmp rcx, 0
+        jz .error
+        mov rdx, rcx
+        ret
+
+    .error:
+        mov rdx, 0
+        ret
 
 
 ; Принимает указатель на строку, пытается
@@ -225,6 +249,8 @@ parse_uint:
 ; Возвращает в rax: число, rdx : его длину в символах (включая знак, если он был) 
 ; rdx = 0 если число прочитать не удалось
 parse_int:
+    xor rcx, rcx
+    mov r11b, byte[rdi + rcx]
     xor rax, rax
     ret 
 
@@ -234,4 +260,5 @@ parse_int:
 string_copy:
     xor rax, rax
     ret
+
 

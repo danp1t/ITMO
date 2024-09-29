@@ -71,7 +71,7 @@ section .data
     .end:
 
 section .data
-input: db '0', 0
+input: db '1', 0
 
 section .text
 _start:
