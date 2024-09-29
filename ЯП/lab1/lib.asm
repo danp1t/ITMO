@@ -1,6 +1,5 @@
 global _start
 
-
 section .text
 ; Принимает код возврата и завершает текущий процесс
 exit: 
@@ -141,7 +140,71 @@ read_char:
 ; Эта функция должна дописывать к слову нуль-терминатор
 
 read_word:
-    ret
+    push r11
+    push r12
+    mov rcx, rsi ; Размер буфера
+    mov r11, rdi ; Адрес буфера
+    mov rax, 0
+    mov rdi, 0
+    xor r12, r12 ; Счетчик символов
+
+    .loop:
+        push rcx
+        push r11
+        push rdx
+        call read_char
+        pop rdx
+        pop r11
+        pop rcx
+        cmp al, 0x20
+        jz .loop
+        cmp al, 0x9
+        jz .loop
+        cmp al, 0xA
+        jz .loop
+        jmp .loop3
+
+
+    .loop2:
+        push rcx
+        push r11
+        push rdx
+        call read_char
+        pop rdx
+        pop r11
+        pop rcx
+        cmp al, 0x20
+        jz .end
+        cmp al, 0x9
+        jz .end
+        cmp al, 0xA
+        jz .end
+        jmp .loop3
+
+    .loop3:
+        test al,al   
+        jz .end
+        cmp rcx, 0
+        jz .error
+        mov byte[r11 + r12], al
+        dec rcx
+        inc r12
+        jmp .loop2
+
+    .error:
+        mov rax, 0
+        pop r12
+        pop r11
+        ret
+
+    .end:
+        mov byte [r11 + r12], 0
+        mov rax, r11
+        mov rdx, r12
+        pop r12
+        pop r11
+        ret
+    
  
 
 ; Принимает указатель на строку, пытается
@@ -171,3 +234,4 @@ parse_int:
 string_copy:
     xor rax, rax
     ret
+
