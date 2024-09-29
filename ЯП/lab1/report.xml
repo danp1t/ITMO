@@ -1,44 +1,40 @@
 <?xml version="1.0" ?>
-<testsuite errors="0" failures="7" name="IOLibraryTest-20240929115651" tests="15" time="1.139">
-	<testcase classname="IOLibraryTest" name="test_print_char" time="0.073"/>
-	<testcase classname="IOLibraryTest" name="test_print_string" time="0.068"/>
-	<testcase classname="IOLibraryTest" name="test_print_uint" time="0.117"/>
-	<testcase classname="IOLibraryTest" name="test_read_char" time="0.190"/>
-	<testcase classname="IOLibraryTest" name="test_string_copy_too_long" time="0.080"/>
-	<testcase classname="IOLibraryTest" name="test_string_equals" time="0.098"/>
-	<testcase classname="IOLibraryTest" name="test_string_length" time="0.067"/>
-	<testcase classname="IOLibraryTest" name="test_string_not_equals" time="0.093"/>
-	<testcase classname="IOLibraryTest" name="test_parse_int" time="0.028">
+<testsuite errors="0" failures="6" name="IOLibraryTest-20240929152146" tests="15" time="0.868">
+	<testcase classname="IOLibraryTest" name="test_print_char" time="0.059"/>
+	<testcase classname="IOLibraryTest" name="test_print_int" time="0.083"/>
+	<testcase classname="IOLibraryTest" name="test_print_string" time="0.050"/>
+	<testcase classname="IOLibraryTest" name="test_print_uint" time="0.082"/>
+	<testcase classname="IOLibraryTest" name="test_read_char" time="0.113"/>
+	<testcase classname="IOLibraryTest" name="test_string_copy_too_long" time="0.049"/>
+	<testcase classname="IOLibraryTest" name="test_string_equals" time="0.070"/>
+	<testcase classname="IOLibraryTest" name="test_string_length" time="0.065"/>
+	<testcase classname="IOLibraryTest" name="test_string_not_equals" time="0.067"/>
+	<testcase classname="IOLibraryTest" name="test_parse_int" time="0.029">
 		<failure message="parse_int('0') returned wrong length: 0, expected: 1" type="AssertionError">
 <![CDATA[AssertionError: parse_int('0') returned wrong length: 0, expected: 1
 ]]>		</failure>
 	</testcase>
-	<testcase classname="IOLibraryTest" name="test_parse_uint" time="0.026">
+	<testcase classname="IOLibraryTest" name="test_parse_uint" time="0.017">
 		<failure message="parse_uint('0') returned wrong length: 0, expected: 1" type="AssertionError">
 <![CDATA[AssertionError: parse_uint('0') returned wrong length: 0, expected: 1
 ]]>		</failure>
 	</testcase>
-	<testcase classname="IOLibraryTest" name="test_print_int" time="0.046">
-		<failure message="print_int('-12345234121') printed wrong number: u'-1'" type="AssertionError">
-<![CDATA[AssertionError: print_int('-12345234121') printed wrong number: u'-1'
-]]>		</failure>
-	</testcase>
-	<testcase classname="IOLibraryTest" name="test_read_word" time="0.168">
+	<testcase classname="IOLibraryTest" name="test_read_word" time="0.117">
 		<failure message="segmentation fault" type="AssertionError">
 <![CDATA[AssertionError: segmentation fault
 ]]>		</failure>
 	</testcase>
-	<testcase classname="IOLibraryTest" name="test_read_word_length" time="0.028">
+	<testcase classname="IOLibraryTest" name="test_read_word_length" time="0.029">
 		<failure message="read_word('-1') returned incorrect length: 0, expected: 2" type="AssertionError">
 <![CDATA[AssertionError: read_word('-1') returned incorrect length: 0, expected: 2
 ]]>		</failure>
 	</testcase>
-	<testcase classname="IOLibraryTest" name="test_read_word_too_long" time="0.022">
+	<testcase classname="IOLibraryTest" name="test_read_word_too_long" time="0.016">
 		<failure message="read_word('asdbaskdbaksvbaskvhbashvbasdasdads wewe') overflows buffer, but does not fail" type="AssertionError">
 <![CDATA[AssertionError: read_word('asdbaskdbaksvbaskvhbashvbasdasdads wewe') overflows buffer, but does not fail
 ]]>		</failure>
 	</testcase>
-	<testcase classname="IOLibraryTest" name="test_string_copy" time="0.033">
+	<testcase classname="IOLibraryTest" name="test_string_copy" time="0.023">
 		<failure message="string_copy('ashdb asdhabs dahb') put wrong string into buffer: u'BBBBBBBBBBBBBBBBBBB'" type="AssertionError">
 <![CDATA[AssertionError: string_copy('ashdb asdhabs dahb') put wrong string into buffer: u'BBBBBBBBBBBBBBBBBBB'
 ]]>		</failure>

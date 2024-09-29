@@ -1,5 +1,6 @@
 global _start
 
+
 section .text
 ; Принимает код возврата и завершает текущий процесс
 exit: 
@@ -82,8 +83,9 @@ print_uint:
 print_int:  
     ; Узнать, положительное число или нет
     cmp rdi, 0
-    jbe .positive
-    ja .negative
+    jl .negative
+    jge .positive
+    
 
     .positive:
         sub rsp, 8
@@ -91,12 +93,11 @@ print_int:
         add rsp, 8
         ret
     .negative:
+        push rdi
         mov rdi, '-'
-        sub rsp, 8
         call print_char
-        add rsp, 8
+        pop rdi
         neg rdi
-        mov rdi, rax
         sub rsp, 8
         call print_uint
         add rsp, 8
@@ -148,6 +149,7 @@ read_word:
 ; Возвращает в rax: число, rdx : его длину в символах
 ; rdx = 0 если число прочитать не удалось
 parse_uint:
+
     xor rax, rax
     ret
 

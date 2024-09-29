@@ -72,7 +72,7 @@ section .data
 
 section .text
 _start:
-    mov rdi, -12345234121
+    mov rdi, 123123
     call print_int
     mov rax, 60
     xor rdi, rdi
