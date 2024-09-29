@@ -55,44 +55,52 @@ print_newline:
 ; Совет: выделите место в стеке и храните там результаты деления
 ; Не забудьте перевести цифры в их ASCII коды.
 print_uint:
-    mov r10, 0 ; Счетчик
-    mov rbx, 16 ; Делим на это число
-    mov rax, 16 ; Степень
-    mov r15, 16
+    mov r10, 10 ; Делитель
+    sub rsp, 24 ; Освобождаем стек для 20 символов
+    mov rax, rdi
+    mov rcx, 24 ; Счетчик
+    dec rcx
+    mov byte[rcx + rsp], 0 ; Создаем конец строки для нуль-детерминированной строки, чтобы далее воспользоваться функцией print_string
 
     .loop:
-    mov r9, rdi
-    and rdi, 0xf ; Находим последнюю цифру числа
-    push rdi
-
-    inc r10
-    cmp r10, 16
-    push rax
-    mov rax, r9
-    sub rax, rdi
-    div rbx         ; Разбиваем число по цифрам
-    mov rdi, rax
-    cmp rax, 0
-    jz .end
-    pop rax 
-    jmp .loop
-
-    
-
-
-
-
-
-
+        xor rdx, rdx
+        dec rcx
+        div r10
+        add rdx, 48 ; Переводим число в ASCII символ
+        mov byte[rcx + rsp], dl ; Сохраняем byte регистра rdx
+        cmp rax, 0
+        jz .end
+        jmp .loop
     .end:
-        mov rax, r11
+        lea rdi, [rcx + rsp]  ; Адрес начала строки
+        call print_string
+        add rsp, 24
         ret
     
 
 ; Выводит знаковое 8-байтовое число в десятичном формате 
-print_int:
-    xor rax, rax
-    ret
+print_int:  
+    ; Узнать, положительное число или нет
+    cmp rdi, 0
+    jbe .positive
+    ja .negative
+
+    .positive:
+        sub rsp, 8
+        call print_uint
+        add rsp, 8
+        ret
+    .negative:
+        mov rdi, '-'
+        sub rsp, 8
+        call print_char
+        add rsp, 8
+        neg rdi
+        mov rdi, rax
+        sub rsp, 8
+        call print_uint
+        add rsp, 8
+        ret
 
 ; Принимает два указателя на нуль-терминированные строки, возвращает 1 если они равны, 0 иначе
 string_equals:
@@ -161,9 +169,3 @@ parse_int:
 string_copy:
     xor rax, rax
     ret
-_start:
-    mov rdi, -1
-    call print_uint
-    mov rax, 60
-    xor rdi, rdi
-    syscall
