@@ -251,8 +251,40 @@ parse_uint:
 parse_int:
     xor rcx, rcx
     mov r11b, byte[rdi + rcx]
-    xor rax, rax
-    ret 
+    
+
+    cmp r11b, 0x2B
+    jz .sign
+    cmp r11b, 0x2D
+    jz .sign
+    sub rsp, 8
+    call parse_uint
+    add rsp, 8
+    
+    ret
+
+    .sign:
+    inc rcx
+    lea rdi, [rdi + rcx]
+    push r11
+    call parse_uint
+    pop r11
+    
+
+    cmp rdx, 0
+    jz .error
+    inc rdx
+    
+    cmp r11b, 0x2D
+    jz .neg
+    ret
+
+    .neg:
+        neg rax
+        ret
+
+    .error:
+        ret
 
 ; Принимает указатель на строку, указатель на буфер и длину буфера
 ; Копирует строку в буфер
@@ -260,5 +292,4 @@ parse_int:
 string_copy:
     xor rax, rax
     ret
-
 
