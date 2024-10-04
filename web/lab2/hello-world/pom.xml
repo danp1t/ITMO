@@ -10,9 +10,9 @@
 
   <dependencies>
     <dependency>
-      <groupId>javax</groupId>
-      <artifactId>javaee-api</artifactId>
-      <version>8.0</version>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version> <!-- или более новая версия, если доступна -->
       <scope>provided</scope>
     </dependency>
   </dependencies>
@@ -26,7 +26,7 @@
         <configuration>
           <hostname>localhost</hostname>
           <port>9990</port>
-          <username>admin</username> <!-- Замените на ваш логин -->
+          <username>danp1t</username> <!-- Замените на ваш логин -->
           <password>admin</password> <!-- Замените на ваш пароль -->
         </configuration>
       </plugin>
