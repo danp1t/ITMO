@@ -3,6 +3,7 @@
 	<head>
 		<title>Лаба №2</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="styles.css">
 	</head>
 	<body>
 		<header>
@@ -10,7 +11,6 @@
 			<span id="mygroup">P3207</span>
 			<span id="variant">Вариант: 409323</span>
 		</header>
-		<div id="interactive-image"></div>
 		<div id="form">
 			<form id="myForm" method="GET">
 			    <div id="coor_x">
@@ -46,7 +46,9 @@
 			    </div>
 			</form>
 		</div>
-		<canvas id="canvas" width="1200" height="1200"></canvas>
+		<div>
+            <canvas id="canvas" width="400" height="400"></canvas>
+        </div>
 
 <script>
 
@@ -136,6 +138,9 @@
 
     document.getElementById('coor_r-select').addEventListener('change', function() {
         const R = parseFloat(this.value); 
+        const errorMessageDiv = document.getElementById('error_message');
+        errorMessageDiv.textContent = ''
+
         drawAxes(R);
         drawShapes(R);
     });
@@ -176,6 +181,16 @@
         // Преобразуем координаты в систему координат вашей области
         const scaledX = (x - 200) / 60; // Масштабируем по X
         const scaledY = (200 - y) / 60; // Масштабируем по Y
+
+        const rValue = document.getElementById('coor_r-select').value;
+
+        const errorMessageDiv = document.getElementById('error_message');
+        errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
+
+        if (rValue === '') {
+            errorMessageDiv.textContent = 'Выберете значение R';
+            return; // Прерываем выполнение, если есть ошибка
+        }
 
         // Отправляем данные на сервер
         $.ajax({
