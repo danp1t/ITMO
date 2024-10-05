@@ -12,27 +12,27 @@
 		</header>
 		<div id="interactive-image"></div>
 		<div id="form">
-			<form method="GET">
-    			<div id="coor_x">
-        			<label for="coor_x">Выберете координату X:</label><br>
-                <input type="checkbox" id="coor_x1" name="coor_x" value="-3" onclick="onlyOne(this)"/> -3
-                <input type="checkbox" id="coor_x2" name="coor_x" value="-2" onclick="onlyOne(this)"/> -2
-                <input type="checkbox" id="coor_x3" name="coor_x" value="-1" onclick="onlyOne(this)"/> -1
-                <input type="checkbox" id="coor_x4" name="coor_x" value="0" onclick="onlyOne(this)"/> 0
-                <input type="checkbox" id="coor_x5" name="coor_x" value="1" onclick="onlyOne(this)"/> 1
-                <input type="checkbox" id="coor_x6" name="coor_x" value="2" onclick="onlyOne(this)"/> 2
-                <input type="checkbox" id="coor_x7" name="coor_x" value="3" onclick="onlyOne(this)"/> 3
-                <input type="checkbox" id="coor_x8" name="coor_x" value="4" onclick="onlyOne(this)"/> 4
-                <input type="checkbox" id="coor_x9" name="coor_x" value="5" onclick="onlyOne(this)"/> 5
-            </div>
+			<form id="myForm" method="GET">
+			    <div id="coor_x">
+			        <label for="coor_x">Выберите координату X:</label><br>
+			        <input type="checkbox" id="coor_x1" name="coor_x" value="-3" onclick="onlyOne(this)"/> -3
+			        <input type="checkbox" id="coor_x2" name="coor_x" value="-2" onclick="onlyOne(this)"/> -2
+			        <input type="checkbox" id="coor_x3" name="coor_x" value="-1" onclick="onlyOne(this)"/> -1
+			        <input type="checkbox" id="coor_x4" name="coor_x" value="0" onclick="onlyOne(this)"/> 0
+			        <input type="checkbox" id="coor_x5" name="coor_x" value="1" onclick="onlyOne(this)"/> 1
+			        <input type="checkbox" id="coor_x6" name="coor_x" value="2" onclick="onlyOne(this)"/> 2
+			        <input type="checkbox" id="coor_x7" name="coor_x" value="3" onclick="onlyOne(this)"/> 3
+			        <input type="checkbox" id="coor_x8" name="coor_x" value="4" onclick="onlyOne(this)"/> 4
+			        <input type="checkbox" id="coor_x9" name="coor_x" value="5" onclick="onlyOne(this)"/> 5
+			    </div>
 			    <div id="coor_y">
 			        <label for="coor_y1">Введите координату Y:</label>
-			        <input type="text" id="coor_y1" name="coor_y" required maxlength="8" size="10" />
-			        <div id="error_message" style="color: red;"></div>
+			        <input type="text" id="coor_y1" name="coor_y" required maxlength="8" size="10"/>
 			    </div>
 			    <div id="coor_r">
-			        <label for="coor_r-select">Выберете координату R:</label>
+			        <label for="coor_r-select">Выберите координату R:</label>
 			        <select id="coor_r-select" name="coor_r">
+			            <option value="">--Выберите R--</option>
 			            <option value="1">1</option>
 			            <option value="1.5">1.5</option>
 			            <option value="2">2</option>
@@ -40,6 +40,7 @@
 			            <option value="3">3</option>
 			        </select>
 			    </div>
+			    <div id="error_message" style="color: red;"></div>
 			    <div>
 			        <button type="submit">Отправить</button>
 			    </div>
@@ -48,6 +49,26 @@
 		<canvas id="canvas" width="1200" height="1200"></canvas>
 
 <script>
+
+	document.getElementById('myForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Отменяем стандартное поведение формы
+
+        const checkboxes = document.querySelectorAll('input[name="coor_x"]:checked');
+        const yValue = document.getElementById('coor_y1').value;
+        const rValue = document.getElementById('coor_r-select').value;
+
+        const errorMessageDiv = document.getElementById('error_message');
+        errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
+
+        if (checkboxes.length === 0 || yValue === '' || rValue === '') {
+            errorMessageDiv.textContent = 'Ошибка: Не все поля заполнены!';
+            return; // Прерываем выполнение, если есть ошибка
+        }
+
+        // Если все поля заполнены, можно отправить форму
+        this.submit();
+    });
+
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');    
 
@@ -170,7 +191,7 @@
         	document.getElementById('resultTable').innerHTML = data;
     }
 });
-        
+
     });
 </script>
 	</body>
