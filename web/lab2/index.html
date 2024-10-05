@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Лаба №2</title>
+	</head>
+	<body>
+		<header>
+			<span id="myname">Путинцев Данил Денисович</span>
+			<span id="mygroup">P3207</span>
+			<span id="variant">Вариант: 409323</span>
+		</header>
+		<div id="interactive-image"></div>
+		<div id="form">
+			<form method="GET">
+    			<div id="coor_x">
+        			<label for="coor_x">Выберете координату X:</label>
+        			<input type="checkbox" id="coor_x1" name="coor_x1"/>
+			        <label for="coor_x1">-3</label>
+			        <input type="checkbox" id="coor_x2" name="coor_x2"/>
+			        <label for="coor_x2">-2</label>
+			        <input type="checkbox" id="coor_x3" name="coor_x3"/>
+			        <label for="coor_x3">-1</label>
+			        <input type="checkbox" id="coor_x4" name="coor_x4"/>
+			        <label for="coor_x4">0</label>
+			        <input type="checkbox" id="coor_x5" name="coor_x5"/>
+			        <label for="coor_x5">1</label>
+			        <input type="checkbox" id="coor_x6" name="coor_x6"/>
+			        <label for="coor_x6">2</label>
+			        <input type="checkbox" id="coor_x7" name="coor_x7"/>
+			        <label for="coor_x7">3</label>
+			        <input type="checkbox" id="coor_x8" name="coor_x8"/>
+			        <label for="coor_x8">4</label>
+			        <input type="checkbox" id="coor_x9" name="coor_x9"/>
+			        <label for="coor_x9">5</label>
+    			</div>
+			    <div id="coor_y">
+			        <label for="coor_y1">Введите координату Y:</label>
+			        <input type="text" id="coor_y1" name="coor_y" required maxlength="8" size="10" />
+			    </div>
+			    <div id="coor_r">
+			        <label for="coor_r-select">Выберете координату R:</label>
+			        <select id="coor_r-select" name="coor_r">
+			            <option value="1">1</option>
+			            <option value="1.5">1.5</option>
+			            <option value="2">2</option>
+			            <option value="2.5">2.5</option>
+			            <option value="3">3</option>
+			        </select>
+			    </div>
+			    <div>
+			        <button type="submit">Отправить</button>
+			    </div>
+			</form>
+		</div>
+		<canvas id="canvas" width="1200" height="1200"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    let R = 5; // Значение радиуса от 1 до 5
+    let halfR = R / 2;
+
+    function drawAxes() {
+        ctx.beginPath();
+        ctx.moveTo(200, 0);
+        ctx.lineTo(200, 400); // Ось Y
+        ctx.moveTo(0, 200);
+        ctx.lineTo(400, 200); // Ось X
+        ctx.stroke();
+
+        ctx.fillText(-R, 200 - R*30, 215);
+        ctx.fillText(R, 200 + R*30, 215);
+        ctx.fillText(halfR, 200 + halfR*30, 215);
+        ctx.fillText(-halfR, 200 - halfR*30, 215);
+        ctx.fillText(-R, 205, 200 + R * 30);
+        ctx.fillText(R, 205, 200 - R * 30);
+        ctx.fillText(-halfR, 205, 200 + halfR * 30);
+        ctx.fillText(halfR, 205, 200 - halfR * 30);
+
+        ctx.fillText("y", 205, 10);
+        ctx.fillText("x", 400, 215);
+
+    }
+
+    function drawShapes() {
+        const scale = 30; // Масштаб для отображения
+
+        // Первая четверть: часть окружности
+        ctx.beginPath();
+		ctx.arc(200, 200, R * scale, -(Math.PI * 0.5), 0); // Часть окружности сверху
+		ctx.lineTo(200, 200);
+		ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+		ctx.fill();
+		ctx.stroke();
+
+        // Вторая четверть: прямоугольник
+        ctx.beginPath();
+        ctx.rect(200 - (R * scale) / 2, 200 - R * scale, (R * scale) / 2, R * scale);
+        ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+        ctx.fill();
+        ctx.stroke();
+
+        // Третья четверть: треугольник
+        ctx.beginPath();
+        ctx.moveTo(200 - R * scale, 200); // (-R; 0)
+        ctx.lineTo(200, 200 + R * scale);   // (0; -R)
+        ctx.lineTo(200, 200);       // (0; 0)
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+        ctx.fill();
+        ctx.stroke();
+
+    }
+
+    function draw() {
+        drawAxes();
+        drawShapes();
+    }
+
+    draw();
+</script>
+	</body>
+</html>
