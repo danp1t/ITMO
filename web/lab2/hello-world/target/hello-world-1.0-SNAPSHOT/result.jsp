@@ -12,7 +12,7 @@
     Boolean isInArea = (Boolean) request.getAttribute("isInArea");
 %>
 
-<div id="resultsContainer">
+
     <table border="1">
         <thead>
             <tr>
@@ -38,7 +38,6 @@
         </tbody>
     </table>
     <a href="/hello-world-1.0-SNAPSHOT/index.jsp">Назад</a>
-</div>
 
 </body>
 </html>

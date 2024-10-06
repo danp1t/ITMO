@@ -55,7 +55,7 @@
     <div>
         <canvas id="canvas" width="400" height="400"></canvas>
     </div>
-    <div style="margin-left: 20px;" id="resultsContainer">
+    <div id="results-Container">
         <table border="1">
             <thead>
                 <tr>
@@ -66,20 +66,17 @@
                 </tr>
             </thead>
             <tbody>
-                <%
-                    ResultList resultList = (ResultList) session.getAttribute("resultList");
-                    if (resultList != null) {
-                        for (ResultBean result : resultList.getResults()) {
-                            out.println("<tr>");
-                            out.println("<td>" + result.getX() + "</td>");
-                            out.println("<td>" + result.getY() + "</td>");
-                            out.println("<td>" + result.getR() + "</td>");
-                            out.println("<td>" + (result.isInArea() ? "Да" : "Нет") + "</td>");
-                            out.println("</tr>");
-                        }
-                    } else {
-                        out.println("<tr><td colspan='4'>Нет результатов.</td></tr>");
-                    }
+                <% ResultList resultList = (ResultList) session.getAttribute("resultList");
+                   if (resultList != null) {
+                       for (ResultBean result : resultList.getResults()) {
+                           out.println("<tr>");
+                           out.println("<td>" + result.getX() + "</td>");
+                           out.println("<td>" + result.getY() + "</td>");
+                           out.println("<td>" + result.getR() + "</td>");
+                           out.println("<td>" + (result.isInArea() ? "Да" : "Нет") + "</td>");
+                           out.println("</tr>");
+                       }
+                   }
                 %>
             </tbody>
         </table>
@@ -215,8 +212,8 @@
         const y = event.clientY - rect.top; // Получаем координату Y
 
         // Преобразуем координаты в систему координат вашей области
-        const scaledX = (x - 200) / 60; // Масштабируем по X
-        const scaledY = (200 - y) / 60; // Масштабируем по Y
+        const scaledX = (x - 220) / 60; // Масштабируем по X
+        const scaledY = (220 - y) / 60; // Масштабируем по Y
 
         const rValue = document.getElementById('coor_r-select').value;
 
@@ -240,7 +237,7 @@
     	},
     	success: function(response) {
                 // Обновляем содержимое таблицы с результатами
-                $('#resultsContainer').html(response);
+                location.reload();
     }
 });
 

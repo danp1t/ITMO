@@ -139,7 +139,15 @@ a:hover {
 }
 
 #resultsContainer {
-    margin: 20px;
+    width: 100%;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5); /* Тень для блока */
+}
+#results-Container {
+    width: 100%;
+    margin: 10px;
     padding: 20px;
     border-radius: 15px;
     background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
