@@ -88,3 +88,60 @@ canvas {
     box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5);
     background-color: rgba(250, 250, 250, 1); /* Светлый фон для канваса */
 }
+table {
+    width: 100%;
+    border-collapse: collapse; /* Убираем двойные границы */
+    margin-top: 20px; /* Отступ сверху */
+    background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный фон */
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Тень для таблицы */
+}
+
+th, td {
+    padding: 15px; /* Отступы внутри ячеек */
+    text-align: center; /* Центрируем текст */
+    border-bottom: 1px solid #00bfff; /* Нижняя граница ячеек */
+}
+
+th {
+    background-color: #00bfff; /* Цвет фона заголовка */
+    color: #ffffff; /* Цвет текста заголовка */
+    font-size: 18px; /* Размер шрифта заголовка */
+    text-shadow: 0 0 5px #007acc; /* Легкая тень для заголовка */
+}
+
+tr:hover {
+    background-color: rgba(173, 216, 230, 0.5); /* Цвет строки при наведении */
+}
+
+tbody tr:nth-child(even) {
+    background-color: rgba(240, 240, 240, 0.5); /* Светлый фон для четных строк */
+}
+
+tbody tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.9); /* Белый фон для нечетных строк */
+}
+
+a {
+    display: inline-block; /* Чтобы ссылка выглядела как кнопка */
+    margin-top: 20px; /* Отступ сверху */
+    padding: 10px 20px; /* Отступы внутри ссылки */
+    background-color: #00bfff; /* Цвет фона ссылки */
+    color: #ffffff; /* Цвет текста ссылки */
+    border-radius: 5px; /* Закругленные углы */
+    text-decoration: none; /* Убираем подчеркивание */
+    transition: background-color 0.3s, transform 0.2s; /* Плавный переход */
+}
+
+a:hover {
+    background-color: #0099cc; /* Темнее при наведении */
+    transform: scale(1.05); /* Увеличение при наведении */
+}
+
+#resultsContainer {
+    margin: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый фон */
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5); /* Тень для блока */
+}

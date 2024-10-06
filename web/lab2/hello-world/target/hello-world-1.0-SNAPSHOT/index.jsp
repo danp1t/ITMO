@@ -1,56 +1,90 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.example.ResultList" %>
+<%@ page import="com.example.ResultBean" %>
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Лаба №2</title>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <link rel="stylesheet" href="styles.css">
-        <meta charset="UTF-8">
-	</head>
-	<body>
-		<header>
-			<span id="myname">Путинцев Данил Денисович</span>
-			<span id="mygroup">P3207</span>
-			<span id="variant">Вариант: 409323</span>
-		</header>
-		<div id="form">
-			<form id="myForm" method="GET" action="controller">
-			    <div id="coor_x">
-			        <label for="coor_x">Выберите координату X:</label><br>
-			        <input type="checkbox" id="coor_x1" name="coor_x" value="-3" onclick="onlyOne(this)"/> -3
-			        <input type="checkbox" id="coor_x2" name="coor_x" value="-2" onclick="onlyOne(this)"/> -2
-			        <input type="checkbox" id="coor_x3" name="coor_x" value="-1" onclick="onlyOne(this)"/> -1
-			        <input type="checkbox" id="coor_x4" name="coor_x" value="0" onclick="onlyOne(this)"/> 0
-			        <input type="checkbox" id="coor_x5" name="coor_x" value="1" onclick="onlyOne(this)"/> 1
-			        <input type="checkbox" id="coor_x6" name="coor_x" value="2" onclick="onlyOne(this)"/> 2
-			        <input type="checkbox" id="coor_x7" name="coor_x" value="3" onclick="onlyOne(this)"/> 3
-			        <input type="checkbox" id="coor_x8" name="coor_x" value="4" onclick="onlyOne(this)"/> 4
-			        <input type="checkbox" id="coor_x9" name="coor_x" value="5" onclick="onlyOne(this)"/> 5
-			    </div>
-			    <div id="coor_y">
-			        <label for="coor_y1">Введите координату Y:</label>
-			        <input type="text" id="coor_y1" name="coor_y" required maxlength="8" size="10"/>
-			    </div>
-			    <div id="coor_r">
-			        <label for="coor_r-select">Выберите координату R:</label>
-			        <select id="coor_r-select" name="coor_r">
-			            <option value="">--Выберите R--</option>
-			            <option value="1">1</option>
-			            <option value="1.5">1.5</option>
-			            <option value="2">2</option>
-			            <option value="2.5">2.5</option>
-			            <option value="3">3</option>
-			        </select>
-			    </div>
-			    <div id="error_message" style="color: red;"></div>
-			    <div>
-			        <button type="submit">Отправить</button>
-			    </div>
-			</form>
-		</div>
-		<div>
-            <canvas id="canvas" width="400" height="400"></canvas>
+<head>
+    <title>Лаба №2</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+</head>
+<body>
+<header>
+    <span id="myname">Путинцев Данил Денисович</span>
+    <span id="mygroup">P3207</span>
+    <span id="variant">Вариант: 409323</span>
+</header>
+<div id="form">
+    <form id="myForm" method="GET" action="controller">
+        <div id="coor_x">
+            <label for="coor_x">Выберите координату X:</label><br>
+            <input type="checkbox" id="coor_x1" name="coor_x" value="-3" onclick="onlyOne(this)"/> -3
+            <input type="checkbox" id="coor_x2" name="coor_x" value="-2" onclick="onlyOne(this)"/> -2
+            <input type="checkbox" id="coor_x3" name="coor_x" value="-1" onclick="onlyOne(this)"/> -1
+            <input type="checkbox" id="coor_x4" name="coor_x" value="0" onclick="onlyOne(this)"/> 0
+            <input type="checkbox" id="coor_x5" name="coor_x" value="1" onclick="onlyOne(this)"/> 1
+            <input type="checkbox" id="coor_x6" name="coor_x" value="2" onclick="onlyOne(this)"/> 2
+            <input type="checkbox" id="coor_x7" name="coor_x" value="3" onclick="onlyOne(this)"/> 3
+            <input type="checkbox" id="coor_x8" name="coor_x" value="4" onclick="onlyOne(this)"/> 4
+            <input type="checkbox" id="coor_x9" name="coor_x" value="5" onclick="onlyOne(this)"/> 5
         </div>
+        <div id="coor_y">
+            <label for="coor_y1">Введите координату Y:</label>
+            <input type="text" id="coor_y1" name="coor_y" required maxlength="8" size="10"/>
+        </div>
+        <div id="coor_r">
+            <label for="coor_r-select">Выберите координату R:</label>
+            <select id="coor_r-select" name="coor_r">
+                <option value="">--Выберите R--</option>
+                <option value="1">1</option>
+                <option value="1.5">1.5</option>
+                <option value="2">2</option>
+                <option value="2.5">2.5</option>
+                <option value="3">3</option>
+            </select>
+        </div>
+        <div id="error_message" style="color: red;"></div>
+        <div>
+            <button type="submit">Отправить</button>
+        </div>
+    </form>
+</div>
+
+<div style="display: flex; margin-top: 20px;">
+    <div>
+        <canvas id="canvas" width="400" height="400"></canvas>
+    </div>
+    <div style="margin-left: 20px;" id="resultsContainer">
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>X</th>
+                    <th>Y</th>
+                    <th>R</th>
+                    <th>Результат</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    ResultList resultList = (ResultList) session.getAttribute("resultList");
+                    if (resultList != null) {
+                        for (ResultBean result : resultList.getResults()) {
+                            out.println("<tr>");
+                            out.println("<td>" + result.getX() + "</td>");
+                            out.println("<td>" + result.getY() + "</td>");
+                            out.println("<td>" + result.getR() + "</td>");
+                            out.println("<td>" + (result.isInArea() ? "Да" : "Нет") + "</td>");
+                            out.println("</tr>");
+                        }
+                    } else {
+                        out.println("<tr><td colspan='4'>Нет результатов.</td></tr>");
+                    }
+                %>
+            </tbody>
+        </table>
+    </div>
+</div>
 
 <script>
 
@@ -204,8 +238,9 @@
         	coor_y: scaledY,
         	coor_r: parseFloat(document.getElementById('coor_r-select').value)
     	},
-    	success: function(data, textStatus, jqXHR) {
-        	document.getElementById('resultTable').innerHTML = data;
+    	success: function(response) {
+                // Обновляем содержимое таблицы с результатами
+                $('#resultsContainer').html(response);
     }
 });
 
