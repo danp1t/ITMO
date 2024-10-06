@@ -1,0 +1,90 @@
+body {
+    background-color: #f0f0f0;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+
+}
+
+header {
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    margin: 10px;
+    border-bottom: 2px solid #00bfff;
+    background-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#myname, #mygroup, #variant {
+    font-size: 20px;
+    text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff;
+}
+
+#form {
+    margin: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    font-size: 18px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+input[type="text"], select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #e6f7ff; /* Светлый фон для полей ввода */
+    color: #333;
+    font-size: 16px;
+    box-shadow: inset 0 0 5px #00bfff;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+input[type="text"]:focus, select:focus {
+    outline: none;
+    box-shadow: inset 0 0 5px #00bfff, 0 0 5px #00bfff; /* Неоновый эффект при фокусе */
+}
+
+input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+button {
+    background-color: #00bfff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+
+button:hover {
+    background-color: #0099cc; /* Темнее при наведении */
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5); /* Неоновый эффект при наведении */
+}
+
+#error_message {
+    margin-top: 10px;
+}
+
+canvas {
+    margin: 10px;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5);
+    background-color: rgba(250, 250, 250, 1); /* Светлый фон для канваса */
+}
