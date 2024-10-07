@@ -82,9 +82,25 @@
         </table>
     </div>
 </div>
-
 <script>
+    const results = [
 
+            <% if (resultList != null) { for (ResultBean result : resultList.getResults()) { %>
+                { x: <%= result.getX() %>, y: <%= result.getY() %>, inArea: <%= result.isInArea() ? "true" : "false" %> },
+            <% } }%>
+        ];
+    function drawPoints() {
+            const scale = 60; // Масштаб для отображения
+            results.forEach(result => {
+                const xCanvas = 200 + result.x * scale; // Преобразование координаты X
+                const yCanvas = 200 - result.y * scale; // Преобразование координаты Y (инверсия по Y)
+
+                ctx.fillStyle = result.inArea ? 'green' : 'red'; // Цвет точки
+                ctx.beginPath();
+                ctx.arc(xCanvas, yCanvas, 5, 0, Math.PI * 2); // Рисуем точку
+                ctx.fill();
+            });
+        }
 	document.getElementById('myForm').addEventListener('submit', function(event) {
         event.preventDefault(); // Отменяем стандартное поведение формы
 
@@ -176,12 +192,14 @@
 
         drawAxes(R);
         drawShapes(R);
+        drawPoints();
     });
 
     // Инициализация с начальным значением R
     const R = parseFloat(document.getElementById('coor_r-select').value);
     drawAxes(R);
     drawShapes(R);
+    drawPoints();
 
     document.getElementById('coor_y1').addEventListener('input', function() {
     const input = this.value;
