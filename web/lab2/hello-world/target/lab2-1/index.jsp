@@ -245,7 +245,7 @@
 
         // Отправляем данные на сервер
         $.ajax({
-    	url: '/hello-world-1.0-SNAPSHOT/controller',
+    	url: '/lab2-1/controller',
     	method: 'GET',
     	dataType: 'html',
     	data: {

@@ -37,7 +37,7 @@
             %>
         </tbody>
     </table>
-    <a href="/hello-world-1.0-SNAPSHOT/index.jsp">Назад</a>
+    <a href="/lab2-1/index.jsp">Назад</a>
 
 </body>
 </html>

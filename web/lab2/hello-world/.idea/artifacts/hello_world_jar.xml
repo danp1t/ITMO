@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="hello-world:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/hello_world_jar</output-path>
+    <root id="archive" name="lab2.war">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="hello-world" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Maven: jakarta.servlet:jakarta.servlet-api:6.1.0" />
+        </element>
+      </element>
+      <element id="directory" name="META-INF">
+        <element id="dir-copy" path="$PROJECT_DIR$/src/main/webapp/META-INF" />
+      </element>
+      <element id="dir-copy" path="$PROJECT_DIR$/src/main/webapp/WEB-INF" />
+      <element id="dir-copy" path="$PROJECT_DIR$/src/main/webapp" />
+    </root>
+  </artifact>
+</component>

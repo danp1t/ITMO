@@ -89,7 +89,7 @@
                 { x: <%= result.getX() %>, y: <%= result.getY() %>, inArea: <%= result.isInArea() ? "true" : "false" %> },
             <% } }%>
         ];
-    function drawPoints() {
+    function drawPoints(R) {
             const scale = 60; // Масштаб для отображения
             results.forEach(result => {
                 const xCanvas = 200 + result.x * scale; // Преобразование координаты X
@@ -245,7 +245,7 @@
 
         // Отправляем данные на сервер
         $.ajax({
-    	url: '/hello-world-1.0-SNAPSHOT/controller',
+    	url: '/lab2/controller',
     	method: 'GET',
     	dataType: 'html',
     	data: {
