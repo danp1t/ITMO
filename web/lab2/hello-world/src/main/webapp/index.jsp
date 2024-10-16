@@ -89,13 +89,24 @@
                 { x: <%= result.getX() %>, y: <%= result.getY() %>, inArea: <%= result.isInArea() ? "true" : "false" %> },
             <% } }%>
         ];
-    function drawPoints(R) {
+    function drawPoints(r) {
             const scale = 60; // Масштаб для отображения
             results.forEach(result => {
                 const xCanvas = 200 + result.x * scale; // Преобразование координаты X
                 const yCanvas = 200 - result.y * scale; // Преобразование координаты Y (инверсия по Y)
+                let x = result.x;
+                let y = result.y;
+                if (x >= 0 && y >= 0) {
+                            inArea = (x * x + y * y) <= (r * r);
+                        } else if (x >= 0 && y <= 0) {
+                            inArea = false;
+                        } else if (x <= 0 && y >= 0) {
+                            inArea = (Math.abs(x) <= r / 2 && y <= r);
+                        } else if (x <= 0 && y <= 0) {
+                            inArea = (Math.abs(x) + Math.abs(y) <= r);
+                        }
 
-                ctx.fillStyle = result.inArea ? 'green' : 'red'; // Цвет точки
+                ctx.fillStyle = inArea  ? 'green' : 'red'; // Цвет точки
                 ctx.beginPath();
                 ctx.arc(xCanvas, yCanvas, 5, 0, Math.PI * 2); // Рисуем точку
                 ctx.fill();
@@ -192,14 +203,14 @@
 
         drawAxes(R);
         drawShapes(R);
-        drawPoints();
+        drawPoints(R);
     });
 
     // Инициализация с начальным значением R
     const R = parseFloat(document.getElementById('coor_r-select').value);
     drawAxes(R);
     drawShapes(R);
-    drawPoints();
+    drawPoints(R);
 
     document.getElementById('coor_y1').addEventListener('input', function() {
     const input = this.value;
