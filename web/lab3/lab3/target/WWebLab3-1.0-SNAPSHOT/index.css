@@ -1,0 +1,165 @@
+header
+{
+    text-align: center;
+    border: 1px solid darkgrey;
+    height: 100%;
+    background-color: #206876;
+    color: white;
+    font: 20px sans-serif;
+}
+body
+{
+    margin: 0;
+    font: 20px sans-serif;
+}
+tr
+{
+    width: 100%;
+}
+
+table
+{
+    table-layout: fixed;
+    width: 95%;
+    margin-left: 5%;
+}
+img
+{
+    width: 80%;
+}
+.ctrl
+{
+    color: white;
+    width: 95%;
+    margin-right: 5%;
+    padding: 1.5%;
+    border: 1px solid darkgrey;
+    box-shadow: 0 2px 5px #294057;
+    border-radius: 15px;
+}
+.check_x
+{
+    background-color: #5FBDCE;
+}
+.inp_y
+{
+    width: 100%;
+    padding: 0.5%;
+    border: 2px solid #FF1800	;
+    box-shadow: 0 3px 10px #a94057;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+    cursor: text;
+}
+.check_r
+{
+    background-color: #65E080;
+}
+.frm_submit
+{
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    background-color: #37B6CE;
+    border: none;
+    color: white;
+    padding: 1.5%;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: sans-serif;
+    box-shadow: 0 5px 15px #193047;
+    border-radius: 10px;
+    margin: 0;
+}
+.frm_reset
+{
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    background-color: #a94057;
+    border: none;
+    color: white;
+    padding: 1.5%;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: sans-serif;
+    box-shadow: 0 5px 15px #193047;
+    border-radius: 10px;
+    margin: 0;
+}
+#submit:hover
+{
+    background-color: #48C7DF;
+}
+.check_x > .check_txt
+{
+    display: inline-block;
+    width: 80%;
+    text-align: center;
+}
+.check_r > .radio_txt
+{
+    display: inline-block;
+    width: 80%;
+    text-align: center;
+}
+table input
+{
+    cursor: pointer;
+}
+
+.row_res
+{
+    width: 100%;
+    padding: 0.5%;
+    border: 2px solid #FF1800;
+    box-shadow: 0 3px 10px #a94057;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+}
+#res_table_div
+{
+    width: 100%;
+    padding: 0.5%;
+    border: 2px solid #FF1800;
+    box-shadow: 0 3px 10px #a94057;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 18px;
+    margin: 0;
+    border-collapse: separate;
+}
+#img
+{
+    margin-top: 10%;
+}
+#time_field
+{
+    border-left: white solid 2px;
+    border-bottom: white solid 2px;
+    height: 90%;
+    font-size: 45px;
+}
+#time_div
+{
+    width:15%;
+    margin-left: 10%;
+    overflow:auto;
+    height: 60%;
+}
+.com_y
+{
+    text-align: right;
+    color: #495057;
+    font-size: 15px;
+}
+.inp_y > .ui-button
+{
+    cursor: pointer;
+}
+h2
+{
+    color: white;
+}
