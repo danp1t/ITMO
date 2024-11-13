@@ -2,33 +2,14 @@
 <project version="4">
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
-      <artifact name="lab3:war" />
+      <artifact name="lab3:war exploded" />
     </artifacts-to-build>
   </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="88ed52a9-8f9b-49a1-9d02-ce6e63f6721c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/Bean.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/webapp/web/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/hibernate.cfg.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/lab3/wweblab3/Point.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/lab3/wweblab3/PointBean.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/lab3/wweblab3/PointCollection.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/lab3/wweblab3/PointDAO.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/faces-config.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/web.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/clock.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/img/favicon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/index.xhtml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/start.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/start.xhtml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/start.xhtml" afterDir="false" />
-    </list>
+    <list default="true" id="88ed52a9-8f9b-49a1-9d02-ce6e63f6721c" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -42,7 +23,7 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="uddvt993" />
@@ -67,9 +48,9 @@
     &quot;JBoss/WildFly Server.JBoss/WildFly 34.0.0.Beta1.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/danp1t/github/lab3&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/danp1t/github/ITMO/web/lab3/lab3&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -175,6 +156,11 @@
       <workItem from="1731412114059" duration="232000" />
       <workItem from="1731412484173" duration="26000" />
       <workItem from="1731412543246" duration="10000" />
+      <workItem from="1731412970960" duration="250000" />
+      <workItem from="1731433586150" duration="414000" />
+      <workItem from="1731436825133" duration="4129000" />
+      <workItem from="1731492234879" duration="2546000" />
+      <workItem from="1731495103687" duration="648000" />
     </task>
     <servers />
   </component>
