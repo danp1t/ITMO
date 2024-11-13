@@ -19,6 +19,7 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="facelets" />
       </list>
     </option>
   </component>
@@ -160,7 +161,7 @@
       <workItem from="1731433586150" duration="414000" />
       <workItem from="1731436825133" duration="4129000" />
       <workItem from="1731492234879" duration="2546000" />
-      <workItem from="1731495103687" duration="648000" />
+      <workItem from="1731495103687" duration="3218000" />
     </task>
     <servers />
   </component>

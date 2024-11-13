@@ -28,8 +28,11 @@
     <div id="clock">
         <h:form>
             <p:clock displayMode="analog"/>
-            <h:outputText id="currentTime" value="#{clockBean.currentTime}" style="font-size: 24px;"/>
-            <p:poll interval="9" listener="#{clockBean.updateCurrentTime}" update="currentTime" />
+            <div class="centered-content">
+                <h:outputText id="currentTime" value="#{clockBean.currentTime}" style="font-size: 24px;"/>
+                <p:poll interval="9" listener="#{clockBean.updateCurrentTime}" update="currentTime" />
+            </div>
+            <h:commandButton value="Перейти на главную страницу" action="index.xhtml" styleClass="custom-button" />
         </h:form>
     </div>
 
