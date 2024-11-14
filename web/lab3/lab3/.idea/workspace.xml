@@ -9,7 +9,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="88ed52a9-8f9b-49a1-9d02-ce6e63f6721c" name="Changes" comment="" />
+    <list default="true" id="88ed52a9-8f9b-49a1-9d02-ce6e63f6721c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../../phisics/lab3/Отчет.odt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../phisics/lab3/Отчет.odt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../phisics/lab3/Отчет.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/../../../phisics/lab3/Отчет.pdf" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,8 +21,8 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Class" />
         <option value="facelets" />
+        <option value="Class" />
       </list>
     </option>
   </component>
@@ -161,7 +164,8 @@
       <workItem from="1731433586150" duration="414000" />
       <workItem from="1731436825133" duration="4129000" />
       <workItem from="1731492234879" duration="2546000" />
-      <workItem from="1731495103687" duration="3218000" />
+      <workItem from="1731495103687" duration="5120000" />
+      <workItem from="1731604308695" duration="2227000" />
     </task>
     <servers />
   </component>

@@ -10,14 +10,48 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html">
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui" xmlns:c="http://java.sun.com/jsp/jstl/core">
+
 
 <h:head>
     <title>Основная страничка</title>
+    <link rel="stylesheet" href="styles.css"/>
 </h:head>
 
 <h:body>
-    <p>lol</p>
+    <div id="header">
+        <span id="myname">Путинцев Данил Денисович</span>
+        <span id="mygroup">P3207</span>
+        <span id="variant">Вариант: 430331</span>
+    </div>
+    <div id="form">
+        <div id="coor_x">
+            <span class="ui-float-label">
+                <p:inputText class="float-input" value="#{CoorBean.coorX}"/>
+                <p:outputLabel for="@previous" value="Координата X"/>
+            </span>
+        </div>
+        <div id="coor_y">
+            <h:form>
+                <h:outputLabel value="Select CoorY: " for="coorYSelect" />
+                <h:panelGroup id="coorYSelect">
+                    <c:forEach items="#{CoorBean.coorYOptions}" var="option">
+                        <h:commandLink value="#{option}" action="#{CoorBean.selectCoorY(option)}" />
+                    </c:forEach>
+                </h:panelGroup>
+
+                <h:outputText value="Selected CoorY: #{CoorBean.coorY}" />
+            </h:form>
+        </div>
+        <div id="coor_r">
+            <span class="ui-float-label">
+                <p:inputText class="float-input" value="#{CoorBean.coorR}"/>
+                <p:outputLabel for="@previous" value="Координата R"/>
+            </span>
+
+        </div>
+    </div>
 </h:body>
 
 </html>

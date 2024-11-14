@@ -63,3 +63,7 @@ body {
     flex-direction: column; /* Расположение элементов по вертикали */
     align-items: center; /* Центрируем текст и опрос по горизонтали */
 }
+
+#coor_x, #coor_r {
+    margin-top: 10px;
+}
