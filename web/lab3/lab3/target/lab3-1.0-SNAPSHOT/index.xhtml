@@ -26,30 +26,38 @@
         <span id="variant">Вариант: 430331</span>
     </div>
     <div id="form">
-        <div id="coor_x">
+        <div id="coor_x" class="coors">
             <span class="ui-float-label">
                 <p:inputText class="float-input" value="#{CoorBean.coorX}"/>
                 <p:outputLabel for="@previous" value="Координата X"/>
             </span>
         </div>
-        <div id="coor_y">
+        <div id="coor_y" class="coors">
             <h:form>
-                <h:outputLabel value="Select CoorY: " for="coorYSelect" />
-                <h:panelGroup id="coorYSelect">
-                    <c:forEach items="#{CoorBean.coorYOptions}" var="option">
-                        <h:commandLink value="#{option}" action="#{CoorBean.selectCoorY(option)}" />
-                    </c:forEach>
+                <h:panelGroup id="tabPanel">
+                    <h:outputLabel value="Select CoorY: " />
+
+                    <h:panelGrid columns="9">
+                        <c:forEach items="#{CoorBean.coorYOptions}" var="option">
+                            <h:commandLink value="#{option}" action="#{CoorBean.selectCoorY(option)}" />
+                        </c:forEach>
+                    </h:panelGrid>
                 </h:panelGroup>
 
                 <h:outputText value="Selected CoorY: #{CoorBean.coorY}" />
             </h:form>
         </div>
-        <div id="coor_r">
+        <div id="coor_r" class="coors">
             <span class="ui-float-label">
                 <p:inputText class="float-input" value="#{CoorBean.coorR}"/>
                 <p:outputLabel for="@previous" value="Координата R"/>
             </span>
+        </div>
+        <div id="error_message" style="color: red;">
 
+        </div>
+        <div>
+            <button type="submit">Отправить</button>
         </div>
     </div>
 </h:body>
