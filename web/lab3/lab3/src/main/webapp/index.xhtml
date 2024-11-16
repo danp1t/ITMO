@@ -17,118 +17,7 @@
 <h:head>
     <title>Основная страничка</title>
     <link rel="stylesheet" href="styles.css"/>
-    <script type="text/javascript">
 
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-
-        function drawAxes(R) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let halfR = R / 2;
-            ctx.beginPath();
-            ctx.moveTo(200, 0);
-            ctx.lineTo(200, 400); // Ось Y
-            ctx.moveTo(0, 200);
-            ctx.lineTo(400, 200); // Ось X
-            ctx.stroke();
-            ctx.fillStyle = 'black'
-            ctx.fillText(-R, 200 - R*60, 215);
-            ctx.fillText(R, 200 + R*60, 215);
-            ctx.fillText(halfR, 200 + halfR*60, 215);
-            ctx.fillText(-halfR, 200 - halfR*60, 215);
-            ctx.fillText(-R, 205, 200 + R * 60);
-            ctx.fillText(R, 205, 200 - R * 60);
-            ctx.fillText(-halfR, 205, 200 + halfR * 60);
-            ctx.fillText(halfR, 205, 200 - halfR * 60);
-
-            ctx.fillText("y", 205, 8);
-            ctx.fillText("x", 400, 215);
-
-
-        }
-
-        function drawShapes(R) {
-            const scale = 60; // Масштаб для отображения
-
-            // Первая четверть: часть окружности
-            ctx.beginPath();
-            ctx.arc(200, 200, R * scale, -(Math.PI * 0.5), 0); // Часть окружности сверху
-            ctx.lineTo(200, 200);
-            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
-            ctx.fill();
-            ctx.stroke();
-
-            // Вторая четверть: прямоугольник
-            ctx.beginPath();
-            ctx.rect(200 - (R * scale) / 2, 200 - R * scale, (R * scale) / 2, R * scale);
-            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
-            ctx.fill();
-            ctx.stroke();
-
-            // Третья четверть: треугольник
-            ctx.beginPath();
-            ctx.moveTo(200 - R * scale, 200);
-            ctx.lineTo(200, 200 + R * scale);
-            ctx.lineTo(200, 200);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
-            ctx.fill();
-            ctx.stroke();
-
-        }
-
-
-        document.getElementById('coor_r-select').addEventListener('change', function() {
-            const R = parseFloat(this.value);
-            const errorMessageDiv = document.getElementById('error_message');
-            errorMessageDiv.textContent = ''
-
-            drawAxes(R);
-            drawShapes(R);
-        });
-
-        // Инициализация с начальным значением R
-        const R = parseFloat(document.getElementById('coor_r-select').value);
-        drawAxes(R);
-        drawShapes(R);
-
-
-        canvas.addEventListener('click', function(event) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left; // Получаем координату X
-            const y = event.clientY - rect.top; // Получаем координату Y
-
-            // Преобразуем координаты в систему координат вашей области
-            const scaledX = (x - 200) / 60; // Масштабируем по X
-            const scaledY = (200 - y) / 60; // Масштабируем по Y
-
-            const rValue = document.getElementById('coor_r-select').value;
-
-            const errorMessageDiv = document.getElementById('error_message');
-            errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
-
-            if (rValue === '') {
-                errorMessageDiv.textContent = 'Выберете значение R';
-                return; // Прерываем выполнение, если есть ошибка
-            }
-
-            // Отправляем данные на сервер
-            $.ajax({
-                url: '/fcgi-bin/lab1.jar',
-                method: 'GET',
-                dataType: 'html',
-                data: {
-                    coor_x: scaledX,
-                    coor_y: scaledY,
-                    coor_r: parseFloat(document.getElementById('coor_r-select').value)
-                },
-                success: function(data, textStatus, jqXHR) {
-                    document.getElementById('resultTable').innerHTML = data;
-                }
-            });
-
-        });
-    </script>
 </h:head>
 
 <h:body>
@@ -161,8 +50,8 @@
         </div>
         <div id="coor_r" class="coors">
             <span class="ui-float-label">
-                <p:inputText class="float-input" value="#{CoorBean.coorR}"/>
-                <p:outputLabel for="@previous" value="Координата R"/>
+                <p:inputText id="coorRInput" class="float-input" value="#{CoorBean.coorR}"/>
+                <p:outputLabel for="coorRInput" value="Координата R"/>
             </span>
         </div>
         <div id="error_message" style="color: red;">
@@ -173,8 +62,119 @@
         </div>
 
     </div>
-    <canvas id="canvas" width="400" height="400"> </canvas>
+    <canvas id="canvas" width="600" height="600"> </canvas>
+    <script type="text/javascript">
 
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        function drawAxes(R) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            let halfR = R / 2;
+            ctx.beginPath();
+            ctx.moveTo(300, 0);
+            ctx.lineTo(300, 600); // Ось Y
+            ctx.moveTo(0, 300);
+            ctx.lineTo(600, 300); // Ось X
+            ctx.stroke();
+            ctx.fillStyle = 'black'
+            ctx.fillText(-R, 300 - R*60, 315);
+            ctx.fillText(R, 300 + R*60, 315);
+            ctx.fillText(halfR, 300 + halfR*60, 315);
+            ctx.fillText(-halfR, 300 - halfR*60, 315);
+            ctx.fillText(-R, 305, 300 + R * 60);
+            ctx.fillText(R, 305, 300 - R * 60);
+            ctx.fillText(-halfR, 305, 300 + halfR * 60);
+            ctx.fillText(halfR, 305, 300 - halfR * 60);
+
+            ctx.fillText("y", 305, 8);
+            ctx.fillText("x", 580, 315);
+
+
+        }
+
+        function drawShapes(R) {
+            const scale = 60; // Масштаб для отображения
+
+            // Первая четверть: часть окружности
+            ctx.beginPath();
+            ctx.arc(300, 300, R * scale / 2, -(Math.PI*1.5), -(Math.PI)); // Часть окружности сверху
+            ctx.lineTo(300, 300);
+            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+            ctx.fill();
+            ctx.stroke();
+
+            // Вторая четверть: прямоугольник
+            ctx.beginPath();
+            ctx.rect(300, 300, R * scale / 2,  R * scale);
+            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+            ctx.fill();
+            ctx.stroke();
+
+            // Третья четверть: треугольник
+            ctx.beginPath();
+            ctx.moveTo(300 - R * scale, 300);
+            ctx.lineTo(300, 300 - R * scale);
+            ctx.lineTo(300, 300);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+            ctx.fill();
+            ctx.stroke();
+
+        }
+
+
+        document.getElementById('coorRInput').addEventListener('change', function() {
+            const R = parseFloat(this.value);
+            const errorMessageDiv = document.getElementById('error_message');
+            errorMessageDiv.textContent = ''
+
+            drawAxes(R);
+            drawShapes(R);
+        });
+
+        // Инициализация с начальным значением R
+        const R = parseFloat(document.getElementById('coorRInput').value);
+        drawAxes(R);
+        drawShapes(R);
+
+
+        canvas.addEventListener('click', function(event) {
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left; // Получаем координату X
+            const y = event.clientY - rect.top; // Получаем координату Y
+
+            // Преобразуем координаты в систему координат вашей области
+            const scaledX = (x - 200) / 60; // Масштабируем по X
+            const scaledY = (200 - y) / 60; // Масштабируем по Y
+
+            const rValue = document.getElementById('coorRInput').value;
+
+            const errorMessageDiv = document.getElementById('error_message');
+            errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
+
+            if (rValue === '') {
+                errorMessageDiv.textContent = 'Выберете значение R';
+                return; // Прерываем выполнение, если есть ошибка
+            }
+
+            // Отправляем данные на сервер
+            $.ajax({
+                url: '/fcgi-bin/lab1.jar',
+                method: 'GET',
+                dataType: 'html',
+                data: {
+                    coor_x: scaledX,
+                    coor_y: scaledY,
+                    coor_r: parseFloat(document.getElementById('coor_r-select').value)
+                },
+                success: function(data, textStatus, jqXHR) {
+                    document.getElementById('resultTable').innerHTML = data;
+                }
+            });
+
+        });
+    </script>
 </h:body>
 
 </html>
