@@ -62,60 +62,63 @@
         </div>
 
     </div>
-    <canvas id="canvas" width="600" height="600"> </canvas>
+    <canvas id="canvas" width="400" height="400"> </canvas>
     <script type="text/javascript">
 
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-
+        const scale = 40
+        const width = canvas.width;
+        const height = canvas.height;
         function drawAxes(R) {
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             let halfR = R / 2;
             ctx.beginPath();
-            ctx.moveTo(300, 0);
-            ctx.lineTo(300, 600); // Ось Y
-            ctx.moveTo(0, 300);
-            ctx.lineTo(600, 300); // Ось X
+            ctx.moveTo(width / 2, 0);
+            ctx.lineTo(width / 2, width); // Ось Y
+            ctx.moveTo(0, width / 2);
+            ctx.lineTo(width, width / 2); // Ось X
             ctx.stroke();
             ctx.fillStyle = 'black'
-            ctx.fillText(-R, 300 - R*60, 315);
-            ctx.fillText(R, 300 + R*60, 315);
-            ctx.fillText(halfR, 300 + halfR*60, 315);
-            ctx.fillText(-halfR, 300 - halfR*60, 315);
-            ctx.fillText(-R, 305, 300 + R * 60);
-            ctx.fillText(R, 305, 300 - R * 60);
-            ctx.fillText(-halfR, 305, 300 + halfR * 60);
-            ctx.fillText(halfR, 305, 300 - halfR * 60);
+            ctx.fillText(-R, width / 2 - R * scale, width / 2 + 15);
+            ctx.fillText(R, width / 2 + R * scale, width / 2 + 15);
+            ctx.fillText(halfR, width / 2 + halfR * scale, width / 2 + 15);
+            ctx.fillText(-halfR, width / 2 - halfR * scale, width / 2 + 15);
+            ctx.fillText(-R, width / 2 + 5, width / 2 + R * scale);
+            ctx.fillText(R, width / 2 + 5, width / 2 - R * scale);
+            ctx.fillText(-halfR, width / 2 + 5, width / 2 + halfR * scale);
+            ctx.fillText(halfR, width / 2 + 5, width / 2 - halfR * scale);
 
-            ctx.fillText("y", 305, 8);
-            ctx.fillText("x", 580, 315);
+            ctx.fillText("y", width / 2 + 5, 8);
+            ctx.fillText("x", width - 20, width / 2 + 15);
 
 
         }
 
         function drawShapes(R) {
-            const scale = 60; // Масштаб для отображения
+
 
             // Первая четверть: часть окружности
             ctx.beginPath();
-            ctx.arc(300, 300, R * scale / 2, -(Math.PI*1.5), -(Math.PI)); // Часть окружности сверху
-            ctx.lineTo(300, 300);
+            ctx.arc(width / 2, width / 2, R * scale / 2, -(Math.PI*1.5), -(Math.PI)); // Часть окружности сверху
+            ctx.lineTo(width / 2, width / 2);
             ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
             ctx.fill();
             ctx.stroke();
 
             // Вторая четверть: прямоугольник
             ctx.beginPath();
-            ctx.rect(300, 300, R * scale / 2,  R * scale);
+            ctx.rect(width / 2, width / 2, R * scale / 2,  R * scale);
             ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
             ctx.fill();
             ctx.stroke();
 
             // Третья четверть: треугольник
             ctx.beginPath();
-            ctx.moveTo(300 - R * scale, 300);
-            ctx.lineTo(300, 300 - R * scale);
-            ctx.lineTo(300, 300);
+            ctx.moveTo(width / 2 - R * scale, width / 2);
+            ctx.lineTo(width / 2, width / 2 - R * scale);
+            ctx.lineTo(width / 2, width / 2);
             ctx.closePath();
             ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
             ctx.fill();
