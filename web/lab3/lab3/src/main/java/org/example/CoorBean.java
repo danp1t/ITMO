@@ -1,10 +1,10 @@
 package org.example;
 
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.validator.ValidatorException;
-import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
@@ -15,7 +15,7 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 @Named("CoorBean")
-@ViewScoped
+@SessionScoped
 public class CoorBean implements Serializable {
     private List<ResultBean> results = new ArrayList<>();
     private static final long serialVersionUID = 1L;

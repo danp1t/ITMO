@@ -1,14 +1,13 @@
 package org.example;
 
 
-import jakarta.faces.view.ViewScoped;
-import jakarta.inject.Inject;
+import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
 
 @Named("ResultBean")
-@ViewScoped
+@SessionScoped
 public class ResultBean implements Serializable {
     private static final long serialVersionUID = 2L;
     private double x;

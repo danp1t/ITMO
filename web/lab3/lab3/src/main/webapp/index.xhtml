@@ -126,6 +126,36 @@
 
         }
 
+        function drawPoints(R) {
+            const results = [];
+
+            // Извлечение данных из таблицы
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length &lt; 4 || cells[0].innerText.trim() === "Данные не найдены.") {
+                    return; // Пропускаем эту строку
+                }
+                const x = parseFloat(cells[0].innerText);
+                const y = parseFloat(cells[1].innerText);
+                const status = cells[3].innerText; // Предполагаем, что статус в четвертой колонке
+                results.push({x, y, status}); // Предполагаем, что статус "внутри" или "снаружи"
+            });
+
+            results.forEach(result => {
+                const xCanvas = 200 + result.x * scale; // Преобразование координаты X
+                const yCanvas = 200 - result.y * scale; // Преобразование координаты Y (инверсия по Y)
+
+                // Определение цвета точки на основе inArea
+
+                ctx.fillStyle = result.status === "true" ? 'green' : 'red';
+                ctx.beginPath();
+                ctx.arc(xCanvas, yCanvas, 5, 0, Math.PI * 2); // Рисуем точку
+                ctx.fill();
+            });
+        }
+
         function drawShapes(R) {
 
 
@@ -164,12 +194,15 @@
 
             drawAxes(R);
             drawShapes(R);
+            drawPoints(R)
         });
 
         // Инициализация с начальным значением R
         const R = parseFloat(document.getElementById('mainForm:coorRInput').value);
         drawAxes(R);
         drawShapes(R);
+        drawPoints(R)
+
 
 
         canvas.addEventListener('click', function (event) {
@@ -199,8 +232,7 @@
 
             // Отправляем форму
             document.getElementById('mainForm:button123').click();
-
-
+            location.reload();
         });
     </script>
 </h:body>
