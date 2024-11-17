@@ -66,7 +66,7 @@
             </div>
 
 
-            <p:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" update="resultTable" />
+            <p:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" update="resultTable" oncomplete="updateCanvas()"/>
                 <p:dataTable id="resultTable" value="#{CoorBean.results}" var="result">
                     <p:column headerText="X">
                         #{result.x}
@@ -81,9 +81,174 @@
                         #{result.status}
                     </p:column>
                 </p:dataTable>
+            <canvas id="canvas" width="400" height="400"> </canvas>
+            <script type="text/javascript">
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                const scale = 40
+                const width = canvas.width;
+                const height = canvas.height;
 
+
+
+
+
+
+                function drawAxes(R) {
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    let halfR = R / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(width / 2, 0);
+                    ctx.lineTo(width / 2, width); // Ось Y
+                    ctx.moveTo(0, width / 2);
+                    ctx.lineTo(width, width / 2); // Ось X
+                    ctx.stroke();
+                    ctx.fillStyle = 'black'
+                    ctx.fillText(-R, width / 2 - R * scale, width / 2 + 15);
+                    ctx.fillText(R, width / 2 + R * scale, width / 2 + 15);
+                    ctx.fillText(halfR, width / 2 + halfR * scale, width / 2 + 15);
+                    ctx.fillText(-halfR, width / 2 - halfR * scale, width / 2 + 15);
+                    ctx.fillText(-R, width / 2 + 5, width / 2 + R * scale);
+                    ctx.fillText(R, width / 2 + 5, width / 2 - R * scale);
+                    ctx.fillText(-halfR, width / 2 + 5, width / 2 + halfR * scale);
+                    ctx.fillText(halfR, width / 2 + 5, width / 2 - halfR * scale);
+
+                    ctx.fillText("y", width / 2 + 5, 8);
+                    ctx.fillText("x", width - 20, width / 2 + 15);
+
+
+                }
+                function checkArea(x, y, r) {
+                    // Проверка попадания точки (x, y) в область с радиусом r
+                    if (x >= 0 &amp;&amp; y >= 0) {
+                        return false;
+                    } else if (x &lt;= 0 &amp;&amp; y >= 0) {
+                        return (Math.abs(x) + Math.abs(y)) &lt;= r;
+                    } else if (x &lt;= 0 &amp;&amp; y &lt;= 0) {
+                        return (x * x + y * y) &lt;= (r * r) / 2;
+                    } else if (x >= 0 &amp;&amp; y &lt;= 0) {
+                        return (Math.abs(x) &lt;= r / 2 &amp;&amp; y &lt;= r);
+                    }
+                    return false;
+                }
+                function drawPoints(R) {
+                    const results = [];
+
+                    // Извлечение данных из таблицы
+                    const rows = document.querySelectorAll('tbody tr');
+
+
+                    rows.forEach(row => {
+                        const cells = row.querySelectorAll('td');
+                        if (cells[0].innerText.trim() === "Данные не найдены." || cells.length &lt; 4) {
+                            return; // Пропускаем эту строку
+                        }
+                        const x = parseFloat(cells[0].innerText);
+                        const y = parseFloat(cells[1].innerText);
+                        const status = cells[3].innerText; // Предполагаем, что статус в четвертой колонке
+                        results.push({x, y, status}); // Предполагаем, что статус "внутри" или "снаружи"
+                    });
+
+                    results.forEach(result => {
+                        const xCanvas = 200 + result.x * scale; // Преобразование координаты X
+                        const yCanvas = 200 - result.y * scale; // Преобразование координаты Y (инверсия по Y)
+                        if (xCanvas === 80 &amp;&amp; yCanvas === 280) return;
+                        // Определение цвета точки на основе inArea
+
+
+                        ctx.fillStyle = checkArea(result.x, result.y, R) ? 'green' : 'red';
+                        ctx.beginPath();
+                        ctx.arc(xCanvas, yCanvas, 5, 0, Math.PI * 2); // Рисуем точку
+                        ctx.fill();
+                    });
+                }
+
+                function drawShapes(R) {
+
+
+                    // Первая четверть: часть окружности
+                    ctx.beginPath();
+                    ctx.arc(width / 2, width / 2, R * scale / 2, -(Math.PI * 1.5), -(Math.PI)); // Часть окружности сверху
+                    ctx.lineTo(width / 2, width / 2);
+                    ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Вторая четверть: прямоугольник
+                    ctx.beginPath();
+                    ctx.rect(width / 2, width / 2, R * scale / 2, R * scale);
+                    ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Третья четверть: треугольник
+                    ctx.beginPath();
+                    ctx.moveTo(width / 2 - R * scale, width / 2);
+                    ctx.lineTo(width / 2, width / 2 - R * scale);
+                    ctx.lineTo(width / 2, width / 2);
+                    ctx.closePath();
+                    ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
+                    ctx.fill();
+                    ctx.stroke();
+
+                }
+
+
+                document.getElementById('mainForm:coorRInput').addEventListener('change', function () {
+                    const R = parseFloat(this.value);
+                    const errorMessageDiv = document.getElementById('error_message');
+                    errorMessageDiv.textContent = ''
+
+                    drawAxes(R);
+                    drawShapes(R);
+                    drawPoints(R)
+                });
+
+                // Инициализация с начальным значением R
+                const R = parseFloat(document.getElementById('mainForm:coorRInput').value);
+                drawAxes(R);
+                drawShapes(R);
+                drawPoints(R)
+
+                function updateCanvas() {
+                    drawAxes(R);
+                    drawShapes(R);
+                    drawPoints(R);
+                }
+
+                canvas.addEventListener('click', function (event) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = event.clientX - rect.left; // Получаем координату X
+                    const y = event.clientY - rect.top; // Получаем координату Y
+
+                    // Преобразуем координаты в систему координат вашей области
+                    const scaledX = (x - 220) / scale; // Масштабируем по X
+                    const scaledY = (220 - y) / scale; // Масштабируем по Y
+
+                    const rValue = document.getElementById('mainForm:coorRInput').value;
+
+                    const errorMessageDiv = document.getElementById('error_message');
+                    errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
+
+                    if (rValue === '') {
+                        errorMessageDiv.textContent = 'Выберите значение R';
+                        return; // Прерываем выполнение, если есть ошибка
+                    }
+
+                    // Заполняем скрытые поля
+                    document.getElementById('mainForm:coorX').value = scaledX;
+                    document.getElementById('mainForm:coorY').value = scaledY;
+                    document.getElementById('mainForm:coorXInput').value = scaledX;
+                    document.getElementById('mainForm:coorY_1').value = scaledY;
+
+                    // Отправляем форму
+                    document.getElementById('mainForm:button123').click();
+                    location.reload();
+                });
+            </script>
         </h:form>
-        <canvas id="canvas" width="400" height="400"> </canvas>
+
         <h:form>
             <h:commandButton value="Перейти на стартовую страницу" action="start.xhtml" styleClass="custom-button" />
         </h:form>
@@ -92,167 +257,7 @@
 
 
 
-    <script type="text/javascript">
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const scale = 40
-        const width = canvas.width;
-        const height = canvas.height;
 
-
-
-
-
-
-        function drawAxes(R) {
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            let halfR = R / 2;
-            ctx.beginPath();
-            ctx.moveTo(width / 2, 0);
-            ctx.lineTo(width / 2, width); // Ось Y
-            ctx.moveTo(0, width / 2);
-            ctx.lineTo(width, width / 2); // Ось X
-            ctx.stroke();
-            ctx.fillStyle = 'black'
-            ctx.fillText(-R, width / 2 - R * scale, width / 2 + 15);
-            ctx.fillText(R, width / 2 + R * scale, width / 2 + 15);
-            ctx.fillText(halfR, width / 2 + halfR * scale, width / 2 + 15);
-            ctx.fillText(-halfR, width / 2 - halfR * scale, width / 2 + 15);
-            ctx.fillText(-R, width / 2 + 5, width / 2 + R * scale);
-            ctx.fillText(R, width / 2 + 5, width / 2 - R * scale);
-            ctx.fillText(-halfR, width / 2 + 5, width / 2 + halfR * scale);
-            ctx.fillText(halfR, width / 2 + 5, width / 2 - halfR * scale);
-
-            ctx.fillText("y", width / 2 + 5, 8);
-            ctx.fillText("x", width - 20, width / 2 + 15);
-
-
-        }
-        function checkArea(x, y, r) {
-            // Проверка попадания точки (x, y) в область с радиусом r
-            if (x >= 0 &amp;&amp; y >= 0) {
-                return false;
-            } else if (x &lt;= 0 &amp;&amp; y >= 0) {
-                return (Math.abs(x) + Math.abs(y)) &lt;= r;
-            } else if (x &lt;= 0 &amp;&amp; y &lt;= 0) {
-                return (x * x + y * y) &lt;= (r * r) / 2;
-            } else if (x >= 0 &amp;&amp; y &lt;= 0) {
-                return (Math.abs(x) &lt;= r / 2 &amp;&amp; y &lt;= r);
-            }
-            return false;
-        }
-        function drawPoints(R) {
-            const results = [];
-
-            // Извлечение данных из таблицы
-            const rows = document.querySelectorAll('tbody tr');
-
-
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells[0].innerText.trim() === "Данные не найдены." || cells.length &lt; 4) {
-                    return; // Пропускаем эту строку
-                }
-                const x = parseFloat(cells[0].innerText);
-                const y = parseFloat(cells[1].innerText);
-                const status = cells[3].innerText; // Предполагаем, что статус в четвертой колонке
-                results.push({x, y, status}); // Предполагаем, что статус "внутри" или "снаружи"
-            });
-
-            results.forEach(result => {
-                const xCanvas = 200 + result.x * scale; // Преобразование координаты X
-                const yCanvas = 200 - result.y * scale; // Преобразование координаты Y (инверсия по Y)
-                if (xCanvas === 80 &amp;&amp; yCanvas === 280) return;
-                // Определение цвета точки на основе inArea
-
-
-                ctx.fillStyle = checkArea(result.x, result.y, R) ? 'green' : 'red';
-                ctx.beginPath();
-                ctx.arc(xCanvas, yCanvas, 5, 0, Math.PI * 2); // Рисуем точку
-                ctx.fill();
-            });
-        }
-
-        function drawShapes(R) {
-
-
-            // Первая четверть: часть окружности
-            ctx.beginPath();
-            ctx.arc(width / 2, width / 2, R * scale / 2, -(Math.PI * 1.5), -(Math.PI)); // Часть окружности сверху
-            ctx.lineTo(width / 2, width / 2);
-            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
-            ctx.fill();
-            ctx.stroke();
-
-            // Вторая четверть: прямоугольник
-            ctx.beginPath();
-            ctx.rect(width / 2, width / 2, R * scale / 2, R * scale);
-            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
-            ctx.fill();
-            ctx.stroke();
-
-            // Третья четверть: треугольник
-            ctx.beginPath();
-            ctx.moveTo(width / 2 - R * scale, width / 2);
-            ctx.lineTo(width / 2, width / 2 - R * scale);
-            ctx.lineTo(width / 2, width / 2);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
-            ctx.fill();
-            ctx.stroke();
-
-        }
-
-
-        document.getElementById('mainForm:coorRInput').addEventListener('change', function () {
-            const R = parseFloat(this.value);
-            const errorMessageDiv = document.getElementById('error_message');
-            errorMessageDiv.textContent = ''
-
-            drawAxes(R);
-            drawShapes(R);
-            drawPoints(R)
-        });
-
-        // Инициализация с начальным значением R
-        const R = parseFloat(document.getElementById('mainForm:coorRInput').value);
-        drawAxes(R);
-        drawShapes(R);
-        drawPoints(R)
-
-
-
-        canvas.addEventListener('click', function (event) {
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left; // Получаем координату X
-            const y = event.clientY - rect.top; // Получаем координату Y
-
-            // Преобразуем координаты в систему координат вашей области
-            const scaledX = (x - 220) / scale; // Масштабируем по X
-            const scaledY = (220 - y) / scale; // Масштабируем по Y
-
-            const rValue = document.getElementById('mainForm:coorRInput').value;
-
-            const errorMessageDiv = document.getElementById('error_message');
-            errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
-
-            if (rValue === '') {
-                errorMessageDiv.textContent = 'Выберите значение R';
-                return; // Прерываем выполнение, если есть ошибка
-            }
-
-            // Заполняем скрытые поля
-            document.getElementById('mainForm:coorX').value = scaledX;
-            document.getElementById('mainForm:coorY').value = scaledY;
-            document.getElementById('mainForm:coorXInput').value = scaledX;
-            document.getElementById('mainForm:coorY_1').value = scaledY;
-
-            // Отправляем форму
-            document.getElementById('mainForm:button123').click();
-            location.reload();
-        });
-    </script>
 </h:body>
 
 </html>
