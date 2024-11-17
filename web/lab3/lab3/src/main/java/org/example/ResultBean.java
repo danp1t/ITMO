@@ -1,19 +1,27 @@
 package org.example;
 
 
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.context.ApplicationScoped;;
 import jakarta.inject.Named;
+import jakarta.persistence.*;
 
 import java.io.Serializable;
 
 @Named("ResultBean")
-@SessionScoped
+@ApplicationScoped
+@Entity
+@Table(name = "results")
 public class ResultBean implements Serializable {
     private static final long serialVersionUID = 2L;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоинкремент для первичного ключа
+    private Long id;
     private double x;
     private double y;
     private double r;
     private boolean status;
+
+
 
     public ResultBean(double x, double y, double r, boolean status) {
         this.x = x;
@@ -24,7 +32,12 @@ public class ResultBean implements Serializable {
     public ResultBean() {
 
     }
-
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public double getX() {
         return x;

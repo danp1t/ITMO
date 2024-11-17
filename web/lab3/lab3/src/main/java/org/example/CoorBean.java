@@ -1,10 +1,11 @@
 package org.example;
 
-import jakarta.enterprise.context.SessionScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.validator.ValidatorException;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
@@ -15,7 +16,7 @@ import java.util.List;
 import static java.lang.Math.abs;
 
 @Named("CoorBean")
-@SessionScoped
+@ApplicationScoped
 public class CoorBean implements Serializable {
     private List<ResultBean> results = new ArrayList<>();
     private static final long serialVersionUID = 1L;
@@ -25,6 +26,8 @@ public class CoorBean implements Serializable {
     private String errorMessage;
     private List<String> coorYOptions = Arrays.asList("-3", "-2", "-1", "0", "1", "2", "3", "4", "5");
 
+    @Inject
+    private ResultService resultService;
     // Getters и Setters
 
     public String getCoorX() {
@@ -111,7 +114,9 @@ public class CoorBean implements Serializable {
             double r = Double.parseDouble(coorR);
 
             boolean status = checkArea(x, y, r);
-            results.add(new ResultBean(x, y, r, status));
+            ResultBean result = new ResultBean(x, y, r, status);
+            results.add(result);
+            resultService.saveResult(result);
 
         }
 
