@@ -103,7 +103,9 @@ public class CoorBean implements Serializable {
 
     }
     public void submitData() {
+        System.out.println(coorX + " " + coorY + " " + coorR);
         if (validateCoordinates()) {
+
             double x = Double.parseDouble(coorX);
             double y = Double.parseDouble(coorY);
             double r = Double.parseDouble(coorR);

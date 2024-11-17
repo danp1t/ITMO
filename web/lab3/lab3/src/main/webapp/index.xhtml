@@ -28,6 +28,8 @@
     </div>
     <div id="form">
         <h:form id="mainForm">
+            <h:inputHidden id="coorX" value="#{CoorBean.coorX}" />
+            <h:inputHidden id="coorY" value="#{CoorBean.coorY}" />
             <div id="coor_x" class="coors">
             <span class="ui-float-label">
                 <p:inputText class="float-input" id="coorXInput" value="#{CoorBean.coorX}" validator="#{CoorBean.validateX}" required="true"/>
@@ -44,7 +46,7 @@
                             <h:commandLink value="#{option}" action="#{CoorBean.selectCoorY(option)}" />
                         </c:forEach>
                     </h:panelGrid>
-                    <h:outputText value="Selected CoorY: #{CoorBean.coorY}" />
+                    <h:outputText id="coorY_1" value="Selected CoorY: #{CoorBean.coorY}" />
                 </h:panelGroup>
             </div>
 
@@ -55,6 +57,9 @@
             </span>
                 <p:messages for="coorRInput" autoUpdate="true" />
             </div>
+
+
+
 
             <div id="error_message" style="color: red;">
                 <h:outputText value="#{CoorBean.errorMessage}" style="color: red;" rendered="#{not empty CoorBean.errorMessage}" />
@@ -176,24 +181,19 @@
             errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
 
             if (rValue === '') {
-                errorMessageDiv.textContent = 'Выберете значение R';
+                errorMessageDiv.textContent = 'Выберите значение R';
                 return; // Прерываем выполнение, если есть ошибка
             }
 
-            // Отправляем данные на сервер
-            $.ajax({
-                url: '/fcgi-bin/lab1.jar',
-                method: 'GET',
-                dataType: 'html',
-                data: {
-                    coor_x: scaledX,
-                    coor_y: scaledY,
-                    coor_r: parseFloat(document.getElementById('mainForm:coorRInput').value)
-                },
-                success: function(data, textStatus, jqXHR) {
-                    document.getElementById('resultTable').innerHTML = data;
-                }
-            });
+            // Заполняем скрытые поля
+            document.getElementById('mainForm:coorX').value = scaledX;
+            document.getElementById('mainForm:coorY').value = scaledY;
+            document.getElementById('mainForm:coorXInput').value = scaledX;
+            document.getElementById('mainForm:coorY_1').value = scaledY;
+
+            // Отправляем форму
+            document.getElementById('mainForm:button123').click();
+
 
         });
     </script>
