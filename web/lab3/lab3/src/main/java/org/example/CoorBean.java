@@ -93,16 +93,25 @@ public class CoorBean implements Serializable {
                 throw new ValidatorException(new FacesMessage("Введите число"));
             }
         }
-        else {
+        else if (value == null || value.isEmpty()) {
             throw new ValidatorException(new FacesMessage("Введите число от 1 до 4"));
         }
 
     }
     public void submitData() {
+        validateCoordinates();
         // Логика обработки данных
         // Например, сохранение в базе данных или выполнение других действий
-        System.out.println("X: " + coorX + " " + "Y: " + coorY + " " + "R: " + coorR);
-        System.out.println(coorX + coorY + coorR);
+
+    }
+
+    public void validateCoordinates() {
+        // Пример валидации
+        if (coorX.isEmpty() || coorY.isEmpty() || coorR.isEmpty()) {
+            errorMessage = "Все координаты должны быть заполнены.";
+        } else {
+            errorMessage = ""; // Сброс сообщения об ошибке, если все в порядке
+        }
     }
 
 }

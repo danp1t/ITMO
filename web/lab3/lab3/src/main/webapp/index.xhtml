@@ -56,9 +56,12 @@
                 <p:messages for="coorRInput" autoUpdate="true" />
             </div>
 
-            <div id="error_message" style="color: red;"></div>
+            <div id="error_message" style="color: red;">
+                <h:outputText value="#{CoorBean.errorMessage}" style="color: red;" rendered="#{not empty CoorBean.errorMessage}" />
+            </div>
 
-            <h:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" />
+
+            <p:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" update="@form" />
 
         </h:form>
     </div>
