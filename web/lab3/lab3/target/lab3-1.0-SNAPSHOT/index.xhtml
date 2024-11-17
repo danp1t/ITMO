@@ -27,12 +27,15 @@
         <span id="variant">Вариант: 430331</span>
     </div>
     <div id="form">
+        <h:form>
         <div id="coor_x" class="coors">
             <span class="ui-float-label">
-                <p:inputText class="float-input" value="#{CoorBean.coorX}"/>
+                <p:inputText class="float-input" id="coorXInput" value="#{CoorBean.coorX}" validator="#{CoorBean.validateX}" required="true"/>
                 <p:outputLabel for="@previous" value="Координата X"/>
             </span>
+            <p:messages for="coorXInput" autoUpdate="true" />
         </div>
+        </h:form>
         <div id="coor_y" class="coors">
             <h:form>
                 <h:panelGroup id="tabPanel">
@@ -48,12 +51,15 @@
                 <h:outputText value="Selected CoorY: #{CoorBean.coorY}" />
             </h:form>
         </div>
+        <h:form id="RForm">
         <div id="coor_r" class="coors">
             <span class="ui-float-label">
-                <p:inputText id="coorRInput" class="float-input" value="#{CoorBean.coorR}"/>
+                <p:inputText id="coorRInput" class="float-input" value="#{CoorBean.coorR}" validator="#{CoorBean.validateR}" required="true"/>
                 <p:outputLabel for="coorRInput" value="Координата R"/>
             </span>
+            <p:messages for="coorRInput" autoUpdate="true" />
         </div>
+        </h:form>
         <div id="error_message" style="color: red;">
 
         </div>
@@ -127,7 +133,7 @@
         }
 
 
-        document.getElementById('coorRInput').addEventListener('change', function() {
+        document.getElementById('RForm:coorRInput').addEventListener('change', function() {
             const R = parseFloat(this.value);
             const errorMessageDiv = document.getElementById('error_message');
             errorMessageDiv.textContent = ''
@@ -137,7 +143,7 @@
         });
 
         // Инициализация с начальным значением R
-        const R = parseFloat(document.getElementById('coorRInput').value);
+        const R = parseFloat(document.getElementById('RForm:coorRInput').value);
         drawAxes(R);
         drawShapes(R);
 
@@ -151,7 +157,7 @@
             const scaledX = (x - 200) / 60; // Масштабируем по X
             const scaledY = (200 - y) / 60; // Масштабируем по Y
 
-            const rValue = document.getElementById('coorRInput').value;
+            const rValue = document.getElementById('RForm:coorRInput').value;
 
             const errorMessageDiv = document.getElementById('error_message');
             errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке

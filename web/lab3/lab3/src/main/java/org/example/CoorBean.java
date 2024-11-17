@@ -1,6 +1,10 @@
 package org.example;
 
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.validator.ValidatorException;
 import jakarta.inject.Named;
 
 import java.util.Arrays;
@@ -68,4 +72,42 @@ public class CoorBean {
         // Ваша логика валидации
         return true; // или false в зависимости от проверки
     }
+
+    public void validateX(FacesContext context, UIComponent component, String value) throws ValidatorException {
+        if (value != null && !value.isEmpty()) {
+            try {
+            double x = Double.parseDouble(value);
+            if (x < -3 || x > 5) {
+                throw new ValidatorException(new FacesMessage("Число должно быть от -3 до 5"));
+            }
+        }
+            catch (NumberFormatException e) {
+                throw new ValidatorException(new FacesMessage("Введите число"));
+            }
+    }
+    else {
+            throw new ValidatorException(new FacesMessage("Введите число от -3 до 5"));
+        }
+
+    }
+
+    public void validateR(FacesContext context, UIComponent component, String value) throws ValidatorException {
+        if (value != null && !value.isEmpty()) {
+            try {
+                double r = Double.parseDouble(value);
+                if (r < 1 || r > 4) {
+                    throw new ValidatorException(new FacesMessage("Число должно быть от 1 до 4"));
+                }
+            }
+            catch (NumberFormatException e) {
+                throw new ValidatorException(new FacesMessage("Введите число"));
+            }
+        }
+        else {
+            throw new ValidatorException(new FacesMessage("Введите число от 1 до 4"));
+        }
+
+    }
+
 }
+
