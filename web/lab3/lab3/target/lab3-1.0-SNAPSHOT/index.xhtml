@@ -81,6 +81,7 @@
                         #{result.status}
                     </p:column>
                 </p:dataTable>
+
         </h:form>
         <canvas id="canvas" width="400" height="400"> </canvas>
     </div>
@@ -88,12 +89,17 @@
 
 
     <script type="text/javascript">
-
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const scale = 40
         const width = canvas.width;
         const height = canvas.height;
+
+
+
+
+
+
         function drawAxes(R) {
 
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -125,7 +131,7 @@
 
             // Первая четверть: часть окружности
             ctx.beginPath();
-            ctx.arc(width / 2, width / 2, R * scale / 2, -(Math.PI*1.5), -(Math.PI)); // Часть окружности сверху
+            ctx.arc(width / 2, width / 2, R * scale / 2, -(Math.PI * 1.5), -(Math.PI)); // Часть окружности сверху
             ctx.lineTo(width / 2, width / 2);
             ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
             ctx.fill();
@@ -133,7 +139,7 @@
 
             // Вторая четверть: прямоугольник
             ctx.beginPath();
-            ctx.rect(width / 2, width / 2, R * scale / 2,  R * scale);
+            ctx.rect(width / 2, width / 2, R * scale / 2, R * scale);
             ctx.fillStyle = 'rgba(51, 153, 255, 0.5)';
             ctx.fill();
             ctx.stroke();
@@ -151,7 +157,7 @@
         }
 
 
-        document.getElementById('mainForm:coorRInput').addEventListener('change', function() {
+        document.getElementById('mainForm:coorRInput').addEventListener('change', function () {
             const R = parseFloat(this.value);
             const errorMessageDiv = document.getElementById('error_message');
             errorMessageDiv.textContent = ''
@@ -166,7 +172,7 @@
         drawShapes(R);
 
 
-        canvas.addEventListener('click', function(event) {
+        canvas.addEventListener('click', function (event) {
             const rect = canvas.getBoundingClientRect();
             const x = event.clientX - rect.left; // Получаем координату X
             const y = event.clientY - rect.top; // Получаем координату Y
