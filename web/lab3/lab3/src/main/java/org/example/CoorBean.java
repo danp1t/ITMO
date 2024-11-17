@@ -125,19 +125,19 @@ public class CoorBean implements Serializable {
             return false;
 
         }
-        else if (x >= 0 && y <= 0){
+        else if (x <= 0 && y >= 0){
             if ((abs(x) + abs(y)) <= r) {
                 return true;
             }
             return false;
         }
-        else if (x <= 0 && y >= 0) {
+        else if (x <= 0 && y <= 0) {
             if ((x * x + y * y) <= ((r * r) / 2)) {
                 return true;
             }
             return false;
         }
-        else if (x <= 0 && y <= 0){
+        else if (x >= 0 && y <= 0){
             if (abs(x)  <= r/2 && y <= r) {
                 return true;
             }

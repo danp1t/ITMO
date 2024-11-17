@@ -129,11 +129,11 @@
             // Проверка попадания точки (x, y) в область с радиусом r
             if (x >= 0 &amp;&amp; y >= 0) {
                 return false;
-            } else if (x >= 0 &amp;&amp; y &lt;= 0) {
-                return (Math.abs(x) + Math.abs(y)) &lt;= r;
             } else if (x &lt;= 0 &amp;&amp; y >= 0) {
-                return (x * x + y * y) &lt;= (r * r) / 2;
+                return (Math.abs(x) + Math.abs(y)) &lt;= r;
             } else if (x &lt;= 0 &amp;&amp; y &lt;= 0) {
+                return (x * x + y * y) &lt;= (r * r) / 2;
+            } else if (x >= 0 &amp;&amp; y &lt;= 0) {
                 return (Math.abs(x) &lt;= r / 2 &amp;&amp; y &lt;= r);
             }
             return false;
