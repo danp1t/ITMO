@@ -27,46 +27,40 @@
         <span id="variant">Вариант: 430331</span>
     </div>
     <div id="form">
-        <h:form>
-        <div id="coor_x" class="coors">
+        <h:form id="mainForm">
+            <div id="coor_x" class="coors">
             <span class="ui-float-label">
                 <p:inputText class="float-input" id="coorXInput" value="#{CoorBean.coorX}" validator="#{CoorBean.validateX}" required="true"/>
-                <p:outputLabel for="@previous" value="Координата X"/>
+                <p:outputLabel for="coorXInput" value="Координата X"/>
             </span>
-            <p:messages for="coorXInput" autoUpdate="true" />
-        </div>
-        </h:form>
-        <div id="coor_y" class="coors">
-            <h:form>
+                <p:messages for="coorXInput" autoUpdate="true" />
+            </div>
+
+            <div id="coor_y" class="coors">
                 <h:panelGroup id="tabPanel">
                     <h:outputLabel value="Select CoorY: " />
-
                     <h:panelGrid columns="9">
                         <c:forEach items="#{CoorBean.coorYOptions}" var="option">
                             <h:commandLink value="#{option}" action="#{CoorBean.selectCoorY(option)}" />
                         </c:forEach>
                     </h:panelGrid>
+                    <h:outputText value="Selected CoorY: #{CoorBean.coorY}" />
                 </h:panelGroup>
+            </div>
 
-                <h:outputText value="Selected CoorY: #{CoorBean.coorY}" />
-            </h:form>
-        </div>
-        <h:form id="RForm">
-        <div id="coor_r" class="coors">
+            <div id="coor_r" class="coors">
             <span class="ui-float-label">
                 <p:inputText id="coorRInput" class="float-input" value="#{CoorBean.coorR}" validator="#{CoorBean.validateR}" required="true"/>
                 <p:outputLabel for="coorRInput" value="Координата R"/>
             </span>
-            <p:messages for="coorRInput" autoUpdate="true" />
-        </div>
+                <p:messages for="coorRInput" autoUpdate="true" />
+            </div>
+
+            <div id="error_message" style="color: red;"></div>
+
+            <h:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" />
+
         </h:form>
-        <div id="error_message" style="color: red;">
-
-        </div>
-        <div>
-            <button type="submit">Отправить</button>
-        </div>
-
     </div>
     <canvas id="canvas" width="400" height="400"> </canvas>
     <script type="text/javascript">
@@ -133,7 +127,7 @@
         }
 
 
-        document.getElementById('RForm:coorRInput').addEventListener('change', function() {
+        document.getElementById('mainForm:coorRInput').addEventListener('change', function() {
             const R = parseFloat(this.value);
             const errorMessageDiv = document.getElementById('error_message');
             errorMessageDiv.textContent = ''
@@ -143,7 +137,7 @@
         });
 
         // Инициализация с начальным значением R
-        const R = parseFloat(document.getElementById('RForm:coorRInput').value);
+        const R = parseFloat(document.getElementById('mainForm:coorRInput').value);
         drawAxes(R);
         drawShapes(R);
 

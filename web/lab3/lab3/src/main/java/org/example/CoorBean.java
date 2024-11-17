@@ -1,18 +1,20 @@
 package org.example;
 
-import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.validator.ValidatorException;
+import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
 @Named("CoorBean")
-@RequestScoped
-public class CoorBean {
+@ViewScoped
+public class CoorBean implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String coorX = "";
     private String coorY = "" ;
     private String coorR = "";
@@ -47,6 +49,7 @@ public class CoorBean {
 
     public void selectCoorY(String value) {
         this.coorY = value;
+
         // Здесь вы можете добавить любую логику, которая должна выполняться при выборе значения
     }
 
@@ -58,20 +61,7 @@ public class CoorBean {
         return coorYOptions;
     }
 
-    public void submit() {
-        // Ваша логика обработки данных формы
-        if (validateInputs()) {
-            // Обработка успешной отправки
-            errorMessage = null; // Сброс ошибки
-        } else {
-            errorMessage = "Пожалуйста, исправьте ошибки."; // Установка сообщения об ошибке
-        }
-    }
 
-    private boolean validateInputs() {
-        // Ваша логика валидации
-        return true; // или false в зависимости от проверки
-    }
 
     public void validateX(FacesContext context, UIComponent component, String value) throws ValidatorException {
         if (value != null && !value.isEmpty()) {
@@ -107,6 +97,12 @@ public class CoorBean {
             throw new ValidatorException(new FacesMessage("Введите число от 1 до 4"));
         }
 
+    }
+    public void submitData() {
+        // Логика обработки данных
+        // Например, сохранение в базе данных или выполнение других действий
+        System.out.println("X: " + coorX + " " + "Y: " + coorY + " " + "R: " + coorR);
+        System.out.println(coorX + coorY + coorR);
     }
 
 }
