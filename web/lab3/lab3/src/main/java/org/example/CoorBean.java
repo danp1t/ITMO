@@ -8,12 +8,16 @@ import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.Math.abs;
 
 @Named("CoorBean")
 @ViewScoped
 public class CoorBean implements Serializable {
+    private List<ResultBean> results = new ArrayList<>();
     private static final long serialVersionUID = 1L;
     private String coorX = "";
     private String coorY = "" ;
@@ -99,20 +103,60 @@ public class CoorBean implements Serializable {
 
     }
     public void submitData() {
-        validateCoordinates();
-        // Логика обработки данных
-        // Например, сохранение в базе данных или выполнение других действий
+        if (validateCoordinates()) {
+            double x = Double.parseDouble(coorX);
+            double y = Double.parseDouble(coorY);
+            double r = Double.parseDouble(coorR);
+
+            boolean status = checkArea(x, y, r);
+            results.add(new ResultBean(x, y, r, status));
+
+        }
+
+
 
     }
 
-    public void validateCoordinates() {
+    private boolean checkArea(double x, double y, double r) {
+        // Проверка попадания точки (x, y) в область с радиусом r
+        if (x >= 0 && y >= 0){
+            return false;
+
+        }
+        else if (x >= 0 && y <= 0){
+            if ((abs(x) + abs(y)) <= r) {
+                return true;
+            }
+            return false;
+        }
+        else if (x <= 0 && y >= 0) {
+            if ((x * x + y * y) <= ((r * r) / 2)) {
+                return true;
+            }
+            return false;
+        }
+        else if (x <= 0 && y <= 0){
+            if (abs(x)  <= r/2 && y <= r) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public boolean validateCoordinates() {
         // Пример валидации
         if (coorX.isEmpty() || coorY.isEmpty() || coorR.isEmpty()) {
             errorMessage = "Все координаты должны быть заполнены.";
+            return false;
         } else {
             errorMessage = ""; // Сброс сообщения об ошибке, если все в порядке
+            return true;
         }
     }
 
+    public List<ResultBean> getResults() {
+        return results;
+    }
 }
 

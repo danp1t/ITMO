@@ -61,11 +61,27 @@
             </div>
 
 
-            <p:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" update="@form" />
-
+            <p:commandButton id="button123" value="Отправить" action="#{CoorBean.submitData()}" update="resultTable" />
+                <p:dataTable id="resultTable" value="#{CoorBean.results}" var="result">
+                    <p:column headerText="X">
+                        #{result.x}
+                    </p:column>
+                    <p:column headerText="Y">
+                        #{result.y}
+                    </p:column>
+                    <p:column headerText="R">
+                        #{result.r}
+                    </p:column>
+                    <p:column headerText="Статус">
+                        #{result.status}
+                    </p:column>
+                </p:dataTable>
         </h:form>
+        <canvas id="canvas" width="400" height="400"> </canvas>
     </div>
-    <canvas id="canvas" width="400" height="400"> </canvas>
+
+
+
     <script type="text/javascript">
 
         const canvas = document.getElementById('canvas');
@@ -151,10 +167,10 @@
             const y = event.clientY - rect.top; // Получаем координату Y
 
             // Преобразуем координаты в систему координат вашей области
-            const scaledX = (x - 200) / 60; // Масштабируем по X
-            const scaledY = (200 - y) / 60; // Масштабируем по Y
+            const scaledX = (x - width / 2) / scale; // Масштабируем по X
+            const scaledY = (width / 2 - y) / scale; // Масштабируем по Y
 
-            const rValue = document.getElementById('RForm:coorRInput').value;
+            const rValue = document.getElementById('mainForm:coorRInput').value;
 
             const errorMessageDiv = document.getElementById('error_message');
             errorMessageDiv.textContent = ''; // Сбрасываем сообщение об ошибке
@@ -172,7 +188,7 @@
                 data: {
                     coor_x: scaledX,
                     coor_y: scaledY,
-                    coor_r: parseFloat(document.getElementById('coor_r-select').value)
+                    coor_r: parseFloat(document.getElementById('mainForm:coorRInput').value)
                 },
                 success: function(data, textStatus, jqXHR) {
                     document.getElementById('resultTable').innerHTML = data;
