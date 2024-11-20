@@ -3,6 +3,7 @@
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
       <artifact name="lab3:war" />
+      <artifact name="lab3:war exploded" />
     </artifacts-to-build>
   </component>
   <component name="AutoImportSettings">
@@ -184,7 +185,11 @@
       <workItem from="1731862885595" duration="1832000" />
       <workItem from="1731865676558" duration="2961000" />
       <workItem from="1731869171963" duration="514000" />
-      <workItem from="1731913013858" duration="1785000" />
+      <workItem from="1731913013858" duration="1805000" />
+      <workItem from="1731938559296" duration="323000" />
+      <workItem from="1731939202614" duration="187000" />
+      <workItem from="1732005459987" duration="39000" />
+      <workItem from="1732005909347" duration="1383000" />
     </task>
     <servers />
   </component>

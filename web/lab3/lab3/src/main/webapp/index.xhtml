@@ -32,7 +32,7 @@
             <h:inputHidden id="coorY" value="#{CoorBean.coorY}" />
             <div id="coor_x" class="coors">
             <span class="ui-float-label">
-                <p:inputText class="float-input" id="coorXInput" value="#{CoorBean.coorX}" validator="#{CoorBean.validateX}" required="true"/>
+                <p:inputText class="float-input" id="coorXInput" immediate="true" value="#{CoorBean.coorX}" validator="#{CoorBean.validateX}" required="true"/>
                 <p:outputLabel for="coorXInput" value="Координата X"/>
             </span>
                 <p:messages for="coorXInput" autoUpdate="true" />
@@ -52,7 +52,7 @@
 
             <div id="coor_r" class="coors">
             <span class="ui-float-label">
-                <p:inputText id="coorRInput" class="float-input" value="#{CoorBean.coorR}" validator="#{CoorBean.validateR}" required="true"/>
+                <p:inputText id="coorRInput" class="float-input" value="#{CoorBean.coorR}" validator="#{CoorBean.validateR}" immediate="true" required="true"/>
                 <p:outputLabel for="coorRInput" value="Координата R"/>
             </span>
                 <p:messages for="coorRInput" autoUpdate="true" />
