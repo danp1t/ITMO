@@ -7,9 +7,9 @@
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.example.ResultBean</class>
         <properties>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://pg/studs"/>
-            <property name="jakarta.persistence.jdbc.user" value="s409425"/>
-            <property name="jakarta.persistence.jdbc.password" value="WbDYd8rYfLY7ewNE"/>
+            <property name="jakarta.persistence.jdbc.url" value=""/>
+            <property name="jakarta.persistence.jdbc.user" value=""/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="eclipselink.ddl-generation" value="create-tables"/>
             <property name="eclipselink.ddl-generation.output-mode" value="database"/>
