@@ -1,10 +1,12 @@
 <script setup>
 import Header from "@/components/Header.vue";
+import Authorization from "@/components/Authorization.vue";
 </script>
 
 <template>
   <body>
     <Header />
+    <Authorization />
   </body>
 </template>
 
