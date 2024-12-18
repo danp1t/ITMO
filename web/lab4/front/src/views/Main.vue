@@ -3,12 +3,14 @@
 import Header from "@/components/Header.vue";
 import InputValues from "@/components/InputValues.vue";
 import Table from "@/components/Table.vue";
+import Canvas from "@/components/Canvas.vue";
 </script>
 
 <template>
    <Header />
   <div class="container">
     <InputValues />
+    <Canvas />
     <Table />
   </div>
 </template>
