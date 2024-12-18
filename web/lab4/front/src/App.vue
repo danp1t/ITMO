@@ -1,21 +1,27 @@
-<script setup>
-import Header from "@/components/Header.vue";
-import Authorization from "@/components/Authorization.vue";
-</script>
-
 <template>
-  <body>
-    <Header />
-    <Authorization />
-  </body>
+  <router-view/>
 </template>
 
-<style scoped>
-body {
-  background-color: rgb(232, 232, 232);
-  font-family: 'Arial', sans-serif;
-  color: #333;
-  margin: 0;
-  padding: 20px;
+<script>
+import Home from "@/views/Home.vue";
+import Main from "@/views/Main.vue";
+
+export default {
+  components: {Home, Main}
+};
+</script>
+
+<style>
+/* Общие стили для адаптивности */
+@media (min-width: 1137px) {
+  /* Десктопный режим */
+}
+
+@media (min-width: 889px) and (max-width: 1136px) {
+  /* Планшетный режим */
+}
+
+@media (max-width: 888px) {
+  /* Мобильный режим */
 }
 </style>
