@@ -2,13 +2,29 @@
 
 import Header from "@/components/Header.vue";
 import InputValues from "@/components/InputValues.vue";
+import Table from "@/components/Table.vue";
 </script>
 
 <template>
    <Header />
-  <InputValues />
+  <div class="container">
+    <InputValues />
+    <Table />
+  </div>
 </template>
 
 <style scoped>
+.container {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
 
+InputValues {
+  flex: 1;
+}
+
+Table {
+  flex: 2;
+}
 </style>
