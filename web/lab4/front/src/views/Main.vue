@@ -1,18 +1,14 @@
-<template>
-  <div class="main">
-    <h1>Основная страница приложения</h1>
-    <p>Добро пожаловать!</p>
-    <!-- Здесь можно добавить контент основной страницы -->
-  </div>
-</template>
+<script setup>
 
-<script>
-export default {
-};
+import Header from "@/components/Header.vue";
+import InputValues from "@/components/InputValues.vue";
 </script>
 
+<template>
+   <Header />
+  <InputValues />
+</template>
+
 <style scoped>
-.main {
-  text-align: center;
-}
+
 </style>

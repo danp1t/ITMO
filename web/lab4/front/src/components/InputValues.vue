@@ -1,0 +1,84 @@
+<script setup>
+
+</script>
+
+<template>
+  <div id="form">
+    <label for="coor_x">Координата X (-5 ... 3):</label>
+    <input type="text" v-model="coorX" @input="validateCoordinates('x')" />
+    <!-- <span v-if="errors.x" class="error">{{ errors.x }}</span> -->
+
+    <label for="coor_y">Координата Y (-3 ... 3):</label>
+    <input type="text" v-model="coorY" @input="validateCoordinates('y')" />
+    <!-- <span v-if="errors.y" class="error">{{ errors.y }}</span> -->
+
+   <label for="coor_r">Радиус R (0 ... 3):</label>
+   <input type="text" v-model="coorR" @input="validateRadius" />
+    <!-- <span v-if="errors.r" class="error">{{ errors.r }}</span> -->
+
+    <button @click="updateCanvas">Обновить область</button>
+  </div>
+
+ </template>
+
+ <style scoped>
+ #form {
+   width: 18%;
+  margin: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+ }
+
+ label {
+  font-size: 18px;
+  margin-bottom: 10px;
+  display: block;
+   text-shadow: 0 0 5px #6b4e5a, 0 0 10px #00bfff;
+ }
+
+ input[type="text"], select {
+  width: calc(100% - 20px);
+  padding: 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #e6f7ff; /* Светлый фон для полей ввода */
+  color: #333;
+  font-size: 16px;
+  box-shadow: inset 0 0 5px #00bfff;
+  transition: border-color 0.3s, box-shadow 0.3s;
+ }
+
+ input[type="text"]:focus, select:focus {
+  outline: none;
+  box-shadow: inset 0 0 5px #00bfff, 0 0 5px #00bfff; /* Неоновый эффект при фокусе */
+ }
+
+ input[type="checkbox"] {
+  margin-right: 10px;
+ }
+
+ button {
+  background-color: #00bfff;
+  color: #ffffff;
+  border: none;
+   margin-left: 10px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+ }
+
+ button:hover {
+  background-color: #0099cc; /* Темнее при наведении */
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(0, 191, 255, 0.5); /* Неоновый эффект при наведении */
+ }
+
+ .error {
+  margin-top: 10px;
+ }
+ </style>
