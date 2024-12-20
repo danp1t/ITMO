@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <canvas id="canvas" width="400" height="315"></canvas>
+  <canvas id="canvas" width="315" height="315"></canvas>
 </template>
 
 <style scoped>

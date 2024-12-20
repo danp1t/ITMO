@@ -1,14 +1,14 @@
 <template>
   <div class="home">
-    <h2>Авторизация</h2>
+    <h2>Регистрация</h2>
     <form @submit.prevent="handleSubmit" class="auth-form">
       <div class="form-group">
         <label for="login">Логин:</label>
-        <input type="text" id="login" v-model="login" required />
+        <input type="text" id="new_login" v-model="new_login" required />
       </div>
       <div class="form-group">
         <label for="password">Пароль:</label>
-        <input type="password" id="password" v-model="password" required />
+        <input type="password" id="new_password" v-model="new_password" required />
       </div>
       <button type="submit" class="submit-button">Войти</button>
     </form>
@@ -39,7 +39,6 @@ export default {
 .home {
   max-width: 400px;
   width: 25%;
-
   margin: auto;
   padding: 20px;
   border: 1px solid #ddd;

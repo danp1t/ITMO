@@ -2,12 +2,16 @@
 <script setup>
 import Header from "@/components/Header.vue";
 import Authorization from "@/components/Authorization.vue";
+import Registration from "@/components/Registration.vue";
 </script>
 
 <template>
   <body>
   <Header />
-  <Authorization />
+  <div class="container">
+    <Authorization />
+    <Registration />
+  </div>
   </body>
 </template>
 
@@ -18,5 +22,19 @@ body {
   color: #333;
   margin: 0;
   padding: 20px;
+}
+
+.container {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+}
+
+Authorization {
+  flex: 1;
+}
+
+Registration {
+  flex: 2;
 }
 </style>
