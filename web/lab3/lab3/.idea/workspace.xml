@@ -10,8 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="88ed52a9-8f9b-49a1-9d02-ce6e63f6721c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../../phisics/lab5/.~lock.Отчет.odt#" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../phisics/lab5/Отчет.odt" beforeDir="false" afterPath="$PROJECT_DIR$/../../../phisics/lab5/Отчет.odt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../lab4/front/src/components/Registration.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../../lab4/front/src/components/Registration.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../lab4/untitled/.idea/workspace.xml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +59,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/danp1t/github/ITMO/web/lab3/lab3&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/danp1t/Apps/IDEPlugins/javaee-ejb-impl-243.22562.13.zip&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -69,6 +69,7 @@
     &quot;project.structure.last.edited&quot;: &quot;Artifacts&quot;,
     &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
     &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -192,6 +193,8 @@
       <workItem from="1732920994211" duration="1198000" />
       <workItem from="1733162152245" duration="3285000" />
       <workItem from="1733861670518" duration="199000" />
+      <workItem from="1734725900578" duration="237000" />
+      <workItem from="1734726154042" duration="118000" />
     </task>
     <servers />
   </component>

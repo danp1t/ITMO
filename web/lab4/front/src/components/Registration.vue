@@ -1,20 +1,3 @@
-<template>
-  <div class="home">
-    <h2>Регистрация</h2>
-    <form @submit.prevent="handleSubmit" class="auth-form">
-      <div class="form-group">
-        <label for="login">Логин:</label>
-        <input type="text" id="new_login" v-model="new_login" required />
-      </div>
-      <div class="form-group">
-        <label for="password">Пароль:</label>
-        <input type="password" id="new_password" v-model="new_password" required />
-      </div>
-      <button type="submit" class="submit-button">Войти</button>
-    </form>
-  </div>
-</template>
-
 <script>
 export default {
   data() {
@@ -24,16 +7,35 @@ export default {
     };
   },
   methods: {
-    handleSubmit() {
-      // Обработка логина и пароля
-      console.log('Логин:', this.login);
-      console.log('Пароль:', this.password);
-      // Здесь можно добавить логику перехода на основную страницу
-      this.$router.push('/main');
+    async handleSubmit() {
+      try {
+        const response = await fetch('http://localhost:8080/api/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            login: this.login,
+            password: this.password,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Ошибка при регистрации');
+        }
+
+        const data = await response.json();
+        console.log('Успех:', data);
+        // Логика перехода на основную страницу
+        this.$router.push('/main');
+      } catch (error) {
+        console.error('Ошибка:', error);
+      }
     },
   },
 };
 </script>
+
 
 <style scoped>
 .home {
