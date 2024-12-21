@@ -1,5 +1,6 @@
 package org.example.backend;
 
+import org.mindrot.jbcrypt.BCrypt;
 import jakarta.persistence.*;
 
 @Entity
@@ -32,6 +33,15 @@ public class Users {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = hashPassword(password);
+    }
+
+    public String hashPassword(String plainPassword) {
+        return BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+    }
+
+    // Метод для проверки пароля
+    public boolean checkPassword(String plainPassword, String hashedPassword) {
+        return BCrypt.checkpw(plainPassword, hashedPassword);
     }
 }
