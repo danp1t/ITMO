@@ -1,5 +1,0 @@
-/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=ASan -DCMAKE_MAKE_PROGRAM=/home/danp1t/Apps/clion-2024.3/bin/ninja/linux/x64/ninja -G Ninja -DCMAKE_BUILD_TYPE=ASan -S /home/danp1t/github/assignment-4-memory-allocator -B /home/danp1t/github/assignment-4-memory-allocator/out/build/asan
--- Clang-tidy: CLANG_TIDY-NOTFOUND
--- Configuring done (0.0s)
--- Generating done (0.1s)
--- Build files have been written to: /home/danp1t/github/assignment-4-memory-allocator/out/build/asan
