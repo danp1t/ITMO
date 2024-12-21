@@ -1,0 +1,166 @@
+{
+	"globsDependent" : 
+	[
+		{
+			"expression" : "/home/danp1t/github/assignment-4-memory-allocator/src/*.c",
+			"paths" : 
+			[
+				"/home/danp1t/github/assignment-4-memory-allocator/src/main.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/src/mem.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/src/mem_debug.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/src/util.c"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "/home/danp1t/github/assignment-4-memory-allocator/src/*.h",
+			"paths" : 
+			[
+				"/home/danp1t/github/assignment-4-memory-allocator/src/mem.h",
+				"/home/danp1t/github/assignment-4-memory-allocator/src/mem_internals.h",
+				"/home/danp1t/github/assignment-4-memory-allocator/src/util.h"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "/home/danp1t/github/assignment-4-memory-allocator/tester/src/*.c",
+			"paths" : 
+			[
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/src/test_utils.c"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "/home/danp1t/github/assignment-4-memory-allocator/tester/src/*.h",
+			"paths" : 
+			[
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/src/test.h",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/src/test_utils.h"
+			],
+			"recurse" : true
+		},
+		{
+			"expression" : "/home/danp1t/github/assignment-4-memory-allocator/tester/tests/*.c",
+			"paths" : 
+			[
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/_free.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/alloc_region.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/find_good_or_last.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/grow_heap.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/heap_init.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/heap_term.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/memalloc.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/split_if_too_big.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/try_memalloc_existing.c",
+				"/home/danp1t/github/assignment-4-memory-allocator/tester/tests/try_merge_with_next.c"
+			],
+			"recurse" : true
+		}
+	],
+	"inputs" : 
+	[
+		{
+			"path" : "CMakeLists.txt"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/asan/CMakeFiles/3.30.5/CMakeSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Platform/Linux-Initialize.cmake"
+		},
+		{
+			"isGenerated" : true,
+			"path" : "out/build/asan/CMakeFiles/3.30.5/CMakeCCompiler.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Platform/Linux.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Platform/UnixPaths.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeCInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Compiler/GNU-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Compiler/GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Platform/Linux-GNU-C.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/Platform/Linux-GNU.cmake"
+		},
+		{
+			"isCMake" : true,
+			"isExternal" : true,
+			"path" : "/home/danp1t/Apps/clion-2024.3/bin/cmake/linux/x64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake"
+		},
+		{
+			"path" : "src/CMakeLists.txt"
+		},
+		{
+			"path" : "tester/CMakeLists.txt"
+		}
+	],
+	"kind" : "cmakeFiles",
+	"paths" : 
+	{
+		"build" : "/home/danp1t/github/assignment-4-memory-allocator/out/build/asan",
+		"source" : "/home/danp1t/github/assignment-4-memory-allocator"
+	},
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 1
+	}
+}

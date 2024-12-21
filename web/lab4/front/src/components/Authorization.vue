@@ -62,7 +62,7 @@ export default {
         // Уведомление об ошибке
         this.notificationMessage = error.response && error.response.data && error.response.data.message
           ? error.response.data.message
-          : 'Ошибка при регистрации. Попробуйте еще раз.';
+          : 'Неверный логин или пароль';
         this.notificationType = 'error';
         this.notificationVisible = true;
 

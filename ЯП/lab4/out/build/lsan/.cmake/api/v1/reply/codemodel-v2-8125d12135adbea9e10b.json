@@ -1,0 +1,209 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2
+					],
+					"jsonFile" : "directory-.-LSan-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-LSan-b6cf2213fc5053b67c22.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						1,
+						2
+					]
+				},
+				{
+					"build" : "tester",
+					"jsonFile" : "directory-tester-LSan-e9d49f88a042e74df727.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.12"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "tester",
+					"targetIndexes" : 
+					[
+						0,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13
+					]
+				}
+			],
+			"name" : "LSan",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2
+					],
+					"name" : "memory-allocator",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 2,
+					"id" : "check::@2d3ea729871aefd03561",
+					"jsonFile" : "target-check-LSan-59c69b3a27cd01dd66ee.json",
+					"name" : "check",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "memalloc::@145eef247bfb46b6828c",
+					"jsonFile" : "target-memalloc-LSan-da6f65c202443881f179.json",
+					"name" : "memalloc",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "my_tests::@145eef247bfb46b6828c",
+					"jsonFile" : "target-my_tests-LSan-b2134c8f99922f13554f.json",
+					"name" : "my_tests",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test__free::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test__free-LSan-35f6c2e0d6d1875cc0f1.json",
+					"name" : "test__free",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_alloc_region::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_alloc_region-LSan-9b44763ef50ca79368d4.json",
+					"name" : "test_alloc_region",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_find_good_or_last::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_find_good_or_last-LSan-f24025d57db82c9bf1ea.json",
+					"name" : "test_find_good_or_last",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_grow_heap::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_grow_heap-LSan-896ded025d3944bdf061.json",
+					"name" : "test_grow_heap",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_heap_init::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_heap_init-LSan-fa37ccfabe0a365c4c97.json",
+					"name" : "test_heap_init",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_heap_term::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_heap_term-LSan-b608b66dee862ecea354.json",
+					"name" : "test_heap_term",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_memalloc::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_memalloc-LSan-d8c75080ddf7f9763ad1.json",
+					"name" : "test_memalloc",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_split_if_too_big::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_split_if_too_big-LSan-86fda76f37d6c11bba3b.json",
+					"name" : "test_split_if_too_big",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_stubs::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_stubs-LSan-3534ed662f2ef7ab1926.json",
+					"name" : "test_stubs",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_try_memalloc_existing::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_try_memalloc_existing-LSan-38a7de0d6c7507583860.json",
+					"name" : "test_try_memalloc_existing",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "test_try_merge_with_next::@2d3ea729871aefd03561",
+					"jsonFile" : "target-test_try_merge_with_next-LSan-19c52ec6e9438f9b818b.json",
+					"name" : "test_try_merge_with_next",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/danp1t/github/assignment-4-memory-allocator/out/build/lsan",
+		"source" : "/home/danp1t/github/assignment-4-memory-allocator"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

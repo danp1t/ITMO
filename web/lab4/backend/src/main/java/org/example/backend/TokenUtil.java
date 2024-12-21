@@ -9,7 +9,7 @@ import java.util.Date;
 
 @Stateless
 public class TokenUtil {
-    private static final String SECRET_KEY = "your_super_secret_key_which_is_long_enough"; // Убедитесь, что ключ длинный
+    private static final String SECRET_KEY = "your_super_secret_key_which_is_long_enough";
     private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 час
 
     public String generateToken(Users user) {
