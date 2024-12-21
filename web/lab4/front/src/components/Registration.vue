@@ -12,15 +12,26 @@
       </div>
       <button type="submit" class="submit-button">Зарегистрироваться</button>
     </form>
+
+    <!-- Всплывающее уведомление -->
+    <Notification v-if="notificationVisible" :message="notificationMessage" :type="notificationType" />
   </div>
 </template>
 
 <script>
+import Notification from './Notification.vue';
+
 export default {
+  components: {
+    Notification,
+  },
   data() {
     return {
       login: '',
       password: '',
+      notificationVisible: false,
+      notificationMessage: '',
+      notificationType: 'success', // 'success' или 'error'
     };
   },
   methods: {
@@ -43,15 +54,35 @@ export default {
 
         const data = await response.json();
         console.log('Успех:', data);
-        // Логика перехода на основную страницу
-        this.$router.push('/main');
+
+        // Уведомление об успешной регистрации
+        this.notificationMessage = 'Вы успешно зарегистрированы!';
+        this.notificationType = 'success';
+        this.notificationVisible = true;
+
+        // Скрыть уведомление через 3 секунды
+        setTimeout(() => {
+          this.notificationVisible = false;
+        }, 3000);
+
       } catch (error) {
         console.error('Ошибка:', error);
+
+        // Уведомление об ошибке
+        this.notificationMessage = 'Ошибка при регистрации. Попробуйте еще раз.';
+        this.notificationType = 'error';
+        this.notificationVisible = true;
+
+        // Скрыть уведомление через 3 секунды
+        setTimeout(() => {
+          this.notificationVisible = false;
+        }, 3000);
       }
     },
   },
 };
 </script>
+
 
 
 <style scoped>
