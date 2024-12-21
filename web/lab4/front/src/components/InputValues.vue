@@ -1,4 +1,49 @@
 <script setup>
+import { ref, computed } from 'vue';
+
+const coorX = ref('');
+const coorY = ref('');
+const coorR = ref('');
+const errors = ref({ x: '', y: '', r: '' });
+const emit = defineEmits(['update-canvas']);
+
+const validateCoordinates = (axis) => {
+  const value = axis === 'x' ? parseFloat(coorX.value) : parseFloat(coorY.value);
+
+  if (axis === 'x') {
+    if (isNaN(value) || value < -5 || value > 3) {
+      errors.value.x = 'Координата X должна быть в диапазоне от -5 до 3.';
+    } else {
+      errors.value.x = '';
+    }
+  } else if (axis === 'y') {
+    if (isNaN(value) || value < -3 || value > 3) {
+      errors.value.y = 'Координата Y должна быть в диапазоне от -3 до 3.';
+    } else {
+      errors.value.y = '';
+    }
+  }
+};
+
+const validateRadius = () => {
+  const value = parseFloat(coorR.value);
+
+  if (isNaN(value) || value < 0 || value > 3) {
+    errors.value.r = 'Радиус R должен быть в диапазоне от 0 до 3.';
+  } else {
+    errors.value.r = '';
+  }
+};
+
+const updateCanvas = () => {
+  if (!errors.value.x && !errors.value.y && !errors.value.r) {
+    emit('update-canvas', {
+      x: parseFloat(coorX.value),
+      y: parseFloat(coorY.value),
+      r: parseFloat(coorR.value)
+    });
+  }
+};
 
 </script>
 
@@ -6,22 +51,28 @@
   <div id="form">
     <label for="coor_x">Координата X (-5 ... 3):</label>
     <input type="text" v-model="coorX" @input="validateCoordinates('x')" />
-    <!-- <span v-if="errors.x" class="error">{{ errors.x }}</span> -->
+    <span v-if="errors.x" class="error">{{ errors.x }}</span>
 
     <label for="coor_y">Координата Y (-3 ... 3):</label>
     <input type="text" v-model="coorY" @input="validateCoordinates('y')" />
-    <!-- <span v-if="errors.y" class="error">{{ errors.y }}</span> -->
+    <span v-if="errors.y" class="error">{{ errors.y }}</span>
 
-   <label for="coor_r">Радиус R (0 ... 3):</label>
-   <input type="text" v-model="coorR" @input="validateRadius" />
-    <!-- <span v-if="errors.r" class="error">{{ errors.r }}</span> -->
+    <label for="coor_r">Радиус R (0 ... 3):</label>
+    <input type="text" v-model="coorR" @input="validateRadius" />
+    <span v-if="errors.r" class="error">{{ errors.r }}</span>
 
     <button @click="updateCanvas">Обновить область</button>
   </div>
+</template>
 
- </template>
+<style>
+.error {
+  color: red;
+}
+</style>
 
- <style scoped>
+
+<style scoped>
  #form {
    width: 18%;
   margin: 10px;
