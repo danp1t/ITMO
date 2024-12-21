@@ -1,10 +1,10 @@
 package org.example.backend;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 
 @Path("/register")
 public class UserResource {
@@ -12,15 +12,35 @@ public class UserResource {
     @Inject
     private UserRegistrationService userRegistrationService;
 
+
     @POST
     @Consumes("application/json")
-    public Response registerUser(UserDTO userDTO) {
+    @Produces("application/json") // Убедитесь, что вы указываете, что возвращаете JSON
+    public Response registerUser(UserDTO userDTO, @Context HttpHeaders headers) {
         try {
+            System.out.println(userDTO);
             userRegistrationService.registerUser(userDTO.getLogin(), userDTO.getPassword());
-            return Response.ok().entity("Пользователь зарегистрирован").build();
+            return Response.ok()
+                    .entity("{\"message\": \"Пользователь зарегистрирован\"}") // Возвращаем JSON
+                    .header("Access-Control-Allow-Origin", "*")
+                    .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                    .header("Access-Control-Allow-Headers", "Content-Type")
+                    .build();
         } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Ошибка регистрации").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка регистрации\"}") // Возвращаем JSON
+                    .header("Access-Control-Allow-Origin", "*")
+                    .build();
         }
     }
-}
 
+
+    @OPTIONS
+    public Response options() {
+        return Response.ok()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                .header("Access-Control-Allow-Headers", "Content-Type")
+                .build();
+    }
+}

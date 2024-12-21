@@ -11,7 +11,7 @@ public class UserRegistrationService {
     private EntityManager entityManager;
 
     public void registerUser(String login, String password) {
-        User user = new User();
+        Users user = new Users();
         user.setLogin(login);
         user.setPassword(password);
         entityManager.persist(user);
