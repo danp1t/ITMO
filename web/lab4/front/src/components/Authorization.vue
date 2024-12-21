@@ -12,30 +12,79 @@
       </div>
       <button type="submit" class="submit-button">Войти</button>
     </form>
+    <div v-if="notificationVisible" :class="notificationType">
+      {{ notificationMessage }}
+    </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
       login: '',
       password: '',
+      notificationMessage: '',
+      notificationType: '',
+      notificationVisible: false,
     };
   },
   methods: {
-    handleSubmit() {
-      // Обработка логина и пароля
-      console.log('Логин:', this.login);
-      console.log('Пароль:', this.password);
-      // Здесь можно добавить логику перехода на основную страницу
-      this.$router.push('/main');
+    async handleSubmit() {
+      try {
+        const response = await axios.post('http://localhost:8080/backend-1.0-SNAPSHOT/api/auth/login', {
+          login: this.login,
+          password: this.password,
+        });
+
+        // Сохраните токен в локальное хранилище (если он возвращается)
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
+
+        // Уведомление об успешной регистрации
+        this.notificationMessage = 'Вы успешно зарегистрированы!';
+        this.notificationType = 'success';
+        this.notificationVisible = true;
+
+        // Перенаправление на главную страницу
+        this.$router.push('/main');
+
+        // Скрыть уведомление через 3 секунды
+        setTimeout(() => {
+          this.notificationVisible = false;
+        }, 3000);
+      } catch (error) {
+        console.error('Ошибка:', error.response ? error.response.data : error.message);
+
+        // Уведомление об ошибке
+        this.notificationMessage = error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : 'Ошибка при регистрации. Попробуйте еще раз.';
+        this.notificationType = 'error';
+        this.notificationVisible = true;
+
+        // Скрыть уведомление через 3 секунды
+        setTimeout(() => {
+          this.notificationVisible = false;
+        }, 3000);
+      }
     },
   },
 };
 </script>
 
+
 <style scoped>
+.success {
+  color: green;
+}
+.error {
+  color: red;
+}
+
 .home {
   max-width: 400px;
   width: 25%;

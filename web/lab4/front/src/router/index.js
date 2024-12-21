@@ -12,12 +12,22 @@ const routes = [
         path: '/main',
         name: 'Main',
         component: Main,
+        meta: { requiresAuth: true }, 
     },
 ];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
+});
+
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = !!localStorage.getItem('token'); // Проверка наличия токена
+    if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
+        next({ path: '/' });
+    } else {
+        next();
+    }
 });
 
 export default router;
