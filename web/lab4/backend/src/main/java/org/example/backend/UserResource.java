@@ -18,7 +18,6 @@ public class UserResource {
     @Produces("application/json") // Убедитесь, что вы указываете, что возвращаете JSON
     public Response registerUser(UserDTO userDTO, @Context HttpHeaders headers) {
         try {
-            System.out.println(userDTO);
             userRegistrationService.registerUser(userDTO.getLogin(), userDTO.getPassword());
             return Response.ok()
                     .entity("{\"message\": \"Пользователь зарегистрирован\"}") // Возвращаем JSON

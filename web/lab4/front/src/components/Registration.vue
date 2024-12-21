@@ -36,52 +36,55 @@ export default {
   },
   methods: {
     async handleSubmit() {
-      try {
-        const response = await fetch('http://localhost:8080/backend-1.0-SNAPSHOT/api/register', {
+  try {
+      const response = await fetch('http://localhost:8080/backend-1.0-SNAPSHOT/api/register', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+              'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            login: this.login,
-            password: this.password,
+              login: this.login,
+              password: this.password,
           }),
-        });
+      });
 
-        if (!response.ok) {
-          throw new Error('Ошибка при регистрации');
-        }
-
-        const data = await response.json();
-        console.log('Успех:', data);
-
-        // Уведомление об успешной регистрации
-        this.notificationMessage = 'Вы успешно зарегистрированы!';
-        this.notificationType = 'success';
-        this.notificationVisible = true;
-
-        // Скрыть уведомление через 3 секунды
-        setTimeout(() => {
-          this.notificationVisible = false;
-        }, 3000);
-
-      } catch (error) {
-        console.error('Ошибка:', error);
-
-        // Уведомление об ошибке
-        this.notificationMessage = 'Ошибка при регистрации. Попробуйте еще раз.';
-        this.notificationType = 'error';
-        this.notificationVisible = true;
-
-        // Скрыть уведомление через 3 секунды
-        setTimeout(() => {
-          this.notificationVisible = false;
-        }, 3000);
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Логин уже существует. Пожалуйста, выберите другой.');
       }
-    },
+
+      const data = await response.json();
+      console.log('Успех:', data);
+
+      // Уведомление об успешной регистрации
+      this.notificationMessage = 'Вы успешно зарегистрированы!';
+      this.notificationType = 'success';
+      this.notificationVisible = true;
+
+      // Скрыть уведомление через 3 секунды
+      setTimeout(() => {
+          this.notificationVisible = false;
+      }, 3000);
+
+  } catch (error) {
+      console.error('Ошибка:', error);
+
+      // Уведомление об ошибке
+      this.notificationMessage = error.message || 'Ошибка при регистрации. Попробуйте еще раз.';
+      this.notificationType = 'error';
+      this.notificationVisible = true;
+
+      // Скрыть уведомление через 3 секунды
+      setTimeout(() => {
+          this.notificationVisible = false;
+      }, 3000);
+  }
+},
+
   },
 };
 </script>
+
 
 
 
