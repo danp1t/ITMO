@@ -14,14 +14,55 @@ const updateCanvasData = (data) => {
   canvasData.value = data;
 };
 
-//const handlePointClick = (point) => {
-  // Logic to send point to server and update color
-//};
+const notificationMessage = ref('');
+const notificationType = ref('');
+const notificationVisible = ref(false);
+
+const handlePointClick = async (point) => {
+  try {
+    const response = await fetch('http://localhost:8080/backend-1.0-SNAPSHOT/api/point', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(point),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Ошибка отправки точки.');
+    }
+
+    const data = await response.json();
+    console.log('Успех:', data);
+
+    // Show success notification
+    notificationMessage.value = 'Точка успешно отправлена!';
+    notificationType.value = 'success';
+    notificationVisible.value = true;
+
+    setTimeout(() => {
+      notificationVisible.value = false;
+    }, 3000);
+
+  } catch (error) {
+    console.error('Ошибка:', error);
+
+    // Show error notification
+    notificationMessage.value = error.message || 'Ошибка при отправке точки. Попробуйте еще раз.';
+    notificationType.value = 'error';
+    notificationVisible.value = true;
+
+    setTimeout(() => {
+      notificationVisible.value = false;
+    }, 3000);
+  }
+};
 
 // Функция выхода
 const logout = () => {
-    localStorage.removeItem('token')
-    router.push('/');
+  localStorage.removeItem('token');
+  router.push('/');
 };
 </script>
 
@@ -35,10 +76,32 @@ const logout = () => {
   <div class="button-container">
     <button @click="logout">Выйти</button>
   </div>
+
+  <div v-if="notificationVisible" class="notification" :class="notificationType">
+    {{ notificationMessage }}
+  </div>
 </template>
 
-
 <style scoped>
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.notification.success {
+  background-color: #4caf50;
+  color: white;
+}
+
+.notification.error {
+  background-color: #f44336;
+  color: white;
+}
+
 .container {
   display: flex;
   align-items: flex-start;
