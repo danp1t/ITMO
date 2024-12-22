@@ -71,7 +71,6 @@ const logout = () => {
   <div class="container">
     <InputValues @update-canvas="updateCanvasData" />
     <Canvas :data="canvasData" @point-clicked="handlePointClick" />
-    <Table />
   </div>
   <div class="button-container">
     <button @click="logout">Выйти</button>

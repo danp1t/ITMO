@@ -19,8 +19,10 @@ public class PointResource {
             // Тут можно сделать опроботку результатов
             boolean hit = isHit(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
 
+            String toSendStringHit = "{\"hit\" :" + hit + "}";
+
             return Response.ok()
-                    .entity("{\"message\": \"Point received successfully\"}")
+                    .entity(toSendStringHit)
                     .header("Access-Control-Allow-Origin", "*")
                     .header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
                     .header("Access-Control-Allow-Headers", "Content-Type")
