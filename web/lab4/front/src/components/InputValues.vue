@@ -1,19 +1,35 @@
+<!-- InputValues.vue -->
+<template>
+  <div id="form">
+    <!-- Form inputs -->
+    <label for="coor_x">Координата X (-5 ... 3):</label>
+    <input type="text" v-model="coorX" @input="validateCoordinates('x')" />
+    <span v-if="errors.x" class="error">{{ errors.x }}</span>
+
+    <label for="coor_y">Координата Y (-3 ... 3):</label>
+    <input type="text" v-model="coorY" @input="validateCoordinates('y')" />
+    <span v-if="errors.y" class="error">{{ errors.y }}</span>
+
+    <label for="coor_r">Радиус R (0 ... 3):</label>
+    <input type="text" v-model="coorR" @input="validateRadius" />
+    <span v-if="errors.r" class="error">{{ errors.r }}</span>
+
+    <!-- Buttons -->
+    <button @click="updateCanvas">Обновить область</button>
+    <button @click="sendPoint">Отправить на сервер</button>
+  </div>
+</template>
+
+<!-- InputValues.vue -->
 <script setup>
-import { ref } from 'vue';
+import { ref, defineEmits } from 'vue';
+
+const emit = defineEmits(['update-canvas', 'point-sent']);
 
 const coorX = ref('');
 const coorY = ref('');
 const coorR = ref('');
 const errors = ref({ x: '', y: '', r: '' });
-const emit = defineEmits(['update-canvas']);
-
-// Add results ref to store point history
-const results = ref([]);
-
-// Notification variables
-const notificationMessage = ref('');
-const notificationType = ref('success');
-const notificationVisible = ref(false);
 
 const validateCoordinates = (axis) => {
   const value = axis === 'x' ? parseFloat(coorX.value) : parseFloat(coorY.value);
@@ -32,6 +48,7 @@ const validateCoordinates = (axis) => {
     }
   }
 };
+
 
 const validateRadius = () => {
   const value = parseFloat(coorR.value);
@@ -53,7 +70,8 @@ const updateCanvas = () => {
   }
 };
 
-const sendCoordinates = async () => {
+
+const sendPoint = () => {
   validateCoordinates('x');
   validateCoordinates('y');
   validateRadius();
@@ -64,95 +82,16 @@ const sendCoordinates = async () => {
       y: parseFloat(coorY.value),
       r: parseFloat(coorR.value)
     };
-
-    try {
-      const response = await fetch('http://localhost:8080/backend-1.0-SNAPSHOT/api/point', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(point),
-      });
-
-      if (!response.ok) {
-        throw new Error('Ошибка отправки точки.');
-      }
-
-      const data = await response.json();
-      if (typeof data.hit === 'boolean') {
-        // Store the point and hit result in the results array
-        results.value.push({
-          x: point.x,
-          y: point.y,
-          r: point.r,
-          hit: data.hit
-        });
-
-        // Show success notification
-        notificationMessage.value = 'Точка успешно отправлена!';
-        notificationType.value = 'success';
-        notificationVisible.value = true;
-
-        setTimeout(() => {
-          notificationVisible.value = false;
-        }, 3000);
-      } else {
-        throw new Error('Ответ сервера не содержит информацию о попадании.');
-      }
-    } catch (error) {
-      console.error('Ошибка:', error);
-
-      // Show error notification
-      notificationMessage.value = error.message || 'Ошибка при отправке точки. Попробуйте еще раз.';
-      notificationType.value = 'error';
-      notificationVisible.value = true;
-
-      setTimeout(() => {
-        notificationVisible.value = false;
-      }, 3000);
-    }
+    emit('point-sent', point);
+    // Reset inputs
+    coorX.value = '';
+    coorY.value = '';
+    coorR.value = '';
+    errors.value = { x: '', y: '', r: '' };
   }
 };
 </script>
 
-<template>
-  <div id="form">
-    <!-- Form inputs and buttons remain the same -->
-    <label for="coor_x">Координата X (-5 ... 3):</label>
-    <input type="text" v-model="coorX" @input="validateCoordinates('x')" />
-    <span v-if="errors.x" class="error">{{ errors.x }}</span>
-
-    <label for="coor_y">Координата Y (-3 ... 3):</label>
-    <input type="text" v-model="coorY" @input="validateCoordinates('y')" />
-    <span v-if="errors.y" class="error">{{ errors.y }}</span>
-
-    <label for="coor_r">Радиус R (0 ... 3):</label>
-    <input type="text" v-model="coorR" @input="validateRadius" />
-    <span v-if="errors.r" class="error">{{ errors.r }}</span>
-
-    <button @click="updateCanvas">Обновить область</button>
-    <button @click="sendCoordinates">Отправить на сервер</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Координата X</th>
-        <th>Координата Y</th>
-        <th>Радиус R</th>
-        <th>Результат</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(result, index) in results" :key="index">
-        <td>{{ result.x }}</td>
-        <td>{{ result.y }}</td>
-        <td>{{ result.r }}</td>
-        <td>{{ result.hit ? 'Попал' : 'Не попал' }}</td>
-      </tr>
-    </tbody>
-  </table>
-</template>
 
 <style scoped>
 .error {

@@ -82,8 +82,9 @@ const handleCanvasClick = (event) => {
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
   const scale = 60;
-  const actualX = (x - 200) / scale;
-  const actualY = (200 - y) / scale;
+  const halfCanvas = canvas.value.width / 2;
+  const actualX = (x - halfCanvas) / scale;
+  const actualY = (halfCanvas - y) / scale;
   emit('point-clicked', { x: actualX, y: actualY, r: props.data.r });
 };
 

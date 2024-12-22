@@ -1,23 +1,31 @@
 <script setup>
+import { defineProps } from 'vue';
 
+defineProps({
+  results: {
+    type: Array,
+    default: () => []
+  }
+});
 </script>
 
 <template>
   <table>
     <thead>
-    <tr>
-      <th>Координаты X</th>
-      <th>Координата Y</th>
-      <th>Радиус (R)</th>
-      <th>Результат</th>
-    </tr>
+      <tr>
+        <th>Координаты X</th>
+        <th>Координата Y</th>
+        <th>Радиус (R)</th>
+        <th>Результат</th>
+      </tr>
     </thead>
     <tbody>
-    <tr v-for="(result, index) in results" :key="index">
-      <td>{{ result.coordinates }}</td>
-      <td>{{ result.radius }}</td>
-      <td>{{ result.hit ? 'Попал' : 'Не попал' }}</td>
-    </tr>
+      <tr v-for="(point, index) in results" :key="index">
+        <td>{{ point.x }}</td>
+        <td>{{ point.y }}</td>
+        <td>{{ point.r }}</td>
+        <td>{{ point.hit ? 'Попал' : 'Не попал' }}</td>
+      </tr>
     </tbody>
   </table>
 </template>

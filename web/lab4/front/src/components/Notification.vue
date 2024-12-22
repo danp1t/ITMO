@@ -13,7 +13,7 @@ export default {
     },
     type: {
       type: String,
-      default: 'success', // Можно использовать 'error' для ошибок
+      default: 'success',
     },
   },
   data() {
@@ -24,6 +24,7 @@ export default {
   methods: {
     close() {
       this.visible = false;
+      this.$emit('close');
     },
   },
 };

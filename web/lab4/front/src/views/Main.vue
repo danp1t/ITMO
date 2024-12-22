@@ -5,18 +5,45 @@ import Header from "@/components/Header.vue";
 import InputValues from "@/components/InputValues.vue";
 import Table from "@/components/Table.vue";
 import Canvas from "@/components/Canvas.vue";
+import Notification from "@/components/Notification.vue"; // Import the Notification component
 
 const router = useRouter();
-
 const canvasData = ref({ x: 0, y: 0, r: 1 });
+const pointsList = ref([]);
+
+const notificationVisible = ref(false); // Define notificationVisible
+const notificationMessage = ref('');    // Define notificationMessage
+const notificationType = ref('success'); // Define notificationType
 
 const updateCanvasData = (data) => {
   canvasData.value = data;
 };
 
-const notificationMessage = ref('');
-const notificationType = ref('');
-const notificationVisible = ref(false);
+const onPointSent = async (point) => {
+  try {
+    const response = await fetch('http://localhost:8080/backend-1.0-SNAPSHOT/api/point', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(point),
+    });
+
+    if (!response.ok) {
+      throw new Error('Ошибка отправки точки.');
+    }
+
+    const data = await response.json();
+    pointsList.value.push({ ...point, hit: data.hit });
+
+    // Show success notification
+    showNotification('Точка успешно отправлена!', 'success');
+
+  } catch (error) {
+    // Show error notification
+    showNotification(error.message || 'Ошибка при отправке точки. Попробуйте еще раз.', 'error');
+  }
+};
 
 const handlePointClick = async (point) => {
   try {
@@ -34,51 +61,55 @@ const handlePointClick = async (point) => {
     }
 
     const data = await response.json();
-    console.log('Успех:', data);
+    pointsList.value.push({ ...point, hit: data.hit });
 
     // Show success notification
-    notificationMessage.value = 'Точка успешно отправлена!';
-    notificationType.value = 'success';
-    notificationVisible.value = true;
-
-    setTimeout(() => {
-      notificationVisible.value = false;
-    }, 3000);
+    showNotification('Точка успешно отправлена!', 'success');
 
   } catch (error) {
     console.error('Ошибка:', error);
 
     // Show error notification
-    notificationMessage.value = error.message || 'Ошибка при отправке точки. Попробуйте еще раз.';
-    notificationType.value = 'error';
-    notificationVisible.value = true;
-
-    setTimeout(() => {
-      notificationVisible.value = false;
-    }, 3000);
+    showNotification(error.message || 'Ошибка при отправке точки. Попробуйте еще раз.', 'error');
   }
 };
 
-// Функция выхода
+// Function to handle logout
 const logout = () => {
   localStorage.removeItem('token');
   router.push('/');
+};
+
+// Function to show notifications
+const showNotification = (message, type) => {
+  notificationMessage.value = message;
+  notificationType.value = type;
+  notificationVisible.value = true;
+
+  setTimeout(() => {
+    notificationVisible.value = false;
+  }, 3000);
 };
 </script>
 
 <template>
   <Header />
   <div class="container">
-    <InputValues @update-canvas="updateCanvasData" />
+    <InputValues @update-canvas="updateCanvasData" @point-sent="onPointSent" />
+    <Table :results="pointsList" />
     <Canvas :data="canvasData" @point-clicked="handlePointClick" />
   </div>
   <div class="button-container">
     <button @click="logout">Выйти</button>
   </div>
 
-  <div v-if="notificationVisible" class="notification" :class="notificationType">
-    {{ notificationMessage }}
-  </div>
+  <!-- Include the Notification component -->
+  <Notification
+    v-if="notificationVisible"
+    :message="notificationMessage"
+    :type="notificationType"
+    @close="notificationVisible = false"
+  />
 </template>
 
 <style scoped>
