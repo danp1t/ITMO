@@ -7,6 +7,11 @@ const coorR = ref('');
 const errors = ref({ x: '', y: '', r: '' });
 const emit = defineEmits(['update-canvas']);
 
+
+const notificationMessage = ref('');
+const notificationType = ref('success');
+const notificationVisible = ref(false);
+
 const validateCoordinates = (axis) => {
   const value = axis === 'x' ? parseFloat(coorX.value) : parseFloat(coorY.value);
 
@@ -45,6 +50,62 @@ const updateCanvas = () => {
   }
 };
 
+const sendCoordinates = async () => {
+  validateCoordinates('x');
+  validateCoordinates('y');
+  validateRadius();
+
+  if (!errors.value.x && !errors.value.y && !errors.value.r) {
+    const point = {
+      x: parseFloat(coorX.value),
+      y: parseFloat(coorY.value),
+      r: parseFloat(coorR.value)
+    };
+
+    await handlePointClick(point);
+  }
+};
+
+const handlePointClick = async (point) => {
+  try {
+    const response = await fetch('http://localhost:8080/backend-1.0-SNAPSHOT/api/point', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(point),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Ошибка отправки точки.');
+    }
+
+    const data = await response.json();
+    console.log('Успех:', data);
+
+    // Show success notification
+    notificationMessage.value = 'Точка успешно отправлена!';
+    notificationType.value = 'success';
+    notificationVisible.value = true;
+
+    setTimeout(() => {
+      notificationVisible.value = false;
+    }, 3000);
+
+  } catch (error) {
+    console.error('Ошибка:', error);
+
+    // Show error notification
+    notificationMessage.value = error.message || 'Ошибка при отправке точки. Попробуйте еще раз.';
+    notificationType.value = 'error';
+    notificationVisible.value = true;
+
+    setTimeout(() => {
+      notificationVisible.value = false;
+    }, 3000);
+  }
+};
 </script>
 
 <template>
@@ -62,6 +123,7 @@ const updateCanvas = () => {
     <span v-if="errors.r" class="error">{{ errors.r }}</span>
 
     <button @click="updateCanvas">Обновить область</button>
+    <button @click="sendCoordinates">Отправить на сервер</button>
   </div>
 </template>
 
@@ -115,7 +177,7 @@ const updateCanvas = () => {
   background-color: #00bfff;
   color: #ffffff;
   border: none;
-   margin-left: 10px;
+  margin: 10px;
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
