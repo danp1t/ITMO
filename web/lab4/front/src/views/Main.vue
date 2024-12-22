@@ -97,7 +97,7 @@ const showNotification = (message, type) => {
   <div class="container">
     <InputValues @update-canvas="updateCanvasData" @point-sent="onPointSent" />
     <Table :results="pointsList" />
-    <Canvas :data="canvasData" @point-clicked="handlePointClick" />
+    <Canvas :data="canvasData" :points="pointsList" @point-clicked="handlePointClick" />
   </div>
   <div class="button-container">
     <button @click="logout">Выйти</button>

@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, onUnmounted, defineProps, defineEmits, watch } from 'vue';
-
-const props = defineProps(['data']);
+const props = defineProps(['data', 'points']);
 const emit = defineEmits(['point-clicked']);
 
 const canvas = ref(null);
@@ -66,10 +65,28 @@ const halfWidth = canvas.value.width / 2;
   ctx.value.stroke();
 }
 
+function drawPoints() {
+  props.points.forEach(point => {
+    const halfWidth = canvas.value.width / 2;
+    const halfHeight = canvas.value.height / 2;
+    const scaledX = halfWidth + point.x * scale;
+    const scaledY = halfHeight - point.y * scale;
+    ctx.value.beginPath();
+    ctx.value.arc(scaledX, scaledY, 3, 0, 2 * Math.PI); // Draw a circle with radius 3
+    ctx.value.fillStyle = point.hit ? 'green' : 'red'; // Different colors for hit or miss
+    ctx.value.fill();
+  });
+}
+
+function drawCanvas(R, points) {
+  ctx.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
+  drawAxes(R);
+  drawShapes(R);
+  drawPoints(points);
+}
 onMounted(() => {
   ctx.value = canvas.value.getContext('2d');
-  drawAxes(props.data.r);
-  drawShapes(props.data.r);
+  drawCanvas(props.data.r, props.points);
   canvas.value.addEventListener('click', handleCanvasClick);
 });
 
@@ -88,10 +105,13 @@ const handleCanvasClick = (event) => {
   emit('point-clicked', { x: actualX, y: actualY, r: props.data.r });
 };
 
-watch(() => props.data, (newData) => {
-  drawAxes(newData.r);
-  drawShapes(newData.r);
-}, { deep: true });
+watch(
+  () => ({ r: props.data.r, points: props.points }),
+  (newData) => {
+    drawCanvas(newData.r, newData.points);
+  },
+  { deep: true }
+);
 </script>
 
 <template>

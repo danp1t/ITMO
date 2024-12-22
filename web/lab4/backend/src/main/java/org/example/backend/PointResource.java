@@ -16,7 +16,7 @@ public class PointResource {
     public Response receivePoint(PointDTO pointDTO, @Context HttpHeaders headers) {
         try {
             processPoint(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
-            // Тут можно сделать опроботку результатов
+
             boolean hit = isHit(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
 
             String toSendStringHit = "{\"hit\" :" + hit + "}";
