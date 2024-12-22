@@ -27,13 +27,10 @@ public class AuthController {
     }
 
     @POST
-    @Path("/login") // Убедитесь, что путь указан
+    @Path("/login")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(UserDTO userDTO) {
-        System.out.println(userDTO);
-        System.out.println(userDTO.getLogin());
-        System.out.println(userDTO.getPassword());
         Users user = authService.authenticate(userDTO.getLogin(), userDTO.getPassword());
 
         if (user != null) {

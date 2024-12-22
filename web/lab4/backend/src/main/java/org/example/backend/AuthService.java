@@ -9,7 +9,7 @@ public class AuthService {
 
     private EntityManagerFactory emf = Persistence.createEntityManagerFactory("lab4");
 
-    public Users    authenticate(String login, String password) {
+    public Users authenticate(String login, String password) {
         EntityManager em = emf.createEntityManager();
         TypedQuery<Users> query = em.createQuery(
                 "SELECT u FROM Users u WHERE u.login = :login", Users.class);

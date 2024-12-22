@@ -14,7 +14,7 @@ public class PointResource {
     @Produces("application/json")
     public Response receivePoint(PointDTO pointDTO, @Context HttpHeaders headers) {
         try {
-            //processPoint(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
+            processPoint(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
             return Response.ok()
                     .entity("{\"message\": \"Point received successfully\"}")
                     .header("Access-Control-Allow-Origin", "*")

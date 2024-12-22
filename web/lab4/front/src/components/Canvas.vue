@@ -84,7 +84,7 @@ const handleCanvasClick = (event) => {
   const scale = 60;
   const actualX = (x - 200) / scale;
   const actualY = (200 - y) / scale;
-  emit('point-clicked', { x: actualX, y: actualY });
+  emit('point-clicked', { x: actualX, y: actualY, r: props.data.r });
 };
 
 watch(() => props.data, (newData) => {
