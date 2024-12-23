@@ -16,7 +16,7 @@
 header {
   border-radius: 15px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
   padding: 20px;
   margin: 10px;
@@ -28,5 +28,39 @@ header {
 .info_header {
   font-size: 20px;
   text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff;
+  margin-right: 20px;
+}
+
+.info_header:last-child {
+  margin-right: 0;
+}
+
+/* Media queries for font sizes and layout */
+@media (max-width: 888px) {
+  header {
+    flex-direction: column;
+  }
+  .info_header {
+    font-size: 16px;
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+  .info_header:last-child {
+    margin-bottom: 0;
+  }
+}
+
+@media (min-width: 889px) and (max-width: 1136px) {
+  .info_header {
+    font-size: 18px;
+    margin-right: 15px;
+  }
+}
+
+@media (min-width: 1137px) {
+  .info_header {
+    font-size: 20px;
+    margin-right: 20px;
+  }
 }
 </style>

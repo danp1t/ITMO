@@ -62,4 +62,30 @@ tr:hover {
   background-color: rgba(173, 216, 230, 0.5);
 }
 
+/* Tablet styles */
+@media (min-width: 889px) and (max-width: 1136px) {
+  table {
+    width: 90%;
+    margin: 5px auto; /* Center the table */
+  }
+  th, td {
+    font-size: 16px; /* Adjusted font size for better readability */
+    padding: 8px;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 888px) {
+  table {
+    width: 100%;
+  }
+  th, td {
+    font-size: 8px; /* Increased font size for mobile */
+    padding: 6px;
+  }
+  td {
+    word-wrap: break-word;
+    white-space: normal;
+  }
+}
 </style>
