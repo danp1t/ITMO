@@ -11,11 +11,12 @@ const router = useRouter();
 const canvasData = ref({ x: 0, y: 0, r: 1 });
 const pointsList = ref([]);
 
-const notificationVisible = ref(false); // Define notificationVisible
-const notificationMessage = ref('');    // Define notificationMessage
-const notificationType = ref('success'); // Define notificationType
+const notificationVisible = ref(false);
+const notificationMessage = ref('');
+const notificationType = ref('success');
 
 const updateCanvasData = (data) => {
+
   canvasData.value = data;
 };
 

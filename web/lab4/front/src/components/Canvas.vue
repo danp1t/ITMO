@@ -100,9 +100,12 @@ function drawPoints() {
     ctx.value.beginPath();
     ctx.value.arc(scaledX, scaledY, 3, 0, 2 * Math.PI);
 
-    let color = isHit(point.x, point.y, point.r);
+    let color = isHit(point.x, point.y, props.data.r);
     ctx.value.fillStyle = color ? 'green' : 'red';
     ctx.value.fill();
+
+
+
   });
 }
 
@@ -130,6 +133,7 @@ const handleCanvasClick = (event) => {
   const halfCanvas = canvas.value.width / 2;
   const actualX = (x - 178) / scale;
   const actualY = (178 - y) / scale;
+  console.log(actualX, actualY);
   emit('point-clicked', { x: actualX, y: actualY, r: props.data.r });
 };
 
