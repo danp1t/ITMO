@@ -65,6 +65,32 @@ const halfWidth = canvas.value.width / 2;
   ctx.value.stroke();
 }
 
+function isHit(x, y, r) {
+    // First quadrant
+    if (x >= 0 && y >= 0) {
+        if (x <= r && y <= r) {
+            return true;
+        }
+    }
+    // Second quadrant
+    else if (x <= 0 && y >= 0) {
+        if (Math.abs(x) + Math.abs(y) <= r) {
+            return true;
+        }
+    }
+    // Third quadrant
+    else if (x <= 0 && y <= 0) {
+        return false;
+    }
+    // Fourth quadrant
+    else if (x >= 0 && y <= 0) {
+        if (x * x + y * y <= (r / 2) * (r / 2)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function drawPoints() {
   props.points.forEach(point => {
     const halfWidth = canvas.value.width / 2;
@@ -72,8 +98,10 @@ function drawPoints() {
     const scaledX = halfWidth + point.x * scale;
     const scaledY = halfHeight - point.y * scale;
     ctx.value.beginPath();
-    ctx.value.arc(scaledX, scaledY, 3, 0, 2 * Math.PI); // Draw a circle with radius 3
-    ctx.value.fillStyle = point.hit ? 'green' : 'red'; // Different colors for hit or miss
+    ctx.value.arc(scaledX, scaledY, 3, 0, 2 * Math.PI);
+
+    let color = isHit(point.x, point.y, point.r);
+    ctx.value.fillStyle = color ? 'green' : 'red';
     ctx.value.fill();
   });
 }
@@ -102,7 +130,6 @@ const handleCanvasClick = (event) => {
   const halfCanvas = canvas.value.width / 2;
   const actualX = (x - 178) / scale;
   const actualY = (178 - y) / scale;
-  console.log(actualX, actualY);
   emit('point-clicked', { x: actualX, y: actualY, r: props.data.r });
 };
 
