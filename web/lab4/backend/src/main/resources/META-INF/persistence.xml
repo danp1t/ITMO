@@ -6,6 +6,7 @@
     <persistence-unit name="lab4" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
         <class>org.example.backend.Users</class>
+        <class>org.example.backend.Result</class>
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/studs"/>
             <property name="jakarta.persistence.jdbc.user" value="s409425"/>

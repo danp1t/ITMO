@@ -1,14 +1,16 @@
 package org.example.backend;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.Response;
 
 
 @Path("/point")
 public class PointResource {
-
+    @Inject
+    private ResultService resultService;
 
     @POST
     @Consumes("application/json")
@@ -17,7 +19,9 @@ public class PointResource {
         try {
             processPoint(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
 
+
             boolean hit = isHit(pointDTO.getX(), pointDTO.getY(), pointDTO.getR());
+            resultService.registerUser(pointDTO.getX(), pointDTO.getY(), pointDTO.getR(), hit);
 
             String toSendStringHit = "{\"hit\" :" + hit + "}";
 
