@@ -16,25 +16,33 @@ import Registration from "@/components/Registration.vue";
 </template>
 
 <style scoped>
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   background-color: rgb(232, 232, 232);
   font-family: 'Arial', sans-serif;
   color: #333;
   margin: 0;
-  padding: 20px;
+  padding: 0;
 }
 
 .container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-.Authorization, .Registration {
-  width: 100%;
-}
 
-/* Tablet styles */
 @media (min-width: 889px) and (max-width: 1136px) {
   .container {
     flex-direction: column;
@@ -51,7 +59,7 @@ body {
 @media (min-width: 1137px) {
   .container {
     flex-direction: row;
-    gap: 40px;
+    gap: 20px;
   }
   .Authorization {
     flex: 1;

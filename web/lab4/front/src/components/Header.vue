@@ -18,6 +18,7 @@ header {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: space-between; /* Distributes items evenly */
   padding: 20px;
   margin: 10px;
   border-bottom: 2px solid #00bfff;
@@ -28,11 +29,8 @@ header {
 .info_header {
   font-size: 20px;
   text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff;
-  margin-right: 20px;
-}
-
-.info_header:last-child {
-  margin-right: 0;
+  margin-right: 0; /* Removed margin for even distribution */
+  flex: 1; /* Ensures items take equal space if needed */
 }
 
 /* Media queries for font sizes and layout */
@@ -53,14 +51,14 @@ header {
 @media (min-width: 889px) and (max-width: 1136px) {
   .info_header {
     font-size: 18px;
-    margin-right: 15px;
+    margin-right: 0; /* Adjusted margin for even distribution */
   }
 }
 
 @media (min-width: 1137px) {
   .info_header {
     font-size: 20px;
-    margin-right: 20px;
+    margin-right: 0; /* Adjusted margin for even distribution */
   }
 }
 </style>

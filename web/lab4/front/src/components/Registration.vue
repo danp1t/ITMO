@@ -116,7 +116,7 @@ label {
 
 input {
   width: 95%;
-  padding: 10px;
+  padding: 3px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -138,5 +138,25 @@ input:focus {
 
 .submit-button:hover {
   background-color: #0056b3;
+}
+
+/* Tablet Styles */
+@media (min-width: 889px) and (max-width: 1136px) {
+  .home {
+    width: 50%;
+  }
+  input {
+    width: 95%; /* Adjust input width if necessary */
+  }
+}
+
+/* Mobile Styles */
+@media (max-width: 888px) {
+  .home {
+    width: 90%;
+  }
+  input {
+    width: 100%; /* Ensure inputs take full width on mobile */
+  }
 }
 </style>

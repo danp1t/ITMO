@@ -87,8 +87,7 @@ export default {
 
 .home {
   max-width: 400px;
-  width: 25%;
-
+  width: 90%; /* Mobile default */
   margin: auto;
   padding: 20px;
   border: 1px solid #ddd;
@@ -112,8 +111,8 @@ label {
 }
 
 input {
-  width: 95%;
-  padding: 10px;
+  width: 100%; /* Full width on mobile */
+  padding: 3px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
@@ -135,5 +134,22 @@ input:focus {
 
 .submit-button:hover {
   background-color: #0056b3;
+}
+
+/* Tablet Styles */
+@media (min-width: 889px) and (max-width: 1136px) {
+  .home {
+    width: 50%; /* Tablet width */
+  }
+  input {
+    width: 95%; /* Adjusted for tablet */
+  }
+}
+
+/* Desktop Styles */
+@media (min-width: 1137px) {
+  .home {
+    width: 25%; /* Desktop width */
+  }
 }
 </style>
