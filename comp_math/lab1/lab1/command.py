@@ -1,8 +1,4 @@
-import os
 
-#Команда для выхода из программы
-def exit():
-    os._exit(0)
 
 #Команда для вывода списка команд с их описанием
 def help():
@@ -15,6 +11,7 @@ def help():
     print("/input_epsilon_file - ввод точности из файла")
     print("/input_matrix - ввод матрицы с клавиатуры")
     print("/input_epsilon - ввод точности с клавиатуры")
+    print()
 
 def info():
     pass
@@ -31,15 +28,4 @@ def input_epsilon():
 def start():
     pass
 
-#Список команд
-commands = {
-    "/help" : help(),
-    "/exit" : exit(),
-    "/info" : info(),
-    "/start" : start(),
-    "/full_input_file" : full_input_file(),
-    "/input_matrix_file" : input_matrix_file(),
-    "/input_epsilon_file" : input_epsilon_file(),
-    "/input_matrix" : input_matrix(),
-    "/input_epsilon" : input_epsilon()
-}
+

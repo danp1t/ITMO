@@ -1,3 +1,5 @@
+import command
+
 #Информация о лабораторной работе
 def info_about_lab():
     print("Лабораторная работа №1")
@@ -11,3 +13,9 @@ def welcome_message():
     print("Добро пожаловать в программу, которая решает СЛАУ с помошью метода Гаусса-Зейделя")
     print("Список команд доступен по команде /help")
     print()
+
+def validate_task(task):
+    if task == "/help": command.help()
+    elif task == "/info": command.info()
+    elif task == "/exit": exit(0)
+    else: print("Команда не найдена")
