@@ -14,7 +14,3 @@ command.help()
 while True:
     task = input("Введите команду: ")
     other_command.validate_task(task)
-
-
-
-
