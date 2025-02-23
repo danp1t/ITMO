@@ -18,4 +18,6 @@ def validate_task(task):
     if task == "/help": command.help()
     elif task == "/info": command.info()
     elif task == "/exit": exit(0)
+    elif task == "/input_n": command.input_n()
+    elif task == "/input_epsilon": command.input_epsilon()
     else: print("Команда не найдена")
