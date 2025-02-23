@@ -1,7 +1,8 @@
 #Глобальные данные
 matrix = None
 epsilon = None
-n = None #размерность матрицы
+n = None  #размерность матрицы
+
 
 #Команда для вывода списка команд с их описанием
 def help():
@@ -18,6 +19,7 @@ def help():
     print("/input_n - ввод размера матрицы с клавиатуры")
     print()
 
+
 def info():
     if epsilon is not None:
         print("Точность: ", epsilon)
@@ -32,9 +34,69 @@ def info():
     print()
 
 
+def input_full_file():
+    global n, epsilon, matrix
+    file_path = input("Введите путь к файлу: ")
+    try:
+        with open(file_path, 'r') as file:
+            lines = [line.strip() for line in file if line.strip()]
 
-def full_input_file():
-    pass
+            if len(lines) < 2:
+                print("Ошибка: файл должен содержать как минимум две строки (n и epsilon)")
+                return input_full_file()
+
+            n_str = lines[0]
+            try:
+                n_float = float(n_str)
+            except ValueError:
+                print(f"Ошибка: n должно быть числом. Получено: {n_str}")
+                return input_full_file()
+
+            if not n_float.is_integer():
+                print(f"Ошибка: n должно быть целым числом. Получено: {n_str}")
+                return input_full_file()
+
+            n = int(n_float)
+            if n <= 0 or n > 20:
+                print(f"Ошибка: n должно быть от 1 до 20. Получено: {n}")
+                return input_full_file()
+
+            epsilon_str = lines[1]
+            try:
+                epsilon = float(epsilon_str)
+            except ValueError:
+                print(f"Ошибка: epsilon должно быть числом. Получено: {epsilon_str}")
+                return input_full_file()
+
+            matrix_lines = lines[2:]
+            if len(matrix_lines) != n:
+                print(f"Ошибка: для матрицы ожидается {n} строк, получено {len(matrix_lines)}")
+                return input_full_file()
+
+            matrix = []
+            for i, line in enumerate(matrix_lines, 1):
+                elements = line.split()
+                if len(elements) != n:
+                    print(f"Ошибка в строке матрицы {i}: ожидается {n} элементов, получено {len(elements)}")
+                    return input_full_file()
+                try:
+                    row = list(map(float, elements))
+                    matrix.append(row)
+                except ValueError:
+                    print(f"Ошибка в строке матрицы {i}: нечисловой элемент")
+                    return input_full_file()
+
+    except FileNotFoundError:
+        print(f"Ошибка: файл '{file_path}' не найден")
+        return input_full_file()
+    except PermissionError:
+        print(f"Ошибка: нет прав для чтения файла '{file_path}'")
+        return input_full_file()
+    except Exception as e:
+        print(f"Неизвестная ошибка: {str(e)}")
+        return input_full_file()
+
+
 def input_matrix_file():
     global matrix
     file_path = input("Введите путь к файлу: ")
@@ -77,6 +139,7 @@ def input_matrix_file():
         print(f"Неизвестная ошибка: {str(e)}")
         input_matrix_file()
 
+
 def input_n_file():
     global n
     file_path = input("Введите путь к файлу: ")
@@ -107,6 +170,7 @@ def input_n_file():
     except FileNotFoundError:
         print(f"Ошибка: файл '{file_path}' не найден")
         input_n_file()
+
 
 def input_epsilon_file():
     global epsilon
@@ -141,7 +205,7 @@ def input_matrix():
 
     for i in range(n):
         while True:
-            row_input = input(f"Строка {i+1}: ").strip()
+            row_input = input(f"Строка {i + 1}: ").strip()
             elements = row_input.split()
 
             if len(elements) != n:
@@ -160,6 +224,7 @@ def input_epsilon():
     global epsilon
     epsilon = float(input("Введите точность: "))
 
+
 def input_n():
     global n
     n = int(input("Введите размерность матрицы: "))
@@ -169,7 +234,7 @@ def input_n():
     elif n > 20:
         print("Размерность должна быть меньше 20")
         input_n()
+
+
 def start():
     pass
-
-
