@@ -36,7 +36,46 @@ def info():
 def full_input_file():
     pass
 def input_matrix_file():
-    pass
+    global matrix
+    file_path = input("Введите путь к файлу: ")
+    if n is None:
+        print("Ошибка: сначала введите размерность матрицы")
+        input_n()
+    matrix = []
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+            non_empty_lines = [line.strip() for line in lines if line.strip()]
+
+            if len(non_empty_lines) != n:
+                print(f"Ошибка: файл должен содержать ровно {n} строк. Найдено: {len(non_empty_lines)}")
+                input_matrix_file()
+
+            for i, line in enumerate(non_empty_lines, 1):
+                elements = line.split()
+
+                if len(elements) != n:
+                    print(f"Ошибка в строке {i}: должно быть {n} элементов. Найдено: {len(elements)}")
+                    input_matrix_file()
+
+                try:
+                    row = list(map(float, elements))
+                    matrix.append(row)
+                except ValueError:
+                    print(f"Ошибка в строке {i}: нечисловой элемент")
+                    input_matrix_file()
+
+
+    except FileNotFoundError:
+        print(f"Ошибка: файл '{file_path}' не найден")
+        input_matrix_file()
+    except PermissionError:
+        print(f"Ошибка: нет прав для чтения файла '{file_path}'")
+        input_matrix_file()
+    except Exception as e:
+        print(f"Неизвестная ошибка: {str(e)}")
+        input_matrix_file()
 
 def input_n_file():
     global n
@@ -93,7 +132,29 @@ def input_epsilon_file():
 
 
 def input_matrix():
-    pass
+    global n, matrix
+    if n is None:
+        print("Ошибка: сначала введите размерность матрицы")
+        input_n()
+    matrix = []
+    print(f"\nВведите матрицу {n}x{n} построчно. Числа разделяйте пробелами:")
+
+    for i in range(n):
+        while True:
+            row_input = input(f"Строка {i+1}: ").strip()
+            elements = row_input.split()
+
+            if len(elements) != n:
+                print(f"Ошибка: нужно ввести ровно {n} чисел")
+                continue
+
+            try:
+                row = list(map(float, elements))
+                matrix.append(row)
+                break
+            except ValueError:
+                print("Ошибка: все элементы должны быть числами")
+
 
 def input_epsilon():
     global epsilon

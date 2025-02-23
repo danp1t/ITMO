@@ -22,4 +22,6 @@ def validate_task(task):
     elif task == "/input_epsilon": command.input_epsilon()
     elif task == "/input_n_file": command.input_n_file()
     elif task == "/input_epsilon_file": command.input_epsilon_file()
+    elif task == "/input_matrix": command.input_matrix()
+    elif task == "/input_matrix_file": command.input_matrix_file()
     else: print("Команда не найдена")
