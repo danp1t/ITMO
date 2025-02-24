@@ -245,5 +245,5 @@ def start():
     if epsilon is None:
         print("Необходимо ввести точность")
         input_epsilon()
-    print("Ответ: ", end="")
+
     print(math_module.seidel(matrix, epsilon, 50))
