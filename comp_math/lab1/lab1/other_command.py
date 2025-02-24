@@ -25,4 +25,5 @@ def validate_task(task):
     elif task == "/input_matrix": command.input_matrix()
     elif task == "/input_matrix_file": command.input_matrix_file()
     elif task == "/input_full_file": command.input_full_file()
+    elif task == "/start": command.start()
     else: print("Команда не найдена")

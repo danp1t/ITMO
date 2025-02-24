@@ -1,3 +1,5 @@
+import math_module
+
 #Глобальные данные
 matrix = None
 epsilon = None
@@ -28,7 +30,7 @@ def info():
     if matrix is not None:
         print("Матрица: ")
         for i in range(n):
-            for j in range(n):
+            for j in range(n + 1):
                 print(matrix[i][j], end=" ")
             print()
     print()
@@ -76,8 +78,8 @@ def input_full_file():
             matrix = []
             for i, line in enumerate(matrix_lines, 1):
                 elements = line.split()
-                if len(elements) != n:
-                    print(f"Ошибка в строке матрицы {i}: ожидается {n} элементов, получено {len(elements)}")
+                if len(elements) != n + 1:
+                    print(f"Ошибка в строке матрицы {i}: ожидается {n + 1} элементов, получено {len(elements)}")
                     return input_full_file()
                 try:
                     row = list(map(float, elements))
@@ -117,8 +119,8 @@ def input_matrix_file():
             for i, line in enumerate(non_empty_lines, 1):
                 elements = line.split()
 
-                if len(elements) != n:
-                    print(f"Ошибка в строке {i}: должно быть {n} элементов. Найдено: {len(elements)}")
+                if len(elements) != n + 1:
+                    print(f"Ошибка в строке {i}: должно быть {n + 1} элементов. Найдено: {len(elements)}")
                     input_matrix_file()
 
                 try:
@@ -208,8 +210,8 @@ def input_matrix():
             row_input = input(f"Строка {i + 1}: ").strip()
             elements = row_input.split()
 
-            if len(elements) != n:
-                print(f"Ошибка: нужно ввести ровно {n} чисел")
+            if len(elements) != n + 1:
+                print(f"Ошибка: нужно ввести ровно {n + 1} чисел")
                 continue
 
             try:
@@ -237,4 +239,11 @@ def input_n():
 
 
 def start():
-    pass
+    if matrix is None:
+        print("Необходимо ввести матрицу")
+        input_matrix()
+    if epsilon is None:
+        print("Необходимо ввести точность")
+        input_epsilon()
+    print("Ответ: ", end="")
+    print(math_module.seidel(matrix, epsilon, 10))
