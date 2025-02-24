@@ -27,6 +27,6 @@ def seidel(matrix, epsilon, max_iterations):
             return x
         k += 1
 
-    print("Итерации расходятся")
+    return "Итерации расходятся"
 
 
