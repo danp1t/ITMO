@@ -19,6 +19,7 @@ def help():
     print("/input_matrix - ввод матрицы с клавиатуры")
     print("/input_epsilon - ввод точности с клавиатуры")
     print("/input_n - ввод размера матрицы с клавиатуры")
+    print("/clear - очистка введенных данных")
     print()
 
 
@@ -200,7 +201,6 @@ def input_epsilon_file():
 def input_matrix():
     global n, matrix
     if n is None:
-        print("Ошибка: сначала введите размерность матрицы")
         input_n()
     matrix = []
     print(f"\nВведите матрицу {n}x{n} построчно. Числа разделяйте пробелами:")
@@ -258,3 +258,10 @@ def start():
         input_epsilon()
 
     print(math_module.seidel(matrix, epsilon, 1000))
+    clear()
+
+def clear():
+    global matrix, n, epsilon
+    matrix = None
+    n = None
+    epsilon = None
