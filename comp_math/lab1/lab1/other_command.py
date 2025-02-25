@@ -17,7 +17,7 @@ def welcome_message():
 def validate_task(task):
     match task:
         case "/help": command.help()
-        case "/info" :command.info()
+        case "/info": command.info()
         case "/exit": exit(0)
         case "/input_n": command.input_n()
         case "/input_epsilon": command.input_epsilon()
