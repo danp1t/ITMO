@@ -18,6 +18,7 @@ def seidel(matrix, epsilon, max_iterations):
             for j in range(n):
                 if j != i:
                     s += a[i][j] * x[j]
+            if a[i][i] == 0: a[i][i] = .000000001
             new_x = (b[i] - s) / a[i][i]
             d = abs(new_x - x[i])
             current_errors.append(d)
@@ -54,7 +55,7 @@ def rearrange_matrix(matrix):
         for row in range(col, n):
             if abs(new_matrix[row][col]) > abs(new_matrix[max_row][col]):
                 max_row = row
-        # Меняем строки местами
+
         new_matrix[col], new_matrix[max_row] = new_matrix[max_row], new_matrix[col]
 
     return new_matrix

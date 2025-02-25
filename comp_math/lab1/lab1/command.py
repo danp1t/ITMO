@@ -224,17 +224,28 @@ def input_matrix():
 
 def input_epsilon():
     global epsilon
-    epsilon = float(input("Введите точность: "))
+    try:
+        epsilon = float(input("Введите точность: "))
+        if epsilon <= 0:
+            print("Точность должна быть больше 0")
+            input_epsilon()
+    except ValueError:
+        print("Ошибка: введено не число")
+        input_epsilon()
 
 
 def input_n():
     global n
-    n = int(input("Введите размерность матрицы: "))
-    if n <= 0:
-        print("Размерность должна быть больше 0")
-        input_n()
-    elif n > 20:
-        print("Размерность должна быть меньше 20")
+    try:
+        n = int(input("Введите размерность матрицы: "))
+        if n <= 0:
+            print("Размерность должна быть больше 0")
+            input_n()
+        elif n > 20:
+            print("Размерность должна быть меньше 20")
+            input_n()
+    except ValueError:
+        print("Ошибка: введено не целое число")
         input_n()
 
 
@@ -246,4 +257,4 @@ def start():
         print("Необходимо ввести точность")
         input_epsilon()
 
-    print(math_module.seidel(matrix, epsilon, 50))
+    print(math_module.seidel(matrix, epsilon, 1000))
