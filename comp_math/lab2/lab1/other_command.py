@@ -17,10 +17,11 @@ def welcome_message():
     print()
 
 def validate_task(task):
-    match task:
-        case "/help": command.help()
-        case "/info": command.info()
-        case "/exit": exit(0)
-        case "/start": command.start()
-        case "/clear": command.clear()
-        case _: print("Команда не найдена")
+    if task == "/help" or task =="0": command.help()
+    elif task == "/exit" or task == "1": exit(0)
+    elif task == "/info" or task == "2": command.info()
+    elif task == "/start" or task == "3": command.start()
+    elif task == "/clear" or task == "4": command.clear()
+    elif task == "/choice_equation" or task == "5": command.choice_equation()
+    elif task == "/choice_system" or task == "6": command.choice_system()
+    else: print("Команда не найдена")
