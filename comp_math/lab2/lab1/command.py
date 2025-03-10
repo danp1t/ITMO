@@ -1,8 +1,13 @@
 import math_module
 
 #Глобальные данные
+number_equation = None
 equation = None
+number_system = None
 system = None
+interval = None
+epsilon = None
+approximation = None
 
 
 #Команда для вывода списка команд с их описанием
@@ -14,10 +19,94 @@ def help():
     print("4. /clear - очистка введенных данных")
     print("5. /choice_equation - выбор уравнения")
     print("6. /choice_system - выбор системы уравнений")
+
+    print("7. /input_interval - ввод интервала")
+    print("8. /input_epsilon - ввод погрешности")
+    print("9. /input_approximation - ввод начального приближения")
+
+    print("10. /input_file_interval - ввод интервала из файла")
+    print("11. /input_file_epsilon - ввод погрешности из файла")
+    print("12. /input_file_approximation - ввод начального приближения из файла")
     print()
 
+def input_interval():
+    global interval
+    try:
+        a = float(input("Введите нижнюю границу интервала: "))
+        b = float(input("Введите верхнюю границу интервала: "))
+        if a >= b:
+            print("Ошибка: нижняя граница должна быть меньше верхней. Попробуйте снова.")
+            input_interval()
+        else:
+            interval = (a, b)
+    except ValueError:
+        print("Ошибка: введите числовые значения. Попробуйте снова.")
+        input_interval()
+
+def input_epsilon():
+    global epsilon
+    try:
+        epsilon = float(input("Введите погрешность: "))
+        if epsilon <= 0:
+            print("Ошибка: погрешность должна быть положительным числом. Попробуйте снова.")
+            input_epsilon()
+    except ValueError:
+        print("Ошибка: введите числовое значение. Попробуйте снова.")
+        input_epsilon()
+
+def input_approximation():
+    global approximation
+    try:
+        approximation = float(input("Введите начальное приближение: "))
+    except ValueError:
+        print("Ошибка: введите числовое значение. Попробуйте снова.")
+        input_approximation()
+
+def input_file_interval():
+    global interval
+    filename = input("Введите путь к файлу: ")
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+            a, b = map(float, lines[0].split())
+            if a >= b:
+                print("Ошибка: нижняя граница должна быть меньше верхней.")
+                input_file_interval()
+            else:
+                interval = (a, b)
+    except (ValueError, IndexError):
+        print("Ошибка: некорректный формат данных в файле.")
+        input_file_interval()
+
+def input_file_epsilon():
+    global epsilon
+    filename = input("Введите путь к файлу: ")
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+            epsilon = float(lines[1].strip())
+            if epsilon <= 0:
+                print("Ошибка: погрешность должна быть положительным числом.")
+                input_file_epsilon()
+    except (ValueError, IndexError):
+        print("Ошибка: некорректный формат данных в файле.")
+        input_file_epsilon()
+
+def input_file_approximation():
+    global approximation
+    filename = input("Введите путь к файлу: ")
+    try:
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+            approximation = float(lines[2].strip())
+            return True
+    except (ValueError, IndexError):
+        print("Ошибка: некорректный формат данных в файле.")
+        input_file_approximation()
+
+
 def choice_equation():
-    global equation
+    global equation, number_equation
     print("Доступные уравнения: ")
     print()
     print("1. x^2 - 4 = 0")
@@ -46,7 +135,7 @@ def choice_equation():
         return choice_equation()
 
 def choice_system():
-    global system
+    global system, number_system
     print("Доступные системы уравнений: ")
     print()
     print("1. x^3 + y = 1, x - 3y = 3")
@@ -72,9 +161,16 @@ def choice_system():
 
 def info():
     if equation is not None:
-        print("Уравнение: ", equation)
+        print(number_equation, ".", "Уравнение: ", equation)
     if system is not None:
-        print("Система уравнений: ", system)
+        print(number_system, ".", "Система уравнений: ", system)
+    if interval is not None:
+        print("Интервал: ", interval)
+    if epsilon is not None:
+        print("Погрешность: ", epsilon)
+    if approximation is not None:
+        print("Начальное приближение: ", approximation)
+    print()
 
 
 
