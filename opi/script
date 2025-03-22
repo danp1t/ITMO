@@ -1,0 +1,60 @@
+cd github/ITMO/opi/lab2/
+mkdir git_repo_user_1
+cd git_repo_user_1/
+
+git init
+unzip ./../commit0.zip
+git add .
+git commit -m "Initial commit"
+
+git clone git_repo_user_1 git_repo_user_2
+cd git_repo_user_2
+unzip ./../commit1.zip 
+git add .
+git commit -m "First commit"
+
+git branch develop
+git checkout develop
+unzip ./../commit2.zip
+git add .
+git commit -m "Second commit"
+
+unzip ./../commit3.zip
+git add .
+git commit -m "Third commit"
+
+cd ../git_repo_user_1
+unzip ./../commit4.zip
+git add .
+git commit -m "Fourth commit"
+
+unzip ./../commit5.zip
+git add .
+git commit -m "Fifth commit"
+
+cd ../git_repo_user_2
+unzip ./../commit6.zip
+git add .
+git commit -m "Sixth commit"
+
+cd ../git_repo_user_1
+unzip ./../commit7.zip
+git add .
+git commit -m "Seventh commit"
+
+cd ../git_repo_user_2
+unzip ./../commit8.zip
+git add .
+git commit -m "Eigth commit"
+
+cd ../git_repo_user_1
+git remote add local-clone ./../git_repo_user_2
+git fetch local-clone
+git merge local-clone/develop
+git commit -m "Nine commit"
+
+git checkout master
+unzip ./../commit10.zip 
+git add .
+git commit -m "Ten commit"
+
