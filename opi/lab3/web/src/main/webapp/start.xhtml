@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Created by IntelliJ IDEA.
+  User: danp1t
+  Date: 12.11.2024
+  Time: 11:22
+-->
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Стартовая страничка</title>
+    <link rel="stylesheet" href="styles.css"/>
+</h:head>
+
+<h:body>
+    <div id="header">
+        <span id="myname">Путинцев Данил Денисович</span>
+        <span id="mygroup">P3207</span>
+        <span id="variant">Вариант: 430331</span>
+    </div>
+
+    <div id="clock">
+        <h:form>
+            <p:clock displayMode="analog"/>
+            <div class="centered-content">
+                <h:outputText id="currentTime" value="#{clockBean.currentTime}" style="font-size: 24px;"/>
+                <p:poll interval="9" listener="#{clockBean.updateCurrentTime}" update="currentTime" />
+            </div>
+            <h:commandButton value="Перейти на главную страницу" action="index.xhtml" styleClass="custom-button" />
+        </h:form>
+    </div>
+
+</h:body>
+
+</html>

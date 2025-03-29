@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<project name="lab3" default="build">
+	<target name="compile"></target>
+	<target name="build" depends="compile"></target>
+	<target name="clean"></target>
+	<target name="test" depends="build"></target>
+	<target name="music" depends="build"></target>
+	<target name="team"></target>
+</project>
