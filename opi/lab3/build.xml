@@ -7,6 +7,7 @@
     <property name="classes.dir" location="${build.dir}/classes"/>
     <property name="dist.dir" location="dist"/>
     <property name="lib.dir" location="lib"/>
+    <property name="war.file" value="${dist.dir}/lab3.war"/>
 
 	<target name="compile">
     	<ivy:configure />
@@ -25,8 +26,31 @@
         </javac>
 	</target>
 
-	<target name="build" depends="compile"></target>
-	<target name="clean"></target>
+	<target name="build" depends="compile">
+        <war destfile="${war.file}" webxml="${web.dir}/WEB-INF/web.xml">
+            <classes dir="${classes.dir}"/>
+            
+            <lib dir="${lib.dir}">
+                <include name="*.jar"/>
+                <exclude name="jakarta.servlet-api*.jar"/>
+            </lib>
+            
+            <fileset dir="${web.dir}">
+                <include name="**/*.xhtml"/>
+                <include name="**/*.css"/>
+                <include name="**/*.js"/>
+                <include name="**/*.png"/>
+                <include name="**/*.jpg"/>
+            </fileset>
+        </war>
+	</target>
+
+	<target name="clean">
+		 <delete dir="${build.dir}"/>
+        <delete dir="${dist.dir}"/>
+        <delete dir="${lib.dir}"/>
+	</target>
+	
 	<target name="test" depends="build"></target>
 	<target name="music" depends="build"></target>
 	<target name="team"></target>
