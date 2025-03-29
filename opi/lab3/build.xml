@@ -1,6 +1,30 @@
 <?xml version="1.0"?>
-<project name="lab3" default="build">
-	<target name="compile"></target>
+<project name="lab3" default="build" xmlns:ivy="antlib:org.apache.ivy.ant">
+
+	<property name="src.dir" location="web/src/main/java"/>
+    <property name="web.dir" location="web/src/main/webapp"/>
+    <property name="build.dir" location="build"/>
+    <property name="classes.dir" location="${build.dir}/classes"/>
+    <property name="dist.dir" location="dist"/>
+    <property name="lib.dir" location="lib"/>
+
+	<target name="compile">
+    	<ivy:configure />
+    	<ivy:resolve />
+    	<ivy:retrieve pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
+
+    	<mkdir dir="${build.dir}" />
+    	<mkdir dir="${classes.dir}" />
+    	<mkdir dir="${dist.dir}" />
+
+    	<javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false">
+            <classpath>
+                <fileset dir="${lib.dir}" includes="**/*.jar"/>
+                <fileset dir="${web.dir}/WEB-INF/lib" includes="**/*.jar"/>
+            </classpath>
+        </javac>
+	</target>
+
 	<target name="build" depends="compile"></target>
 	<target name="clean"></target>
 	<target name="test" depends="build"></target>

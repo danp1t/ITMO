@@ -2,16 +2,14 @@
 <ivy-module version="2.0">
     <info organisation="opi.labs" module="lab3" revision="1.0"/>
     <dependencies>
-        <dependency org="jakarta.servlet" name="jakarta.servlet-api" rev="6.1.0" scope="provided"/>
-        <dependency org="jakarta.platform" name="jakarta.jakartaee-api" rev="11.0.0-M4"  scope="provided"/>
+        <dependency org="jakarta.servlet" name="jakarta.servlet-api" rev="6.1.0" />
+        <dependency org="jakarta.platform" name="jakarta.jakartaee-api" rev="11.0.0-M4"  />
         <dependency org="jakarta.faces" name="jakarta.faces-api" rev="4.1.0"/>
         <dependency org="org.eclipse.persistence" name="org.eclipse.persistence.jpa" rev="4.0.4"/>
-        <dependency org="org.primefaces" name="primefaces" rev="14.0.6" conf="default">
-            <artifact name="primefaces" type="jar" classifier="jakarta"/>
-        </dependency>
+        <dependency org="org.primefaces" name="primefaces" rev="14.0.6" />
         <dependency org="org.postgresql" name="postgresql" rev="42.7.4"/>
         <dependency org="jakarta.inject" name="jakarta.inject-api" rev="2.0.1"/>
-        <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.9.2" scope="test"/>
-        <dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.9.2" scope="test"/>
+        <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.9.2" />
+        <dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.9.2" />
     </dependencies>
 </ivy-module>

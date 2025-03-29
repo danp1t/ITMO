@@ -1,7 +1,7 @@
 package org.example;
 
 
-import jakarta.enterprise.context.ApplicationScoped;;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import jakarta.persistence.*;
 
