@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import static java.lang.Math.abs;
 
 @Named("CoorBean")
@@ -119,6 +118,10 @@ public class CoorBean implements Serializable {
 
 
 
+    }
+
+    public void setResultService(ResultService resultService) {
+        this.resultService = resultService;
     }
 
     public boolean checkArea(double x, double y, double r) {

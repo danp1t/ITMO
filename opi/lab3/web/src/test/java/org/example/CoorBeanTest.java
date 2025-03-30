@@ -7,6 +7,7 @@ import jakarta.faces.validator.ValidatorException;
 import org.junit.Before;
 import org.junit.Test;
 
+import  java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -17,11 +18,23 @@ public class CoorBeanTest {
     private FacesContext facesContext;
     private UIComponent uiComponent;
 
-    @Before
+   @Before
     public void setUp() {
         coorBean = new CoorBean();
-        facesContext = null; 
-        uiComponent = null; 
+        coorBean.setResultService(new TestResultService());
+    }
+
+    private static class TestResultService extends ResultService {
+        private List<ResultBean> savedResults = new ArrayList<>();
+        
+        @Override
+        public void saveResult(ResultBean result) {
+            savedResults.add(result); // Сохраняем в память для тестов
+        }
+        
+        public List<ResultBean> getSavedResults() {
+            return savedResults;
+        }
     }
 
     @Test

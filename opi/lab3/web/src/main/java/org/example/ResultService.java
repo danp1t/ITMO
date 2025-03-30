@@ -9,15 +9,10 @@ import jakarta.persistence.PersistenceContext;
 
 @Stateless
 public class ResultService {
-
-    private EntityManagerFactory emf = Persistence.createEntityManagerFactory("lab3_123");
-
+    @PersistenceContext(unitName = "lab3_123")
+    private EntityManager em;
 
     public void saveResult(ResultBean result) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
         em.persist(result);
-        em.getTransaction().commit();
     }
-
 }
