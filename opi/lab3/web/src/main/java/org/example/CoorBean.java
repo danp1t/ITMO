@@ -28,7 +28,6 @@ public class CoorBean implements Serializable {
 
     @Inject
     private ResultService resultService;
-    // Getters и Setters
 
     public String getCoorX() {
         return coorX;
@@ -56,8 +55,6 @@ public class CoorBean implements Serializable {
 
     public void selectCoorY(String value) {
         this.coorY = value;
-
-        // Здесь вы можете добавить любую логику, которая должна выполняться при выборе значения
     }
 
     public String getErrorMessage() {
@@ -124,7 +121,7 @@ public class CoorBean implements Serializable {
 
     }
 
-    private boolean checkArea(double x, double y, double r) {
+    public boolean checkArea(double x, double y, double r) {
         // Проверка попадания точки (x, y) в область с радиусом r
         if (x >= 0 && y >= 0){
             return false;

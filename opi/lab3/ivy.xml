@@ -9,7 +9,11 @@
         <dependency org="org.primefaces" name="primefaces" rev="14.0.6" />
         <dependency org="org.postgresql" name="postgresql" rev="42.7.4"/>
         <dependency org="jakarta.inject" name="jakarta.inject-api" rev="2.0.1"/>
-        <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.9.2" />
-        <dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.9.2" />
+        <dependency org="org.junit.jupiter" name="junit-jupiter-api" rev="5.12.1" />
+        <dependency org="org.junit.jupiter" name="junit-jupiter-engine" rev="5.12.1" />
+        <dependency org="org.junit.platform" name="junit-platform-launcher" rev="1.12.1" />
+        <dependency org="org.junit.platform" name="junit-platform-engine" rev="1.12.1" />
+        <dependency org="org.junit.platform" name="junit-platform-commons" rev="1.12.1" />
+        <dependency org="org.apache.ant" name="ant-junitlauncher" rev="1.10.14" />
     </dependencies>
 </ivy-module>

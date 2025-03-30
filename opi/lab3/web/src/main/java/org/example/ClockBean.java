@@ -26,7 +26,7 @@ public class ClockBean {
             public void run() {
                 updateCurrentTime();
             }
-        }, 0, 9000); // Обновляем каждую 9 секунд
+        }, 0, 9000); 
     }
 
     public void updateCurrentTime() {
