@@ -67,7 +67,6 @@
 	</target>
 	
 	<target name="test" depends="build">
-        <echo message="***** TEST STARTED *****"/>
     <mkdir dir="${test.reports.dir}"/>
     
     <junit printsummary="on" haltonfailure="true" haltonerror="true">
@@ -81,11 +80,16 @@
             <fileset dir="${test.dir}" includes="**/*Test.java"/>
         </batchtest>
     </junit>
-    
-    <echo message="***** TEST COMPLETED *****"/>
     </target>
 
 
-	<target name="music" depends="build"></target>
+	<target name="music" depends="build">
+        <exec executable="mpv" osfamily="unix" failonerror="false">
+        <arg value="--no-terminal"/>  <!-- Без вывода в консоль -->
+        <arg value="--no-video"/>     <!-- Если файл не видео -->
+        <arg value="/home/danp1t/github/ITMO/opi/lab3/music.mp3"/>
+    </exec>
+         
+    </target>
 	<target name="team"></target>
 </project>
