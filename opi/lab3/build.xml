@@ -11,6 +11,7 @@
     <property name="lib.dir" location="lib"/>
     <property name="war.file" value="${dist.dir}/lab3.war"/>
     <property name="test.reports.dir" location="${build.dir}/test-reports"/>
+    <property name="revisions.dir" location="${build.dir}/revisions"/>
 
     <path id="test.classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
@@ -64,6 +65,7 @@
 		 <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
         <delete dir="${lib.dir}"/>
+        <delete dir="${revisions.dir}"/>
 	</target>
 	
 	<target name="test" depends="build">
@@ -84,12 +86,53 @@
 
 
 	<target name="music" depends="build">
-        <exec executable="mpv" osfamily="unix" failonerror="false">
-        <arg value="--no-terminal"/>  <!-- Без вывода в консоль -->
-        <arg value="--no-video"/>     <!-- Если файл не видео -->
-        <arg value="/home/danp1t/github/ITMO/opi/lab3/music.mp3"/>
-    </exec>
-         
+            <exec executable="mpv" osfamily="unix" failonerror="false">
+            <arg value="--no-terminal"/>
+            <arg value="--no-video"/> 
+            <arg value="/home/danp1t/github/ITMO/opi/lab3/music.mp3"/>
+        </exec>
     </target>
-	<target name="team"></target>
+
+    
+
+	<target name="team">
+        <mkdir dir="${revisions.dir}"/>
+
+        <exec executable="git" outputproperty="git.commits">
+            <arg value="log"/>
+            <arg value="--pretty=format:%H"/>
+            <arg value="-n"/>
+            <arg value="4"/>
+        </exec>
+
+        <property name="commits.list" value="${git.commits}"/>
+
+        <antcall target="process-commit">
+            <param name="commit" value="${commits.list.split(',')[0]}"/>
+        </antcall>
+        <antcall target="process-commit">
+            <param name="commit" value="${commits.list.split(',')[1]}"/> 
+        </antcall>
+        <antcall target="process-commit">
+            <param name="commit" value="${commits.list.split(',')[2]}"/>
+        </antcall>
+        <antcall target="process-commit">
+            <param name="commit" value="${commits.list.split(',')[3]}"/>
+        </antcall>
+        <zip destfile="${dist.dir}/all-revisions.zip" basedir="${revisions.dir}"/>
+    </target>
+
+    <target name="process-commit">
+        <exec executable="git">
+            <arg value="${commit}"/> 
+        </exec>
+
+        <antcall target="build"/>
+        <copy file="${war.file}" tofile="${revisions.dir}/lab3-${commit}.war"/>
+
+        <exec executable="git">
+            <arg value="checkout"/>
+            <arg value="main"/> 
+        </exec>
+    </target>
 </project>
