@@ -1,27 +1,16 @@
 <?xml version="1.0"?>
 <project name="lab3" default="build" xmlns:ivy="antlib:org.apache.ivy.ant">
-
-	<property name="src.dir" location="web/src/main/java"/>
-    <property name="web.dir" location="web/src/main/webapp"/>
-    <property name="test.dir" location="web/src/test/java"/>
-    <property name="build.dir" location="build"/>
-    <property name="classes.dir" location="${build.dir}/classes"/>
-    <property name="test.classes.dir" location="${build.dir}/test-classes"/>
-    <property name="dist.dir" location="dist"/>
-    <property name="lib.dir" location="lib"/>
-    <property name="war.file" value="${dist.dir}/lab3.war"/>
-    <property name="test.reports.dir" location="${build.dir}/test-reports"/>
-    <property name="revisions.dir" location="${build.dir}/revisions"/>
-
+	<property file="build.properties"/>
+    
     <path id="test.classpath">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
         <pathelement path="${classes.dir}"/>
     </path>
 
 	<target name="compile">
-    	<ivy:configure />
-    	<ivy:resolve />
-    	<ivy:retrieve pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
+        <ivy:configure />
+        <ivy:resolve />
+        <ivy:retrieve pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]"/>
 
     	<mkdir dir="${build.dir}" />
     	<mkdir dir="${classes.dir}" />
@@ -89,7 +78,7 @@
             <exec executable="mpv" osfamily="unix" failonerror="false">
             <arg value="--no-terminal"/>
             <arg value="--no-video"/> 
-            <arg value="/home/danp1t/github/ITMO/opi/lab3/music.mp3"/>
+            <arg value="./lab3/music.mp3"/>
         </exec>
     </target>
 
@@ -105,34 +94,27 @@
             <arg value="4"/>
         </exec>
 
-        <property name="commits.list" value="${git.commits}"/>
+    <tempfile property="commits.file" suffix=".txt" deleteonexit="true"/>
+    <echo message="${git.commits}" file="${commits.file}"/>
 
-        <antcall target="process-commit">
-            <param name="commit" value="${commits.list.split(',')[0]}"/>
-        </antcall>
-        <antcall target="process-commit">
-            <param name="commit" value="${commits.list.split(',')[1]}"/> 
-        </antcall>
-        <antcall target="process-commit">
-            <param name="commit" value="${commits.list.split(',')[2]}"/>
-        </antcall>
-        <antcall target="process-commit">
-            <param name="commit" value="${commits.list.split(',')[3]}"/>
-        </antcall>
+    <exec executable="bash" osfamily="unix">
+        <arg value="-c"/>
+        <arg value="cat ${commits.file} | xargs -I {} ant -Dcommit={} process-commit"/>
+    </exec>
         <zip destfile="${dist.dir}/all-revisions.zip" basedir="${revisions.dir}"/>
     </target>
 
-    <target name="process-commit">
-        <exec executable="git">
-            <arg value="${commit}"/> 
-        </exec>
+   <target name="process-commit">    
+    <exec executable="git">
+        <arg value="checkout"/>
+        <arg value="${commit}"/> 
+    </exec>
 
-        <antcall target="build"/>
-        <copy file="${war.file}" tofile="${revisions.dir}/lab3-${commit}.war"/>
-
-        <exec executable="git">
-            <arg value="checkout"/>
-            <arg value="main"/> 
-        </exec>
-    </target>
+    <antcall target="build"/>
+    <copy file="${war.file}" tofile="${revisions.dir}/lab3-${commit}.war"/>
+    <exec executable="git">
+        <arg value="checkout"/>
+        <arg value="main"/> 
+    </exec>
+</target>
 </project>
