@@ -21,7 +21,7 @@ def choice_system():
     global system
     print("Выберите систему нелинейных уравнений")
     for i in range(len(systems)):
-        print(i, systems[i])
+        print(f"{i}. {systems[i]}")
     try:
         system = int(input("Введите номер системы: "))
         if system >= len(systems):
@@ -31,16 +31,31 @@ def choice_system():
             print(f"Ошибка: system должен быть неотрицательным. Получено: {system}")
             return choice_system()
     except ValueError:
-        print(f"Ошибка: system должно быть целым числом. Получено: {system}")
+        print(f"Ошибка: номер system должен быть целым числом. Получено: {system}")
         return choice_system()
 
 
 def choice_equations():
-    pass
+    global equation
+    for i in range(len(equations)):
+        print(f"{i}. {equations[i]}")
+    try:
+        equation = int(input("Введите номер нелинейного уравнения: "))
+        if equation >= len(equations):
+            print(f"Ошибка: номер equation должен быть в указаном диапазоне. Получено: {equation}")
+            return choice_equations()
+        if equation < 0:
+            print(f"Ошибка: номер equation должен быть неотрицательным. Получено: {equation}")
+            return choice_equations()
+    except ValueError:
+        print(f"Ошибка: номер equation должен быть целым числом. Получено: {equation}")
+        return choice_equations()
 
 def info():
     if system is not None:
         print(f"Выбрана система: {systems[system]}")
+    if equation is not None:
+        print(f"Выбрано уравнение: {equations[equation]}")
 
 def start():
     pass
