@@ -1,3 +1,8 @@
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy as np
+import re
+
 #Глобальные переменные
 type_n = None # Тип решения (система или уравнения)
 systems = [("sin(x - y) - xy = -1", "0.3x^2 + y^2 = 2"), ("sin(y) + 2x = 2", "y + cos(x - 1) = 0.7")] # Системы нелинейных уравнений
@@ -57,6 +62,97 @@ def input_interval_file():
     except FileNotFoundError:
         print(f"Ошибка: файл '{file_path}' не найден")
         input_interval_file()
+
+
+def parse_equation(eq_str):
+    eq_str = eq_str.replace('sin', 'np.sin')
+    eq_str = eq_str.replace('cos', 'np.cos')
+    eq_str = eq_str.replace('tan', 'np.tan')
+    eq_str = eq_str.replace('tg', 'np.tan')
+    eq_str = eq_str.replace('sqrt', 'np.sqrt')
+    eq_str = eq_str.replace('^', '**')
+
+    eq_str = re.sub(r'(?<=[0-9)])(?=[a-zA-Z])', '*', eq_str)
+    eq_str = re.sub(r'(?<=[a-zA-Z])(?=[0-9])', '*', eq_str)
+
+    if '=' in eq_str:
+        left, right = eq_str.split('=', 1)
+        expr = f'({left.strip()}) - ({right.strip()})'
+    else:
+        expr = eq_str.strip()
+
+    return expr
+
+
+def plot_equation(equation_str, interval):
+    expr = parse_equation(equation_str)
+    a, b = interval
+    x = np.linspace(a, b, 400)
+
+    try:
+        y = eval(expr, {'np': np, 'x': x})
+    except Exception as e:
+        print(f"Ошибка при вычислении уравнения: {e}")
+        return
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(x, y, label=f'f(x) = {equation_str}')
+    plt.axhline(0, color='black', linewidth=0.5)
+    plt.axvline(0, color='black', linewidth=0.5)
+    plt.xlabel('x')
+    plt.ylabel('f(x)')
+    plt.title('График уравнения')
+    plt.grid(True)
+    plt.legend()
+
+    plt.savefig('equation_plot.png')
+    print("График сохранен как 'equation_plot.png'")
+
+    if matplotlib.get_backend().lower() not in ['agg', 'pdf']:
+        try:
+            plt.show(block=True)
+        except Exception as e:
+            print(f"Ошибка отображения графика: {e}")
+    else:
+        plt.close()
+
+
+def plot_system(system_str):
+    eq1, eq2 = system_str
+    expr1 = parse_equation(eq1)
+    expr2 = parse_equation(eq2)
+
+    x = np.linspace(-5, 5, 400)
+    y = np.linspace(-5, 5, 400)
+    X, Y = np.meshgrid(x, y)
+
+    try:
+        Z1 = eval(expr1, {'np': np, 'x': X, 'y': Y})
+        Z2 = eval(expr2, {'np': np, 'x': X, 'y': Y})
+    except Exception as e:
+        print(f"Ошибка при вычислении системы: {e}")
+        return
+
+    plt.figure(figsize=(10, 6))
+
+    cs1 = plt.contour(X, Y, Z1, levels=[0], colors='r', linewidths=2)
+    cs2 = plt.contour(X, Y, Z2, levels=[0], colors='b', linewidths=2)
+
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], color='r', lw=2, label=eq1),
+        Line2D([0], [0], color='b', lw=2, label=eq2)
+    ]
+
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.title('График системы уравнений')
+    plt.legend(handles=legend_elements)
+    plt.grid(True)
+
+    plt.savefig('system_plot.png')
+    print("График системы сохранен как 'system_plot.png'")
+
 
 
 def input_start_value():
@@ -172,13 +268,32 @@ def start():
         print("1. Нелинейное уравнение")
         print("2. Систему нелинейных уравнений")
         number = input()
-        if number == 1:
+        if number == "1":
             choice_equations()
+            if interval is None:
+                print("Для построения графика введите интервал.")
+                input_interval()
+            eq = equations[equation]
+            plot_equation(eq, interval)
 
+            #Тут нужно вывести график нелинейной функции
+            print("Выберете способ решения нелинейного уравнения")
+            print("1. Метод половинного деления")
+            print("2. Метод Ньютона")
+            print("3. Метод простой итерации")
+            variant = input()
+            if variant == "1": pass
+            elif variant == "2": pass
+            elif variant == "3": pass
+            else:
+                print("Нужно ввести номер способа решения")
+                start()
 
-        elif number == 2:
+        elif number == "2":
             choice_system()
-
+            system_eq = systems[system]
+            plot_system(system_eq)
+            print("Система нелинейных уравнений будет решаться методом Ньютона")
 
 
         else:
@@ -191,6 +306,7 @@ def start():
         print("Выбран вариант решения системы нелинейных уравнений")
 
 def clear():
+    global system, equation, epsilon, start_value, interval
     print("Сброс всех значений")
     system = None
     equation = None
