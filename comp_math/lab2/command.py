@@ -4,6 +4,9 @@ systems = [("sin(x - y) - xy = -1", "0.3x^2 + y^2 = 2"), ("sin(y) + 2x = 2", "y 
 equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.4 = 0.2"), ("tg(x) - 2.34 = 21"), ("-3.2x^3 - 3.2x = 2"), ("-33x^3 + 21.23x^2 + 3 = 2.32")] #Нелинейные уравнения, доступные на выбор
 system = None #Текущая система
 equation = None #Текущее уравнение
+epsilon = None #Погрешность
+start_value = None #Начальное приближение к корню
+interval = None #Интервал
 
 #Команда для вывода списка команд с их описанием
 def help():
@@ -14,8 +17,108 @@ def help():
     print("5. /clear - очистка введенных данных")
     print("6. /choice_system - выбор системы")
     print("7. /choice_equations - выбор уравнения")
+    print("8. /input_interval - ввод интервала с клавиатуры")
+    print("9. /input_interval_file - ввод интервала из файла")
+    print("10. /input_start_value - ввод начального приближения с клавиатуры")
+    print("11. /input_start_value_file - ввод начального приблежения из файла")
+    print("12. /input_epsilon - ввод погрешности с клавиатуры")
+    print("13. /input_epsilon_file - ввод погрешности из файла")
     print()
 
+def input_interval():
+    global interval
+    try:
+        a = float(input("Введите нижнюю границу интервала: "))
+        b = float(input("Введите верхнюю границу интервала: "))
+        if a >= b:
+            print("Ошибка: нижняя граница должна быть меньше верхней. Попробуйте снова.")
+            input_interval()
+        else:
+            interval = (a, b)
+    except ValueError:
+        print("Ошибка: введите числовые значения. Попробуйте снова.")
+        input_interval()
+
+def input_interval_file():
+    global interval
+    file_path = input("Введите путь к файлу: ")
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            a, b = map(float, lines[0].split())
+            if a >= b:
+                print("Ошибка: нижняя граница должна быть меньше верхней.")
+                input_interval_file()
+            else:
+                interval = (a, b)
+    except (ValueError, IndexError):
+        print("Ошибка: некорректный формат данных в файле.")
+        input_interval_file()
+    except FileNotFoundError:
+        print(f"Ошибка: файл '{file_path}' не найден")
+        input_interval_file()
+
+
+def input_start_value():
+    global start_value
+    try:
+        start_value = float(input("Введите начальное приближение: "))
+    except ValueError:
+        print(f"Ошибка: Получено не число: {start_value}")
+        return input_start_value()
+
+def input_start_value_file():
+    global start_value
+    file_path = input("Введите путь к файлу: ")
+    try:
+        with open(file_path, 'r') as file:
+            content = file.read().strip()
+            numbers = content.split()
+
+            if len(numbers) != 1:
+                print(f"Ошибка: в файле должно быть ровно одно число. Найдено: {len(numbers)}")
+                return input_start_value_file()
+            try:
+                start_value = float(numbers[0])
+            except ValueError:
+                print(f"Ошибка: невозможно преобразовать '{numbers[0]}' в float")
+                return input_start_value_file()
+
+    except FileNotFoundError:
+        print(f"Ошибка: файл '{file_path}' не найден")
+        input_start_value_file()
+
+def input_epsilon():
+    global epsilon
+    try:
+        epsilon = float(input("Введите точность: "))
+        if epsilon <= 0:
+            print("Точность должна быть больше 0")
+            input_epsilon()
+    except ValueError:
+        print("Ошибка: введено не число")
+        input_epsilon()
+
+def input_epsilon_file():
+    global epsilon
+    file_path = input("Введите путь к файлу: ")
+    try:
+        with open(file_path, 'r') as file:
+            content = file.read().strip()
+            numbers = content.split()
+
+            if len(numbers) != 1:
+                print(f"Ошибка: в файле должно быть ровно одно число. Найдено: {len(numbers)}")
+                input_epsilon_file()
+            try:
+                epsilon = float(numbers[0])
+            except ValueError:
+                print(f"Ошибка: невозможно преобразовать '{numbers[0]}' в float")
+                input_epsilon_file()
+
+    except FileNotFoundError:
+        print(f"Ошибка: файл '{file_path}' не найден")
+        input_epsilon_file()
 
 def choice_system():
     global system
@@ -56,6 +159,12 @@ def info():
         print(f"Выбрана система: {systems[system]}")
     if equation is not None:
         print(f"Выбрано уравнение: {equations[equation]}")
+    if interval is not None:
+        print(f"Интервал: {interval}")
+    if epsilon is not None:
+        print(f"Погреность: {epsilon}")
+    if start_value is not None:
+        print(f"Начальное приближение: {start_value}")
 
 def start():
     pass
