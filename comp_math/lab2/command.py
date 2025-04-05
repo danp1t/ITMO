@@ -167,7 +167,33 @@ def info():
         print(f"Начальное приближение: {start_value}")
 
 def start():
-    pass
+    if (equation is None and system is None) or (equation is not None and system is not None):
+        print("Выберете, что будем решать")
+        print("1. Нелинейное уравнение")
+        print("2. Систему нелинейных уравнений")
+        number = input()
+        if number == 1:
+            choice_equations()
+
+
+        elif number == 2:
+            choice_system()
+
+
+
+        else:
+            print("Нужно ввести число 1 или 2")
+            start()
+    elif equation is not None and system is None:
+        print("Выбран вариант решения нелинейных уравнений")
+
+    elif equation is None and system is not None:
+        print("Выбран вариант решения системы нелинейных уравнений")
 
 def clear():
-    pass
+    print("Сброс всех значений")
+    system = None
+    equation = None
+    epsilon = None
+    start_value = None
+    interval = None
