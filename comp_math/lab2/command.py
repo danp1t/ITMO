@@ -455,11 +455,21 @@ def start():
             input_epsilon()
         try:
             (root_x, root_y), iterations, history = newton_system_solver(f1, f2, system_start_values[0], system_start_values[1], epsilon)
+            print(f"Найденное решение:")
             print(f"x = {root_x:.8f}")
             print(f"y = {root_y:.8f}")
-            print(f"Итераций: {iterations}")
+            print(f"\nЗначения функций в решении:")
             print(f"f1(x,y) = {f1(root_x, root_y):.2e}")
             print(f"f2(x,y) = {f2(root_x, root_y):.2e}")
+            print(f"\nОбщее количество итераций: {iterations}")
+
+            print("\nИстория итераций:")
+            print("Итер |      x      |      y      |    Δx    |    Δy    |   f1(x,y)   |   f2(x,y)")
+            print("-----|-------------|-------------|----------|----------|-------------|----------")
+            for step in history:
+                print(f"{step['iteration']:4d} | {step['x']:11.6f} | {step['y']:11.6f} | "
+                      f"{step['delta_x']:8.2e} | {step['delta_y']:8.2e} | "
+                      f"{step['f1']:11.2e} | {step['f2']:10.2e}")
         except RuntimeError as e:
             print(f"Ошибка решения: {str(e)}")
         except Exception as e:
