@@ -1,3 +1,5 @@
+import numpy as np
+
 def bisection_method(func, a, b, epsilon):
     if func(a) * func(b) >= 0:
         raise ValueError("Функция должна иметь разные знаки на концах интервала")
@@ -64,3 +66,50 @@ def simple_iteration_method(f, x0, epsilon, max_iter=100):
         x = x_new
 
     raise RuntimeError(f"Не сошлось за {max_iter} итераций. Последнее значение: {x:.6f}")
+
+
+def compute_jacobian(f1, f2, x, y, h=1e-6):
+    df1_dx = (f1(x + h, y) - f1(x - h, y)) / (2 * h)
+    df1_dy = (f1(x, y + h) - f1(x, y - h)) / (2 * h)
+
+    df2_dx = (f2(x + h, y) - f2(x - h, y)) / (2 * h)
+    df2_dy = (f2(x, y + h) - f2(x, y - h)) / (2 * h)
+
+    return np.array([
+        [df1_dx, df1_dy],
+        [df2_dx, df2_dy]
+    ])
+
+
+def newton_system_solver(f1, f2, x0, y0, epsilon=1e-6, max_iter=100):
+    x, y = x0, y0
+    history = []
+
+    for iterations in range(1, max_iter + 1):
+        f_val = np.array([f1(x, y), f2(x, y)])
+        J = compute_jacobian(f1, f2, x, y)
+
+        if np.abs(np.linalg.det(J)) < 1e-12:
+            raise RuntimeError("Якобиан вырожден. Решение невозможно.")
+
+        delta = np.linalg.solve(J, -f_val)
+
+        x_new = x + delta[0]
+        y_new = y + delta[1]
+
+        history.append({
+            'iteration': iterations,
+            'x': x,
+            'y': y,
+            'f1': f_val[0],
+            'f2': f_val[1],
+            'delta_x': delta[0],
+            'delta_y': delta[1]
+        })
+
+        if np.linalg.norm(delta) < epsilon and np.linalg.norm(f_val) < epsilon:
+            return (x_new, y_new), iterations, history
+
+        x, y = x_new, y_new
+
+    raise RuntimeError(f"Метод не сошелся за {max_iter} итераций.")

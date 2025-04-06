@@ -185,6 +185,15 @@ def input_start_value_file():
         print(f"Ошибка: файл '{file_path}' не найден")
         input_start_value_file()
 
+def input_system_start_values():
+    print("Введите начальные приближения x0 и y0 через пробел:")
+    while True:
+        try:
+            x0, y0 = map(float, input().split())
+            return x0, y0
+        except:
+            print("Ошибка! Введите два числа через пробел.")
+
 def input_epsilon():
     global epsilon
     try:
@@ -264,129 +273,131 @@ def info():
         print(f"Начальное приближение: {start_value}")
 
 def start():
-    if (equation is None and system is None) or (equation is not None and system is not None):
-        print("Выберете, что будем решать")
-        print("1. Нелинейное уравнение")
-        print("2. Систему нелинейных уравнений")
-        number = input()
-        if number == "1":
-            choice_equations()
-            if interval is None:
-                print("Для построения графика введите интервал.")
-                input_interval()
-            eq = equations[equation]
-            plot_equation(eq, interval)
-
-            print("Выберете способ решения нелинейного уравнения")
-            print("1. Метод половинного деления")
-            print("2. Метод Ньютона")
-            print("3. Метод простой итерации")
-            variant = input()
-
-            eq_str = equations[equation]
-            parsed_expr = parse_equation(eq_str)
-
-            try:
-                f = lambda x: eval(parsed_expr, {'np': np, 'x': x})
-            except:
-                print("Ошибка в преобразовании уравнения")
-                return
-
-            if variant == "1":
-                if interval is None:
-                    print("Требуется ввод интервала.")
-                    input_interval()
-                if epsilon is None:
-                    print("Требуется ввод точности.")
-                    input_epsilon()
-
-
-                try:
-                    a, b = interval
-                    root, f_val, iterations = bisection_method(f, a, b, epsilon)
-
-                    print("\nРезультаты:")
-                    print(f"Приближенный корень: {root:.6f}")
-                    print(f"Значение функции: {f_val:.2e}")
-                    print(f"Количество итераций: {iterations}")
-                except ValueError as e:
-                    print(f"\nОшибка: {e}")
-
-            elif variant == "2":
-                if interval is None:
-                    print("Требуется ввод интервала.")
-                    input_interval()
-                if epsilon is None:
-                    print("Требуется ввод точности.")
-                    input_epsilon()
-                if start_value is None:
-                    print("Требуется ввод начального приближения")
-                    input_start_value()
-                try:
-                    root, f_val, iters, history = newton_method(
-                        f,
-                        start_value,
-                        epsilon
-                    )
-                    print(f"Уравнение: {eq_str}")
-                    print(f"Начальное приближение: {start_value:.4f}")
-                    print(f"Найденный корень: {root:.8f}")
-                    print(f"Значение функции: {f_val:.2e}")
-                    print(f"Итераций выполнено: {iters}")
-                    print(f"Погрешность: {epsilon}")
-                except RuntimeError as e:
-                    print(f"Метод Ньютона не сошелся: {e}")
-            elif variant == "3":
-                if interval is None:
-                    print("Требуется ввод интервала.")
-                    input_interval()
-                if epsilon is None:
-                    print("Требуется ввод точности.")
-                    input_epsilon()
-                if start_value is None:
-                    print("Требуется ввод начального приближения")
-                    input_start_value()
-                try:
-                    root, f_val, iters, history = simple_iteration_method(
-                        f, start_value, epsilon
-                    )
-
-                    # Вывод результатов
-                    print(f"Уравнение: {eq_str}")
-                    print(f"Начальное приближение: {start_value:.4f}")
-                    print(f"Корень: {root:.8f}")
-                    print(f"Значение функции: {f_val:.2e}")
-                    print(f"Итераций: {iters}")
-
-                except RuntimeError as e:
-                    print(f"\nОшибка: {e}")
-            else:
-                print("Нужно ввести номер способа решения")
-                start()
-
-        elif number == "2":
-            choice_system()
-            system_eq = systems[system]
-            plot_system(system_eq)
-            print("Система нелинейных уравнений будет решаться методом Ньютона")
-
-
-        else:
-            print("Нужно ввести число 1 или 2")
-            start()
-    elif equation is not None and system is None:
-        print("Выбран вариант решения нелинейных уравнений")
+    print("Выберете, что будем решать")
+    print("1. Нелинейное уравнение")
+    print("2. Систему нелинейных уравнений")
+    number = input()
+    if number == "1":
+        choice_equations()
         if interval is None:
             print("Для построения графика введите интервал.")
             input_interval()
         eq = equations[equation]
         plot_equation(eq, interval)
 
+        print("Выберете способ решения нелинейного уравнения")
+        print("1. Метод половинного деления")
+        print("2. Метод Ньютона")
+        print("3. Метод простой итерации")
+        variant = input()
 
-    elif equation is None and system is not None:
-        print("Выбран вариант решения системы нелинейных уравнений")
+        eq_str = equations[equation]
+        parsed_expr = parse_equation(eq_str)
+
+        try:
+            f = lambda x: eval(parsed_expr, {'np': np, 'x': x})
+        except:
+            print("Ошибка в преобразовании уравнения")
+            return
+
+        if variant == "1":
+            if interval is None:
+                print("Требуется ввод интервала.")
+                input_interval()
+            if epsilon is None:
+                print("Требуется ввод точности.")
+                input_epsilon()
+
+
+            try:
+                a, b = interval
+                root, f_val, iterations = bisection_method(f, a, b, epsilon)
+                print("\nРезультаты:")
+                print(f"Приближенный корень: {root:.6f}")
+                print(f"Значение функции: {f_val:.2e}")
+                print(f"Количество итераций: {iterations}")
+            except ValueError as e:
+                print(f"\nОшибка: {e}")
+
+        elif variant == "2":
+            if interval is None:
+                print("Требуется ввод интервала.")
+                input_interval()
+            if epsilon is None:
+                print("Требуется ввод точности.")
+                input_epsilon()
+            if start_value is None:
+                print("Требуется ввод начального приближения")
+                input_start_value()
+            try:
+                root, f_val, iters, history = newton_method(f, start_value, epsilon)
+                print(f"Уравнение: {eq_str}")
+                print(f"Начальное приближение: {start_value:.4f}")
+                print(f"Найденный корень: {root:.8f}")
+                print(f"Значение функции: {f_val:.2e}")
+                print(f"Итераций выполнено: {iters}")
+                print(f"Погрешность: {epsilon}")
+            except RuntimeError as e:
+                print(f"Метод Ньютона не сошелся: {e}")
+        elif variant == "3":
+            if interval is None:
+                print("Требуется ввод интервала.")
+                input_interval()
+            if epsilon is None:
+                print("Требуется ввод точности.")
+                input_epsilon()
+            if start_value is None:
+                print("Требуется ввод начального приближения")
+                input_start_value()
+            try:
+                root, f_val, iters, history = simple_iteration_method(
+                    f, start_value, epsilon
+                )
+
+                # Вывод результатов
+                print(f"Уравнение: {eq_str}")
+                print(f"Начальное приближение: {start_value:.4f}")
+                print(f"Корень: {root:.8f}")
+                print(f"Значение функции: {f_val:.2e}")
+                print(f"Итераций: {iters}")
+
+            except RuntimeError as e:
+                print(f"\nОшибка: {e}")
+        else:
+            print("Нужно ввести номер способа решения")
+            start()
+
+    elif number == "2":
+        choice_system()
         system_eq = systems[system]
         plot_system(system_eq)
+        eq1, eq2 = system_eq
+        try:
+            parsed_eq1 = parse_equation(eq1)
+            parsed_eq2 = parse_equation(eq2)
+            f1 = lambda x, y: eval(parsed_eq1, {'np': np, 'x': x, 'y': y})
+            f2 = lambda x, y: eval(parsed_eq2, {'np': np, 'x': x, 'y': y})
+        except Exception as e:
+            print(f"Ошибка преобразования уравнений: {str(e)}")
+            return
+        system_start_values = input_system_start_values()
+        if epsilon is None:
+            input_epsilon()
+        try:
+            (root_x, root_y), iterations, history = newton_system_solver(f1, f2, system_start_values[0], system_start_values[1], epsilon)
+            print(f"x = {root_x:.8f}")
+            print(f"y = {root_y:.8f}")
+            print(f"Итераций: {iterations}")
+            print(f"f1(x,y) = {f1(root_x, root_y):.2e}")
+            print(f"f2(x,y) = {f2(root_x, root_y):.2e}")
+        except RuntimeError as e:
+            print(f"Ошибка решения: {str(e)}")
+        except Exception as e:
+            print(f"Неожиданная ошибка: {str(e)}")
+
+    else:
+        print("Нужно ввести число 1 или 2")
+        start()
     clear()
 
 def clear():
