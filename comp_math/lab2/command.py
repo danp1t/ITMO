@@ -13,6 +13,7 @@ equation = None #Текущее уравнение
 epsilon = None #Погрешность
 start_value = None #Начальное приближение к корню
 interval = None #Интервал
+results = None
 
 #Команда для вывода списка команд с их описанием
 def help():
@@ -272,7 +273,40 @@ def info():
     if start_value is not None:
         print(f"Начальное приближение: {start_value}")
 
+def save_results_to_file(filename, results):
+    with open(filename, 'w') as f:
+        for key, value in results.items():
+            f.write(f"{key}: {value}\n")
+    print(f"\nРезультаты сохранены в файл '{filename}'")
+
+def print_results(results):
+    print("\n════════ Результаты ════════")
+    for key, value in results.items():
+        print(f"{key}: {value}")
+    print("════════════════════════════")
+
+def get_output_choice():
+    print("\nВыберите способ вывода результатов:")
+    print("1. Вывести на экран")
+    print("2. Сохранить в файл")
+    print("3. Сделать и то, и другое")
+    choice = input("Ваш выбор (1-3): ")
+    return choice
+
+def prepare_results(method_name, eq_str, root, f_val, iterations, additional=None):
+    results = {
+        "Метод": method_name,
+        "Уравнение": eq_str,
+        "Приближенный корень": f"{root:.8f}",
+        "Значение функции в корне": f"{f_val:.2e}",
+        "Количество итераций": iterations
+    }
+    if additional:
+        results.update(additional)
+    return results
+
 def start():
+    global results
     print("Выберете, что будем решать")
     print("1. Нелинейное уравнение")
     print("2. Систему нелинейных уравнений")
@@ -311,11 +345,19 @@ def start():
 
             try:
                 a, b = interval
+                f = lambda x: eval(parsed_expr, {'np': np, 'x': x})
+
+                verified_interval = verify_interval(f, (a, b))
+                print(f"Корень существует на интервале: {verified_interval}")
+
+                if (b - a) > 1.0:
+                    print("Рекомендуется сузить интервал для повышения точности")
                 root, f_val, iterations = bisection_method(f, a, b, epsilon)
-                print("\nРезультаты:")
-                print(f"Приближенный корень: {root:.6f}")
-                print(f"Значение функции: {f_val:.2e}")
-                print(f"Количество итераций: {iterations}")
+                results = prepare_results(
+                    "Метод половинного деления",
+                    eq_str, root, f_val, iterations,
+                    {"Интервал": f"[{a:.4f}, {b:.4f}]"}
+                )
             except ValueError as e:
                 print(f"\nОшибка: {e}")
 
@@ -326,19 +368,24 @@ def start():
             if epsilon is None:
                 print("Требуется ввод точности.")
                 input_epsilon()
-            if start_value is None:
-                print("Требуется ввод начального приближения")
-                input_start_value()
+            start_value = find_optimal_newton_start(f, interval, n_samples=100)
             try:
+                check_newton_conditions(f, start_value, epsilon, interval)
+                verify_interval(f, interval)
+
                 root, f_val, iters, history = newton_method(f, start_value, epsilon)
-                print(f"Уравнение: {eq_str}")
-                print(f"Начальное приближение: {start_value:.4f}")
-                print(f"Найденный корень: {root:.8f}")
-                print(f"Значение функции: {f_val:.2e}")
-                print(f"Итераций выполнено: {iters}")
-                print(f"Погрешность: {epsilon}")
+                results = prepare_results(
+                    "Метод Ньютона",
+                    eq_str, root, f_val, iters,
+                    {
+                        "Начальное приближение": f"{start_value:.4f}",
+                        "Погрешность": epsilon
+                    }
+                )
             except RuntimeError as e:
                 print(f"Метод Ньютона не сошелся: {e}")
+            except ValueError as e:
+                print(e)
         elif variant == "3":
             if interval is None:
                 print("Требуется ввод интервала.")
@@ -346,26 +393,49 @@ def start():
             if epsilon is None:
                 print("Требуется ввод точности.")
                 input_epsilon()
-            if start_value is None:
-                print("Требуется ввод начального приближения")
-                input_start_value()
+            start_value = find_best_start_point(f, interval)
             try:
+                a, b = interval
+                M = (f(start_value + 1e-6) - f(start_value - 1e-6)) / 2e-6
+                phi = lambda x: x - f(x) / M
+                check_iteration_conditions(phi, a, b)
+
                 root, f_val, iters, history = simple_iteration_method(
                     f, start_value, epsilon
                 )
 
-                # Вывод результатов
-                print(f"Уравнение: {eq_str}")
-                print(f"Начальное приближение: {start_value:.4f}")
-                print(f"Корень: {root:.8f}")
-                print(f"Значение функции: {f_val:.2e}")
-                print(f"Итераций: {iters}")
+                results = prepare_results(
+                    "Метод простой итерации",
+                    eq_str, root, f_val, iters,
+                    {
+                        "Начальное приближение": f"{start_value:.4f}",
+                        "Параметр M": f"{M:.4f}"
+                    }
+                )
 
             except RuntimeError as e:
                 print(f"\nОшибка: {e}")
+            except ValueError as e:
+                print(f"Ошибка сходимости: {e}")
         else:
             print("Нужно ввести номер способа решения")
             start()
+
+        if results is not None:
+            output_choice = get_output_choice()
+
+            if output_choice == "1":
+                print_results(results)
+            elif output_choice == "2":
+                filename = input("Введите имя файла для сохранения (например: results.txt): ")
+                save_results_to_file(filename, results)
+            elif output_choice == "3":
+                print_results(results)
+                filename = input("Введите имя файла для сохранения (например: results.txt): ")
+                save_results_to_file(filename, results)
+            else:
+                print("Неверный выбор, результаты будут выведены на экран")
+                print_results(results)
 
     elif number == "2":
         choice_system()
