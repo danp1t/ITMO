@@ -312,8 +312,54 @@ def start():
                 except ValueError as e:
                     print(f"\nОшибка: {e}")
 
-            elif variant == "2": pass
-            elif variant == "3": pass
+            elif variant == "2":
+                if interval is None:
+                    print("Требуется ввод интервала.")
+                    input_interval()
+                if epsilon is None:
+                    print("Требуется ввод точности.")
+                    input_epsilon()
+                if start_value is None:
+                    print("Требуется ввод начального приближения")
+                    input_start_value()
+                try:
+                    root, f_val, iters, history = newton_method(
+                        f,
+                        start_value,
+                        epsilon
+                    )
+                    print(f"Уравнение: {eq_str}")
+                    print(f"Начальное приближение: {start_value:.4f}")
+                    print(f"Найденный корень: {root:.8f}")
+                    print(f"Значение функции: {f_val:.2e}")
+                    print(f"Итераций выполнено: {iters}")
+                    print(f"Погрешность: {epsilon}")
+                except RuntimeError as e:
+                    print(f"Метод Ньютона не сошелся: {e}")
+            elif variant == "3":
+                if interval is None:
+                    print("Требуется ввод интервала.")
+                    input_interval()
+                if epsilon is None:
+                    print("Требуется ввод точности.")
+                    input_epsilon()
+                if start_value is None:
+                    print("Требуется ввод начального приближения")
+                    input_start_value()
+                try:
+                    root, f_val, iters, history = simple_iteration_method(
+                        f, start_value, epsilon
+                    )
+
+                    # Вывод результатов
+                    print(f"Уравнение: {eq_str}")
+                    print(f"Начальное приближение: {start_value:.4f}")
+                    print(f"Корень: {root:.8f}")
+                    print(f"Значение функции: {f_val:.2e}")
+                    print(f"Итераций: {iters}")
+
+                except RuntimeError as e:
+                    print(f"\nОшибка: {e}")
             else:
                 print("Нужно ввести номер способа решения")
                 start()
@@ -336,10 +382,12 @@ def start():
         eq = equations[equation]
         plot_equation(eq, interval)
 
+
     elif equation is None and system is not None:
         print("Выбран вариант решения системы нелинейных уравнений")
         system_eq = systems[system]
         plot_system(system_eq)
+    clear()
 
 def clear():
     global system, equation, epsilon, start_value, interval
