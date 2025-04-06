@@ -1,5 +1,6 @@
 import numpy as np
 import re
+from math_module import *
 
 #Глобальные переменные
 equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.4 = 0.2"), ("cos(x) - 0.34x = 0.21"), ("-3.2x^3 - 3.2x = 2"), ("-33x^3 + 21.23x^2 + 3 = 2.32")]
@@ -93,3 +94,44 @@ def clear():
     equation = None
     epsilon = None
     interval = None
+
+def start():
+    if equation is None:
+        choice_equations()
+    if interval is None:
+        input_interval()
+    if epsilon is None:
+        input_epsilon()
+
+    original_eq = equations[equation]
+    parsed_eq = parse_equation(original_eq)
+    f = lambda x: eval(parsed_eq, {'np': np, 'x': x})
+
+    print("Выберете способ численного интегрирования")
+    print("1. Метод левых прямоугольников")
+    print("2. Метод правых прямоугольников")
+    print("3. Метод средних прямоугольников")
+    print("4. Метод трапеций")
+    print("5. Метод Симпсона")
+    number = input("Введите номер метода: ")
+
+    a, b = interval
+    try:
+        if number == "1": result, error = left_rectangle_method(f, a, b, epsilon)
+        elif number == "2": result, error = right_rectangle_method(f, a, b, epsilon)
+        elif number == "3": result, error = middle_rectangle_method(f, a, b, epsilon)
+        elif number == "4": result, error = trapezoid_method(f, a, b, epsilon)
+        elif number == "5": result, error = simpson_method(f, a, b, epsilon)
+        else:
+            print("Нужно указать метод числом от 1 до 5")
+            start()
+        result = abs(result)
+        print("\n" + "=" * 50)
+        print(f"Уравнение: {original_eq}")
+        print(f"Интервал: [{a}, {b}]")
+        print(f"Точность: {epsilon}")
+        print(f"Результат интегрирования: {result:.6f}")
+        print(f"Оценка погрешности: {error:.6f}")
+        print("=" * 50 + "\n")
+    except ValueError as e:
+        print(e)
