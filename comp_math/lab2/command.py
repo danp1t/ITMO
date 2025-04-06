@@ -7,7 +7,7 @@ from math_module import *
 #Глобальные переменные
 type_n = None # Тип решения (система или уравнения)
 systems = [("sin(x - y) - x*y = -1", "0.3x^2 + y^2 = 2"), ("sin(y) + 2x = 2", "y + cos(x - 1) = 0.7")] # Системы нелинейных уравнений
-equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.4 = 0.2"), ("tg(x) - 2.34 = 21"), ("-3.2x^3 - 3.2x = 2"), ("-33x^3 + 21.23x^2 + 3 = 2.32")] #Нелинейные уравнения, доступные на выбор
+equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.4 = 0.2"), ("cos(x) - 0.34x = 0.21"), ("-3.2x^3 - 3.2x = 2"), ("-33x^3 + 21.23x^2 + 3 = 2.32")] #Нелинейные уравнения, доступные на выбор
 system = None #Текущая система
 equation = None #Текущее уравнение
 epsilon = None #Погрешность
@@ -332,7 +332,8 @@ def start():
             f = lambda x: eval(parsed_expr, {'np': np, 'x': x})
         except:
             print("Ошибка в преобразовании уравнения")
-            return
+            clear()
+            start()
 
         if variant == "1":
             if interval is None:
@@ -341,16 +342,11 @@ def start():
             if epsilon is None:
                 print("Требуется ввод точности.")
                 input_epsilon()
-
-
             try:
                 a, b = interval
                 f = lambda x: eval(parsed_expr, {'np': np, 'x': x})
 
-                verified_interval = verify_interval(f, (a, b))
-                print(f"Корень существует на интервале: {verified_interval}")
-
-                if (b - a) > 1.0:
+                if (b - a) > 3.0:
                     print("Рекомендуется сузить интервал для повышения точности")
                 root, f_val, iterations = bisection_method(f, a, b, epsilon)
                 results = prepare_results(
@@ -360,6 +356,8 @@ def start():
                 )
             except ValueError as e:
                 print(f"\nОшибка: {e}")
+                clear()
+                start()
 
         elif variant == "2":
             if interval is None:
@@ -369,6 +367,7 @@ def start():
                 print("Требуется ввод точности.")
                 input_epsilon()
             start_value = find_optimal_newton_start(f, interval, n_samples=100)
+
             try:
                 check_newton_conditions(f, start_value, epsilon, interval)
                 verify_interval(f, interval)
@@ -384,8 +383,11 @@ def start():
                 )
             except RuntimeError as e:
                 print(f"Метод Ньютона не сошелся: {e}")
+                clear()
+                start()
             except ValueError as e:
-                print(e)
+                clear()
+                start()
         elif variant == "3":
             if interval is None:
                 print("Требуется ввод интервала.")
@@ -415,10 +417,15 @@ def start():
 
             except RuntimeError as e:
                 print(f"\nОшибка: {e}")
+                clear()
+                start()
             except ValueError as e:
                 print(f"Ошибка сходимости: {e}")
+                clear()
+                start()
         else:
             print("Нужно ввести номер способа решения")
+            clear()
             start()
 
         if results is not None:
@@ -449,7 +456,8 @@ def start():
             f2 = lambda x, y: eval(parsed_eq2, {'np': np, 'x': x, 'y': y})
         except Exception as e:
             print(f"Ошибка преобразования уравнений: {str(e)}")
-            return
+            clear()
+            start()
         system_start_values = input_system_start_values()
         if epsilon is None:
             input_epsilon()
@@ -459,8 +467,6 @@ def start():
             print(f"x = {root_x:.8f}")
             print(f"y = {root_y:.8f}")
             print(f"\nЗначения функций в решении:")
-            print(f"f1(x,y) = {f1(root_x, root_y):.2e}")
-            print(f"f2(x,y) = {f2(root_x, root_y):.2e}")
             print(f"\nОбщее количество итераций: {iterations}")
 
             print("\nИстория итераций:")
@@ -472,8 +478,12 @@ def start():
                       f"{step['f1']:11.2e} | {step['f2']:10.2e}")
         except RuntimeError as e:
             print(f"Ошибка решения: {str(e)}")
+            clear()
+            start()
         except Exception as e:
             print(f"Неожиданная ошибка: {str(e)}")
+            clear()
+            start()
 
     else:
         print("Нужно ввести число 1 или 2")
@@ -482,7 +492,6 @@ def start():
 
 def clear():
     global system, equation, epsilon, start_value, interval
-    print("Сброс всех значений")
     system = None
     equation = None
     epsilon = None

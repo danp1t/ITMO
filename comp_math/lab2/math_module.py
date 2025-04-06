@@ -47,7 +47,7 @@ def newton_method(f, x0, epsilon, max_iter=100):
 
     raise RuntimeError(f"Не сошлось за {max_iter} итераций. Последнее значение: {x:.6f}")
 
-def find_root_intervals(f, a, b, step=0.01):
+def find_root_intervals(f, a, b, step=0.001):
     intervals = []
     x = a
     prev_sign = np.sign(f(x))
