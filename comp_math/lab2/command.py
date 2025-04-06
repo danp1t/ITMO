@@ -2,10 +2,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import re
+from math_module import *
 
 #Глобальные переменные
 type_n = None # Тип решения (система или уравнения)
-systems = [("sin(x - y) - xy = -1", "0.3x^2 + y^2 = 2"), ("sin(y) + 2x = 2", "y + cos(x - 1) = 0.7")] # Системы нелинейных уравнений
+systems = [("sin(x - y) - x*y = -1", "0.3x^2 + y^2 = 2"), ("sin(y) + 2x = 2", "y + cos(x - 1) = 0.7")] # Системы нелинейных уравнений
 equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.4 = 0.2"), ("tg(x) - 2.34 = 21"), ("-3.2x^3 - 3.2x = 2"), ("-33x^3 + 21.23x^2 + 3 = 2.32")] #Нелинейные уравнения, доступные на выбор
 system = None #Текущая система
 equation = None #Текущее уравнение
@@ -276,13 +277,41 @@ def start():
             eq = equations[equation]
             plot_equation(eq, interval)
 
-            #Тут нужно вывести график нелинейной функции
             print("Выберете способ решения нелинейного уравнения")
             print("1. Метод половинного деления")
             print("2. Метод Ньютона")
             print("3. Метод простой итерации")
             variant = input()
-            if variant == "1": pass
+
+            eq_str = equations[equation]
+            parsed_expr = parse_equation(eq_str)
+
+            try:
+                f = lambda x: eval(parsed_expr, {'np': np, 'x': x})
+            except:
+                print("Ошибка в преобразовании уравнения")
+                return
+
+            if variant == "1":
+                if interval is None:
+                    print("Требуется ввод интервала.")
+                    input_interval()
+                if epsilon is None:
+                    print("Требуется ввод точности.")
+                    input_epsilon()
+
+
+                try:
+                    a, b = interval
+                    root, f_val, iterations = bisection_method(f, a, b, epsilon)
+
+                    print("\nРезультаты:")
+                    print(f"Приближенный корень: {root:.6f}")
+                    print(f"Значение функции: {f_val:.2e}")
+                    print(f"Количество итераций: {iterations}")
+                except ValueError as e:
+                    print(f"\nОшибка: {e}")
+
             elif variant == "2": pass
             elif variant == "3": pass
             else:
@@ -301,9 +330,16 @@ def start():
             start()
     elif equation is not None and system is None:
         print("Выбран вариант решения нелинейных уравнений")
+        if interval is None:
+            print("Для построения графика введите интервал.")
+            input_interval()
+        eq = equations[equation]
+        plot_equation(eq, interval)
 
     elif equation is None and system is not None:
         print("Выбран вариант решения системы нелинейных уравнений")
+        system_eq = systems[system]
+        plot_system(system_eq)
 
 def clear():
     global system, equation, epsilon, start_value, interval
