@@ -86,15 +86,14 @@ def simpson_method(f, a, b, epsilon):
 
     for _ in range(max_iter):
         h = (b - a) / n
-        current_result = f(a) + f(b)
+        current_result = abs(f(a)) + abs(f(b))
 
-        current_result += 4 * sum(f(a + i * h) for i in range(1, n, 2))
-
-        current_result += 2 * sum(f(a + i * h) for i in range(2, n - 1, 2))
+        current_result += 4 * abs(sum((f(a + i * h)) for i in range(1, n, 2)))
+        current_result += 2 * abs(sum((f(a + i * h)) for i in range(2, n - 1, 2)))
         current_result *= h / 3
 
         if n > 2:
-            error = abs(current_result - prev_result) / 15
+            error = abs(current_result - prev_result)
             if error < epsilon:
                 return current_result, error
 

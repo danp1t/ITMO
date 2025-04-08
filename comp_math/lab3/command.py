@@ -3,7 +3,7 @@ import re
 from math_module import *
 
 #Глобальные переменные
-equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.4 = 0.2"), ("cos(x) - 0.34x = 0.21"), ("-3.2x^3 - 3.2x = 2"), ("-33x^3 + 21.23x^2 + 3 = 2.32")]
+equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12"), ("sin(x) + cos(x) - 0.6"), ("cos(x) - 0.34x - 0.21"), ("-3.2x^3 - 3.2x - 2"), ("-33x^3 + 21.23x^2 + 0.68")]
 interval = None
 epsilon = None
 equation = None
