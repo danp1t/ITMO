@@ -398,7 +398,7 @@ def start():
             start_value = find_best_start_point(f, interval)
             try:
                 a, b = interval
-                M = (f(start_value + 1e-6) - f(start_value - 1e-6)) / 2e-6
+                M = (f(start_value + 1/10**6) - f(start_value - 1/10**6)) / 2/10**6
                 phi = lambda x: x - f(x) / M
                 check_iteration_conditions(phi, a, b)
 

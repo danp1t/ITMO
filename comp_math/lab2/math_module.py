@@ -22,7 +22,7 @@ def bisection_method(func, a, b, epsilon):
 
 
 def newton_method(f, x0, epsilon, max_iter=100):
-    h = 1e-6
+    h = 1/10**6
 
     def df(x):
         return (f(x + h) - f(x - h)) / (2 * h)
@@ -38,7 +38,7 @@ def newton_method(f, x0, epsilon, max_iter=100):
 
         if abs(fx) < epsilon:
             return x, fx, iter_count, history
-        if abs(dfx) < 1e-12:
+        if abs(dfx) < 1/10**12:
             raise RuntimeError(f"Производная близка к нулю (df={dfx:.2e})")
         x_new = x - fx / dfx
         if abs(x_new - x) < epsilon:
@@ -84,7 +84,7 @@ def check_newton_conditions(f, x0, epsilon, interval):
     a, b = interval
     df = (f(x0 + h) - f(x0 - h)) / (2 * h)
 
-    if abs(df) < 1e-12:
+    if abs(df) < 1/10**12:
         raise ValueError("Производная в начальной точке слишком мала")
 
     if abs(f(x0) / df) > (b - a) / 2:
@@ -123,7 +123,7 @@ def simple_iteration_method(f, x0, epsilon, max_iter=100):
     raise RuntimeError(f"Не сошлось за {max_iter} итераций. Последнее значение: {x:.6f}")
 
 
-def compute_jacobian(f1, f2, x, y, h=1e-6):
+def compute_jacobian(f1, f2, x, y, h=1/10**6):
     df1_dx = (f1(x + h, y) - f1(x - h, y)) / (2 * h)
     df1_dy = (f1(x, y + h) - f1(x, y - h)) / (2 * h)
 
@@ -140,9 +140,9 @@ def find_best_start_point(f, interval):
     a, b = interval
     fa, fb = f(a), f(b)
 
-    if abs(fa) < 1e-12:
+    if abs(fa) < 1/10**12:
         return a
-    if abs(fb) < 1e-12:
+    if abs(fb) < 1/10**12:
         return b
 
     if abs(fa) < abs(fb):
@@ -178,7 +178,7 @@ def newton_system_solver(f1, f2, x0, y0, epsilon=1e-6, max_iter=100):
         f_val = np.array([f1(x, y), f2(x, y)])
         J = compute_jacobian(f1, f2, x, y)
 
-        if np.abs(np.linalg.det(J)) < 1e-12:
+        if np.abs(np.linalg.det(J)) < 1/10**12:
             raise RuntimeError("Якобиан вырожден. Решение невозможно.")
 
         delta = np.linalg.solve(J, -f_val)
