@@ -14,6 +14,44 @@ def help():
     print("7. /input_table_file - ввод таблицы y = f(x) из файла")
     print()
 
+
+def save_to_file(filename, text):
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(text)
+
+
+def format_table(x_data, y_data, y_pred, eps):
+    header = "|    x   |    y   |  f(x)  |  eps   |\n"
+    separator = "+--------+--------+--------+--------+\n"
+    table = separator + header + separator
+
+    for xi, yi, fxi, epsi in zip(x_data, y_data, y_pred, eps):
+        row = f"| {xi:6.4f} | {yi:6.4f} | {fxi:6.4f} | {epsi:6.4f} |\n"
+        table += row
+    table += separator
+    return table
+
+
+def print_results(models, x_data, y_data, filename="results.txt"):
+    output = []
+
+    for model in models:
+        output.append(f"\n{model['name']}")
+        output.append("-" * 50)
+
+        if model["valid"]:
+            output.append(f"Коэффициенты: {model['coeffs_str']}")
+            output.append(f"Среднеквадратичное отклонение (SSE): {model['sse']:.4f}")
+            output.append("\n" + format_table(x_data, y_data, model["y_pred"], model["eps"]))
+        else:
+            output.append("Модель не применима (ошибка в данных)")
+
+        output.append("\n")
+
+    final_output = "\n".join(output)
+    print(final_output)
+    save_to_file(filename, final_output)
+
 def input_table():
     global table
     x = input("Введите значения x: ")
@@ -82,6 +120,7 @@ def clear():
 def start():
     if table is None:
         input_table()
+    models = []
     print("Выберете тип функции для исследования: ")
     print("1. Линейная функция")
     print("2. Полиномиальная функция 2-й степени")
@@ -89,20 +128,48 @@ def start():
     print("4. Экспоненциальная функция")
     print("5. Логарифмическая функция")
     print("6. Степенная функция")
-    print("7. Все вышестоящие функции")
+
+    x = np.array(table[0], dtype=float)
+    y = np.array(table[1], dtype=float)
 
     number_type = input("Введите тип функции: ")
     if number_type == "1":
-        a, b = linial_approx(table[0], table[1])
-        print(f"f(x) = {a}x + {b}")
-        print(f"x_i: {table[0]}")
+        a, b = linial_approx(x, y)
+        y_lin =  a * x + b
+        sse_lin = np.sum((y - y_lin) ** 2)
+        models.append({
+            "name": "1. Линейная функция: y = a + b·x",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+            "sse": sse_lin,
+            "y_pred": y_lin,
+            "eps": y - y_lin,
+            "valid": True
+        })
 
     elif number_type == "2":
-        a, b, c = bipolin_approx(table[0], table[1])
-        print(a, b, c)
+        a, b, c = bipolin_approx(x, y)
+        y_bi = a*x**2 + b*x + c
+        sse_bi = np.sum((y - y_bi) ** 2)
+        models.append({
+            "name": "2. Полиномиальная функция 2-й степени: y = a·x^2 + b·x + c",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}",
+            "sse": sse_bi,
+            "y_pred": y_bi,
+            "eps": y - y_bi,
+            "valid": True
+        })
     elif number_type == "3":
-        a, b, c, d = cubic_approx(table[0], table[1])
-        print(a, b, c, d)
+        a, b, c, d = cubic_approx(x, y)
+        y_cub = a * x ** 3 + b * x**2 + c*x + d
+        sse_cub = np.sum((y - y_cub) ** 2)
+        models.append({
+            "name": "3. Полиномиальная функция 3-й степени: y = a·x^3 + b·x^2 + c·x + d",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}, d = {d:.4f}",
+            "sse": sse_cub,
+            "y_pred": y_cub,
+            "eps": y - y_cub,
+            "valid": True
+        })
     elif number_type == "4":
         flag = False
         for i in table[1]:
@@ -139,9 +206,11 @@ def start():
             start()
             clear()
         a, b = power_approx(table[0], table[1])
-    elif number_type == "7": pass
+
+
     else:
         print("Тип не найден")
         start()
         clear()
+    print_results(models, x, y)
     clear()

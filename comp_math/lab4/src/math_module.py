@@ -101,7 +101,7 @@ def exp_approx(x, y):
     A_coeff, b = np.linalg.solve(A, B)
     a = np.exp(A_coeff)
 
-    return a, b
+    return b, a
 
 def log_approx(x, y):
     log_x = np.log(x)
@@ -123,7 +123,7 @@ def log_approx(x, y):
     B = [sum_y, sum_logx_y]
 
     a, b = np.linalg.solve(A, B)
-    return a, b
+    return b, a
 
 def power_approx(x, y):
     log_x = np.log(x)
@@ -136,12 +136,12 @@ def power_approx(x, y):
     for i in range(len(x)):
         sum_logx += log_x[i]
         sum_logx2 += (log_x[i]**2)
-        sum_logy += sum_logy[i]
+        sum_logy += log_y[i]
         sum_logx_logy += (log_x[i] * log_y[i])
 
     # Матрица системы уравнений
     A = [
-        [len(n), sum_logx],
+        [len(x), sum_logx],
         [sum_logx, sum_logx2]
     ]
     B = [sum_logy, sum_logx_logy]
@@ -150,4 +150,4 @@ def power_approx(x, y):
     A_coeff, b = np.linalg.solve(A, B)
     a = np.exp(A_coeff)
 
-    return a, b
+    return b, a
