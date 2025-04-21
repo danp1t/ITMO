@@ -1,3 +1,5 @@
+from math_module import *
+
 #Глобальные переменные
 table = None
 
@@ -17,8 +19,8 @@ def input_table():
     x = input("Введите значения x: ")
     y = input("Введите значения y: ")
     try:
-        x = list(map(int, x.split()))
-        y = list(map(int, y.split()))
+        x = list(map(float, x.split()))
+        y = list(map(float, y.split()))
 
         if len(x) != len(y):
             print("Количество чисел должно совпадать")
@@ -43,8 +45,8 @@ def input_table_file():
             x = lines[0]
             y = lines[1]
             try:
-                x = list(map(int, x.split()))
-                y = list(map(int, y.split()))
+                x = list(map(float, x.split()))
+                y = list(map(float, y.split()))
 
                 if len(x) != len(y):
                     print("Количество чисел должно совпадать")
@@ -80,3 +82,29 @@ def clear():
 def start():
     if table is None:
         input_table()
+    print("Выберете тип функции для исследования: ")
+    print("1. Линейная функция")
+    print("2. Полиномиальная функция 2-й степени")
+    print("3. Полиномиальная функция 3-й степени")
+    print("4. Экспонециальная функция")
+    print("5. Логарифмическая функция")
+    print("6. Степенная функция")
+    print("7. Все вышестоящие функции")
+
+    number_type = input("Введите тип функции: ")
+    if number_type == "1":
+        a, b = linial_approx(table[0], table[1])
+        print(f"f(x) = {a}x + {b}")
+        print(f"x_i: {table[0]}")
+
+    elif number_type == "2":
+        a, b, c = bipolin_approx(table[0], table[1])
+        print(a, b, c)
+    elif number_type == "3": pass
+    elif number_type == "4": pass
+    elif number_type == "5": pass
+    elif number_type == "6": pass
+    elif number_type == "7": pass
+    else:
+        print("Тип не найден")
+        start()
