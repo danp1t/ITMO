@@ -86,7 +86,7 @@ def start():
     print("1. Линейная функция")
     print("2. Полиномиальная функция 2-й степени")
     print("3. Полиномиальная функция 3-й степени")
-    print("4. Экспонециальная функция")
+    print("4. Экспоненциальная функция")
     print("5. Логарифмическая функция")
     print("6. Степенная функция")
     print("7. Все вышестоящие функции")
@@ -100,11 +100,48 @@ def start():
     elif number_type == "2":
         a, b, c = bipolin_approx(table[0], table[1])
         print(a, b, c)
-    elif number_type == "3": pass
-    elif number_type == "4": pass
-    elif number_type == "5": pass
-    elif number_type == "6": pass
+    elif number_type == "3":
+        a, b, c, d = cubic_approx(table[0], table[1])
+        print(a, b, c, d)
+    elif number_type == "4":
+        flag = False
+        for i in table[1]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по Y должны быть положительными")
+            start()
+            clear()
+        a, b = exp_approx(table[0], table[1])
+    elif number_type == "5":
+        flag = False
+        for i in table[0]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по X должны быть положительными")
+            start()
+            clear()
+        a, b = log_approx(table[0], table[1])
+    elif number_type == "6":
+        flag = False
+        for i in table[0]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по X должны быть положительными")
+            start()
+        for i in table[1]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по Y должны быть положительными")
+            start()
+            clear()
+        a, b = power_approx(table[0], table[1])
     elif number_type == "7": pass
     else:
         print("Тип не найден")
         start()
+        clear()
+    clear()
