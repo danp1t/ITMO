@@ -13,15 +13,65 @@ def help():
     print()
 
 def input_table():
-    pass
+    global table
+    x = input("Введите значения x: ")
+    y = input("Введите значения y: ")
+    try:
+        x = list(map(int, x.split()))
+        y = list(map(int, y.split()))
+
+        if len(x) != len(y):
+            print("Количество чисел должно совпадать")
+            input_table()
+        if 8 > len(x) or len(x) > 12:
+            print("Таблица должна содержать от 8 до 12 точек")
+            input_table()
+        if len(set(x)) != len(x):
+            print("Точки должны быть различными по x")
+            input_table()
+        table = [x, y]
+    except ValueError:
+        print("Обнаружена ошибка при вводе")
+        input_table()
 
 def input_table_file():
-    pass
+    global table
+    file_path = input("Введите путь к файлу: ")
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+            x = lines[0]
+            y = lines[1]
+            try:
+                x = list(map(int, x.split()))
+                y = list(map(int, y.split()))
+
+                if len(x) != len(y):
+                    print("Количество чисел должно совпадать")
+                    input_table_file()
+                if 8 > len(x) or len(x) > 12:
+                    print("Таблица должна содержать от 8 до 12 точек")
+                    input_table_file()
+                if len(set(x)) != len(x):
+                    print("Точки должны быть различными по x")
+                    input_table_file()
+                table = [x, y]
+            except ValueError:
+                print("Обнаружена ошибка при вводе")
+                input_table_file()
+    except (ValueError, IndexError):
+        print("Ошибка: некорректный формат данных в файле.")
+        input_table_file()
+    except FileNotFoundError:
+        print(f"Ошибка: файл '{file_path}' не найден")
+        input_table_file()
 
 def info():
     if table is not None:
-        #Вывод переделать
-        print(f"Введена таблица: {table}")
+        print(f"Введена таблица: ")
+        print(f"Значения x: {table[0]}")
+        print(f"Значения y: {table[1]}")
+
 
 def clear():
     global table

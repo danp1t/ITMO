@@ -21,5 +21,5 @@ def validate_task(task):
     elif task == "/start" or task == "4": command.start()
     elif task == "/clear" or task == "5": command.clear()
     elif task == "/input_table" or task == "6": command.input_table()
-    elif task == "/input_table" or task == "6": command.input_table_file()
+    elif task == "/input_table_file" or task == "6": command.input_table_file()
     else: print("Команда не найдена")
