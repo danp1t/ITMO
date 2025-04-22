@@ -128,6 +128,7 @@ def start():
     print("4. Экспоненциальная функция")
     print("5. Логарифмическая функция")
     print("6. Степенная функция")
+    print("7. Исследовать все типы функции")
 
     x = np.array(table[0], dtype=float)
     y = np.array(table[1], dtype=float)
@@ -237,7 +238,108 @@ def start():
             "valid": True
         })
 
+    elif number_type == "7":
+        a, b, c = bipolin_approx(x, y)
+        y_bi = a * x ** 2 + b * x + c
+        sse_bi = np.sum((y - y_bi) ** 2)
+        models.append({
+            "name": "2. Полиномиальная функция 2-й степени: y = a·x^2 + b·x + c",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}",
+            "sse": sse_bi,
+            "y_pred": y_bi,
+            "eps": y - y_bi,
+            "valid": True
+        })
 
+        a, b, c = bipolin_approx(x, y)
+        y_bi = a * x ** 2 + b * x + c
+        sse_bi = np.sum((y - y_bi) ** 2)
+        models.append({
+            "name": "2. Полиномиальная функция 2-й степени: y = a·x^2 + b·x + c",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}",
+            "sse": sse_bi,
+            "y_pred": y_bi,
+            "eps": y - y_bi,
+            "valid": True
+        })
+
+        a, b, c, d = cubic_approx(x, y)
+        y_cub = a * x ** 3 + b * x ** 2 + c * x + d
+        sse_cub = np.sum((y - y_cub) ** 2)
+        models.append({
+            "name": "3. Полиномиальная функция 3-й степени: y = a·x^3 + b·x^2 + c·x + d",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}, d = {d:.4f}",
+            "sse": sse_cub,
+            "y_pred": y_cub,
+            "eps": y - y_cub,
+            "valid": True
+        })
+
+        flag = False
+        for i in table[1]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по Y должны быть положительными")
+            start()
+            clear()
+        b, a = exp_approx(x, y)
+        y_cub = a * math.e ** (b * x)
+        sse_cub = np.sum((y - y_cub) ** 2)
+        models.append({
+            "name": "4. Экспоненциальная функция: y = a·e^(bx)",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+            "sse": sse_cub,
+            "y_pred": y_cub,
+            "eps": y - y_cub,
+            "valid": True
+        })
+
+        flag = False
+        for i in table[0]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по X должны быть положительными")
+            start()
+            clear()
+        a, b = log_approx(x, y)
+        y_cub = a * np.log(x) + b
+        sse_cub = np.sum((y - y_cub) ** 2)
+        models.append({
+            "name": "5. Логарифмическая функция: y = a·log(x) + b",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+            "sse": sse_cub,
+            "y_pred": y_cub,
+            "eps": y - y_cub,
+            "valid": True
+        })
+
+        flag = False
+        for i in table[0]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по X должны быть положительными")
+            start()
+        for i in table[1]:
+            if i < 0:
+                flag = True
+        if flag:
+            print("Аппроксимация невозможна. Значения по Y должны быть положительными")
+            start()
+            clear()
+        a, b = power_approx(x, y)
+        y_cub = a * (x ** b)
+        sse_cub = np.sum((y - y_cub) ** 2)
+        models.append({
+            "name": "6. Степенная функция: y = a * x^b",
+            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+            "sse": sse_cub,
+            "y_pred": y_cub,
+            "eps": y - y_cub,
+            "valid": True
+        })
     else:
         print("Тип не найден")
         start()
