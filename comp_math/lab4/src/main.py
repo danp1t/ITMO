@@ -27,7 +27,7 @@ def input_loop():
 
     readline.set_completer(completer.complete)
     readline.parse_and_bind('tab: complete')
-    readline.set_completer_delims(' \t\n')  # Разделители для автодополнения
+    readline.set_completer_delims(' \t\n')
 
     while True:
         try:
@@ -37,7 +37,6 @@ def input_loop():
             if line.strip() == '/exit':
                 break
 
-            # Обработка команды
             other_command.validate_task(line)
 
         except EOFError:

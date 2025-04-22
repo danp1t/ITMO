@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 
 def linial_approx(x, y):
@@ -139,15 +141,27 @@ def power_approx(x, y):
         sum_logy += log_y[i]
         sum_logx_logy += (log_x[i] * log_y[i])
 
-    # Матрица системы уравнений
     A = [
         [len(x), sum_logx],
         [sum_logx, sum_logx2]
     ]
     B = [sum_logy, sum_logx_logy]
 
-    # Решение системы
     A_coeff, b = np.linalg.solve(A, B)
     a = np.exp(A_coeff)
 
     return a, b
+
+def corr_pirson(x, y):
+    x_sr = sum(x) / len(x)
+    y_sr = sum(y) / len(y)
+    sum_1 = 0
+    sum_2 = 0
+    sum_3 = 0
+    for i in range(len(x)):
+        sum_1 += (x[i] - x_sr)*(y[i] - y_sr)
+        sum_2 += (x[i] - x_sr)**2
+        sum_3 += (y[i] - y_sr)**2
+
+    r = sum_1 / math.sqrt(sum_2 * sum_3)
+    return r
