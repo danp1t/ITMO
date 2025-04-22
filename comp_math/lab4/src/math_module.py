@@ -150,4 +150,4 @@ def power_approx(x, y):
     A_coeff, b = np.linalg.solve(A, B)
     a = np.exp(A_coeff)
 
-    return b, a
+    return a, b
