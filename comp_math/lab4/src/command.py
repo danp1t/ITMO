@@ -1,5 +1,7 @@
 from math_module import *
 import math
+import matplotlib.pyplot as plt
+
 #Глобальные переменные
 table = None
 
@@ -52,6 +54,37 @@ def print_results(models, x_data, y_data, filename="results.txt"):
     final_output = "\n".join(output)
     print(final_output)
     save_to_file(filename, final_output)
+
+
+def plot_all_models(x_data, y_data, models):
+    plt.figure(figsize=(12, 8))
+    colors = plt.cm.tab10(np.linspace(0, 1, len(models)))
+
+    # Исходные данные
+    plt.scatter(x_data, y_data, label='Данные', s=100, color='black')
+
+    # Расширенный интервал
+    x_min, x_max = np.min(x_data), np.max(x_data)
+    x_pad = 0.1 * (x_max - x_min)
+    x_ext = np.linspace(x_min - x_pad, x_max + x_pad, 500)
+
+    # Построение всех моделей
+    for model, color in zip(models, colors):
+        if model['valid']:
+            y_pred = model['predict_function'](x_ext)
+            print(model['predict_function'](4))
+            plt.plot(x_ext, y_pred,
+                     label=f"{model['name']} (R²={model['r_squared']:.2f})",
+                     color=color,
+                     linewidth=2)
+
+    plt.title('Сравнение всех аппроксимирующих моделей')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig('all_models_comparison.png', dpi=300)
 
 def input_table():
     global table
@@ -143,6 +176,7 @@ def start():
             "name": "1. Линейная функция: y = a + b·x",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_lin,
+            'predict_function': lambda x: a * x + b,
             "y_pred": y_lin,
             "eps": y - y_lin,
             "valid": True
@@ -262,6 +296,7 @@ def start():
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_lin,
             "r_squared": r_2,
+            'predict_function': lambda x: a * x + b,
             "interpretation": interpretation,
             "y_pred": y_lin,
             "eps": y - y_lin,
@@ -291,6 +326,7 @@ def start():
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}",
             "sse": sse_bi,
             "r_squared": r_2,
+            'predict_function': lambda x: a * x ** 2 + b * x + c,
             "interpretation": interpretation,
             "y_pred": y_bi,
             "eps": y - y_bi,
@@ -319,6 +355,7 @@ def start():
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}, d = {d:.4f}",
             "sse": sse_cub,
             "r_squared": r_2,
+            'predict_function': lambda x: a * x ** 3 + b * x ** 2 + c * x + d,
             "interpretation": interpretation,
             "y_pred": y_cub,
             "eps": y - y_cub,
@@ -347,11 +384,13 @@ def start():
             interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
         else:
             interpretation = "плохо объясняет данные (R² < 0.5)"
+        print(f"{a} * e^{b}x")
         models.append({
             "name": "4. Экспоненциальная функция: y = a·e^(bx)",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_cub,
             "r_squared": r_2,
+            'predict_function': lambda x: a * np.exp(b*x),
             "interpretation": interpretation,
             "y_pred": y_cub,
             "eps": y - y_cub,
@@ -384,6 +423,7 @@ def start():
             "name": "5. Логарифмическая функция: y = a·log(x) + b",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_cub,
+            'predict_function': lambda x: a * np.log(x) + b,
             "r_squared": r_2,
             "interpretation": interpretation,
             "y_pred": y_cub,
@@ -423,6 +463,7 @@ def start():
             "name": "6. Степенная функция: y = a * x^b",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_cub,
+            'predict_function': lambda x: a * (x ** b),
             "r_squared": r_2,
             "interpretation": interpretation,
             "y_pred": y_cub,
@@ -436,8 +477,12 @@ def start():
             print(f"Коэффициенты: {best_model['coeffs_str']}")
             print(f"R²: {best_model['r_squared']:.4f}")
             print(f"Интерпретация: {best_model['interpretation']}")
+
         else:
             print("Ни одна модель не может быть рассчитана")
+
+        plot_all_models(x, y, models)
+
 
 
     else:
