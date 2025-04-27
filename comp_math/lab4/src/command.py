@@ -67,12 +67,44 @@ def plot_all_models(x_data, y_data, models):
     x_min, x_max = np.min(x_data), np.max(x_data)
     x_pad = 0.1 * (x_max - x_min)
     x_ext = np.linspace(x_min - x_pad, x_max + x_pad, 500)
-
     # Построение всех моделей
     for model, color in zip(models, colors):
         if model['valid']:
-            y_pred = model['predict_function'](x_ext)
-            print(model['predict_function'](4))
+            if model['name'][0] == "1":
+                a = model['a']
+                b = model['b']
+                f = lambda x: a * x + b
+                y_pred = f(x_ext)
+            elif model['name'][0] == "2":
+                a = model['a']
+                b = model['b']
+                c = model['c']
+                f = lambda x: a * x ** 2 + b * x + c
+                y_pred = f(x_ext)
+            elif model['name'][0] == "3":
+                a = model['a']
+                b = model['b']
+                c = model['c']
+                d = model['d']
+                f = lambda x: a * x ** 3 + b * x ** 2 + c * x + d
+                y_pred = f(x_ext)
+            elif model['name'][0] == "4":
+                a = model['a']
+                b = model['b']
+                f = lambda x: a * np.exp(b*x)
+                y_pred = f(x_ext)
+            elif model['name'][0] == "5":
+                a = model['a']
+                b = model['b']
+                f = lambda x: a * np.log(x) + b
+                y_pred = f(x_ext)
+            elif model['name'][0] == "6":
+                a = model['a']
+                b = model['b']
+                f = lambda x: a * (x ** b)
+                y_pred = f(x_ext)
+
+
             plt.plot(x_ext, y_pred,
                      label=f"{model['name']} (R²={model['r_squared']:.2f})",
                      color=color,
@@ -294,6 +326,8 @@ def start():
         models.append({
             "name": "1. Линейная функция: y = a + b·x",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+            "a" : a,
+            "b" : b,
             "sse": sse_lin,
             "r_squared": r_2,
             'predict_function': lambda x: a * x + b,
@@ -325,6 +359,9 @@ def start():
             "name": "2. Полиномиальная функция 2-й степени: y = a·x^2 + b·x + c",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}",
             "sse": sse_bi,
+            "a": a,
+            "b": b,
+            "c": c,
             "r_squared": r_2,
             'predict_function': lambda x: a * x ** 2 + b * x + c,
             "interpretation": interpretation,
@@ -354,6 +391,10 @@ def start():
             "name": "3. Полиномиальная функция 3-й степени: y = a·x^3 + b·x^2 + c·x + d",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}, d = {d:.4f}",
             "sse": sse_cub,
+            "a": a,
+            "b": b,
+            "c": c,
+            "d": d,
             "r_squared": r_2,
             'predict_function': lambda x: a * x ** 3 + b * x ** 2 + c * x + d,
             "interpretation": interpretation,
@@ -389,6 +430,8 @@ def start():
             "name": "4. Экспоненциальная функция: y = a·e^(bx)",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_cub,
+            "a": a,
+            "b": b,
             "r_squared": r_2,
             'predict_function': lambda x: a * np.exp(b*x),
             "interpretation": interpretation,
@@ -423,6 +466,8 @@ def start():
             "name": "5. Логарифмическая функция: y = a·log(x) + b",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_cub,
+            "a": a,
+            "b": b,
             'predict_function': lambda x: a * np.log(x) + b,
             "r_squared": r_2,
             "interpretation": interpretation,
@@ -463,6 +508,8 @@ def start():
             "name": "6. Степенная функция: y = a * x^b",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
             "sse": sse_cub,
+            "a": a,
+            "b": b,
             'predict_function': lambda x: a * (x ** b),
             "r_squared": r_2,
             "interpretation": interpretation,
