@@ -1,7 +1,9 @@
 import re
+import numpy as np
 
 from math_module import *
 import math
+
 
 #Глобальные переменные
 table = None
@@ -59,12 +61,20 @@ def parse_equation(eq_str):
 
     return expr
 
+def create_table_from_input(equation, interval, count_point):
+    eq_str = equations[equation]
+    expr = parse_equation(eq_str)
+    a, b = interval
+    x_values = np.linspace(a, b, count_point)
+    y_values = eval(expr, {'np': np, 'x': x_values}, {})
+    return [x_values.tolist(), y_values.tolist()]
+
 def input_count_point():
     global count_point
     try:
         count_point = int(input("Введите количество точек на интервале: "))
-        if count_point < 0:
-            print("Количество точек на интервале не должно быть отрицательным")
+        if count_point < 2:
+            print("Количество точек на интервале не должно быть меньше 2")
             input_count_point()
     except ValueError:
         print("Ошибка: введите целочисленное число. Попробуйте снова")
@@ -152,4 +162,27 @@ def clear():
     count_point = None
 
 def start():
-     pass
+    global table
+    if table is None:
+         if equation is not None and interval is not None and count_point is not None:
+             table = create_table_from_input(equation, interval, count_point)
+         print("Выберете, каким образом будете вводить информацию")
+         print("1. Введу таблицу")
+         print("2. Введу таблицу из файла")
+         print("3. Выберу функцию и введу параментры")
+         n_choice = input("Ваш выбор:")
+         if n_choice == "1":
+             input_table()
+         elif n_choice == "2":
+             input_table_file()
+         elif n_choice == "3":
+             choice_equations()
+             input_interval()
+             input_count_point()
+             table = create_table_from_input(equation, interval, count_point)
+         else:
+             print("Ваш выбор некорректен")
+             print("Попробуйте заново")
+             clear()
+             start()
+
