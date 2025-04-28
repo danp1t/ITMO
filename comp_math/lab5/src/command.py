@@ -1,9 +1,15 @@
+import re
+
 from math_module import *
 import math
-import matplotlib.pyplot as plt
 
 #Глобальные переменные
 table = None
+interval = None
+count_point = None
+equation = None
+equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12 = 0"), ("sin(x) + cos(x) - 0.6 = 0"), ("cos(x) - 0.34x - 0.21 = 0"), ("-3.2x^3 - 3.2x - 2 = 0"), ("-33x^3 + 21.23x^2 + 0.68 = 0")]
+
 
 #Команда для вывода списка команд с их описанием
 def help():
@@ -14,7 +20,69 @@ def help():
     print("5. /clear - очистка введенных данных")
     print("6. /input_table - ввод таблицы y = f(x) из консоли")
     print("7. /input_table_file - ввод таблицы y = f(x) из файла")
-    print()
+    print("8. /input_interval - ввод интервала")
+    print("9. /input_count_point - ввод количества точек на интервале")
+    print("10. /choice_equations - выбор функции")
+
+def choice_equations():
+    global equation
+    for i in range(len(equations)):
+        print(f"{i}. {equations[i]}")
+    try:
+        equation = int(input("Введите номер функции: "))
+        if equation >= len(equations):
+            print(f"Ошибка: номер equation должен быть в указаном диапазоне. Получено: {equation}")
+            return choice_equations()
+        if equation < 0:
+            print(f"Ошибка: номер equation должен быть неотрицательным. Получено: {equation}")
+            return choice_equations()
+    except ValueError:
+        print(f"Ошибка: номер equation должен быть целым числом. Получено: {equation}")
+        return choice_equations()
+
+def parse_equation(eq_str):
+    eq_str = eq_str.replace('sin', 'np.sin')
+    eq_str = eq_str.replace('cos', 'np.cos')
+    eq_str = eq_str.replace('tan', 'np.tan')
+    eq_str = eq_str.replace('tg', 'np.tan')
+    eq_str = eq_str.replace('sqrt', 'np.sqrt')
+    eq_str = eq_str.replace('^', '**')
+
+    eq_str = re.sub(r'(?<=[0-9)])(?=[a-zA-Z])', '*', eq_str)
+    eq_str = re.sub(r'(?<=[a-zA-Z])(?=[0-9])', '*', eq_str)
+
+    if '=' in eq_str:
+        left, right = eq_str.split('=', 1)
+        expr = f'({left.strip()}) - ({right.strip()})'
+    else:
+        expr = eq_str.strip()
+
+    return expr
+
+def input_count_point():
+    global count_point
+    try:
+        count_point = int(input("Введите количество точек на интервале: "))
+        if count_point < 0:
+            print("Количество точек на интервале не должно быть отрицательным")
+            input_count_point()
+    except ValueError:
+        print("Ошибка: введите целочисленное число. Попробуйте снова")
+        input_count_point()
+
+def input_interval():
+    global interval
+    try:
+        a = float(input("Введите нижнюю границу интервала: "))
+        b = float(input("Введите верхнюю границу интервала: "))
+        if a >= b:
+            print("Ошибка: нижняя граница должна быть меньше верхней. Попробуйте снова.")
+            input_interval()
+        else:
+            interval = (a, b)
+    except ValueError:
+        print("Ошибка: введите числовые значения. Попробуйте снова.")
+        input_interval()
 
 def input_table():
     global table
@@ -26,9 +94,6 @@ def input_table():
 
         if len(x) != len(y):
             print("Количество чисел должно совпадать")
-            input_table()
-        if 8 > len(x) or len(x) > 12:
-            print("Таблица должна содержать от 8 до 12 точек")
             input_table()
         if len(set(x)) != len(x):
             print("Точки должны быть различными по x")
@@ -53,9 +118,6 @@ def input_table_file():
                 if len(x) != len(y):
                     print("Количество чисел должно совпадать")
                     input_table_file()
-                if 8 > len(x) or len(x) > 12:
-                    print("Таблица должна содержать от 8 до 12 точек")
-                    input_table_file()
                 if len(set(x)) != len(x):
                     print("Точки должны быть различными по x")
                     input_table_file()
@@ -75,11 +137,19 @@ def info():
         print(f"Введена таблица: ")
         print(f"Значения x: {table[0]}")
         print(f"Значения y: {table[1]}")
-
+    if equation is not None:
+        print(f"Выбрано уравнение: {equations[equation]}")
+    if interval is not None:
+        print(f"Интервал: {interval}")
+    if count_point is not None:
+        print(f"Количество точек на интервале: {count_point}")
 
 def clear():
-    global table
+    global table, equation, interval, count_point
     table = None
+    equation = None
+    interval = None
+    count_point = None
 
 def start():
      pass

@@ -22,4 +22,7 @@ def validate_task(task):
     elif task == "/clear" or task == "5": command.clear()
     elif task == "/input_table" or task == "6": command.input_table()
     elif task == "/input_table_file" or task == "7": command.input_table_file()
+    elif task == "/input_interval" or task == "8": command.input_interval()
+    elif task == "/input_count_point" or task == "9": command.input_count_point()
+    elif task == "/choice_equations" or task == "10": command.choice_equations()
     else: print("Команда не найдена")

@@ -22,7 +22,8 @@ def input_loop():
     completer = SimpleCompleter([
         '/help', '/exit', '/info', '/start',
         '/clear', '/input_table',
-        '/input_table_file'
+        '/input_table_file', '/input_interval',
+        '/input_count_point', '/choice_equations'
     ])
 
     readline.set_completer(completer.complete)
