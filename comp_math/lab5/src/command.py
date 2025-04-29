@@ -206,7 +206,7 @@ def start():
     elif n_choice == "2":
         pass
     elif n_choice == "3":
-        pass
+        print(method_gauss(x, table, create_difference_table(table)))
     elif n_choice == "4":
         pass
     else:
