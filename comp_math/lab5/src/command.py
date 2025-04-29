@@ -170,7 +170,7 @@ def start():
          print("1. Введу таблицу")
          print("2. Введу таблицу из файла")
          print("3. Выберу функцию и введу параментры")
-         n_choice = input("Ваш выбор:")
+         n_choice = input("Ваш выбор: ")
          if n_choice == "1":
              input_table()
          elif n_choice == "2":
@@ -185,4 +185,4 @@ def start():
              print("Попробуйте заново")
              clear()
              start()
-
+    print(create_difference_table(table))
