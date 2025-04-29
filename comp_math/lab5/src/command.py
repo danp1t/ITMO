@@ -1,8 +1,6 @@
 import re
-import numpy as np
-
 from math_module import *
-import math
+import matplotlib.pyplot as plt
 
 
 #Глобальные переменные
@@ -10,6 +8,7 @@ table = None
 interval = None
 count_point = None
 equation = None
+flag = False
 equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12 = 0"), ("sin(x) + cos(x) - 0.6 = 0"), ("cos(x) - 0.34x - 0.21 = 0"), ("-3.2x^3 - 3.2x - 2 = 0"), ("-33x^3 + 21.23x^2 + 0.68 = 0")]
 
 
@@ -113,6 +112,43 @@ def input_table():
         print("Обнаружена ошибка при вводе")
         input_table()
 
+
+def save_plot(table, output_file="plot.png"):
+    global flag
+    methods = [
+        (method_langrange, "Лагранж"),
+        (method_newton, "Ньютон"),
+        (method_gauss, "Гаусс")
+    ]
+    if flag:
+        methods = [
+            (method_langrange, "Лагранж"),
+            (method_newton, "Ньютон")
+        ]
+    flag = False
+    plt.figure(figsize=(12, 7))
+    x_min, x_max = min(table[0]), max(table[0])
+    x_vals = np.linspace(x_min, x_max, 500)
+
+    plt.scatter(table[0], table[1], s=80, color='black',
+                zorder=3, label='Узлы интерполяции')
+
+    # Построение кривых
+    for method, label in methods:
+        y_vals = [method(x, table) for x in x_vals]
+        plt.plot(x_vals, y_vals, linewidth=2, label=label)
+
+    # Оформление
+    plt.title("Сравнение методов интерполяции", fontsize=14)
+    plt.xlabel("x", fontsize=12)
+    plt.ylabel("y", fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(fontsize=10)
+
+    # Сохранение в файл
+    plt.savefig(output_file, dpi=300, bbox_inches='tight')
+    plt.close()
+
 def input_table_file():
     global table
     file_path = input("Введите путь к файлу: ")
@@ -135,7 +171,8 @@ def input_table_file():
             except ValueError:
                 print("Обнаружена ошибка при вводе")
                 input_table_file()
-    except (ValueError, IndexError):
+    except (ValueError, IndexError) as e:
+        print(e)
         print("Ошибка: некорректный формат данных в файле.")
         input_table_file()
     except FileNotFoundError:
@@ -155,14 +192,15 @@ def info():
         print(f"Количество точек на интервале: {count_point}")
 
 def clear():
-    global table, equation, interval, count_point
+    global table, equation, interval, count_point, flag
     table = None
     equation = None
     interval = None
+    flag = False
     count_point = None
 
 def start():
-    global table
+    global table, flag
     if table is None:
          if equation is not None and interval is not None and count_point is not None:
              table = create_table_from_input(equation, interval, count_point)
@@ -202,13 +240,21 @@ def start():
         clear()
         start()
     if n_choice == "1":
-        print(method_langrange(x, table))
+        print(f"Метод Лагранжа: {method_langrange(x, table)}")
     elif n_choice == "2":
-        print(method_newton(x, table))
+        print(f"Метод Ньютона с разделенными разностями: {method_newton(x, table)}")
     elif n_choice == "3":
-        print(method_gauss(x, table, create_difference_table(table)))
+        print(f"Метод Гаусса: {method_gauss(x, table)}")
     elif n_choice == "4":
-        pass
+        print(f"Метод Лагранжа: {method_langrange(x, table)}")
+        print(f"Метод Ньютона с разделенными разностями: {method_newton(x, table)}")
+        if method_gauss(x, table) == -1:
+            flag = True
+        else:
+            print(f"Метод Гаусса: {method_gauss(x, table)}")
+        save_plot(table)
+        clear()
+
     else:
         print("Вы ввели некорректное значение, попробуйте еще раз")
         clear()

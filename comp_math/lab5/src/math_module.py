@@ -47,46 +47,58 @@ def method_langrange(x, table):
     return result
 
 
-def method_gauss(x, table, diff_table):
+def method_gauss(x, table):
     x_values = np.array(table[0])
     y_values = np.array(table[1])
     n = len(x_values)
-    h = x_values[1] - x_values[0]
 
+    # Проверка равноотстоящих узлов
+    h = x_values[1] - x_values[0]
+    if not np.allclose(np.diff(x_values), h, atol=1e-6):
+        raise ValueError("Узлы не равноотстоящие")
+
+    # Определение центрального узла
     mid_idx = np.argmin(np.abs(x_values - x))
-    if mid_idx == 0: mid_idx = 1
-    if mid_idx == n - 1: mid_idx = n - 2
+    mid_idx = max(1, min(mid_idx, n - 2))
     a = x_values[mid_idx]
 
+    # Корректный расчет параметра t
     t = (x - a) / h
-    use_first_formula = (x < a)
+
+    # Автоматический выбор формулы
+    use_first_formula = (t < 0.5 and t >= -0.5)
+
+    # Таблица конечных разностей
+    diff_table = create_difference_table(table)
 
     result = y_values[mid_idx]
     product = 1.0
 
     for i in range(1, len(diff_table)):
+        # Корректный выбор индекса разности
         if use_first_formula:
             idx = mid_idx - (i // 2)
         else:
-            idx = mid_idx - (i // 2) + (i - 1) % 2
+            idx = mid_idx - (i // 2) + (i % 2)
 
+        # Проверка границ
         if idx < 0 or idx >= len(diff_table[i]):
             break
 
         delta = diff_table[i][idx]
 
-        term_product = 1.0
+        # Корректный расчет множителя
+        term = 1.0
         for j in range(i):
             if use_first_formula:
-                k = (-(i // 2) + j)
+                k = j - (i // 2)
             else:
-                k = (i // 2 - 1 + j)
-            term_product *= (t - k)
+                k = (i // 2 - 1) + j
+            term *= (t - k)
 
-        result += delta * term_product / math.factorial(i)
+        result += delta * term / math.factorial(i)
 
     return result
-
 
 def method_newton(x, table):
     x_nodes = table[0]
