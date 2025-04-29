@@ -11,3 +11,22 @@ def create_difference_table(table):
         current_level = next_level
 
     return difference_table
+
+def method_langrange(x, table):
+    x_values = table[0]
+    y_values = table[1]
+    n = len(x_values)
+    result = 0.0
+
+    for i in range(n):
+        term = y_values[i]
+        for j in range(n):
+            if j != i:
+                term *= (x - x_values[j]) / (x_values[i] - x_values[j])
+        result += term
+
+    return result
+
+
+def method_newton():
+    pass

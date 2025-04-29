@@ -185,4 +185,31 @@ def start():
              print("Попробуйте заново")
              clear()
              start()
-    print(create_difference_table(table))
+    print("Выберете метод для интерполяции функции")
+    print("1. Многочлен Лагранжа")
+    print("2. Многочлен Ньютона с разделенными разностями")
+    print("3. Многочлен Гаусса")
+    print("4. Все методы")
+    n_choice = input("Выберете метод для интерполяции функции: ")
+    try:
+        x = float(input("Введите значения для нахождения приближенного значения функции: "))
+        if min(table[0]) > x or x > max(table[0]):
+            print("Ошибка: x должен быть внутри интервала")
+            clear()
+            start()
+    except ValueError:
+        print("Ошибка: Необходимо ввести число")
+        clear()
+        start()
+    if n_choice == "1":
+        print(method_langrange(x, table))
+    elif n_choice == "2":
+        pass
+    elif n_choice == "3":
+        pass
+    elif n_choice == "4":
+        pass
+    else:
+        print("Вы ввели некорректное значение, попробуйте еще раз")
+        clear()
+        start()
