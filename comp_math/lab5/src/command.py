@@ -204,7 +204,7 @@ def start():
     if n_choice == "1":
         print(method_langrange(x, table))
     elif n_choice == "2":
-        pass
+        print(method_newton(x, table))
     elif n_choice == "3":
         print(method_gauss(x, table, create_difference_table(table)))
     elif n_choice == "4":

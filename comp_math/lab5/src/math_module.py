@@ -1,6 +1,22 @@
 import numpy as np
 import math
 
+def create_divided_differences(table):
+    x = table[0]
+    y = table[1]
+    n = len(x)
+
+    diff_table = [y.copy()]
+
+    for i in range(1, n):
+        level = []
+        for j in range(n - i):
+            delta = (diff_table[i - 1][j + 1] - diff_table[i - 1][j]) / (x[j + i] - x[j])
+            level.append(delta)
+        diff_table.append(level)
+
+    return diff_table
+
 def create_difference_table(table):
     y_values = table[1]
     difference_table = [y_values.copy()]
@@ -72,5 +88,18 @@ def method_gauss(x, table, diff_table):
     return result
 
 
-def method_newton():
-    pass
+def method_newton(x, table):
+    x_nodes = table[0]
+    y_nodes = table[1]
+    n = len(x_nodes)
+
+    diff_table = create_divided_differences(table)
+
+    result = diff_table[0][0]
+    product = 1.0
+
+    for i in range(1, n):
+        product *= (x - x_nodes[i - 1])
+        result += diff_table[i][0] * product
+
+    return result
