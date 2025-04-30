@@ -52,49 +52,48 @@ def method_gauss(x, table):
     y_values = np.array(table[1])
     n = len(x_values)
 
+    if n < 2:
+        return y_values[0] if n == 1 else 0.0
+
     # Проверка равноотстоящих узлов
     h = x_values[1] - x_values[0]
     if not np.allclose(np.diff(x_values), h, atol=1e-6):
         raise ValueError("Узлы не равноотстоящие")
 
-    # Определение центрального узла
+    # Находим ближайший узел
     mid_idx = np.argmin(np.abs(x_values - x))
-    mid_idx = max(1, min(mid_idx, n - 2))
+
+    # Динамическое ограничение для сохранения в границах таблицы разностей
+    max_steps = min(mid_idx, n - mid_idx - 1, len(y_values) - 1)
+    if max_steps < 1:
+        return y_values[mid_idx]  # Если нельзя сделать ни одного шага
+
     a = x_values[mid_idx]
-
-    # Корректный расчет параметра t
     t = (x - a) / h
+    use_first_formula = (t <= 0)  # Выбор формулы по положению относительно центра
 
-    # Автоматический выбор формулы
-    use_first_formula = (t < 0.5 and t >= -0.5)
-
-    # Таблица конечных разностей
     diff_table = create_difference_table(table)
 
     result = y_values[mid_idx]
-    product = 1.0
+    term = 1.0
 
-    for i in range(1, len(diff_table)):
-        # Корректный выбор индекса разности
+    for i in range(1, max_steps + 1):
+        # Корректируем индекс для текущего уровня разности
         if use_first_formula:
             idx = mid_idx - (i // 2)
         else:
-            idx = mid_idx - (i // 2) + (i % 2)
+            idx = mid_idx - ((i - 1) // 2)
 
-        # Проверка границ
-        if idx < 0 or idx >= len(diff_table[i]):
+        # Проверка выхода за границы таблицы разностей
+        if idx < 0 or idx + i >= len(diff_table[i]):
             break
 
         delta = diff_table[i][idx]
 
-        # Корректный расчет множителя
-        term = 1.0
-        for j in range(i):
-            if use_first_formula:
-                k = j - (i // 2)
-            else:
-                k = (i // 2 - 1) + j
-            term *= (t - k)
+        # Вычисление множителя (t +/- k)
+        term *= (t + (-1) ** use_first_formula * (i // 2))
+        if i % 2 == 0:
+            term *= (t - (-1) ** use_first_formula * (i // 2))
 
         result += delta * term / math.factorial(i)
 
