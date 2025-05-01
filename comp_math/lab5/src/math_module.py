@@ -55,22 +55,19 @@ def method_gauss(x, table):
     if n < 2:
         return y_values[0] if n == 1 else 0.0
 
-    # Проверка равноотстоящих узлов
     h = x_values[1] - x_values[0]
     if not np.allclose(np.diff(x_values), h, atol=1e-6):
         raise ValueError("Узлы не равноотстоящие")
 
-    # Находим ближайший узел
     mid_idx = np.argmin(np.abs(x_values - x))
 
-    # Динамическое ограничение для сохранения в границах таблицы разностей
     max_steps = min(mid_idx, n - mid_idx - 1, len(y_values) - 1)
     if max_steps < 1:
-        return y_values[mid_idx]  # Если нельзя сделать ни одного шага
+        return y_values[mid_idx]
 
     a = x_values[mid_idx]
     t = (x - a) / h
-    use_first_formula = (t <= 0)  # Выбор формулы по положению относительно центра
+    use_first_formula = (t <= 0)
 
     diff_table = create_difference_table(table)
 
@@ -78,19 +75,16 @@ def method_gauss(x, table):
     term = 1.0
 
     for i in range(1, max_steps + 1):
-        # Корректируем индекс для текущего уровня разности
         if use_first_formula:
             idx = mid_idx - (i // 2)
         else:
             idx = mid_idx - ((i - 1) // 2)
 
-        # Проверка выхода за границы таблицы разностей
         if idx < 0 or idx + i >= len(diff_table[i]):
             break
 
         delta = diff_table[i][idx]
 
-        # Вычисление множителя (t +/- k)
         term *= (t + (-1) ** use_first_formula * (i // 2))
         if i % 2 == 0:
             term *= (t - (-1) ** use_first_formula * (i // 2))
