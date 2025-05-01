@@ -118,7 +118,9 @@ def save_plot(table, output_file="plot.png"):
     methods = [
         (method_langrange, "Лагранж"),
         (method_newton, "Ньютон"),
-        (method_gauss, "Гаусс")
+        (method_gauss, "Гаусс"),
+        (method_stirling, "Стрилинг"),
+        (method_bessel, "Бессель")
     ]
     if flag:
         methods = [
@@ -227,7 +229,9 @@ def start():
     print("1. Многочлен Лагранжа")
     print("2. Многочлен Ньютона с разделенными разностями")
     print("3. Многочлен Гаусса")
-    print("4. Все методы")
+    print("4. Многочлен Стирлинга")
+    print("5. Многочлен Бесселя")
+    print("6. Все методы")
     n_choice = input("Выберете метод для интерполяции функции: ")
     try:
         x = float(input("Введите значения для нахождения приближенного значения функции: "))
@@ -246,12 +250,25 @@ def start():
     elif n_choice == "3":
         print(f"Метод Гаусса: {method_gauss(x, table)}")
     elif n_choice == "4":
+        print(f"Метод Стирлинга: {method_stirling(x, table)}")
+    elif n_choice == "5":
+        print(f"Метод Бесселя: {method_bessel(x, table)}")
+    elif n_choice == "6":
         print(f"Метод Лагранжа: {method_langrange(x, table)}")
         print(f"Метод Ньютона с разделенными разностями: {method_newton(x, table)}")
         if method_gauss(x, table) == -1:
             flag = True
         else:
             print(f"Метод Гаусса: {method_gauss(x, table)}")
+        if method_stirling(x, table) == -1:
+            flag = True
+        else:
+            print(f"Метод Стирлинга: {method_stirling(x, table)}")
+        if method_bessel(x, table) == -1:
+            flag = True
+        else:
+            print(f"Метод Бесселя: {method_bessel(x, table)}")
+
         save_plot(table)
         clear()
 
