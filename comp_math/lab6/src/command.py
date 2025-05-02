@@ -1,9 +1,12 @@
 #Глобальные переменные
+from math_module import euler_method
+
 interval = None
 equation = None
 equations = [("y' = 2x - y"), ("y' = y/x"), ("y' = e^(-x) + y^2"), ("y' = y(1-y)"), ("y' = sin(x)*y")]
 h = None
 epsilon = None
+start_points = None
 
 #Команда для вывода списка команд с их описанием
 def help():
@@ -47,7 +50,14 @@ def input_h():
         input_h()
 
 def input_start_points():
-    pass
+    global start_points
+    try:
+        input_str = input("Введите начальные условия в формате 'x0 y0' (например, '0 1'): ")
+        x0, y0 = map(float, input_str.strip().split())
+        start_points = (x0, y0)
+    except ValueError:
+        print("Ошибка: введите два числа, разделенных пробелом. Попробуйте снова.\n")
+        input_start_points()
 
 def input_interval():
     global interval
@@ -74,7 +84,6 @@ def input_epsilon():
         print("Ошибка: введено не число")
         input_epsilon()
 
-
 def info():
     if interval is not None:
         print(f"Интервал дифференцирования: {interval}")
@@ -84,13 +93,39 @@ def info():
         print(f"Шаг h: {h}")
     if epsilon is not None:
         print(f"Точность: {epsilon}")
+    if start_points is not None:
+        print(f"Начальные условия (x_0, y_0): {start_points}")
 
 def clear():
-    global interval, equation, h, epsilon
+    global interval, equation, h, epsilon, start_points
     interval = None
     equation = None
     h = None
     epsilon = None
+    start_points = None
 
 def start():
-    pass
+    if equation is None:
+        choice_equations()
+    if start_points is None:
+        input_start_points()
+    if interval is None:
+        input_interval()
+    if h is None:
+        input_h()
+    if epsilon is None:
+        input_epsilon()
+
+    print("1. Метод Эйлера")
+    print("2. Метод Рунге-Кутта 4-го порядка")
+    print("3. Метод Милна")
+    choice_n = input("Выберете метод для решение ОДУ: ")
+
+    if choice_n == "1":
+        euler_method(start_points, interval, h, epsilon, equation)
+        clear()
+    elif choice_n == "2": pass
+    elif choice_n == "3": pass
+    else:
+        print("Нужно ввести цифру из диапазона от 1 до 3 для выбора метода")
+        start()
