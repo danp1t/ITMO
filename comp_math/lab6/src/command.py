@@ -1,12 +1,7 @@
-import re
-from math_module import *
-import matplotlib.pyplot as plt
-
-
 #Глобальные переменные
 interval = None
 equation = None
-equations = [("2x^3 + 3.41x^2 - 1.943x + 2.12 = 0"), ("sin(x) + cos(x) - 0.6 = 0"), ("cos(x) - 0.34x - 0.21 = 0"), ("-3.2x^3 - 3.2x - 2 = 0"), ("-33x^3 + 21.23x^2 + 0.68 = 0")]
+equations = [("y' = 2x - y"), ("y' = y/x"), ("y' = e^(-x) + y^2"), ("y' = y(1-y)"), ("y' = sin(x)*y")]
 h = None
 epsilon = None
 
@@ -24,10 +19,32 @@ def help():
     print("10. /choice_equations - выбор функции")
 
 def choice_equations():
-    pass
+    global equation
+    for i in range(len(equations)):
+        print(f"{i}. {equations[i]}")
+    try:
+        equation = int(input("Введите номер функции: "))
+        if equation >= len(equations):
+            print(f"Ошибка: номер equation должен быть в указаном диапазоне. Получено: {equation}")
+            choice_equations()
+        if equation < 0:
+            print(f"Ошибка: номер equation должен быть неотрицательным. Получено: {equation}")
+            choice_equations()
+    except ValueError:
+        print(f"Ошибка: номер equation должен быть целым числом. Получено: {equation}")
+        choice_equations()
+
 
 def input_h():
-    pass
+    global h
+    try:
+        h = float(input("Введите шаг: "))
+        if h <= 0:
+            print("Значение шага должно быть больше 0")
+            input_h()
+    except ValueError:
+        print("Ошибка: введено не число")
+        input_h()
 
 def input_start_points():
     pass
@@ -47,16 +64,33 @@ def input_interval():
         input_interval()
 
 def input_epsilon():
-    pass
+    global epsilon
+    try:
+        epsilon = float(input("Введите точность: "))
+        if epsilon <= 0:
+            print("Точность должна быть больше 0")
+            input_epsilon()
+    except ValueError:
+        print("Ошибка: введено не число")
+        input_epsilon()
 
-def input_h():
-    pass
 
 def info():
-    pass
+    if interval is not None:
+        print(f"Интервал дифференцирования: {interval}")
+    if equation is not None:
+        print(f"Выбрано уравнение: {equations[equation]}")
+    if h is not None:
+        print(f"Шаг h: {h}")
+    if epsilon is not None:
+        print(f"Точность: {epsilon}")
 
 def clear():
-    pass
+    global interval, equation, h, epsilon
+    interval = None
+    equation = None
+    h = None
+    epsilon = None
 
 def start():
     pass
