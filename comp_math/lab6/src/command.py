@@ -2,6 +2,7 @@
 from math_module import euler_method
 from math_module import runge_kutta_method
 from math_module import milne_method
+from math_module import compare_methods
 
 interval = None
 equation = None
@@ -121,6 +122,7 @@ def start():
     print("1. Метод Эйлера")
     print("2. Метод Рунге-Кутта 4-го порядка")
     print("3. Метод Милна")
+    print("4. Все методы")
     choice_n = input("Выберете метод для решение ОДУ: ")
 
     if choice_n == "1":
@@ -132,6 +134,8 @@ def start():
     elif choice_n == "3":
         milne_method(start_points, interval, h, epsilon, equation)
         clear()
+    elif choice_n == "4":
+        compare_methods(start_points, interval, h, epsilon, equation)
     else:
         print("Нужно ввести цифру из диапазона от 1 до 3 для выбора метода")
         start()

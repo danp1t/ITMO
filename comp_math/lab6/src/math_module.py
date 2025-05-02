@@ -13,7 +13,7 @@ equations_funcs = [
     lambda x, y: math.sin(x) * y
 ]
 
-def euler_method(start_points, interval, h, epsilon, equation):
+def euler_method(start_points, interval, h, epsilon, equation, flag=True):
     x0, y0 = start_points
     xn = interval[1]
     f = equations_funcs[equation]
@@ -38,23 +38,23 @@ def euler_method(start_points, interval, h, epsilon, equation):
         if idx < len(y_h2):
             max_error = max(max_error, abs(y_h[i] - y_h2[idx]))
 
-    # Вывод результатов
-    print("\n" + "=" * 40)
-    print(f"{'Метод Эйлера':^40}")
-    print("=" * 40)
-    print(f"{'x':<10}{'y (h)':<15}{'y (h/2)':<15}")
-    for i in range(len(y_h)):
-        h2_val = y_h2[2 * i] if 2 * i < len(y_h2) else "N/A"
-        print(f"{x_h[i]:<10.3f}{y_h[i]:<15.6f}{str(h2_val):<15}")
+    if flag:
+        print("\n" + "=" * 40)
+        print(f"{'Метод Эйлера':^40}")
+        print("=" * 40)
+        print(f"{'x':<10}{'y (h)':<15}{'y (h/2)':<15}")
+        for i in range(len(y_h)):
+            h2_val = y_h2[2 * i] if 2 * i < len(y_h2) else "N/A"
+            print(f"{x_h[i]:<10.3f}{y_h[i]:<15.6f}{str(h2_val):<15}")
 
-    print(f"\nМаксимальная погрешность: {max_error:.6f}")
-    print(f"Целевая точность: {epsilon:.6f}")
+        print(f"\nМаксимальная погрешность: {max_error:.6f}")
+        print(f"Целевая точность: {epsilon:.6f}")
 
-    if max_error > epsilon:
-        print("\nТребуемая точность не достигнута!")
-        print(f"Рекомендуемый шаг: {h / 2:.4f}")
-    else:
-        print("\nТочность в пределах допустимого!")
+        if max_error > epsilon:
+            print("\nТребуемая точность не достигнута!")
+            print(f"Рекомендуемый шаг: {h / 2:.4f}")
+        else:
+            print("\nТочность в пределах допустимого!")
 
     return {
         "x_values": x_h,
@@ -66,7 +66,7 @@ def euler_method(start_points, interval, h, epsilon, equation):
     }
 
 
-def runge_kutta_method(start_points, interval, h, epsilon, equation):
+def runge_kutta_method(start_points, interval, h, epsilon, equation, flag=True):
     x0, y0 = start_points
     xn = interval[1]
     f = equations_funcs[equation]
@@ -99,13 +99,14 @@ def runge_kutta_method(start_points, interval, h, epsilon, equation):
         if idx < len(y_h2):
             max_error = max(max_error, abs(y_h[i] - y_h2[idx]))
 
-    print("\n" + "=" * 45)
-    print(f"{'Метод Рунге-Кутта 4-го порядка':^45}")
-    print("=" * 45)
-    print(f"{'x':<10}{'y (h)':<18}{'y (h/2)':<18}")
-    for i in range(len(y_h)):
-        h2_val = y_h2[2 * i] if 2 * i < len(y_h2) else "N/A"
-        print(f"{x_h[i]:<10.3f}{y_h[i]:<18.6f}{str(h2_val):<18}")
+    if flag:
+        print("\n" + "=" * 45)
+        print(f"{'Метод Рунге-Кутта 4-го порядка':^45}")
+        print("=" * 45)
+        print(f"{'x':<10}{'y (h)':<18}{'y (h/2)':<18}")
+        for i in range(len(y_h)):
+            h2_val = y_h2[2 * i] if 2 * i < len(y_h2) else "N/A"
+            print(f"{x_h[i]:<10.3f}{y_h[i]:<18.6f}{str(h2_val):<18}")
 
     return {
         "x_values": x_h,
@@ -126,7 +127,7 @@ exact_solutions = [
 ]
 
 
-def milne_method(start_points, interval, h, epsilon, equation):
+def milne_method(start_points, interval, h, epsilon, equation, flag=True):
     x0, y0 = start_points
     xn = interval[1]
     f = equations_funcs[equation]
@@ -136,7 +137,7 @@ def milne_method(start_points, interval, h, epsilon, equation):
         print("Ошибка: Для выбранного уравнения нет точного решения!")
         return None
 
-    rk_result = runge_kutta_method(start_points, interval, h, epsilon, equation)
+    rk_result = runge_kutta_method(start_points, interval, h, epsilon, equation, flag=False)
     x_rk = rk_result["x_values"]
     y_rk = rk_result["y_values"]
 
@@ -165,13 +166,65 @@ def milne_method(start_points, interval, h, epsilon, equation):
     exact_y = [exact_sol(xi, x0, y0) for xi in x]
     errors = [abs(y[i] - exact_y[i]) for i in range(len(y))]
     max_error = max(errors)
+    if flag:
+        print("\n" + "=" * 60)
+        print(f"{'Метод Милна':^60}")
+        print("=" * 60)
+        print(f"{'x':<10}{'y (числ)':<15}{'y (точн)':<15}{'Погрешность':<15}")
+        for i in range(len(x)):
+            print(f"{x[i]:<10.3f}{y[i]:<15.6f}{exact_y[i]:<15.6f}{errors[i]:<15.6f}")
 
-    print("\n" + "=" * 60)
-    print(f"{'Метод Милна':^60}")
-    print("=" * 60)
-    print(f"{'x':<10}{'y (числ)':<15}{'y (точн)':<15}{'Погрешность':<15}")
-    for i in range(len(x)):
-        print(f"{x[i]:<10.3f}{y[i]:<15.6f}{exact_y[i]:<15.6f}{errors[i]:<15.6f}")
+        print(f"\nМаксимальная погрешность: {max_error:.6f}")
+        print(f"Целевая точность: {epsilon:.6f}")
 
-    print(f"\nМаксимальная погрешность: {max_error:.6f}")
-    print(f"Целевая точность: {epsilon:.6f}")
+    return {
+        'x': x,
+        'y': y,
+        'exact': exact_y,
+        'errors': errors,
+        'max_error': max_error,
+        'is_precision_achieved': max_error <= epsilon
+    }
+
+
+def compare_methods(start_points, interval, h, epsilon, equation):
+    euler_result = euler_method(start_points, interval, h, epsilon, equation)
+    rk_result = runge_kutta_method(start_points, interval, h, epsilon, equation)
+    milne_result = None
+
+    if exact_solutions[equation] is not None:
+        milne_result = milne_method(start_points, interval, h, epsilon, equation)
+
+    headers = ["x", "Эйлер", "Рунге-Кутта", "Милн", "Точное"]
+    data = []
+    x_values = euler_result["x_values"]
+
+    for i in range(len(x_values)):
+        x = x_values[i]
+
+        euler_val = euler_result["y_values"][i] if i < len(euler_result["y_values"]) else "N/A"
+        rk_val = rk_result["y_values"][i] if i < len(rk_result["y_values"]) else "N/A"
+        milne_val = milne_result["y"][i] if milne_result and i < len(milne_result["y"]) else "N/A"
+        exact_val = exact_solutions[equation](x, *start_points) if exact_solutions[equation] else "N/A"
+
+        row = [
+            f"{x:.3f}",
+            f"{euler_val:.6f}" if isinstance(euler_val, (int, float)) else str(euler_val),
+            f"{rk_val:.6f}" if isinstance(rk_val, (int, float)) else str(rk_val),
+            f"{milne_val:.6f}" if isinstance(milne_val, (int, float)) else str(milne_val),
+            f"{exact_val:.6f}" if isinstance(exact_val, (int, float)) else str(exact_val)
+        ]
+        data.append(row)
+
+    print("\n" + "=" * 85)
+    print(f"{'Сводная таблица результатов':^85}")
+    print("=" * 85)
+    print("{:<10} {:<15} {:<15} {:<15} {:<15}".format(*headers))
+    for row in data:
+        print("{:<10} {:<15} {:<15} {:<15} {:<15}".format(*row))
+
+    print("\nМаксимальные погрешности:")
+    print(f"Эйлер: {euler_result['max_error']:.6f}")
+    print(f"Рунге-Кутта: {rk_result['max_error']:.6f}")
+    if milne_result:
+        print(f"Милн: {milne_result['max_error']:.6f}")
