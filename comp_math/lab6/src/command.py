@@ -3,6 +3,8 @@ from math_module import euler_method
 from math_module import runge_kutta_method
 from math_module import milne_method
 from math_module import compare_methods
+from math_module import exact_solutions
+import matplotlib.pyplot as plt
 
 interval = None
 equation = None
@@ -23,6 +25,49 @@ def help():
     print("8. /input_interval - ввод интервала дифференицирования [x_0, x_n]")
     print("9. /input_start_points - ввод начальных условий y_0 = y(x_0)")
     print("10. /choice_equations - выбор функции")
+
+
+def plot_solutions(results, exact_sol_func=None, equation_name=""):
+    plt.figure(figsize=(10, 6))
+
+    # Цвета для разных методов
+    colors = {
+        'Эйлер': 'red',
+        'Рунге-Кутта': 'blue',
+        'Милн': 'green'
+    }
+
+    for method in results:
+        x = method['x']
+        y = method['y']
+        plt.plot(x, y,
+                 linestyle='--',
+                 marker='o',
+                 markersize=4,
+                 color=colors.get(method['name'], 'black'),
+                 label=method['name'])
+
+    if exact_sol_func:
+        x_exact = method['x']
+        y_exact = [exact_sol_func(xi, results[0]['x'][0], results[0]['y'][0])
+                   for xi in x_exact]
+        plt.plot(x_exact, y_exact,
+                 color='black',
+                 linewidth=2,
+                 label='Точное решение')
+
+    # Настройки графика
+    plt.title(f"Решение уравнения: {equation_name}")
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.grid(True)
+    plt.legend()
+
+    # Автоматическая настройка масштаба
+    plt.autoscale(enable=True, axis='both', tight=True)
+
+    # Сохранение в файл
+    plt.savefig('solution_plot.png', dpi=300)
 
 def choice_equations():
     global equation
@@ -136,6 +181,23 @@ def start():
         clear()
     elif choice_n == "4":
         compare_methods(start_points, interval, h, epsilon, equation)
+        euler_res = euler_method(start_points, interval, h, epsilon, equation, flag=False)
+        rk_res = runge_kutta_method(start_points, interval, h, epsilon, equation, flag=False)
+        milne_res = milne_method(start_points, interval, h, epsilon, equation, flag=False) if exact_solutions[equation] else None
+        results = [
+            {'x': euler_res['x_values'], 'y': euler_res['y_values'], 'name': 'Эйлер'},
+            {'x': rk_res['x_values'], 'y': rk_res['y_values'], 'name': 'Рунге-Кутта'},
+        ]
+
+        if milne_res:
+            results.append({'x': milne_res['x'], 'y': milne_res['y'], 'name': 'Милн'})
+
+        plot_solutions(
+            results=results,
+            exact_sol_func=exact_solutions[equation],
+            equation_name=equations[equation]
+        )
+        clear()
     else:
         print("Нужно ввести цифру из диапазона от 1 до 3 для выбора метода")
         start()
