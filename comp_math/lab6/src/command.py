@@ -1,5 +1,7 @@
 #Глобальные переменные
 from math_module import euler_method
+from math_module import runge_kutta_method
+from math_module import milne_method
 
 interval = None
 equation = None
@@ -124,8 +126,12 @@ def start():
     if choice_n == "1":
         euler_method(start_points, interval, h, epsilon, equation)
         clear()
-    elif choice_n == "2": pass
-    elif choice_n == "3": pass
+    elif choice_n == "2":
+        runge_kutta_method(start_points, interval, h, epsilon, equation)
+        clear()
+    elif choice_n == "3":
+        milne_method(start_points, interval, h, epsilon, equation)
+        clear()
     else:
         print("Нужно ввести цифру из диапазона от 1 до 3 для выбора метода")
         start()
