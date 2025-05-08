@@ -249,10 +249,13 @@
             </script>
         </h:form>
 
-        <h:form>
-            <h:commandButton value="Перейти на стартовую страницу" action="start.xhtml" styleClass="custom-button" />
-        </h:form>
+
         <h:form id="statsForm" styleClass="stats-container">
+            <script type="text/javascript">
+                function hideNotification() {
+                    document.querySelector('.notification-box').style.display = 'none';
+                }
+            </script>
             <div class="stat-item">
                 <h:outputLabel value="Всего точек: " styleClass="stat-label"/>
                 <h:outputLabel value="#{CountBean.allPoints}" styleClass="stat-value"/>
@@ -265,8 +268,17 @@
                 <h:outputLabel value="Средний интервал между кликами: " styleClass="stat-label"/>
                 <h:outputLabel value="#{IntervalBean.averageInterval}" styleClass="stat-value"/>
             </div>
+            <h:panelGroup rendered="#{CountBean.multipleOf15}">
+                <div class="notification-box">
+                    Вы достигли #{countBean.allPoints} точек!
+                    <button onclick="hideNotification()" class="close-btn">×</button>
+                </div>
+            </h:panelGroup>
         </h:form>
 
+        <h:form>
+            <h:commandButton value="Перейти на стартовую страницу" action="start.xhtml" styleClass="custom-button" />
+        </h:form>
 
     </div>
 

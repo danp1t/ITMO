@@ -10,7 +10,7 @@ import java.time.Instant;
 
 @Named("IntervalBean")
 @ApplicationScoped
-public class IntervalBean implements Serializable {
+public class IntervalBean implements Serializable, IntervalMBean {
     private String averageInterval;
     private Instant lastClickTime;
     private Long duration = 0L;
@@ -19,6 +19,7 @@ public class IntervalBean implements Serializable {
     @Inject
     CountBean countBean;
 
+    @Override
     public String getAverageInterval() {
         return String.format("%.2f сек", calcAverageInterval() / 1000);
     }
@@ -34,6 +35,7 @@ public class IntervalBean implements Serializable {
         this.lastClickTime = lastClickTime;
     }
 
+    @Override
     public void registerClick() {
         Instant now = Instant.now();
         if (lastClickTime != null) {
@@ -43,6 +45,7 @@ public class IntervalBean implements Serializable {
         lastClickTime = now;
     }
 
+    @Override
     public double calcAverageInterval() {
         if (countBean.getAllPoints() < 2) return 0;
         return (double) totalIntervalMillis / (countBean.getAllPoints() - 1);
