@@ -8,16 +8,27 @@ import java.io.Serializable;
 import java.time.Duration;
 import java.time.Instant;
 
-@Named("IntervalBean")
+@Named("Interval")
 @ApplicationScoped
-public class IntervalBean implements Serializable, IntervalMBean {
+public class Interval implements Serializable, IntervalMBean {
     private String averageInterval;
     private Instant lastClickTime;
     private Long duration = 0L;
     private Long totalIntervalMillis = 0L;
 
+    public Interval(){
+
+    }
+
     @Inject
-    CountBean countBean;
+    public Interval(RegMBeans reg){
+        this.reg = reg;
+        reg.registerBean(this);
+    }
+    RegMBeans reg;
+
+    @Inject
+    Count count;
 
     @Override
     public String getAverageInterval() {
@@ -47,7 +58,7 @@ public class IntervalBean implements Serializable, IntervalMBean {
 
     @Override
     public double calcAverageInterval() {
-        if (countBean.getAllPoints() < 2) return 0;
-        return (double) totalIntervalMillis / (countBean.getAllPoints() - 1);
+        if (count.getAllPoints() < 2) return 0;
+        return (double) totalIntervalMillis / (count.getAllPoints() - 1);
     }
 }

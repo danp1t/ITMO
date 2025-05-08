@@ -31,10 +31,10 @@ public class CoorBean implements Serializable {
 
 
     @Inject
-    private CountBean countBean;
+    private Count count;
 
     @Inject
-    private IntervalBean intervalBean;
+    private Interval interval;
     // Getters и Setters
 
     public String getCoorX() {
@@ -122,11 +122,11 @@ public class CoorBean implements Serializable {
 
             boolean status = checkArea(x, y, r);
             ResultBean result = new ResultBean(x, y, r, status);
-            countBean.setAllPoints(countBean.getAllPoints() + 1);
+            count.setAllPoints(count.getAllPoints() + 1);
             if (status) {
-                countBean.setInsidePoints(countBean.getInsidePoints() + 1);
+                count.setInsidePoints(count.getInsidePoints() + 1);
             }
-            intervalBean.registerClick();
+            interval.registerClick();
             results.add(result);
             resultService.saveResult(result);
         }

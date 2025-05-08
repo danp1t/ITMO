@@ -260,19 +260,19 @@
             </script>
             <div class="stat-item">
                 <h:outputLabel value="Всего точек: " styleClass="stat-label"/>
-                <h:outputLabel value="#{CountBean.allPoints}" styleClass="stat-value"/>
+                <h:outputLabel value="#{Count.allPoints}" styleClass="stat-value"/>
             </div>
             <div class="stat-item">
                 <h:outputLabel value="Точек в области: " styleClass="stat-label"/>
-                <h:outputLabel value="#{CountBean.insidePoints}" styleClass="stat-value"/>
+                <h:outputLabel value="#{Count.insidePoints}" styleClass="stat-value"/>
             </div>
             <div class="stat-item">
                 <h:outputLabel value="Средний интервал между кликами: " styleClass="stat-label"/>
-                <h:outputLabel value="#{IntervalBean.averageInterval}" styleClass="stat-value"/>
+                <h:outputLabel value="#{Interval.averageInterval}" styleClass="stat-value"/>
             </div>
-            <h:panelGroup rendered="#{CountBean.multipleOf15}">
+            <h:panelGroup rendered="#{Count.multipleOf15}">
                 <div class="notification-box">
-                    Вы достигли #{countBean.allPoints} точек!
+                    Вы достигли #{Count.allPoints} точек!
                     <button type="button" onclick="hideNotification(event)" class="close-btn">×</button>
                 </div>
             </h:panelGroup>

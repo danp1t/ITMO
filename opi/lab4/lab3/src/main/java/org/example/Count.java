@@ -2,15 +2,26 @@ package org.example;
 
 
 import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
 
-@Named("CountBean")
+@Named("Count")
 @SessionScoped
-public class CountBean implements Serializable, CountMBean{
+public class Count implements Serializable, CountMBean{
     private Integer allPoints = 0;
     private Integer insidePoints = 0;
+
+    public Count(){
+
+    }
+    @Inject
+    public Count(RegMBeans reg){
+        this.reg = reg;
+        reg.registerBean(this);
+    }
+    RegMBeans reg;
 
     @Override
     public Integer getAllPoints() {
