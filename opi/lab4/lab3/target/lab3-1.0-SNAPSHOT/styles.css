@@ -151,6 +151,12 @@ canvas {
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     animation: slideIn 0.5s ease-out;
     z-index: 1000;
+    transition: opacity 0.3s;
+}
+
+.notification-box.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 .close-btn {

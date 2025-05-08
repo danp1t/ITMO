@@ -252,8 +252,10 @@
 
         <h:form id="statsForm" styleClass="stats-container">
             <script type="text/javascript">
-                function hideNotification() {
-                    document.querySelector('.notification-box').style.display = 'none';
+                function hideNotification(event) {
+                    const notification = event.target.closest('.notification-box');
+                    notification.classList.add('hidden');
+                    setTimeout(() => notification.remove(), 300);
                 }
             </script>
             <div class="stat-item">
@@ -271,7 +273,7 @@
             <h:panelGroup rendered="#{CountBean.multipleOf15}">
                 <div class="notification-box">
                     Вы достигли #{countBean.allPoints} точек!
-                    <button onclick="hideNotification()" class="close-btn">×</button>
+                    <button type="button" onclick="hideNotification(event)" class="close-btn">×</button>
                 </div>
             </h:panelGroup>
         </h:form>
