@@ -249,9 +249,7 @@
             </script>
         </h:form>
 
-        <h:form>
-            <h:commandButton value="Перейти на стартовую страницу" action="start.xhtml" styleClass="custom-button" />
-        </h:form>
+
         <h:form id="statsForm" styleClass="stats-container">
             <div class="stat-item">
                 <h:outputLabel value="Всего точек: " styleClass="stat-label"/>
@@ -261,8 +259,15 @@
                 <h:outputLabel value="Точек в области: " styleClass="stat-label"/>
                 <h:outputLabel value="#{CountBean.insidePoints}" styleClass="stat-value"/>
             </div>
+            <div class="stat-item">
+                <h:outputLabel value="Средний интервал между кликами: " styleClass="stat-label"/>
+                <h:outputLabel value="#{IntervalBean.averageInterval}" styleClass="stat-value"/>
+            </div>
         </h:form>
 
+        <h:form>
+            <h:commandButton value="Перейти на стартовую страницу" action="start.xhtml" styleClass="custom-button" />
+        </h:form>
 
     </div>
 

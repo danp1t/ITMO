@@ -32,6 +32,9 @@ public class CoorBean implements Serializable {
 
     @Inject
     private CountBean countBean;
+
+    @Inject
+    private IntervalBean intervalBean;
     // Getters и Setters
 
     public String getCoorX() {
@@ -123,8 +126,7 @@ public class CoorBean implements Serializable {
             if (status) {
                 countBean.setInsidePoints(countBean.getInsidePoints() + 1);
             }
-            System.out.println("ALL" + countBean.getAllPoints());
-            System.out.println("INSIDE" + countBean.getInsidePoints());
+            intervalBean.registerClick();
             results.add(result);
             resultService.saveResult(result);
         }

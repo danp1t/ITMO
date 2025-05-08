@@ -1,18 +1,50 @@
 package org.example;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import java.io.Serializable;
+import java.time.Duration;
+import java.time.Instant;
 
 @Named("IntervalBean")
+@ApplicationScoped
 public class IntervalBean implements Serializable {
-    private Double srInteval;
+    private String averageInterval;
+    private Instant lastClickTime;
+    private Long duration = 0L;
+    private Long totalIntervalMillis = 0L;
 
-    public Double getSrInteval() {
-        return srInteval;
+    @Inject
+    CountBean countBean;
+
+    public String getAverageInterval() {
+        return String.format("%.2f сек", calcAverageInterval() / 1000);
     }
 
-    public void setSrInteval(Double srInteval) {
-        this.srInteval = srInteval;
+    public void averageInterval(String averageInterval) {
+        this.averageInterval = averageInterval;
+    }
+
+    public Instant getLastClickTime() {
+        return lastClickTime;
+    }
+    public void setLastClickTime(Instant lastClickTime) {
+        this.lastClickTime = lastClickTime;
+    }
+
+    public void registerClick() {
+        Instant now = Instant.now();
+        if (lastClickTime != null) {
+            long interval = Duration.between(lastClickTime, now).toMillis();
+            totalIntervalMillis += interval;
+        }
+        lastClickTime = now;
+    }
+
+    public double calcAverageInterval() {
+        if (countBean.getAllPoints() < 2) return 0;
+        return (double) totalIntervalMillis / (countBean.getAllPoints() - 1);
     }
 }
