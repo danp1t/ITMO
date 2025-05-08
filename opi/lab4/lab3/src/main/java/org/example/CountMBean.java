@@ -1,9 +1,9 @@
 package org.example;
 
 public interface CountMBean {
-    Integer getAllPoints();
-    void setAllPoints(Integer allPoints);
-    Integer getInsidePoints();
-    void setInsidePoints(Integer insidePoints);
+    int getAllPoints();
+    void setAllPoints(int allPoints);
+    int getInsidePoints();
+    void setInsidePoints(int insidePoints);
     boolean isMultipleOf15();
 }

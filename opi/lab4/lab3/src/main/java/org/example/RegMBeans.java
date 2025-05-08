@@ -18,6 +18,7 @@ public class RegMBeans implements ServletContextListener {
             var domain = bean.getClass().getPackageName();
             var type = bean.getClass().getSimpleName();
             var objectName = new ObjectName(String.format("%s:type=%s,name=%s", domain, type, cur_name));
+            System.out.println(objectName);
             bean_names.put(bean, objectName);
             ManagementFactory.getPlatformMBeanServer().registerMBean(bean, objectName);
         } catch (InstanceAlreadyExistsException | MBeanRegistrationException | NotCompliantMBeanException | MalformedObjectNameException e) {

@@ -10,8 +10,8 @@ import java.io.Serializable;
 @Named("Count")
 @SessionScoped
 public class Count implements Serializable, CountMBean{
-    private Integer allPoints = 0;
-    private Integer insidePoints = 0;
+    private int allPoints = 0;
+    private int insidePoints = 0;
 
     public Count(){
 
@@ -24,22 +24,22 @@ public class Count implements Serializable, CountMBean{
     RegMBeans reg;
 
     @Override
-    public Integer getAllPoints() {
+    public int getAllPoints() {
         return allPoints;
     }
 
     @Override
-    public void setAllPoints(Integer allPoints) {
+    public void setAllPoints(int allPoints) {
         this.allPoints = allPoints;
     }
 
     @Override
-    public Integer getInsidePoints() {
+    public int getInsidePoints() {
         return insidePoints;
     }
 
     @Override
-    public void setInsidePoints(Integer insidePoints) {
+    public void setInsidePoints(int insidePoints) {
         this.insidePoints = insidePoints;
     }
 
