@@ -29,9 +29,7 @@ loop:
     load_ind     input_addr  
     store_ind    buffer
 
-    ;load_imm 1
-    ;add input_addr
-    ;store_ind input_addr
+    
 
      ; Проверка на перенос строки
     load_ind buffer
@@ -62,10 +60,14 @@ continue_loop:
     sub const_1
     beqz make_great_symbol
 
-
     load_ind buffer
     store_ind    output_addr
-    halt
+    
+    load input_addr
+    add const_1
+    store input_addr
+
+    jmp loop
 
 is_upper:
     load_ind buffer

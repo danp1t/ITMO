@@ -28,6 +28,10 @@ public class CoorBean implements Serializable {
 
     @Inject
     private ResultService resultService;
+
+
+    @Inject
+    private CountBean countBean;
     // Getters и Setters
 
     public String getCoorX() {
@@ -115,13 +119,15 @@ public class CoorBean implements Serializable {
 
             boolean status = checkArea(x, y, r);
             ResultBean result = new ResultBean(x, y, r, status);
+            countBean.setAllPoints(countBean.getAllPoints() + 1);
+            if (status) {
+                countBean.setInsidePoints(countBean.getInsidePoints() + 1);
+            }
+            System.out.println("ALL" + countBean.getAllPoints());
+            System.out.println("INSIDE" + countBean.getInsidePoints());
             results.add(result);
             resultService.saveResult(result);
-
         }
-
-
-
     }
 
     private boolean checkArea(double x, double y, double r) {

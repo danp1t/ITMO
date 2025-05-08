@@ -252,6 +252,17 @@
         <h:form>
             <h:commandButton value="Перейти на стартовую страницу" action="start.xhtml" styleClass="custom-button" />
         </h:form>
+        <h:form id="statsForm" styleClass="stats-container">
+            <div class="stat-item">
+                <h:outputLabel value="Всего точек: " styleClass="stat-label"/>
+                <h:outputLabel value="#{CountBean.allPoints}" styleClass="stat-value"/>
+            </div>
+            <div class="stat-item">
+                <h:outputLabel value="Точек в области: " styleClass="stat-label"/>
+                <h:outputLabel value="#{CountBean.insidePoints}" styleClass="stat-value"/>
+            </div>
+        </h:form>
+
 
     </div>
 

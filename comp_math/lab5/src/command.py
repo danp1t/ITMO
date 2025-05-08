@@ -94,7 +94,7 @@ def input_interval():
         input_interval()
 
 def input_table():
-    global table
+    global table, x, y
     x = input("Введите значения x: ")
     y = input("Введите значения y: ")
     try:

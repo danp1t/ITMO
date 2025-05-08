@@ -119,7 +119,7 @@ def plot_all_models(x_data, y_data, models):
     plt.savefig('all_models_comparison.png', dpi=300)
 
 def input_table():
-    global table
+    global table, x, y
     x = input("Введите значения x: ")
     y = input("Введите значения y: ")
     try:
@@ -202,13 +202,29 @@ def start():
     number_type = input("Введите тип функции: ")
     if number_type == "1":
         a, b = linial_approx(x, y)
-        y_lin =  a * x + b
+        y_lin = a * x + b
         sse_lin = np.sum((y - y_lin) ** 2)
+
+        sum_1 = np.sum((y - np.mean(y_lin)) ** 2)
+        r_2 = 1 - (sse_lin / sum_1) if sum_1 != 0 else 0
+
+        if r_2 >= 0.9:
+            interpretation = "отлично объясняет данные (R² ≥ 0.9)"
+        elif r_2 >= 0.7:
+            interpretation = "хорошо объясняет данные (0.7 ≤ R² < 0.9)"
+        elif r_2 >= 0.5:
+            interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
+        else:
+            interpretation = "плохо объясняет данные (R² < 0.5)"
         models.append({
             "name": "1. Линейная функция: y = a + b·x",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+            "a" : a,
+            "b" : b,
             "sse": sse_lin,
+            "r_squared": r_2,
             'predict_function': lambda x: a * x + b,
+            "interpretation": interpretation,
             "y_pred": y_lin,
             "eps": y - y_lin,
             "valid": True
@@ -218,24 +234,62 @@ def start():
 
     elif number_type == "2":
         a, b, c = bipolin_approx(x, y)
-        y_bi = a*x**2 + b*x + c
+        y_bi = a * x ** 2 + b * x + c
         sse_bi = np.sum((y - y_bi) ** 2)
+
+        sum_1 = np.sum((y - np.mean(y_bi)) ** 2)
+        r_2 = 1 - (sse_bi / sum_1) if sum_1 != 0 else 0
+
+        if r_2 >= 0.9:
+            interpretation = "отлично объясняет данные (R² ≥ 0.9)"
+        elif r_2 >= 0.7:
+            interpretation = "хорошо объясняет данные (0.7 ≤ R² < 0.9)"
+        elif r_2 >= 0.5:
+            interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
+        else:
+            interpretation = "плохо объясняет данные (R² < 0.5)"
+
         models.append({
             "name": "2. Полиномиальная функция 2-й степени: y = a·x^2 + b·x + c",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}",
             "sse": sse_bi,
+            "a": a,
+            "b": b,
+            "c": c,
+            "r_squared": r_2,
+            'predict_function': lambda x: a * x ** 2 + b * x + c,
+            "interpretation": interpretation,
             "y_pred": y_bi,
             "eps": y - y_bi,
             "valid": True
         })
     elif number_type == "3":
         a, b, c, d = cubic_approx(x, y)
-        y_cub = a * x ** 3 + b * x**2 + c*x + d
+        y_cub = a * x ** 3 + b * x ** 2 + c * x + d
         sse_cub = np.sum((y - y_cub) ** 2)
+
+        sum_1 = np.sum((y - np.mean(y_cub)) ** 2)
+        r_2 = 1 - (sse_cub / sum_1) if sum_1 != 0 else 0
+
+        if r_2 >= 0.9:
+            interpretation = "отлично объясняет данные (R² ≥ 0.9)"
+        elif r_2 >= 0.7:
+            interpretation = "хорошо объясняет данные (0.7 ≤ R² < 0.9)"
+        elif r_2 >= 0.5:
+            interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
+        else:
+            interpretation = "плохо объясняет данные (R² < 0.5)"
         models.append({
             "name": "3. Полиномиальная функция 3-й степени: y = a·x^3 + b·x^2 + c·x + d",
             "coeffs_str": f"a = {a:.4f}, b = {b:.4f}, c = {c:.4f}, d = {d:.4f}",
             "sse": sse_cub,
+            "a": a,
+            "b": b,
+            "c": c,
+            "d": d,
+            "r_squared": r_2,
+            'predict_function': lambda x: a * x ** 3 + b * x ** 2 + c * x + d,
+            "interpretation": interpretation,
             "y_pred": y_cub,
             "eps": y - y_cub,
             "valid": True
@@ -247,19 +301,35 @@ def start():
                 flag = True
         if flag:
             print("Аппроксимация невозможна. Значения по Y должны быть положительными")
-            start()
-            clear()
-        b, a = exp_approx(x, y)
-        y_cub = a*math.e**(b*x)
-        sse_cub = np.sum((y - y_cub) ** 2)
-        models.append({
-            "name": "4. Экспоненциальная функция: y = a·e^(bx)",
-            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
-            "sse": sse_cub,
-            "y_pred": y_cub,
-            "eps": y - y_cub,
-            "valid": True
-        })
+        else:
+            b, a = exp_approx(x, y)
+            y_cub = a * math.e ** (b * x)
+            sse_cub = np.sum((y - y_cub) ** 2)
+            sum_1 = np.sum((y - np.mean(y_cub)) ** 2)
+            r_2 = 1 - (sse_cub / sum_1) if sum_1 != 0 else 0
+
+            if r_2 >= 0.9:
+                interpretation = "отлично объясняет данные (R² ≥ 0.9)"
+            elif r_2 >= 0.7:
+                interpretation = "хорошо объясняет данные (0.7 ≤ R² < 0.9)"
+            elif r_2 >= 0.5:
+                interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
+            else:
+                interpretation = "плохо объясняет данные (R² < 0.5)"
+            print(f"{a} * e^{b}x")
+            models.append({
+                "name": "4. Экспоненциальная функция: y = a·e^(bx)",
+                "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+                "sse": sse_cub,
+                "a": a,
+                "b": b,
+                "r_squared": r_2,
+                'predict_function': lambda x: a * np.exp(b*x),
+                "interpretation": interpretation,
+                "y_pred": y_cub,
+                "eps": y - y_cub,
+                "valid": not flag
+            })
     elif number_type == "5":
         flag = False
         for i in table[0]:
@@ -267,19 +337,34 @@ def start():
                 flag = True
         if flag:
             print("Аппроксимация невозможна. Значения по X должны быть положительными")
-            start()
-            clear()
-        a, b = log_approx(x, y)
-        y_cub = a * np.log(x) + b
-        sse_cub = np.sum((y - y_cub) ** 2)
-        models.append({
-            "name": "5. Логарифмическая функция: y = a·log(x) + b",
-            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
-            "sse": sse_cub,
-            "y_pred": y_cub,
-            "eps": y - y_cub,
-            "valid": True
-        })
+        else:
+            a, b = log_approx(x, y)
+            y_cub = a * np.log(x) + b
+            sse_cub = np.sum((y - y_cub) ** 2)
+            sum_1 = np.sum((y - np.mean(y_cub)) ** 2)
+            r_2 = 1 - (sse_cub / sum_1) if sum_1 != 0 else 0
+
+            if r_2 >= 0.9:
+                interpretation = "отлично объясняет данные (R² ≥ 0.9)"
+            elif r_2 >= 0.7:
+                interpretation = "хорошо объясняет данные (0.7 ≤ R² < 0.9)"
+            elif r_2 >= 0.5:
+                interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
+            else:
+                interpretation = "плохо объясняет данные (R² < 0.5)"
+            models.append({
+                "name": "5. Логарифмическая функция: y = a·log(x) + b",
+                "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+                "sse": sse_cub,
+                "a": a,
+                "b": b,
+                'predict_function': lambda x: a * np.log(x) + b,
+                "r_squared": r_2,
+                "interpretation": interpretation,
+                "y_pred": y_cub,
+                "eps": y - y_cub,
+                "valid": not flag
+            })
     elif number_type == "6":
         flag = False
         for i in table[0]:
@@ -287,25 +372,39 @@ def start():
                 flag = True
         if flag:
             print("Аппроксимация невозможна. Значения по X должны быть положительными")
-            start()
         for i in table[1]:
             if i < 0:
                 flag = True
         if flag:
             print("Аппроксимация невозможна. Значения по Y должны быть положительными")
-            start()
-            clear()
-        a, b = power_approx(x, y)
-        y_cub = a * (x**b)
-        sse_cub = np.sum((y - y_cub) ** 2)
-        models.append({
-            "name": "6. Степенная функция: y = a * x^b",
-            "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
-            "sse": sse_cub,
-            "y_pred": y_cub,
-            "eps": y - y_cub,
-            "valid": True
-        })
+        else:
+            a, b = power_approx(x, y)
+            y_cub = a * (x ** b)
+            sse_cub = np.sum((y - y_cub) ** 2)
+            sum_1 = np.sum((y - np.mean(y_cub)) ** 2)
+            r_2 = 1 - (sse_cub / sum_1) if sum_1 != 0 else 0
+
+            if r_2 >= 0.9:
+                interpretation = "отлично объясняет данные (R² ≥ 0.9)"
+            elif r_2 >= 0.7:
+                interpretation = "хорошо объясняет данные (0.7 ≤ R² < 0.9)"
+            elif r_2 >= 0.5:
+                interpretation = "удовлетворительно объясняет данные (0.5 ≤ R² < 0.7)"
+            else:
+                interpretation = "плохо объясняет данные (R² < 0.5)"
+            models.append({
+                "name": "6. Степенная функция: y = a * x^b",
+                "coeffs_str": f"a = {a:.4f}, b = {b:.4f}",
+                "sse": sse_cub,
+                "a": a,
+                "b": b,
+                'predict_function': lambda x: a * (x ** b),
+                "r_squared": r_2,
+                "interpretation": interpretation,
+                "y_pred": y_cub,
+                "eps": y - y_cub,
+                "valid": not flag
+            })
 
     elif number_type == "7":
         a, b = linial_approx(x, y)
