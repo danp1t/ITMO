@@ -8,11 +8,13 @@ const_65:        .word  65
 const_122:       .word  122
 const_10:        .word  10
 const_32:        .word  32
+buffer_end:      .word  32  
 flag:            .word  1
 const_90:        .word  90
 const_97:        .word  97
 const_1:         .word  1
 buffer_ptr:      .word  0x0 
+const_FF: .word 0xFF
 const_5F: .word 0x5F
 buffer_start: .word 0x0
 count_loop: .word -1
@@ -129,7 +131,7 @@ exit:
 fill_loop:
     load         buffer_ptr
     sub          const_32     
-    bgt          end_fill       
+    bgt          end_start_fill      
 
     load         const_5F
     store_ind    buffer_ptr
@@ -138,14 +140,25 @@ fill_loop:
     store        buffer_ptr
     jmp          fill_loop
 
+end_start_fill:
+    load_imm     0            
+    store        buffer_ptr
+
 end_fill:
-    load_addr buffer_start
-    beqz final_end
-    load_addr buffer_start
-    store_ind output_addr
-    load buffer_start
-    add byte_const_1
-    store buffer_start
+    load         buffer_ptr
+    sub          buffer_end
+    bgt        final_end
+
+    load_ind buffer_ptr
+    and const_FF
+    beqz       final_end
+    store_ind    output_addr
+
+    ; Инкремент указателя
+    load         buffer_ptr
+    add          const_1
+    store        buffer_ptr
+
     jmp end_fill
 
 final_end:
