@@ -1,18 +1,21 @@
     .data
 
+
 input_addr:      .word  0x80
 output_addr:     .word  0x84
+byte_const_1: .byte 1
 buffer: .word 0x01
 const_65: .word 65
 const_122: .word 122
 const_10: .word 10
 const_32: .word 32
+flag:       .word 1
 const_90: .word 90
 const_97: .word 97
 const_1: .word 1
-flag: .word 0 ; Флаг ставится, когда следующую букву нужно увеличить
 
-.org 0x1000
+
+.org 0x250
     .text
 
 _start:
@@ -28,8 +31,6 @@ loop:
     ; Загружаем число в аккумулятор, нам надо увеличить input_addr аккамулятор, если он не равен переносу строки
     load_ind     input_addr  
     store_ind    buffer
-
-    
 
      ; Проверка на перенос строки
     load_ind buffer
@@ -56,17 +57,13 @@ continue_loop:
     bgt not_in_domain
 
     ; Проверка установлен ли флаг
-    load_ind flag
+    load flag
     sub const_1
     beqz make_great_symbol
 
     load_ind buffer
     store_ind    output_addr
     
-    load input_addr
-    add const_1
-    store input_addr
-
     jmp loop
 
 is_upper:
@@ -76,14 +73,18 @@ is_upper:
     jmp continue_loop
 
 make_great_symbol:
+    load_imm 0
+    store flag
     load_ind buffer
     sub const_32
     store_ind output_addr
     jmp loop
 
 change_flag:
-    load_ind 1
-    store_ind flag
+    load_imm 1
+    store flag
+    load const_32
+    store_ind output_addr
     jmp loop
 
 exit:
