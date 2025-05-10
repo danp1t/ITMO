@@ -5,6 +5,7 @@ import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
+import javax.management.JMException;
 import java.io.Serializable;
 
 @Named("Count")
@@ -17,7 +18,7 @@ public class Count implements Serializable, CountMBean{
 
     }
     @Inject
-    public Count(RegMBeans reg){
+    public Count(RegMBeans reg) throws JMException {
         this.reg = reg;
         reg.registerBean(this);
     }
@@ -28,7 +29,6 @@ public class Count implements Serializable, CountMBean{
         return allPoints;
     }
 
-    @Override
     public void setAllPoints(int allPoints) {
         this.allPoints = allPoints;
     }
@@ -38,7 +38,6 @@ public class Count implements Serializable, CountMBean{
         return insidePoints;
     }
 
-    @Override
     public void setInsidePoints(int insidePoints) {
         this.insidePoints = insidePoints;
     }
