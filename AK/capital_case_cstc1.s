@@ -14,6 +14,8 @@ const_97:        .word  97
 const_1:         .word  1
 buffer_ptr:      .word  0x0 
 const_5F: .word 0x5F
+buffer_start: .word 0x0
+count_loop: .word -1
 
 
 .org             0x250
@@ -21,6 +23,11 @@ const_5F: .word 0x5F
 
 _start:
 loop:
+    load count_loop
+    add const_1
+    store count_loop
+    sub const_32
+    beqz buffer_overflow
     load_ind     input_addr
     store_ind    buffer
 
@@ -46,7 +53,6 @@ continue_loop_upper:
     sub          const_1
     bnez        make_little_letter
     load_ind buffer
-    store_ind    output_addr
     store_ind    buffer_ptr  
     load_imm     0
     store        flag 
@@ -58,7 +64,6 @@ continue_loop_upper:
 make_little_letter:
     load_ind     buffer
     add          const_32
-    store_ind    output_addr
     store_ind    buffer_ptr   
     load         buffer_ptr
     add          const_1
@@ -74,7 +79,6 @@ continue_loop_little:
     bnez       save_little_symbol
     load_ind     buffer
     sub          const_32
-    store_ind    output_addr
     store_ind    buffer_ptr   
     load_imm     0
     store        flag
@@ -85,7 +89,6 @@ continue_loop_little:
 
 save_little_symbol:
     load_ind     buffer
-    store_ind    output_addr
     store_ind    buffer_ptr
     load         buffer_ptr
     add          const_1
@@ -96,7 +99,6 @@ change_flag:
     load_imm     1
     store        flag
     load         const_32
-    store_ind    output_addr
     store_ind    buffer_ptr
     load         buffer_ptr
     add          const_1
@@ -111,7 +113,6 @@ is_little:
 
 not_letter:
     load_ind buffer
-    store_ind    output_addr
     store_ind    buffer_ptr
     load         buffer_ptr
     add          const_1
@@ -138,4 +139,19 @@ fill_loop:
     jmp          fill_loop
 
 end_fill:
+    load_addr buffer_start
+    beqz final_end
+    load_addr buffer_start
+    store_ind output_addr
+    load buffer_start
+    add byte_const_1
+    store buffer_start
+    jmp end_fill
+
+final_end:
+    halt
+
+buffer_overflow:
+    load_imm     0xCCCC_CCCC
+    store_ind    output_addr
     halt

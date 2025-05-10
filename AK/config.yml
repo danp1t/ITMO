@@ -1,8 +1,8 @@
 name: capital_case_cstr
-limit: 1000
+limit: 2000
 memory_size: 0x1000
 input_streams:
-  0x80: [72, 69, 76, 76, 79, 32, 87, 79, 82, 76, 68, 33, 10]
+  0x80: [49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 10]
   0x84: []
 reports:
   - name: Step-by-step
@@ -16,3 +16,4 @@ reports:
       numio[0x84]: {io:0x84:dec}
       numio[0x80]: {io:0x80:sym}
       numio[0x84]: {io:0x84:sym}
+      {memory:0:31}
