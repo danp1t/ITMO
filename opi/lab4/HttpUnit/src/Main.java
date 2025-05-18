@@ -17,6 +17,7 @@ import com.meterware.servletunit.ServletRunner;
 import com.meterware.servletunit.ServletUnitClient;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.xml.sax.SAXException;
@@ -45,8 +46,8 @@ public class Main {
             while (true) {
                 WebResponse response = sc.getResponse(request);
                 System.out.println("Count: " + number++ + response);
+                ArrayList<String> testList = new ArrayList<String>(10000);
                 java.lang.Thread.sleep(200);
-                HttpUnitOptions.clearScriptErrorMessages();
             }
         } catch (InterruptedException ex) {
             Logger.getLogger("global").log(Level.SEVERE, null, ex);
