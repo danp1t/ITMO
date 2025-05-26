@@ -7,8 +7,6 @@ import math
 
 equations_funcs = [
     lambda x, y: 2 * x - y,
-    lambda x, y: y / x if x != 0 else float('inf'),
-    lambda x, y: math.exp(-x) + y ** 2,
     lambda x, y: y * (1 - y),
     lambda x, y: math.sin(x) * y
 ]
@@ -120,8 +118,6 @@ def runge_kutta_method(start_points, interval, h, epsilon, equation, flag=True):
 
 exact_solutions = [
     lambda x, x0, y0: 2 * (x - 1) + (y0 - 2 * (x0 - 1)) * math.exp(-(x - x0)),
-    lambda x, x0, y0: y0 * (x / x0),
-    None,
     lambda x, x0, y0: y0 / (y0 + (1 - y0) * math.exp(-(x - x0))),
     lambda x, x0, y0: y0 * math.exp(math.cos(x0) - math.cos(x))
 ]

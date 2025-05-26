@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 interval = None
 equation = None
-equations = [("y' = 2x - y"), ("y' = y/x"), ("y' = e^(-x) + y^2"), ("y' = y(1-y)"), ("y' = sin(x)*y")]
+equations = [("y' = 2x - y"), ("y' = y(1-y)"), ("y' = sin(x)*y")]
 h = None
 epsilon = None
 start_points = None

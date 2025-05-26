@@ -1,5 +1,5 @@
 limit: 200
-memory_size: 0x90
+memory_size: 0x2000
 input_streams:
   0x80: [5]
   0x84: []
