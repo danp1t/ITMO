@@ -96,7 +96,7 @@ birthday_fact(elena_aunt, 1983).
 birthday_fact(sergey, 1958).
 birthday_fact(vera, 1958).
 birthday_fact(valentina, 1956).
-birthday_fact(vasiliy, 1978).
+birthday_fact(vasiliy, 1961).
 birthday_fact(nikolay, 1963).
 birthday_fact(victor, 1963).
 birthday_fact(marina, 1968).
@@ -126,14 +126,88 @@ married(X, Y, Z) :- married_fact(X, Y, Z), !.
 married(X, Y, Z) :- married_fact(Y, X, Z).
 
 %3. Who, when my son birthday? X - parent, Y - child, Z - year
-who_my_son(X, Y, Z) :- parent_fact(X, Y), male_fact(Y), birthday_fact(Y, Z).
+son(X, Y, Z) :- parent_fact(X, Y), male_fact(Y), birthday_fact(Y, Z).
 
 %4. Who, when my daughter birthday? X - parent, Y - child, Z - year
-who_my_daughter(X, Y, Z) :- parent_fact(X, Y), female_fact(Y), birthday_fact(Y, Z).
+daughter(X, Y, Z) :- parent_fact(X, Y), female_fact(Y), birthday_fact(Y, Z).
 
 %5. When did my parents marry? X - I am.
-when_parents_married(X, Y, Z, Year) :- (parent_fact(Y, X) ,! ; parent_fact(Z, X)), married_fact(Y, Z, Year).
+parents_married(X, Y, Z, Year) :- (parent_fact(Y, X) ,! ; parent_fact(Z, X)), married_fact(Y, Z, Year).
 
 %6. When did my father born? X - I am.
-when_my_father_born(X, Y, Z) :- parent_fact(Y, X), male_fact(Y), birthday_fact(Y, Z).
+father_born(X, Y, Z) :- parent_fact(Y, X), male_fact(Y), birthday_fact(Y, Z).
+
+%7. When did my mother born? X - I am
+mother_born(X, Y, Z) :- parent_fact(Y, X), female_fact(Y), birthday_fact(Y, Z).
+
+%8. When did my sister born? X - I am
+sister_born(X, Y, Z) :- sibling(X, Y), female_fact(Y), birthday_fact(Y, Z).
+
+%9. When did my brother born?
+brother_born(X, Y, Z) :- sibling(X, Y), male_fact(Y), birthday_fact(Y, Z).
+
+%10. When did my sister marry?
+sister_marry(X, Y, Z, Year) :- sibling(X, Y), female_fact(Y), married(Y, Z, Year).
+
+%11. When did my brother marry?
+brother_marry(X, Y, Z, Year) :- sibling(X, Y), male_fact(Y), married(Y, Z, Year).
+
+%12. When did my cousins born?
+cousins_born(X, Y, Z, A, Year) :- parent_fact(Y, X), sibling(Y, Z), parent_fact(Z, A), birthday_fact(A, Year).
+
+%13. When did my aunt born?
+aunt_born(X, Y, Z, Year) :- parent_fact(Y, X), sibling(Y, Z), female_fact(Z), birthday_fact(Z, Year).
+
+%14. When did my cousins marry?
+cousins_marry(X, Y, Z, A, B, Year) :- parent_fact(Y, X), sibling(Y, Z), parent_fact(Z, A), married(A, B, Year).
+
+%15. When did my grandparents marry?
+grandparents_marry(X, Y, Z, A, Year) :- parent_fact(Y, X), parent_fact(Z, Y), married(Z, A, Year).
+
+%16. When did my grandparents born?
+grandparents_born(X, Y, Z, Year) :- parent_fact(Y, X), parent_fact(Z, Y), birthday_fact(Z, Year).
+
+%17. When did my uncle born?
+uncle_born(X, Y, Z, Year) :- parent_fact(Y, X), sibling(Y, Z), male_fact(Z), birthday_fact(Z, Year).
+
+%18. When did my uncle marry?
+uncle_marry(X, Y, Z, A, Year) :- parent_fact(Y, X), sibling(Y, Z), male_fact(Z), married(Z, A, Year).
+
+%19. When did my uncle died?
+uncle_died(X, Y, Z, Year) :- parent_fact(Y, X), sibling(Y, Z), male_fact(Z), death_fact(Z, Year).
+
+%20. When did my grandparents died?
+grandparents_died(X, Y, Z, Year) :- parent_fact(Y, X), parent_fact(Z, Y), death_fact(Z, Year).
+
+%21. When did my great-grandparents marry?
+great_grandparents_marry(X, Y, Z, A, B, Year) :- parent_fact(Y, X), parent_fact(Z, Y), parent_fact(A, Z), married(A, B, Year).
+
+%22. When did my great-grandparents born?
+great_grandparents_born(X, Y, Z, A, Year) :- parent_fact(Y, X), parent_fact(Z, Y), parent_fact(A, Z), birthday_fact(A, Year).
+
+%23. When did my father died?
+father_died(X, Y, Year) :- parent_fact(Y, X), male_fact(Y), death_fact(Y, Year).
+
+%24. Who married in this year?
+married_in_year(X, Y,Year) :- married_fact(X, Y, Year).
+
+%25. Who born in this year?
+born_in_year(X, Year) :- birthday_fact(X, Year).
+
+%26. Who died in this year?
+died_in_year(X, Year) :- death_fact(X, Year).
+
+%27. When did my aunt marry?
+aunt_marry(X, Y, Z, A, Year) :- parent_fact(Y, X), sibling(Y, Z), female_fact(Z), married(Z, A, Year).
+
+%28. When did nephew born?
+nephew_born(X, Y, Z, Year) :- sibling(X, Y), parent_fact(Y, Z), male_fact(Z), birthday_fact(Z, Year).
+
+%29. When did niece born?
+niece_born(X, Y, Z, Year) :- sibling(X, Y), parent_fact(Y, Z), female_fact(Z), birthday_fact(Z, Year).
+
+%30. When did niece marry?
+niece_marry(X, Y, Z, A, Year) :- sibling(X, Y), parent_fact(Y, Z), female_fact(Z), married(Z, A, Year).
+
+
 
