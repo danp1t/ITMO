@@ -1,0 +1,1317 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://www.semanticweb.org/danil/ontologies/2025/8/untitled-ontology-3"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     ontologyIRI="http://www.semanticweb.org/danil/ontologies/2025/8/untitled-ontology-3">
+    <Prefix name="" IRI="http://www.semanticweb.org/danil/ontologies/2025/8/untitled-ontology-3/"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="#Birth"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Death"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Event"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Female"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Male"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Marriage"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="#Person"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasParent"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasParticipant"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#hasSibling"/>
+    </Declaration>
+    <Declaration>
+        <ObjectProperty IRI="#isParentOf"/>
+    </Declaration>
+    <Declaration>
+        <DataProperty IRI="#hasDate"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Alexander"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Alexander_grandfather"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Anna"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Anna_junior"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Anton"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Arseniy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Daniil"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Danil"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Denis"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Elena"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Elena_aunt"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Evgeniy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Galina"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Ivan"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Ksenia"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Marina"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Nadezhda"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Natalia"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Nikita"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Nikolay"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Olga"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Savely"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Sergey"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Svetlana"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Valentina"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Vasiliy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Vera"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Victor"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_alexander"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_alexander_grandfather"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_anna"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_anna_junior"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_anton"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_arseniy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_daniil"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_danil"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_denis"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_elena"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_elena_aunt"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_evgeniy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_galina"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_ivan"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_ksenia"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_marina"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_nadezhda"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_natalia"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_nikita"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_nikolay"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_olga"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_olga_mother"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_savely"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_sergey"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_svetlana"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_valentina"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_vasiliy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_vera"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_victor"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#birth_vyacheslav"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#death_anton"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#death_vyacheslav"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_anna_ivan"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_denis_olga_mother"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_evgeniy_elena"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_galina_alexander_grandfather"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_nadezhda_vyacheslav"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_olga_anton"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_sergey_vera"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_valentina_vasiliy"/>
+    </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#marriage_victor_marina"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="#Birth"/>
+        <Class IRI="#Event"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Death"/>
+        <Class IRI="#Event"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Female"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Male"/>
+        <Class IRI="#Person"/>
+    </SubClassOf>
+    <SubClassOf>
+        <Class IRI="#Marriage"/>
+        <Class IRI="#Event"/>
+    </SubClassOf>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Alexander"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Alexander_grandfather"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Anna"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Anna_junior"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Anton"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Arseniy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Daniil"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Danil"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Denis"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Elena"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Elena_aunt"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Galina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Ivan"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Ksenia"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Marina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Nadezhda"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Natalia"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Nikita"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Nikolay"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Olga"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Savely"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Sergey"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Svetlana"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Valentina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Vasiliy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Female"/>
+        <NamedIndividual IRI="#Vera"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Victor"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_alexander"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_alexander_grandfather"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_anna"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_anna_junior"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_anton"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_arseniy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_daniil"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_danil"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_denis"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_elena"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_elena_aunt"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_evgeniy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_galina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_ivan"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_ksenia"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_marina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_nadezhda"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_natalia"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_nikita"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_nikolay"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_olga"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_olga_mother"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_savely"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_sergey"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_svetlana"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_valentina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_vasiliy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_vera"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_victor"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Birth"/>
+        <NamedIndividual IRI="#birth_vyacheslav"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Death"/>
+        <NamedIndividual IRI="#death_anton"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Death"/>
+        <NamedIndividual IRI="#death_vyacheslav"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_anna_ivan"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_denis_olga_mother"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_evgeniy_elena"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_galina_alexander_grandfather"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_nadezhda_vyacheslav"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_olga_anton"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_sergey_vera"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_valentina_vasiliy"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Marriage"/>
+        <NamedIndividual IRI="#marriage_victor_marina"/>
+    </ClassAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Alexander"/>
+        <NamedIndividual IRI="#Elena_aunt"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Alexander"/>
+        <NamedIndividual IRI="#Daniil"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Anna"/>
+        <NamedIndividual IRI="#Marina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Anna"/>
+        <NamedIndividual IRI="#Victor"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Anna"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Anna_junior"/>
+        <NamedIndividual IRI="#Elena"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Anna_junior"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Anton"/>
+        <NamedIndividual IRI="#Sergey"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Anton"/>
+        <NamedIndividual IRI="#Vera"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Anton"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Arseniy"/>
+        <NamedIndividual IRI="#Anna"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Arseniy"/>
+        <NamedIndividual IRI="#Ivan"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Arseniy"/>
+        <NamedIndividual IRI="#Svetlana"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Daniil"/>
+        <NamedIndividual IRI="#Elena_aunt"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Daniil"/>
+        <NamedIndividual IRI="#Alexander"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Danil"/>
+        <NamedIndividual IRI="#Denis"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Danil"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Danil"/>
+        <NamedIndividual IRI="#Ksenia"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Denis"/>
+        <NamedIndividual IRI="#Valentina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Denis"/>
+        <NamedIndividual IRI="#Vasiliy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Denis"/>
+        <NamedIndividual IRI="#Natalia"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Elena_aunt"/>
+        <NamedIndividual IRI="#Alexander_grandfather"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Elena_aunt"/>
+        <NamedIndividual IRI="#Galina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+        <NamedIndividual IRI="#Sergey"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+        <NamedIndividual IRI="#Vera"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+        <NamedIndividual IRI="#Anton"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Galina"/>
+        <NamedIndividual IRI="#Marina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Ksenia"/>
+        <NamedIndividual IRI="#Denis"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Ksenia"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Ksenia"/>
+        <NamedIndividual IRI="#Danil"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Marina"/>
+        <NamedIndividual IRI="#Galina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Natalia"/>
+        <NamedIndividual IRI="#Valentina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Natalia"/>
+        <NamedIndividual IRI="#Vasiliy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Natalia"/>
+        <NamedIndividual IRI="#Denis"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Nikita"/>
+        <NamedIndividual IRI="#Natalia"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Nikolay"/>
+        <NamedIndividual IRI="#Victor"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+        <NamedIndividual IRI="#Marina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+        <NamedIndividual IRI="#Victor"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+        <NamedIndividual IRI="#Anna"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Savely"/>
+        <NamedIndividual IRI="#Anton"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Savely"/>
+        <NamedIndividual IRI="#Olga"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Svetlana"/>
+        <NamedIndividual IRI="#Anna"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Svetlana"/>
+        <NamedIndividual IRI="#Ivan"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Svetlana"/>
+        <NamedIndividual IRI="#Arseniy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Valentina"/>
+        <NamedIndividual IRI="#Nadezhda"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Valentina"/>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Valentina"/>
+        <NamedIndividual IRI="#Vera"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Vera"/>
+        <NamedIndividual IRI="#Nadezhda"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParent"/>
+        <NamedIndividual IRI="#Vera"/>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Vera"/>
+        <NamedIndividual IRI="#Valentina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasSibling"/>
+        <NamedIndividual IRI="#Victor"/>
+        <NamedIndividual IRI="#Nikolay"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_alexander"/>
+        <NamedIndividual IRI="#Alexander"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_alexander_grandfather"/>
+        <NamedIndividual IRI="#Alexander_grandfather"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_anna"/>
+        <NamedIndividual IRI="#Anna"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_anna_junior"/>
+        <NamedIndividual IRI="#Anna_junior"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_anton"/>
+        <NamedIndividual IRI="#Anton"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_arseniy"/>
+        <NamedIndividual IRI="#Arseniy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_daniil"/>
+        <NamedIndividual IRI="#Daniil"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_danil"/>
+        <NamedIndividual IRI="#Danil"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_denis"/>
+        <NamedIndividual IRI="#Denis"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_elena"/>
+        <NamedIndividual IRI="#Elena"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_elena_aunt"/>
+        <NamedIndividual IRI="#Elena_aunt"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_evgeniy"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_galina"/>
+        <NamedIndividual IRI="#Galina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_ivan"/>
+        <NamedIndividual IRI="#Ivan"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_ksenia"/>
+        <NamedIndividual IRI="#Ksenia"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_marina"/>
+        <NamedIndividual IRI="#Marina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_nadezhda"/>
+        <NamedIndividual IRI="#Nadezhda"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_natalia"/>
+        <NamedIndividual IRI="#Natalia"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_nikita"/>
+        <NamedIndividual IRI="#Nikita"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_nikolay"/>
+        <NamedIndividual IRI="#Nikolay"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_olga"/>
+        <NamedIndividual IRI="#Olga"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_olga_mother"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_savely"/>
+        <NamedIndividual IRI="#Savely"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_sergey"/>
+        <NamedIndividual IRI="#Sergey"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_svetlana"/>
+        <NamedIndividual IRI="#Svetlana"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_valentina"/>
+        <NamedIndividual IRI="#Valentina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_vasiliy"/>
+        <NamedIndividual IRI="#Vasiliy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_vera"/>
+        <NamedIndividual IRI="#Vera"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_victor"/>
+        <NamedIndividual IRI="#Victor"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#birth_vyacheslav"/>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#death_anton"/>
+        <NamedIndividual IRI="#Anton"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#death_vyacheslav"/>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_anna_ivan"/>
+        <NamedIndividual IRI="#Anna"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_anna_ivan"/>
+        <NamedIndividual IRI="#Ivan"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_denis_olga_mother"/>
+        <NamedIndividual IRI="#Denis"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_denis_olga_mother"/>
+        <NamedIndividual IRI="#Olga_mother"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_evgeniy_elena"/>
+        <NamedIndividual IRI="#Elena"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_evgeniy_elena"/>
+        <NamedIndividual IRI="#Evgeniy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_galina_alexander_grandfather"/>
+        <NamedIndividual IRI="#Alexander_grandfather"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_galina_alexander_grandfather"/>
+        <NamedIndividual IRI="#Galina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_nadezhda_vyacheslav"/>
+        <NamedIndividual IRI="#Nadezhda"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_nadezhda_vyacheslav"/>
+        <NamedIndividual IRI="#Vyacheslav"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_olga_anton"/>
+        <NamedIndividual IRI="#Anton"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_olga_anton"/>
+        <NamedIndividual IRI="#Olga"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_sergey_vera"/>
+        <NamedIndividual IRI="#Sergey"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_sergey_vera"/>
+        <NamedIndividual IRI="#Vera"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_valentina_vasiliy"/>
+        <NamedIndividual IRI="#Valentina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_valentina_vasiliy"/>
+        <NamedIndividual IRI="#Vasiliy"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_victor_marina"/>
+        <NamedIndividual IRI="#Marina"/>
+    </ObjectPropertyAssertion>
+    <ObjectPropertyAssertion>
+        <ObjectProperty IRI="#hasParticipant"/>
+        <NamedIndividual IRI="#marriage_victor_marina"/>
+        <NamedIndividual IRI="#Victor"/>
+    </ObjectPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_alexander"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2006</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_alexander_grandfather"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1964</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_anna"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1988</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_anna_junior"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2013</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_anton"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1980</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_arseniy"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2014</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_daniil"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2017</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_danil"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2005</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_denis"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1985</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_elena"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1990</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_elena_aunt"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1983</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_evgeniy"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1987</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_galina"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1965</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_ivan"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1980</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_ksenia"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2010</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_marina"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1968</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_nadezhda"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1936</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_natalia"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1983</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_nikita"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2012</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_nikolay"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1963</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_olga"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1985</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_olga_mother"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1986</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_savely"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2015</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_sergey"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1958</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_svetlana"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2010</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_valentina"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1956</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_vasiliy"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1961</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_vera"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1958</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_victor"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1963</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#birth_vyacheslav"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1933</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#death_anton"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2019</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#death_vyacheslav"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2000</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_anna_ivan"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2009</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_denis_olga_mother"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2005</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_evgeniy_elena"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2021</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_galina_alexander_grandfather"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1984</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_nadezhda_vyacheslav"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1956</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_olga_anton"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">2011</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_sergey_vera"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1978</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_valentina_vasiliy"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1981</Literal>
+    </DataPropertyAssertion>
+    <DataPropertyAssertion>
+        <DataProperty IRI="#hasDate"/>
+        <NamedIndividual IRI="#marriage_victor_marina"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">1985</Literal>
+    </DataPropertyAssertion>
+    <InverseObjectProperties>
+        <ObjectProperty IRI="#hasParent"/>
+        <ObjectProperty IRI="#isParentOf"/>
+    </InverseObjectProperties>
+    <SymmetricObjectProperty>
+        <ObjectProperty IRI="#hasSibling"/>
+    </SymmetricObjectProperty>
+    <IrreflexiveObjectProperty>
+        <ObjectProperty IRI="#hasSibling"/>
+    </IrreflexiveObjectProperty>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasParent"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#hasSibling"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyDomain>
+        <ObjectProperty IRI="#isParentOf"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyDomain>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasParent"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#hasSibling"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+    <ObjectPropertyRange>
+        <ObjectProperty IRI="#isParentOf"/>
+        <Class IRI="#Person"/>
+    </ObjectPropertyRange>
+</Ontology>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+
