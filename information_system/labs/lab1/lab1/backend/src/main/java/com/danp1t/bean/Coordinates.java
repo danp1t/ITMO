@@ -1,8 +1,12 @@
 package com.danp1t.bean;
 
-public class Coordinates {
-    private Float x; //Не null. Значение поля должно быть > -59
-    private double y; // > -5
+import com.danp1t.error.NotNullError;
+import com.danp1t.error.ValueTooSmallError;
+import com.danp1t.interfaces.NeedValidate;
+
+public class Coordinates implements NeedValidate {
+    private Float x;
+    private double y;
 
     public Float getX() {
         return x;
@@ -20,7 +24,15 @@ public class Coordinates {
 
     public void validate() {
         if (this.x == null) {
+            throw new NotNullError("x");
+        }
 
+        if (this.x <= -59) {
+            throw new ValueTooSmallError("x", -59);
+        }
+
+        if (this.y <= -5) {
+            throw new ValueTooSmallError("y", -5);
         }
     }
 }

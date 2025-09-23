@@ -1,8 +1,49 @@
 package com.danp1t.bean;
 
-public class Location {
-    private Double x; //Поле не может быть null
-    private Float y; //Поле не может быть null
+import com.danp1t.error.NotNullError;
+import com.danp1t.interfaces.NeedValidate;
+
+public class Location implements NeedValidate {
+    private Double x;
+    private Float y;
     private double z;
-    private String name; //Поле не может быть null
+    private String name;
+
+    public Double getX() {
+        return x;
+    }
+    public Float getY() {
+        return y;
+    }
+    public double getZ() {
+        return z;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setX(Double x) {
+        this.x = x;
+    }
+    public void setY(Float y) {
+        this.y = y;
+    }
+    public void setZ(double z) {
+        this.z = z;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void validate() {
+        if (this.x == null) {
+            throw new NotNullError("x");
+        }
+        if (this.y == null) {
+            throw new NotNullError("y");
+        }
+        if (this.name == null) {
+            throw new NotNullError("name");
+        }
+    }
 }
