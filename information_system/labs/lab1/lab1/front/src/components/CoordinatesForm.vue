@@ -23,8 +23,10 @@ export default {
           label: 'Координата x',
           type: 'text',
           required: true,
+          pattern: /^\d+(?:[\.]\d+)?$/,
           errorMessages: {
             required: 'Ввод координаты X обязательный',
+            pattern: 'Координата X - это вещественное число'
           }
         },
         {
@@ -32,7 +34,9 @@ export default {
           label: 'Координата y',
           type: 'text',
           required: false,
+          pattern: /^\d+(?:[\.]\d+)?$/,
           errorMessages: {
+            pattern: 'Координата Y - это вещественное число'
           }
         },
       ],
