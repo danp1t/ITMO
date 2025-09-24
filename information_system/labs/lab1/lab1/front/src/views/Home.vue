@@ -2,12 +2,13 @@
 <script setup>
 import Header from "@/components/Header.vue";
 import CoordinatesForm from "@/components/CoordinatesForm.vue";
+import AddressForm from "@/components/AddressForm.vue";
 </script>
 
 <template>
   <body>
   <Header />
-  <CoordinatesForm />
+  <AddressForm />
   </body>
 </template>
 
