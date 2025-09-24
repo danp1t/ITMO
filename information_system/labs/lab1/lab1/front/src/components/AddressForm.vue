@@ -1,6 +1,6 @@
 <template>
   <BaseForm
-      title="Координаты"
+      title="Адрес"
       :fields-config="fieldsConfig"
       submit-button-text="Отправить"
       submit-url="/api/register"
