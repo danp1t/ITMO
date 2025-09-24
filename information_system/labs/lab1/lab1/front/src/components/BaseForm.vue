@@ -1,74 +1,81 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="form-container">
-    <header class="form-header">
+  <div :class="['form-container', { 'nested-form': nested }]">
+    <header v-if="!nested && title" class="form-header">
       <h2 class="info_header">{{ title }}</h2>
     </header>
 
     <slot name="before-fields"></slot>
 
-    <div
-        v-for="field in fieldsConfig"
-        :key="field.name"
-        class="form-group"
-    >
-      <label :for="field.name">
-        {{ field.label }}{{ field.required ? '*' : '' }}
-      </label>
-
-      <input
-          v-if="field.type === 'text' || field.type === 'email' || field.type === 'password'"
-          :id="field.name"
-          v-model="formData[field.name]"
-          :type="field.type"
-          :placeholder="field.placeholder"
-          :maxlength="field.maxLength"
-          :class="{ 'error-input': errors[field.name] }"
-          @blur="validateField(field.name)"
+    <div class="form-fields">
+      <div
+          v-for="field in fieldsConfig"
+          :key="field.name"
+          class="form-group"
       >
+        <label :for="field.name" class="form-label">
+          {{ field.label }}{{ field.required ? '*' : '' }}
+        </label>
 
-      <textarea
-          v-else-if="field.type === 'textarea'"
-          :id="field.name"
-          v-model="formData[field.name]"
-          :placeholder="field.placeholder"
-          :maxlength="field.maxLength"
-          :rows="field.rows || 4"
-          :class="{ 'error-input': errors[field.name] }"
-          @blur="validateField(field.name)"
-      ></textarea>
-
-      <select
-          v-else-if="field.type === 'select'"
-          :id="field.name"
-          v-model="formData[field.name]"
-          :class="{ 'error-input': errors[field.name] }"
-          @blur="validateField(field.name)"
-      >
-        <option value="">Выберите вариант</option>
-        <option
-            v-for="option in field.options"
-            :key="option.value"
-            :value="option.value"
+        <input
+            v-if="field.type === 'text' || field.type === 'email' || field.type === 'password' || field.type === 'number'"
+            :id="field.name"
+            v-model="formData[field.name]"
+            :type="field.type"
+            :placeholder="field.placeholder"
+            :maxlength="field.maxLength"
+            :class="{ 'error-input': errors[field.name] }"
+            @blur="validateField(field.name)"
+            class="form-input"
         >
-          {{ option.label }}
-        </option>
-      </select>
 
-      <span v-if="errors[field.name]" class="error-message">
-        {{ errors[field.name] }}
-      </span>
+        <textarea
+            v-else-if="field.type === 'textarea'"
+            :id="field.name"
+            v-model="formData[field.name]"
+            :placeholder="field.placeholder"
+            :maxlength="field.maxLength"
+            :rows="field.rows || 3"
+            :class="{ 'error-input': errors[field.name] }"
+            @blur="validateField(field.name)"
+            class="form-textarea"
+        ></textarea>
+
+        <select
+            v-else-if="field.type === 'select'"
+            :id="field.name"
+            v-model="formData[field.name]"
+            :class="{ 'error-input': errors[field.name] }"
+            @blur="validateField(field.name)"
+            class="form-select"
+        >
+          <option value="">Выберите вариант</option>
+          <option
+              v-for="option in field.options"
+              :key="option.value"
+              :value="option.value"
+          >
+            {{ option.label }}
+          </option>
+        </select>
+
+        <span v-if="errors[field.name]" class="error-message">
+          {{ errors[field.name] }}
+        </span>
+      </div>
     </div>
 
     <slot name="after-fields"></slot>
 
     <button
+        v-if="!noButton"
         type="submit"
         :disabled="isSubmitting || hasErrors"
         class="submit-btn"
+        @click.prevent="handleSubmit"
     >
       {{ isSubmitting ? 'Отправка...' : submitButtonText }}
     </button>
-  </form>
+  </div>
 </template>
 
 <script>
@@ -77,7 +84,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: 'Форма'
+      default: ''
     },
     fieldsConfig: {
       type: Array,
@@ -89,14 +96,17 @@ export default {
     },
     submitUrl: {
       type: String,
-      required: true
+      default: ''
     },
     customValidators: {
       type: Object,
       default: () => ({})
     },
-    // Отключаем кнопку отправки для вложенных форм
     noButton: {
+      type: Boolean,
+      default: false
+    },
+    nested: {
       type: Boolean,
       default: false
     }
@@ -158,6 +168,11 @@ export default {
         return
       }
 
+      if (!this.submitUrl) {
+        this.$emit('submit', this.formData)
+        return
+      }
+
       this.isSubmitting = true
       this.$emit('submitting', this.formData)
 
@@ -172,7 +187,6 @@ export default {
       }
     },
 
-    // Методы для внешнего использования
     getFormData() {
       return { ...this.formData }
     },
@@ -188,100 +202,150 @@ export default {
         this.errors[field.name] = ''
       })
     }
+  },
+  watch: {
+    formData: {
+      handler(newValue) {
+        this.$emit('update:formData', newValue)
+      },
+      deep: true
+    }
   }
 }
 </script>
 
 <style scoped>
-/* Стили остаются без изменений */
 .form-container {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 20px;
   background: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-container.nested-form {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
 }
 
 .form-header {
-  border-radius: 15px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
-  margin: 10px;
-  border-bottom: 2px solid #00bfff;
-  background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px 10px 0 0;
+  padding: 15px 20px;
+  margin: 0;
+  border-bottom: 1px solid #00bfff;
+  background: linear-gradient(135deg, #00bfff 0%, #0099cc 100%);
 }
 
-.info_header {
-  font-size: 20px;
-  text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff;
-  margin-right: 0;
-  flex: 1;
+.form-header .info_header {
+  font-size: 18px;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  margin: 0;
+}
+
+.form-fields {
+  padding: 20px;
 }
 
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
-label {
+.form-label {
   display: block;
   margin-bottom: 5px;
-  font-weight: bold;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
 }
 
-input, textarea, select {
+.form-input,
+.form-textarea,
+.form-select {
   width: 100%;
-  padding: 10px;
-  border: 2px solid #00bfff;
-  border-radius: 5px;
-  font-size: 16px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
   box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #00bfff;
+  box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.2);
 }
 
 .error-input {
-  border-color: #ff4444;
+  border-color: #ff4444 !important;
 }
 
 .error-message {
   color: #ff4444;
-  font-size: 14px;
+  font-size: 12px;
   display: block;
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .submit-btn {
-  background: #00bfff;
+  background: linear-gradient(135deg, #00bfff 0%, #0099cc 100%);
   color: white;
-  padding: 12px 30px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 14px;
+  font-weight: 600;
   width: 100%;
+  transition: all 0.3s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 191, 255, 0.3);
 }
 
 .submit-btn:disabled {
   background: #cccccc;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
-@media (max-width: 888px) {
-  .form-header {
-    flex-direction: column;
-  }
+/* Компактный стиль для вложенных форм */
+.nested-form .form-fields {
+  padding: 0;
+}
 
-  .info_header {
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
+.nested-form .form-group {
+  margin-bottom: 12px;
+}
 
-  .form-container {
-    margin: 10px;
+.nested-form .form-label {
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.nested-form .form-input,
+.nested-form .form-textarea,
+.nested-form .form-select {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .form-fields {
     padding: 15px;
+  }
+
+  .form-header {
+    padding: 12px 15px;
+  }
+
+  .form-header .info_header {
+    font-size: 16px;
   }
 }
 </style>

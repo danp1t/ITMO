@@ -1,10 +1,9 @@
 <template>
   <BaseForm
-      title="Локация"
       :fields-config="fieldsConfig"
-      submit-button-text="Отправить"
-      submit-url="/api/register"
-      @submitted="onSubmitted"
+      :nested="nested"
+      :no-button="true"
+      @update:formData="$emit('update:formData', $event)"
   >
   </BaseForm>
 </template>
@@ -15,6 +14,12 @@ import BaseForm from './BaseForm.vue'
 export default {
   name: 'LocationForm',
   components: { BaseForm },
+  props: {
+    nested: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       fieldsConfig: [

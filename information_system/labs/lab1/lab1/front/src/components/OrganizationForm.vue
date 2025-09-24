@@ -85,7 +85,6 @@
         <h3>Официальный адрес</h3>
         <AddressForm
             ref="officialAddressForm"
-            title="Официальный адрес"
             @update:formData="updateOfficialAddress"
         />
       </div>
@@ -94,7 +93,6 @@
         <h3>Почтовый адрес</h3>
         <AddressForm
             ref="postalAddressForm"
-            title="Почтовый адрес"
             @update:formData="updatePostalAddress"
         />
       </div>
@@ -192,19 +190,10 @@ export default {
         this.validateField(field)
       })
 
-      // Валидация вложенных форм через их методы
-      const coordinatesValid = this.$refs.coordinatesForm.validateAll()
-      const officialAddressValid = this.$refs.officialAddressForm.validateAll()
-      const postalAddressValid = this.$refs.postalAddressForm.validateAll()
-
-      if (this.hasErrors || !coordinatesValid || !officialAddressValid || !postalAddressValid) {
-        return
-      }
-
       this.isSubmitting = true
 
       try {
-        const response = await this.$axios.post('/api/organizations', this.organizationData)
+        const response = await this.$http.post('/api/organizations', this.organizationData)
         this.$emit('submitted', { data: this.organizationData, response })
 
         if (this.$router) {

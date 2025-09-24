@@ -1,13 +1,11 @@
 <template>
   <BaseForm
-      title="Координаты"
       :fields-config="fieldsConfig"
       :custom-validators="customValidators"
-      submit-button-text=""
-      submit-url=""
-      no-button
-  >
-  </BaseForm>
+      :nested="nested"
+      :no-button="true"
+      @update:formData="$emit('update:formData', $event)"
+  />
 </template>
 
 <script>
@@ -16,6 +14,12 @@ import BaseForm from './BaseForm.vue'
 export default {
   name: 'CoordinatesForm',
   components: { BaseForm },
+  props: {
+    nested: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       fieldsConfig: [
@@ -52,7 +56,6 @@ export default {
           if (value && value <= -5) {
             return 'Координата X должна быть больше -5'
           }
-          return null
         }
       }
     }
