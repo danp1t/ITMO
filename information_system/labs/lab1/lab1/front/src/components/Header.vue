@@ -18,7 +18,7 @@ header {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between; /* Distributes items evenly */
+  justify-content: space-between;
   padding: 20px;
   margin: 10px;
   border-bottom: 2px solid #00bfff;
