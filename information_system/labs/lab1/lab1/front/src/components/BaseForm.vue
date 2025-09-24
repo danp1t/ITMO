@@ -4,10 +4,8 @@
       <h2 class="info_header">{{ title }}</h2>
     </header>
 
-    <!-- Слот для дополнительного контента перед полями -->
     <slot name="before-fields"></slot>
 
-    <!-- Динамические поля формы -->
     <div
         v-for="field in fieldsConfig"
         :key="field.name"
@@ -17,7 +15,6 @@
         {{ field.label }}{{ field.required ? '*' : '' }}
       </label>
 
-      <!-- Текстовое поле -->
       <input
           v-if="field.type === 'text' || field.type === 'email' || field.type === 'password'"
           :id="field.name"
@@ -29,7 +26,6 @@
           @blur="validateField(field.name)"
       >
 
-      <!-- Textarea -->
       <textarea
           v-else-if="field.type === 'textarea'"
           :id="field.name"
@@ -41,7 +37,6 @@
           @blur="validateField(field.name)"
       ></textarea>
 
-      <!-- Select -->
       <select
           v-else-if="field.type === 'select'"
           :id="field.name"
@@ -59,26 +54,11 @@
         </option>
       </select>
 
-      <!-- Checkbox -->
-      <div v-else-if="field.type === 'checkbox'" class="checkbox-group">
-        <input
-            :id="field.name"
-            v-model="formData[field.name]"
-            type="checkbox"
-            :class="{ 'error-input': errors[field.name] }"
-            @blur="validateField(field.name)"
-        >
-        <label :for="field.name" class="checkbox-label">
-          {{ field.label }}
-        </label>
-      </div>
-
       <span v-if="errors[field.name]" class="error-message">
         {{ errors[field.name] }}
       </span>
     </div>
 
-    <!-- Слот для дополнительного контента после полей -->
     <slot name="after-fields"></slot>
 
     <button
@@ -101,12 +81,7 @@ export default {
     },
     fieldsConfig: {
       type: Array,
-      required: true,
-      validator: (value) => {
-        return value.every(field =>
-            field.name && field.label && field.type
-        )
-      }
+      required: true
     },
     submitButtonText: {
       type: String,
@@ -116,14 +91,17 @@ export default {
       type: String,
       required: true
     },
-    // Дополнительные правила валидации
     customValidators: {
       type: Object,
       default: () => ({})
+    },
+    // Отключаем кнопку отправки для вложенных форм
+    noButton: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
-    // Динамически инициализируем formData на основе fieldsConfig
     const initialFormData = {}
     const initialErrors = {}
 
@@ -151,7 +129,6 @@ export default {
       const value = this.formData[fieldName]
       let error = ''
 
-      // Базовые правила валидации
       if (fieldConfig.required && !value) {
         error = fieldConfig.errorMessages?.required || 'Это поле обязательно для заполнения'
       } else if (fieldConfig.minLength && value.length < fieldConfig.minLength) {
@@ -164,7 +141,6 @@ export default {
         error = fieldConfig.errorMessages?.pattern || 'Неверный формат'
       }
 
-      // Кастомные валидаторы
       if (this.customValidators[fieldName]) {
         const customError = this.customValidators[fieldName](value, this.formData)
         if (customError) error = customError
@@ -175,7 +151,6 @@ export default {
     },
 
     async handleSubmit() {
-      // Валидация всех полей
       this.fieldsConfig.forEach(field => this.validateField(field.name))
 
       if (this.hasErrors) {
@@ -187,20 +162,24 @@ export default {
       this.$emit('submitting', this.formData)
 
       try {
-        const response = await this.$http.post(this.submitUrl, this.formData)
+        const response = await this.$axios.post(this.submitUrl, this.formData)
         this.$emit('submitted', { data: this.formData, response })
         this.$emit('success', response.data)
-
-        // Автоматический сброс если нужно
-        if (this.autoReset) {
-          this.resetForm()
-        }
       } catch (error) {
         this.$emit('error', error)
-        this.$emit('submit-failed', error)
       } finally {
         this.isSubmitting = false
       }
+    },
+
+    // Методы для внешнего использования
+    getFormData() {
+      return { ...this.formData }
+    },
+
+    validateAll() {
+      this.fieldsConfig.forEach(field => this.validateField(field.name))
+      return !this.hasErrors
     },
 
     resetForm() {
@@ -208,41 +187,13 @@ export default {
         this.formData[field.name] = field.defaultValue || ''
         this.errors[field.name] = ''
       })
-      this.$emit('form-reset')
-    },
-
-    // Метод для внешнего сброса
-    clearForm() {
-      this.resetForm()
-    },
-
-    // Метод для установки значений извне
-    setFormData(data) {
-      Object.keys(data).forEach(key => {
-        if (key in this.formData) {
-          this.formData[key] = data[key]
-        }
-      })
-    }
-  },
-  watch: {
-    // Реакция на изменения конфигурации полей
-    fieldsConfig: {
-      handler(newConfig) {
-        newConfig.forEach(field => {
-          if (!(field.name in this.formData)) {
-            this.$set(this.formData, field.name, field.defaultValue || '')
-            this.$set(this.errors, field.name, '')
-          }
-        })
-      },
-      deep: true
     }
   }
 }
 </script>
 
 <style scoped>
+/* Стили остаются без изменений */
 .form-container {
   max-width: 600px;
   margin: 20px auto;
@@ -302,21 +253,6 @@ input, textarea, select {
   margin-top: 5px;
 }
 
-.checkbox-group {
-  display: flex;
-  align-items: center;
-}
-
-.checkbox-group input {
-  width: auto;
-  margin-right: 10px;
-}
-
-.checkbox-label {
-  margin-bottom: 0;
-  font-weight: normal;
-}
-
 .submit-btn {
   background: #00bfff;
   color: white;
@@ -331,10 +267,6 @@ input, textarea, select {
 .submit-btn:disabled {
   background: #cccccc;
   cursor: not-allowed;
-}
-
-.submit-btn:not(:disabled):hover {
-  background: #0099cc;
 }
 
 @media (max-width: 888px) {

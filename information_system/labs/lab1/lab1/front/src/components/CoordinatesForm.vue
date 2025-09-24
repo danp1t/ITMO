@@ -2,10 +2,10 @@
   <BaseForm
       title="Координаты"
       :fields-config="fieldsConfig"
-      submit-button-text="Отправить"
-      submit-url="/api/register"
       :custom-validators="customValidators"
-      @submitted="onSubmitted"
+      submit-button-text=""
+      submit-url=""
+      no-button
   >
   </BaseForm>
 </template>
@@ -21,32 +21,32 @@ export default {
       fieldsConfig: [
         {
           name: 'x',
-          label: 'Координата x',
+          label: 'Координата X',
           type: 'text',
           required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
           errorMessages: {
-            required: 'Ввод координаты X обязательный',
-            pattern: 'Координата X - это вещественное число'
+            required: 'Координата X обязательна',
+            pattern: 'Координата X должна быть вещественным числом'
           }
         },
         {
           name: 'y',
-          label: 'Координата y',
+          label: 'Координата Y',
           type: 'text',
-          required: false,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
+          required: true,
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
           errorMessages: {
-            pattern: 'Координата Y - это вещественное число'
+            required: 'Координата Y обязательна',
+            pattern: 'Координата Y должна быть вещественным числом'
           }
-        },
+        }
       ],
       customValidators: {
         x: (value) => {
           if (value && value <= -59) {
             return 'Координата X должна быть больше -59'
           }
-          return null
         },
         y: (value) => {
           if (value && value <= -5) {
@@ -55,11 +55,6 @@ export default {
           return null
         }
       }
-    }
-  },
-  methods: {
-    onSubmitted({ response }) {
-      this.$router.push('/success')
     }
   }
 }
