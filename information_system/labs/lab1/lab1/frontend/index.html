@@ -1,25 +1,13 @@
 <!DOCTYPE html>
-<html>
-<head>
-    <title>Test Page</title>
-</head>
-<body>
-<h1>Test Page</h1>
-<button onclick="testBackend()">Test Backend</button>
-<div id="result"></div>
-
-<script>
-    async function testBackend() {
-        try {
-            const response = await fetch('http://localhost:8080/lab1-1.0-SNAPSHOT/api/test');
-            const data = await response.json();
-            document.getElementById('result').innerHTML =
-                `Backend works! Items: ${JSON.stringify(data)}`;
-        } catch (error) {
-            document.getElementById('result').innerHTML =
-                `Error: ${error.message}`;
-        }
-    }
-</script>
-</body>
+<html lang="">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
