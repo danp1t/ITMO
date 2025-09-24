@@ -4,6 +4,7 @@
       :fields-config="fieldsConfig"
       submit-button-text="Отправить"
       submit-url="/api/register"
+      :custom-validators="customValidators"
       @submitted="onSubmitted"
   >
   </BaseForm>
@@ -23,7 +24,7 @@ export default {
           label: 'Координата x',
           type: 'text',
           required: true,
-          pattern: /^\d+(?:[\.]\d+)?$/,
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
             required: 'Ввод координаты X обязательный',
             pattern: 'Координата X - это вещественное число'
@@ -34,12 +35,26 @@ export default {
           label: 'Координата y',
           type: 'text',
           required: false,
-          pattern: /^\d+(?:[\.]\d+)?$/,
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
             pattern: 'Координата Y - это вещественное число'
           }
         },
       ],
+      customValidators: {
+        x: (value) => {
+          if (value && value <= -59) {
+            return 'Координата X должна быть больше -59'
+          }
+          return null
+        },
+        y: (value) => {
+          if (value && value <= -5) {
+            return 'Координата X должна быть больше -5'
+          }
+          return null
+        }
+      }
     }
   },
   methods: {
