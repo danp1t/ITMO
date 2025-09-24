@@ -82,16 +82,8 @@
       </div>
 
       <div class="form-section">
-        <h3>Официальный адрес</h3>
-        <AddressForm
-            ref="officialAddressForm"
-            @update:formData="updateOfficialAddress"
-        />
-      </div>
-
-      <div class="form-section">
-        <h3>Почтовый адрес</h3>
-        <AddressForm
+        <h3>Локация</h3>
+        <LocationForm
             ref="postalAddressForm"
             @update:formData="updatePostalAddress"
         />
@@ -111,10 +103,11 @@
 <script>
 import CoordinatesForm from './CoordinatesForm.vue'
 import AddressForm from './AddressForm.vue'
+import LocationForm from "@/components/LocationForm.vue";
 
 export default {
   name: 'OrganizationForm',
-  components: { CoordinatesForm, AddressForm },
+  components: {LocationForm, CoordinatesForm, AddressForm },
   data() {
     return {
       organizationData: {
