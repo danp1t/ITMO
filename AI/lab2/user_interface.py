@@ -25,7 +25,7 @@ class UserInterface:
         print("Большой брат всё-таки следил за тобой...")
         print("=" * 50)
 
-        user_data = {}
+        self.identifier.reset_conversation()
         identification_attempts = 0
 
         while identification_attempts < 5:
@@ -38,13 +38,12 @@ class UserInterface:
                 break
 
             new_data = self.parser.parse_input(user_input)
-            user_data.update(new_data)
 
-            identified_user, uncertain_matches = self.identifier.identify_user(user_data)
+            identified_user, uncertain_matches = self.identifier.identify_user(new_data)
 
             if identified_user:
                 self.current_user = identified_user
-                print(f"\n Большой брат нашел тебя! Вы - {identified_user}")
+                print(f"\nБольшой брат нашел тебя! Ты - {identified_user.capitalize()}")
                 self.show_user_profile(identified_user)
                 self.provide_recommendations(identified_user)
                 break
@@ -53,18 +52,22 @@ class UserInterface:
                 for i, (match, score) in enumerate(uncertain_matches[:3], 1):
                     age = self.kb.get_current_age(match)
                     gender = "мужчина" if self.kb.get_gender(match) == 'male' else "женщина"
-                    print(f"{i}. {match} ({gender}, {age} лет) - совпадение: {score}%")
+                    percentage = min(100, max(0, int((score / 80) * 100)))
+                    print(f"{i}. {match} ({gender}, {age} лет) - совпадение: {percentage}%")
 
                 questions = self.identifier.get_additional_questions(uncertain_matches)
                 if questions:
                     print("\nПожалуйста, уточните:")
                     for question in questions[:2]:
                         print(f"- {question}")
+                else:
+                    print("\nПопробуйте предоставить больше информации о себе.")
             else:
-                missing_questions = self.parser.get_missing_info_questions(user_data)
+                combined_data = self.identifier._combine_conversation_data()
+                missing_questions = self.parser.get_missing_info_questions(combined_data)
                 if missing_questions:
                     print("\nЧтобы я мог вас идентифицировать, ответьте на вопросы:")
-                    for question in missing_questions[:2]:
+                    for question in missing_questions[:3]:
                         print(f"- {question}")
                 else:
                     print("\nНе удалось найти вас в базе знаний. Большой брат, плохо следил за тобой. -_-")
@@ -80,7 +83,7 @@ class UserInterface:
 
     def provide_recommendations(self, person_name):
         print("\n" + "=" * 40)
-        print("-_- ВОТ ЧТО БОЛЬШОЙ БРАТ НАШЕЛ О ТВОЕЙ СЕМЬЕ... -_-")
+        print("    -_- ВОТ ЧТО БОЛЬШОЙ БРАТ НАШЕЛ О ТВОЕЙ СЕМЬЕ... -_-")
         print("=" * 40)
 
         recommendations = self.engine.generate_personalized_recommendations(person_name)
@@ -89,31 +92,36 @@ class UserInterface:
 
         insights = self.engine.get_family_insights(person_name)
         if insights:
-            print("\n💡 Интересные факты о вашей семье:")
+            print("\nИнтересные факты о вашей семье:")
             for insight in insights:
                 print(f"- {insight}")
 
         self.offer_further_actions(person_name)
 
     def offer_further_actions(self, person_name):
-        print("\nЧто вы хотите сделать дальше?")
-        print("1. Исследовать информацию о конкретном родственнике")
-        print("2. Узнать о браках в семье")
-        print("3. Изучить семейную историю")
-        print("4. Вернуться в главное меню")
+        while True:
+            print("\nЧто вы хотите сделать дальше?")
+            print("1. Исследовать информацию о конкретном родственнике")
+            print("2. Узнать о браках в семье")
+            print("3. Изучить семейную историю")
+            print("4. Начать новую идентификацию")
+            print("5. Вернуться в главное меню")
 
-        choice = input("Ваш выбор (1-4): ").strip()
+            choice = input("Ваш выбор (1-5): ").strip()
 
-        if choice == '1':
-            self.explore_relatives(person_name)
-        elif choice == '2':
-            self.explore_marriages(person_name)
-        elif choice == '3':
-            self.explore_family_history(person_name)
-        elif choice == '4':
-            return
-        else:
-            print("Неизвестный выбор")
+            if choice == '1':
+                self.explore_relatives(person_name)
+            elif choice == '2':
+                self.explore_marriages(person_name)
+            elif choice == '3':
+                self.explore_family_history(person_name)
+            elif choice == '4':
+                self.start_identification_mode()
+                break
+            elif choice == '5':
+                break
+            else:
+                print("Неизвестный выбор")
 
     def explore_relatives(self, person_name):
         print("\nВыберите тип родственников для исследования:")
@@ -207,7 +215,7 @@ class UserInterface:
 
         if oldest and oldest != person_name:
             print(f"\nСамый старший родственник в вашей ближайшей семье:")
-            print(f"- {oldest} ({oldest_age} лет)")
+            print(f"- {oldest.capitalize()} ({oldest_age} лет)")
 
 
     def run(self):

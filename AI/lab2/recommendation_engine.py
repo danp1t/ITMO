@@ -13,23 +13,23 @@ class RecommendationEngine:
 
         siblings = self.kb.get_siblings(person_name)
         if siblings:
-            recommendations.append(f"Исследуйте информацию о ваших братьях и сестрах: {', '.join(siblings)}")
+            recommendations.append(f"Информацию о твоих братьях и сестрах: {', '.join(sibling.capitalize() for sibling in siblings)}")
 
         cousins = self.kb.find_cousins(person_name)
         if cousins:
-            recommendations.append(f"Узнайте о двоюродных братьях и сестрах, например: {', '.join(cousins[:2])}")
+            recommendations.append(f"Информация о двоюродных братьях и сестрах, например: {', '.join(cousin.capitalize() for cousin in cousins)}")
 
         aunts_uncles = self.kb.find_aunts_uncles(person_name)
         if aunts_uncles:
-            recommendations.append(f"Изучите информацию о тетях и дядях: {', '.join(aunts_uncles[:2])}")
+            recommendations.append(f"Информация о тетях и дядях: {', '.join(person.capitalize() for person in aunts_uncles)}")
 
         grandparents = self.kb.find_grandparents(person_name)
         if grandparents:
-            recommendations.append(f"Откройте историю ваших бабушек и дедушек: {', '.join(grandparents)}")
+            recommendations.append(f"Информация о твоих бабушек и дедушек: {', '.join(grandparent.capitalize() for grandparent in grandparents)}")
 
         spouse, marriage_year = self.kb.get_married_info(person_name)
         if spouse:
-            recommendations.append(f"Изучите подробности вашего брака с {spouse}")
+            recommendations.append(f"Брака с {spouse}")
         else:
             if current_age and current_age > 18:
                 married_siblings = []

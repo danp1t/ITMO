@@ -1,7 +1,7 @@
 class InputParser:
     def __init__(self):
         self.gender_keywords = {
-            'мужской', 'мужчина', 'мальчик', 'парень',
+            'мужской', 'мужчина', 'мальчик', 'парень', 'юноша',
             'женский', 'женщина', 'девочка', 'девушка'
         }
 
@@ -11,12 +11,12 @@ class InputParser:
         }
 
         self.people_names = [
-            'savely', 'nikita', 'danil', 'arseniy', 'daniil', 'alexander',
-            'anton', 'evgeniy', 'denis', 'ivan', 'sergey', 'vasiliy',
-            'nikolay', 'victor', 'alexander_grandfather', 'vyacheslav',
-            'marina', 'galina', 'nadezhda', 'anna_junior', 'ksenia',
-            'svetlana', 'olga', 'elena', 'natalia', 'olga_mother',
-            'anna', 'elena_aunt', 'vera', 'valentina'
+            'савелий', 'никита', 'данил', 'арсений', 'даниил', 'саша',
+            'антон', 'евгений', 'денис', 'иван', 'сергей', 'василий',
+            'николай', 'виктор', 'александр', 'вячеслав',
+            'марина', 'галина', 'надежда', 'аня', 'ксюша',
+            'светлана', 'ольга', 'лена', 'наталья', 'оля',
+            'анна', 'елена', 'вера', 'валентина'
         ]
 
     def parse_input(self, user_input):
@@ -81,13 +81,19 @@ class InputParser:
         return None
 
     def _extract_gender(self, text):
-        male_indicators = ['мужской', 'мужчина', 'мальчик', 'парень']
+        male_indicators = ['мужской', 'мужчина', 'мальчик', 'парень', 'юноша']
         female_indicators = ['женский', 'женщина', 'девочка', 'девушка']
 
         if any(indicator in text for indicator in male_indicators):
             return 'male'
         elif any(indicator in text for indicator in female_indicators):
             return 'female'
+
+        if ' я ' in f' {text} ':
+            if any(word in text for word in ['мальчик', 'парень', 'мужчина']):
+                return 'male'
+            elif any(word in text for word in ['девочка', 'девушка', 'женщина']):
+                return 'female'
 
         return None
 
@@ -96,18 +102,19 @@ class InputParser:
 
         has_brothers_patterns = [
             'есть брат', 'есть братья', 'имею брата', 'имею братьев',
-            'у меня брат', 'мои братья', 'брат есть', 'братья есть'
+            'у меня брат', 'мои братья', 'брат есть', 'братья есть',
+            'брат', 'братья'
         ]
 
         no_brothers_patterns = [
             'нет брата', 'нет братьев', 'не имею брата', 'без братьев',
-            'нету брата', 'братьев нет'
+            'нету брата', 'братьев нет', 'нет братьев'
         ]
 
-        if any(pattern in text for pattern in has_brothers_patterns):
-            result['has_brothers'] = True
-        elif any(pattern in text for pattern in no_brothers_patterns):
+        if any(pattern in text for pattern in no_brothers_patterns):
             result['has_brothers'] = False
+        elif any(pattern in text for pattern in has_brothers_patterns):
+            result['has_brothers'] = True
 
         brother_keywords = ['брат', 'братья']
         words = text.split()
@@ -125,18 +132,19 @@ class InputParser:
 
         has_sisters_patterns = [
             'есть сестра', 'есть сестры', 'имею сестру', 'имею сестер',
-            'у меня сестра', 'мои сестры', 'сестра есть', 'сестры есть'
+            'у меня сестра', 'мои сестры', 'сестра есть', 'сестры есть',
+            'сестра', 'сестры'
         ]
 
         no_sisters_patterns = [
             'нет сестры', 'нет сестер', 'не имею сестры', 'без сестер',
-            'нету сестры', 'сестер нет'
+            'нету сестры', 'сестер нет', 'нет сестер'
         ]
 
-        if any(pattern in text for pattern in has_sisters_patterns):
-            result['has_sisters'] = True
-        elif any(pattern in text for pattern in no_sisters_patterns):
+        if any(pattern in text for pattern in no_sisters_patterns):
             result['has_sisters'] = False
+        elif any(pattern in text for pattern in has_sisters_patterns):
+            result['has_sisters'] = True
 
         sister_keywords = ['сестра', 'сестры']
         words = text.split()
@@ -151,32 +159,83 @@ class InputParser:
 
     def _extract_parents_info(self, text):
         parents = []
+        text_lower = text.lower()
+        words = text_lower.split()
 
-        parent_keywords = ['мама', 'папа', 'отец', 'мать', 'родитель']
-        words = text.split()
+        parent_keywords = ['мама', 'папа', 'отец', 'мать', 'родитель', 'маму', 'папу', 'отца']
+
+        patterns_to_check = []
 
         for i, word in enumerate(words):
             if word in parent_keywords and i + 1 < len(words):
                 next_word = words[i + 1]
                 if next_word in self.people_names:
-                    parents.append(next_word)
+                    patterns_to_check.append(('direct', next_word, word))
+
+        for i, word in enumerate(words):
+            if word in parent_keywords and i + 2 < len(words):
+                if words[i + 1] in ['зовут', 'по', 'имя', 'именем'] and words[i + 2] in self.people_names:
+                    patterns_to_check.append(('called', words[i + 2], word))
+
+        for i, word in enumerate(words):
+            if word in parent_keywords and i > 0 and i + 1 < len(words):
+                prev_word = words[i - 1]
+                next_word = words[i + 1]
+                if prev_word in ['мой', 'моя', 'мою', 'моего', 'моей'] and next_word in self.people_names:
+                    patterns_to_check.append(('possessive', next_word, word))
+
+        for i, word in enumerate(words):
+            if word in self.people_names:
+                context_start = max(0, i - 3)
+                context_end = min(len(words), i + 3)
+                context = ' '.join(words[context_start:context_end])
+
+                parent_context_indicators = ['мама', 'папа', 'отец', 'мать', 'родитель']
+                if any(indicator in context for indicator in parent_context_indicators):
+                    patterns_to_check.append(('context', word, 'unknown'))
+
+        for i, word in enumerate(words):
+            if word in ['отца', 'папу', 'маму'] and i + 2 < len(words):
+                if words[i + 1] in ['зовут', 'зовутся'] and words[i + 2] in self.people_names:
+                    patterns_to_check.append(('complex', words[i + 2], word))
+
+        if 'родители' in text_lower:
+            parent_indices = [i for i, word in enumerate(words) if word == 'родители']
+            for idx in parent_indices:
+                if idx + 3 < len(words):
+                    name1 = words[idx + 1]
+                    name2 = words[idx + 3] if idx + 3 < len(words) and words[idx + 2] == 'и' else None
+
+                    if name1 in self.people_names:
+                        patterns_to_check.append(('parents_keyword', name1, 'родители'))
+                    if name2 and name2 in self.people_names:
+                        patterns_to_check.append(('parents_keyword', name2, 'родители'))
+
+        unique_names = set()
+        for pattern_type, name, keyword in patterns_to_check:
+            unique_names.add(name)
+
+        parents = list(unique_names)
 
         return parents
 
     def get_missing_info_questions(self, user_data):
         questions = []
 
-        if user_data['age'] is None:
+        if user_data.get('age')is None:
             questions.append("Сколько вам лет?")
 
-        if user_data['gender'] is None:
+        if user_data.get('gender') is None:
             questions.append("Уточните ваш пол (мужской/женский)?")
 
-        if user_data['has_brothers'] is None and user_data['has_sisters'] is None:
+        if user_data.get('has_brothers') is None and user_data.get('has_sisters') is None:
             questions.append("У вас есть братья или сестры?")
-        elif user_data['has_brothers'] is None:
+        elif user_data.get('has_brothers') is None:
             questions.append("У вас есть братья?")
-        elif user_data['has_sisters'] is None:
+        elif user_data.get('has_sisters') is None:
             questions.append("У вас есть сестры?")
+
+        if not user_data.get('parents', []):
+            questions.append("Назовите имена ваших родителей?")
 
         return questions

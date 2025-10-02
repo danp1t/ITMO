@@ -11,64 +11,64 @@ class FamilyKnowledgeBase:
         self.load_knowledge_base()
 
     def load_knowledge_base(self):
-        males = ['savely', 'nikita', 'danil', 'arseniy', 'daniil', 'alexander',
-                'anton', 'evgeniy', 'denis', 'ivan', 'sergey', 'vasiliy',
-                'nikolay', 'victor', 'alexander_grandfather', 'vyacheslav']
+        males = ['савелий', 'никита', 'данил', 'арсений', 'даниил', 'саша',
+            'антон', 'евгений', 'денис', 'иван', 'сергей', 'василий',
+            'николай', 'виктор', 'александр', 'вячеслав']
         self.male_facts.update(males)
 
-        females = ['marina', 'galina', 'nadezhda', 'anna_junior', 'ksenia',
-                  'svetlana', 'olga', 'elena', 'natalia', 'olga_mother',
-                  'anna', 'elena_aunt', 'vera', 'valentina']
+        females = ['марина', 'галина', 'надежда', 'аня', 'ксения',
+            'светлана', 'ольга', 'лена', 'наталья', 'оля',
+            'анна', 'елена', 'вера', 'валентина']
         self.female_facts.update(females)
 
         self.parent_facts = [
-            ('olga', 'savely'), ('anton', 'savely'),
-            ('evgeniy', 'anna_junior'), ('elena', 'anna_junior'),
-            ('natalia', 'nikita'),
-            ('denis', 'danil'), ('olga_mother', 'danil'),
-            ('denis', 'ksenia'), ('olga_mother', 'ksenia'),
-            ('anna', 'svetlana'), ('ivan', 'svetlana'),
-            ('anna', 'arseniy'), ('ivan', 'arseniy'),
-            ('elena_aunt', 'daniil'),
-            ('elena_aunt', 'alexander'),
-            ('sergey', 'anton'), ('vera', 'anton'),
-            ('sergey', 'evgeniy'), ('vera', 'evgeniy'),
-            ('valentina', 'natalia'), ('vasiliy', 'natalia'),
-            ('valentina', 'denis'), ('vasiliy', 'denis'),
-            ('victor', 'olga_mother'), ('marina', 'olga_mother'),
-            ('victor', 'anna'), ('marina', 'anna'),
-            ('galina', 'elena_aunt'), ('alexander_grandfather', 'elena_aunt'),
-            ('nadezhda', 'vera'), ('vyacheslav', 'vera'),
-            ('nadezhda', 'valentina'), ('vyacheslav', 'valentina')
+            ('ольга', 'савелий'), ('антон', 'савелий'),
+            ('евгений', 'аня'), ('лена', 'аня'),
+            ('наталья', 'никита'),
+            ('денис', 'данил'), ('оля', 'данил'),
+            ('денис', 'ксения'), ('оля', 'ксения'),
+            ('анна', 'светлана'), ('иван', 'светлана'),
+            ('анна', 'арсений'), ('иван', 'арсений'),
+            ('елена', 'даниил'),
+            ('елена', 'саша'),
+            ('сергей', 'антон'), ('вера', 'антон'),
+            ('сергей', 'евгений'), ('вера', 'евгений'),
+            ('валентина', 'наталья'), ('василий', 'наталья'),
+            ('валентина', 'денис'), ('василий', 'денис'),
+            ('виктор', 'оля'), ('марина', 'оля'),
+            ('виктор', 'анна'), ('марина', 'анна'),
+            ('галина', 'елена'), ('александр', 'елена'),
+            ('надежда', 'вера'), ('вячеслав', 'вера'),
+            ('надежда', 'валентина'), ('вячеслав', 'валентина')
         ]
 
         self.sibling_facts = [
-            ('danil', 'ksenia'), ('svetlana', 'arseniy'), ('daniil', 'alexander'),
-            ('anton', 'evgeniy'), ('natalia', 'denis'), ('olga_mother', 'anna'),
-            ('vera', 'valentina'), ('nikolay', 'victor'), ('marina', 'galina')
+            ('данил', 'ксения'), ('светлана', 'арсений'), ('даниил', 'саша'),
+            ('антон', 'евгений'), ('наталья', 'денис'), ('оля', 'анна'),
+            ('вера', 'валентина'), ('николай', 'виктор'), ('марина', 'галина')
         ]
 
         self.birthday_facts = {
-            'savely': 2015, 'anna_junior': 2013, 'nikita': 2012, 'danil': 2005,
-            'ksenia': 2010, 'svetlana': 2010, 'arseniy': 2014, 'daniil': 2017,
-            'alexander': 2006, 'olga': 1985, 'anton': 1980, 'evgeniy': 1987,
-            'elena': 1990, 'natalia': 1983, 'denis': 1985, 'olga_mother': 1986,
-            'anna': 1988, 'ivan': 1980, 'elena_aunt': 1983, 'sergey': 1958,
-            'vera': 1958, 'valentina': 1956, 'vasiliy': 1961, 'nikolay': 1963,
-            'victor': 1963, 'marina': 1968, 'galina': 1965, 'alexander_grandfather': 1964,
-            'nadezhda': 1936, 'vyacheslav': 1933
+            'савелий': 2015, 'аня': 2013, 'никита': 2012, 'данил': 2005,
+            'ксения': 2010, 'светлана': 2010, 'арсений': 2014, 'даниил': 2017,
+            'саша': 2006, 'ольга': 1985, 'антон': 1980, 'евгений': 1987,
+            'лена': 1990, 'наталья': 1983, 'денис': 1985, 'оля': 1986,
+            'анна': 1988, 'иван': 1980, 'елена': 1983, 'сергей': 1958,
+            'вера': 1958, 'валентина': 1956, 'василий': 1961, 'николай': 1963,
+            'виктор': 1963, 'марина': 1968, 'галина': 1965, 'александр': 1964,
+            'надежда': 1936, 'вячеслав': 1933
         }
 
         self.death_facts = {
-            'vyacheslav': 2000, 'anton': 2019
+            'вячеслав': 2000, 'антон': 2019
         }
 
         self.married_facts = [
-            ('olga', 'anton', 2011), ('evgeniy', 'elena', 2021),
-            ('denis', 'olga_mother', 2005), ('anna', 'ivan', 2009),
-            ('sergey', 'vera', 1978), ('valentina', 'vasiliy', 1981),
-            ('victor', 'marina', 1985), ('galina', 'alexander_grandfather', 1984),
-            ('nadezhda', 'vyacheslav', 1956)
+            ('ольга', 'антон', 2011), ('евгений', 'лена', 2021),
+            ('денис', 'оля', 2005), ('анна', 'иван', 2009),
+            ('сергей', 'вера', 1978), ('валентина', 'василий', 1981),
+            ('виктор', 'марина', 1985), ('галина', 'александр', 1984),
+            ('надежда', 'вячеслав', 1956)
         ]
 
     def person_exists(self, name):
@@ -206,10 +206,10 @@ class FamilyKnowledgeBase:
 
     def generate_family_report(self, person):
         if not self.person_exists(person):
-            return f"Человек с именем {person} не найден в базе знаний"
+            return f"Человек с именем {person.capitalize()} не найден в базе знаний"
 
         report = []
-        report.append(f"Инфорация найденная о {person}:")
+        report.append(f"Инфорация найденная о {person.capitalize()}:")
         report.append("=" * 40)
 
         gender = "мужчина" if self.get_gender(person) == 'male' else "женщина"
@@ -222,25 +222,25 @@ class FamilyKnowledgeBase:
 
         parents = self.get_parents(person)
         if parents:
-            report.append(f"Родители: {', '.join(parents)}")
+            report.append(f"Родители: {', '.join(parent.capitalize() for parent in parents)}")
         else:
             report.append("Родители: информация отсутствует")
 
         siblings = self.get_siblings(person)
         if siblings:
-            report.append(f"Братья и сестры: {', '.join(siblings)}")
+            report.append(f"Братья и сестры: {', '.join(sibling.capitalize() for sibling in siblings)}")
         else:
             report.append("Братья и сестры: нет")
 
         children = self.get_children(person)
         if children:
-            report.append(f"Дети: {', '.join(children)}")
+            report.append(f"Дети: {', '.join(child.capitalize() for child in children)}")
         else:
             report.append("Дети: нет")
 
         spouse, marriage_year = self.get_married_info(person)
         if spouse:
-            report.append(f"В браке с: {spouse} (с {marriage_year} года)")
+            report.append(f"В браке с: {spouse.capitalize()} (с {marriage_year} года)")
         else:
             report.append("Семейное положение: не в браке")
 
