@@ -182,7 +182,7 @@ export default {
       ['name', 'annualTurnover', 'employeesCount', 'rating'].forEach(field => {
         this.validateField(field)
       })
-
+      //TODO: Настроить валидацию для всех полей. Даже вложенных.
       this.isSubmitting = true
 
       try {
