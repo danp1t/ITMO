@@ -34,9 +34,6 @@ class UserInterface:
             else:
                 user_input = input("\nЧто еще вы можете рассказать? ").strip()
 
-            if user_input.lower() == 'выход':
-                break
-
             new_data = self.parser.parse_input(user_input)
 
             identified_user, uncertain_matches = self.identifier.identify_user(new_data)
@@ -49,7 +46,7 @@ class UserInterface:
                 break
             elif uncertain_matches:
                 print(f"\nХм... Я, конечно, не уверенm но возможно это ты:")
-                for i, (match, score) in enumerate(uncertain_matches[:3], 1):
+                for i, (match, score) in enumerate(uncertain_matches[:6], 1):
                     age = self.kb.get_current_age(match)
                     gender = "мужчина" if self.kb.get_gender(match) == 'male' else "женщина"
                     percentage = min(100, max(0, int((score / 80) * 100)))
@@ -168,7 +165,7 @@ class UserInterface:
 
         spouse, year = self.kb.get_married_info(person_name)
         if spouse:
-            print(f"- Вы в браке с {spouse} с {year} года")
+            print(f"- Вы в браке с {spouse.capitalize()} с {year} года")
         else:
             print("- Вы не в браке")
 
@@ -182,7 +179,7 @@ class UserInterface:
         if married_siblings:
             print("\nБраки ваших братьев и сестер:")
             for sibling, spouse, year in married_siblings:
-                print(f"- {sibling} в браке с {spouse} с {year} года")
+                print(f"- {sibling.capitalize()} в браке с {spouse.capitalize()} с {year} года")
 
     def explore_family_history(self, person_name):
         print("\nСемейная история:")
@@ -194,7 +191,7 @@ class UserInterface:
                 birth_year = self.kb.birthday_facts.get(grandparent, "неизвестен")
                 death_year = self.kb.death_facts.get(grandparent, "")
                 death_info = f", умер(ла) в {death_year}" if death_year else ""
-                print(f"- {grandparent} (род. {birth_year}{death_info})")
+                print(f"- {grandparent.capitalize()} (род. {birth_year}{death_info})")
 
         all_relatives = [person_name]
         all_relatives.extend(self.kb.get_parents(person_name))

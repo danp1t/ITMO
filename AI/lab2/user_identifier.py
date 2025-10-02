@@ -46,7 +46,6 @@ class UserIdentifier:
             scored_candidates.append((candidate, score))
 
         scored_candidates.sort(key=lambda x: x[1], reverse=True)
-        print(scored_candidates)
         if not scored_candidates:
             return None, []
 
@@ -54,7 +53,7 @@ class UserIdentifier:
             self.identified_user = scored_candidates[0][0]
             return self.identified_user, []
         else:
-            self.uncertain_matches = scored_candidates[:3]
+            self.uncertain_matches = scored_candidates[:6]
             return None, self.uncertain_matches
 
     def _combine_conversation_data(self):
