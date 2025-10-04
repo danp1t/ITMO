@@ -37,6 +37,7 @@ class UserInterface:
             new_data = self.parser.parse_input(user_input)
 
             identified_user, uncertain_matches = self.identifier.identify_user(new_data)
+            print(uncertain_matches)
 
             if identified_user:
                 self.current_user = identified_user
