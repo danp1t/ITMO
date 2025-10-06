@@ -1,11 +1,13 @@
 <template>
   <BaseForm
+      title="Координаты"
       :fields-config="fieldsConfig"
+      submit-button-text="Отправить"
+      submit-url="/api/register"
       :custom-validators="customValidators"
-      :nested="nested"
-      :no-button="true"
-      @update:formData="$emit('update:formData', $event)"
-  />
+      @submitted="onSubmitted"
+  >
+  </BaseForm>
 </template>
 
 <script>
@@ -14,50 +16,50 @@ import BaseForm from './BaseForm.vue'
 export default {
   name: 'CoordinatesForm',
   components: { BaseForm },
-  props: {
-    nested: {
-      type: Boolean,
-      default: false
-    }
-  },
   data() {
     return {
       fieldsConfig: [
         {
           name: 'x',
-          label: 'Координата X',
+          label: 'Координата x',
           type: 'text',
           required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
-            required: 'Координата X обязательна',
-            pattern: 'Координата X должна быть вещественным числом'
+            required: 'Ввод координаты X обязательный',
+            pattern: 'Координата X - это вещественное число'
           }
         },
         {
           name: 'y',
-          label: 'Координата Y',
+          label: 'Координата y',
           type: 'text',
-          required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
+          required: false,
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
-            required: 'Координата Y обязательна',
-            pattern: 'Координата Y должна быть вещественным числом'
+            pattern: 'Координата Y - это вещественное число'
           }
-        }
+        },
       ],
       customValidators: {
         x: (value) => {
           if (value && value <= -59) {
             return 'Координата X должна быть больше -59'
           }
+          return null
         },
         y: (value) => {
           if (value && value <= -5) {
             return 'Координата X должна быть больше -5'
           }
+          return null
         }
       }
+    }
+  },
+  methods: {
+    onSubmitted({ response }) {
+      this.$router.push('/success')
     }
   }
 }

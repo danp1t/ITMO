@@ -29,11 +29,10 @@ header {
 .info_header {
   font-size: 20px;
   text-shadow: 0 0 5px #00bfff, 0 0 10px #00bfff;
-  margin-right: 0; /* Removed margin for even distribution */
-  flex: 1; /* Ensures items take equal space if needed */
+  margin-right: 0;
+  flex: 1;
 }
 
-/* Media queries for font sizes and layout */
 @media (max-width: 888px) {
   header {
     flex-direction: column;
@@ -51,14 +50,14 @@ header {
 @media (min-width: 889px) and (max-width: 1136px) {
   .info_header {
     font-size: 18px;
-    margin-right: 0; /* Adjusted margin for even distribution */
+    margin-right: 0;
   }
 }
 
 @media (min-width: 1137px) {
   .info_header {
     font-size: 20px;
-    margin-right: 0; /* Adjusted margin for even distribution */
+    margin-right: 0;
   }
 }
 </style>

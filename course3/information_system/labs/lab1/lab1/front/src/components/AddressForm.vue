@@ -1,10 +1,11 @@
 <template>
   <BaseForm
+      title="Адрес"
       :fields-config="fieldsConfig"
+      submit-button-text="Отправить"
+      submit-url="/api/register"
       :custom-validators="customValidators"
-      :nested="nested"
-      :no-button="true"
-      @update:formData="$emit('update:formData', $event)"
+      @submitted="onSubmitted"
   >
   </BaseForm>
 </template>
@@ -15,12 +16,6 @@ import BaseForm from './BaseForm.vue'
 export default {
   name: 'AddressForm',
   components: { BaseForm },
-  props: {
-    nested: {
-      type: Boolean,
-      default: false
-    }
-  },
   data() {
     return {
       fieldsConfig: [
