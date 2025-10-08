@@ -102,10 +102,10 @@ export default {
   methods: {
     async loadEntities() {
       try {
-        const response = await this.$http.get(`/api/${this.entityType}s`)
+        const response = await this.$axios.get(`/api/get/${this.entityType}`)
         this.entities = response.data
       } catch (error) {
-        console.error(`Ошибка загрузки ${this.entityType}s:`, error)
+        console.error(`Ошибка загрузки ${this.entityType}:`, error)
       }
     },
 
@@ -114,6 +114,9 @@ export default {
         return `${entity.street}, ${entity.zipCode}`
       } else if (this.entityType === 'coordinates') {
         return `X: ${entity.x}, Y: ${entity.y}`
+      }
+      else if (this.entityType === 'location') {
+          return 'location'
       }
       return entity[this.displayField]
     },

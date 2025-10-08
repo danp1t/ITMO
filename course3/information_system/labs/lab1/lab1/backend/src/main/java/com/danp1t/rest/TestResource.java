@@ -1,9 +1,9 @@
 package com.danp1t.rest;
 
+import com.danp1t.bean.Coordinates;
 import com.danp1t.service.SimpleService;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -18,9 +18,8 @@ public class TestResource {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response test() {
-        String message = simpleService.getTestMessage();
-
+    public Response test(Coordinates response) {
+        String message = response.toString();
         String jsonResponse = String.format(
                 "{\"message\": \"%s\", \"status\": \"CDI is working!\"}",
                 message.replace("\"", "\\\"")

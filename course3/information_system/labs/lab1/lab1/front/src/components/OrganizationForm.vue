@@ -49,7 +49,7 @@
                 label="Выбрать адрес"
                 :required="true"
                 :form-component="locationForm"
-                entity-type="address"
+                entity-type="location"
                 display-field="displayName"
                 @selected="onOfficialAddressSelected"
             />

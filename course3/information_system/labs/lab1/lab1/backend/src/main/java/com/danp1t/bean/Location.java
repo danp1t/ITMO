@@ -3,12 +3,16 @@ package com.danp1t.bean;
 import com.danp1t.error.NotNullError;
 import com.danp1t.interfaces.NeedValidate;
 
-public class Location implements NeedValidate {
+public class Location {
+    private Long id;
     private Double x;
     private Float y;
     private double z;
     private String name;
 
+    public Long getId() {
+        return id;
+    }
     public Double getX() {
         return x;
     }
@@ -22,6 +26,9 @@ public class Location implements NeedValidate {
         return name;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
     public void setX(Double x) {
         this.x = x;
     }

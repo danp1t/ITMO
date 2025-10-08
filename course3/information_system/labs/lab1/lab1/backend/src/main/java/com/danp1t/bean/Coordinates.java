@@ -5,9 +5,13 @@ import com.danp1t.error.ValueTooSmallError;
 import com.danp1t.interfaces.NeedValidate;
 
 public class Coordinates implements NeedValidate {
+    private Long id;
     private Float x;
     private double y;
 
+    public Long getId() {
+        return id;
+    }
     public Float getX() {
         return x;
     }
@@ -15,6 +19,7 @@ public class Coordinates implements NeedValidate {
         return y;
     }
 
+    public void setId(Long id) {this.id = id;}
     public void setX(Float x) {
         this.x = x;
     }
