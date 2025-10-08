@@ -2,8 +2,9 @@
   <BaseForm
       title="Координаты"
       :fields-config="fieldsConfig"
-      submit-button-text="Отправить"
-      submit-url="/api/register"
+      submit-button-text="Создать"
+      submit-url="/api/coordinates"
+      :nested="nested"
       :custom-validators="customValidators"
       @submitted="onSubmitted"
   >
@@ -16,6 +17,12 @@ import BaseForm from './BaseForm.vue'
 export default {
   name: 'CoordinatesForm',
   components: { BaseForm },
+  props: {
+    nested: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       fieldsConfig: [
@@ -59,7 +66,10 @@ export default {
   },
   methods: {
     onSubmitted({ response }) {
-      this.$router.push('/success')
+      this.$emit('submitted', {response})
+      if (!this.nested) {
+        this.$router.push('/success')
+      }
     }
   }
 }

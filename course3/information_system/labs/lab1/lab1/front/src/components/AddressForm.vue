@@ -2,10 +2,12 @@
   <BaseForm
       title="Адрес"
       :fields-config="fieldsConfig"
-      submit-button-text="Отправить"
-      submit-url="/api/register"
+      submit-button-text="Создать"
+      submit-url="/api/addresses"
+      :nested="nested"
       :custom-validators="customValidators"
       @submitted="onSubmitted"
+      @error="onError"
   >
   </BaseForm>
 </template>
@@ -16,6 +18,12 @@ import BaseForm from './BaseForm.vue'
 export default {
   name: 'AddressForm',
   components: { BaseForm },
+  props: {
+    nested: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       fieldsConfig: [
@@ -24,8 +32,10 @@ export default {
           label: 'Введите улицу',
           type: 'text',
           required: true,
+          maxLength: 180,
           errorMessages: {
             required: 'Ввод улицы обязательный',
+            maxLength: 'Длина строки не должна быть больше 181'
           }
         },
         {
@@ -40,17 +50,31 @@ export default {
       ],
       customValidators: {
         street: (value) => {
-          if (value && value.length >= 181) {
-            return 'Длина строки не должна быть больше 181'
+          if (value && value.trim().length === 0) {
+            return 'Улица не может быть пустой строкой'
           }
           return null
         },
+        zipCode: (value) => {
+          if (value && value.trim().length === 0) {
+            return 'Почтовый индекс не может быть пустым'
+          }
+          return null
+        }
       }
     }
   },
   methods: {
     onSubmitted({ response }) {
-      this.$router.push('/success')
+      if (!this.nested) {
+        this.$router.push('/success')
+      }
+      this.$emit('submitted', { response })
+    },
+
+    onError(error) {
+      console.error('Ошибка создания адреса:', error)
+      this.$emit('error', error)
     }
   }
 }

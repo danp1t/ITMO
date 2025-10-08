@@ -179,7 +179,9 @@ export default {
       try {
         const response = await this.$axios.post(this.submitUrl, this.formData)
         this.$emit('submitted', { data: this.formData, response })
-        this.$emit('success', response.data)
+        if (!this.nested) {
+          this.$emit('success', response.data)
+        }
       } catch (error) {
         this.$emit('error', error)
       } finally {

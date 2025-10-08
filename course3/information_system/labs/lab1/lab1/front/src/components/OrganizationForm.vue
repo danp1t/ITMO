@@ -1,82 +1,227 @@
 <template>
-  <BaseForm
-      title="Организация"
-      :fields-config="fieldsConfig"
-      :custom-validators="customValidators"
-      submit-button-text="Отправить"
-      submit-url="/api/register"
-      @submitted="onSubmitted"
-  >
-  </BaseForm>
+  <div class="organization-form-wrapper">
+    <BaseForm
+        title="Создание организации"
+        :fields-config="fieldsConfig"
+        :custom-validators="customValidators"
+        submit-button-text="Создать организацию"
+        container-class="organization-form"
+        @submitted="onSubmitted"
+        @submit="onSubmit"
+    >
+      <template #before-fields>
+        <div class="form-section-header">
+          <h3>Основная информация</h3>
+          <p>Заполните основные данные организации</p>
+        </div>
+      </template>
+
+      <template #after-fields>
+        <div class="form-section-header">
+          <h3>Дополнительные данные</h3>
+          <p>Выберите связанные сущности</p>
+        </div>
+
+        <div class="entities-grid">
+          <div class="form-group entity-group">
+            <label class="form-label">Координаты организации*</label>
+            <EntitySelector
+                v-model="formData.coordinates"
+                label="Выбрать координаты"
+                :required="true"
+                :form-component="coordinatesForm"
+                entity-type="coordinates"
+                display-field="displayName"
+                @selected="onCoordinatesSelected"
+            />
+            <div v-if="formData.coordinates" class="selected-entity-info">
+              <span class="entity-preview">{{ coordinatesDisplay }}</span>
+            </div>
+            <span v-if="errors.coordinates" class="error-message">
+              {{ errors.coordinates }}
+            </span>
+          </div>
+
+          <div class="form-group entity-group">
+            <label class="form-label">Официальный адрес*</label>
+            <EntitySelector
+                v-model="formData.officialAddress"
+                label="Выбрать адрес"
+                :required="true"
+                :form-component="locationForm"
+                entity-type="address"
+                display-field="displayName"
+                @selected="onOfficialAddressSelected"
+            />
+            <div v-if="formData.officialAddress" class="selected-entity-info">
+              <span class="entity-preview">{{ officialAddressDisplay }}</span>
+            </div>
+            <span v-if="errors.officialAddress" class="error-message">
+              {{ errors.officialAddress }}
+            </span>
+          </div>
+
+          <div class="form-group entity-group">
+            <label class="form-label">Почтовый адрес*</label>
+            <EntitySelector
+                v-model="formData.postalAddress"
+                label="Выбрать адрес"
+                :required="true"
+                :form-component="addressForm"
+                entity-type="address"
+                display-field="displayName"
+                @selected="onPostalAddressSelected"
+            />
+            <div v-if="formData.postalAddress" class="selected-entity-info">
+              <span class="entity-preview">{{ postalAddressDisplay }}</span>
+            </div>
+            <span v-if="errors.postalAddress" class="error-message">
+              {{ errors.postalAddress }}
+            </span>
+          </div>
+
+          <div class="form-group entity-group">
+            <label class="form-label">Тип организации*</label>
+            <div class="type-selector">
+              <select
+                  v-model="formData.type"
+                  class="form-select type-select"
+                  :class="{ 'error-input': errors.type }"
+              >
+                <option value="">Выберите тип организации</option>
+                <option value="COMMERCIAL">COMMERCIAL</option>
+                <option value="PUBLIC">PUBLIC</option>
+                <option value="GOVERNMENT">GOVERNMENT</option>
+                <option value="TRUST">TRUST</option>
+                <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
+              </select>
+              <div class="select-arrow">▼</div>
+            </div>
+            <span v-if="errors.type" class="error-message">
+              {{ errors.type }}
+            </span>
+          </div>
+        </div>
+
+        <div v-if="hasSelectedEntities" class="selected-summary">
+          <h4>Выбранные данные:</h4>
+          <div class="summary-grid">
+            <div v-if="formData.coordinates" class="summary-item">
+              <strong>Координаты:</strong> {{ coordinatesDisplay }}
+            </div>
+            <div v-if="formData.officialAddress" class="summary-item">
+              <strong>Официальный адрес:</strong> {{ officialAddressDisplay }}
+            </div>
+            <div v-if="formData.postalAddress" class="summary-item">
+              <strong>Почтовый адрес:</strong> {{ postalAddressDisplay }}
+            </div>
+            <div v-if="formData.type" class="summary-item">
+              <strong>Тип:</strong> {{ typeDisplay }}
+            </div>
+          </div>
+        </div>
+      </template>
+    </BaseForm>
+  </div>
 </template>
 
 <script>
 import BaseForm from './BaseForm.vue'
+import EntitySelector from './EntitySelector.vue'
+import AddressForm from './AddressForm.vue'
+import CoordinatesForm from './CoordinatesForm.vue'
+import LocationForm from "@/components/LocationForm.vue";
 
 export default {
   name: 'OrganizationForm',
-  components: { BaseForm },
+  components: { BaseForm, EntitySelector },
   data() {
     return {
+      addressForm: AddressForm,
+      locationForm: LocationForm,
+      coordinatesForm: CoordinatesForm,
+      formData: {
+        name: '',
+        annualTurnover: '',
+        employeesCount: '',
+        rating: '',
+        coordinates: null,
+        officialAddress: null,
+        postalAddress: null,
+        type: ''
+      },
+      errors: {
+        coordinates: '',
+        officialAddress: '',
+        postalAddress: '',
+        type: ''
+      },
       fieldsConfig: [
         {
           name: 'name',
-          label: 'Имя организации',
+          label: 'Название организации',
           type: 'text',
           required: true,
+          placeholder: 'Введите название организации',
           errorMessages: {
-            required: 'Ввод имени организации обязательный',
+            required: 'Название организации обязательно для заполнения',
           }
         },
         {
           name: 'annualTurnover',
           label: 'Годовой оборот',
-          type: 'number',
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
+          type: 'text',
+          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
+          placeholder: 'Введите годовой оборот',
           errorMessages: {
-            pattern: 'Годовой оборот - это вещественное число'
+            pattern: 'Годовой оборот должен быть положительным числом'
           }
         },
         {
           name: 'employeesCount',
-          label: 'Количество работников',
-          type: 'number',
-          pattern: /\d+/ ,
+          label: 'Количество сотрудников',
+          type: 'text',
+          pattern: /\d+/,
+          placeholder: 'Введите количество сотрудников',
           errorMessages: {
-            pattern: 'Количество работников - это целое число'
+            pattern: 'Количество сотрудников должно быть целым числом'
           }
         },
         {
           name: 'rating',
-          label: 'Рейтинг',
-          type: 'number',
+          label: 'Рейтинг организации',
+          type: 'text',
           pattern: /\d+/,
+          placeholder: 'Введите рейтинг',
           errorMessages: {
-            pattern: 'Рейтинг - это целое число'
+            pattern: 'Рейтинг должен быть целым числом'
           }
         },
       ],
       customValidators: {
         name: (value) => {
-          if (value && value.length <= 0) {
-            return 'Имя организации не может быть пустой строкой'
+          if (value && value.trim().length === 0) {
+            return 'Название организации не может быть пустым'
           }
           return null
         },
         annualTurnover: (value) => {
-          if (value && value <= 0) {
+          const num = parseFloat(value)
+          if (value && num <= 0) {
             return 'Годовой оборот должен быть больше 0'
           }
           return null
         },
         employeesCount: (value) => {
-          if (value && value <= 0) {
-            return 'Количество работников должно быть больше 0'
+          const num = parseInt(value)
+          if (value && num <= 0) {
+            return 'Количество сотрудников должно быть больше 0'
           }
           return null
         },
         rating: (value) => {
-          if (value && value <= 0) {
+          const num = parseInt(value)
+          if (value && num <= 0) {
             return 'Рейтинг должен быть больше 0'
           }
           return null
@@ -84,10 +229,313 @@ export default {
       }
     }
   },
+  computed: {
+    coordinatesDisplay() {
+      if (!this.formData.coordinates) return ''
+      return `X: ${this.formData.coordinates.x}, Y: ${this.formData.coordinates.y}`
+    },
+    officialAddressDisplay() {
+      if (!this.formData.officialAddress) return ''
+      return `${this.formData.officialAddress.street}, ${this.formData.officialAddress.zipCode}`
+    },
+    postalAddressDisplay() {
+      if (!this.formData.postalAddress) return ''
+      return `${this.formData.postalAddress.street}, ${this.formData.postalAddress.zipCode}`
+    },
+    typeDisplay() {
+      const types = {
+        'COMMERCIAL': 'COMMERCIAL',
+        'PUBLIC': 'PUBLIC',
+        'GOVERNMENT': 'GOVERNMENT',
+        'TRUST': 'TRUST',
+        'PRIVATE_LIMITED_COMPANY': 'PRIVATE_LIMITED_COMPANY'
+      }
+      return types[this.formData.type] || ''
+    },
+    hasSelectedEntities() {
+      return this.formData.coordinates || this.formData.officialAddress ||
+          this.formData.postalAddress || this.formData.type
+    }
+  },
   methods: {
+    onCoordinatesSelected(coordinates) {
+      console.log('Выбраны координаты:', coordinates)
+    },
+
+    onOfficialAddressSelected(address) {
+      console.log('Выбран официальный адрес:', address)
+    },
+
+    onPostalAddressSelected(address) {
+      console.log('Выбран почтовый адрес:', address)
+    },
+
+    validateForm() {
+      this.errors.coordinates = !this.formData.coordinates ? 'Необходимо выбрать координаты' : ''
+      this.errors.officialAddress = !this.formData.officialAddress ? 'Необходимо выбрать официальный адрес' : ''
+      this.errors.postalAddress = !this.formData.postalAddress ? 'Необходимо выбрать почтовый адрес' : ''
+      this.errors.type = !this.formData.type ? 'Необходимо выбрать тип организации' : ''
+
+      return !Object.values(this.errors).some(error => error !== '')
+    },
+
+    async onSubmit(formData) {
+      if (!this.validateForm()) {
+        this.$notify({
+          title: 'Ошибка валидации',
+          text: 'Пожалуйста, заполните все обязательные поля',
+          type: 'error'
+        })
+        return
+      }
+
+      const dataToSend = {
+        ...formData,
+        coordinatesId: this.formData.coordinates?.id,
+        officialAddressId: this.formData.officialAddress?.id,
+        postalAddressId: this.formData.postalAddress?.id,
+        type: this.formData.type
+      }
+
+      try {
+        const response = await this.$http.post('/api/organizations', dataToSend)
+        this.$emit('submitted', { response, data: dataToSend })
+      } catch (error) {
+        this.$emit('error', error)
+      }
+    },
+
     onSubmitted({ response }) {
       this.$router.push('/success')
     }
   }
 }
 </script>
+
+<style scoped>
+.organization-form-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-section-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-section-header h3 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-section-header p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 14px;
+}
+
+.entities-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.entity-group {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.entity-group:hover {
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #007bff;
+}
+
+.entity-group .form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.selected-entity-info {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #28a745;
+  border-radius: 4px;
+  border-left: 4px solid #28a745;
+}
+
+.entity-preview {
+  font-size: 14px;
+  color: #155724;
+  font-weight: 500;
+}
+
+.type-selector {
+  position: relative;
+}
+
+.type-select {
+  appearance: none;
+  padding-right: 35px;
+  background: white;
+}
+
+.select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #6c757d;
+}
+
+.selected-summary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.selected-summary h4 {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.summary-item {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.summary-item strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .organization-form-wrapper {
+    padding: 10px;
+  }
+
+  .entities-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section-header {
+    padding: 12px 15px;
+    margin-bottom: 20px;
+  }
+}
+
+/* Анимации */
+.entity-group {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для BaseForm контейнера */
+:deep(.organization-form.form-container) {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+:deep(.organization-form .form-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px 12px 0 0;
+  padding: 20px;
+}
+
+:deep(.organization-form .form-header .info_header) {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+:deep(.organization-form .form-fields) {
+  padding: 30px;
+}
+
+:deep(.organization-form .form-group) {
+  margin-bottom: 20px;
+}
+
+:deep(.organization-form .form-label) {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+:deep(.organization-form .form-input) {
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px 15px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+:deep(.organization-form .form-input:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+:deep(.organization-form .submit-btn) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 15px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+:deep(.organization-form .submit-btn:hover:not(:disabled)) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+</style>
