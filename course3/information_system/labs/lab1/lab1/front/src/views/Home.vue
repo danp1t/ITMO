@@ -4,12 +4,13 @@ import Header from "@/components/Header.vue";
 import CoordinatesForm from "@/components/CoordinatesForm.vue";
 import AddressForm from "@/components/AddressForm.vue";
 import LocationForm from "@/components/LocationForm.vue";
+import OrganizationForm from "@/components/OrganizationForm.vue";
 </script>
 
 <template>
   <body>
   <Header />
-  <LocationForm />
+  <OrganizationForm />
   </body>
 </template>
 

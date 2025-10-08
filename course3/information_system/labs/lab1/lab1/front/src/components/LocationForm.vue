@@ -21,7 +21,7 @@ export default {
         {
           name: 'x',
           label: 'X',
-          type: 'text',
+          type: 'number',
           required: true,
           pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
@@ -32,7 +32,7 @@ export default {
         {
           name: 'y',
           label: 'Y',
-          type: 'text',
+          type: 'number',
           required: true,
           pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
@@ -43,7 +43,7 @@ export default {
         {
           name: 'z',
           label: 'Z',
-          type: 'text',
+          type: 'number',
           required: false,
           pattern: /^(|0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {

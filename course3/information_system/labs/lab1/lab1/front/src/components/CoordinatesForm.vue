@@ -22,7 +22,7 @@ export default {
         {
           name: 'x',
           label: 'Координата x',
-          type: 'text',
+          type: 'number',
           required: true,
           pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
@@ -33,7 +33,7 @@ export default {
         {
           name: 'y',
           label: 'Координата y',
-          type: 'text',
+          type: 'number',
           required: false,
           pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/ ,
           errorMessages: {
