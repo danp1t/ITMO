@@ -3,7 +3,7 @@
       title="Координаты"
       :fields-config="fieldsConfig"
       submit-button-text="Создать"
-      submit-url="/api/coordinates"
+      submit-url="/api/create/coordinates"
       :nested="nested"
       :custom-validators="customValidators"
       @submitted="onSubmitted"
