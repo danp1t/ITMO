@@ -3,9 +3,11 @@ package com.danp1t.rest;
 import com.danp1t.bean.Address;
 import com.danp1t.bean.Coordinates;
 import com.danp1t.bean.Location;
+import com.danp1t.bean.Organization;
 import com.danp1t.service.AddressService;
 import com.danp1t.service.CoordinatesService;
 import com.danp1t.service.LocationService;
+import com.danp1t.service.OrganizationService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -25,6 +27,9 @@ public class CreateEntities {
 
     @Inject
     private AddressService addressService;
+
+    @Inject
+    private OrganizationService organizationService;
 
     @POST
     @Path("/coordinates")
@@ -92,6 +97,35 @@ public class CreateEntities {
                     savedAddress.getId(),
                     savedAddress.getStreet(),
                     savedAddress.getZipCode()
+            );
+
+            return Response.ok(jsonResponse).build();
+
+        } catch (Exception e) {
+            String errorResponse = String.format(
+                    "{\"error\": \"%s\"}",
+                    e.getMessage()
+            );
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponse)
+                    .build();
+        }
+    }
+
+    @POST
+    @Path("/organization")
+    public Response createOrganization(Organization organization) {
+        try {
+            Organization savedOrganization = organizationService.createOrganization(organization);
+
+            String jsonResponse = String.format(
+                    "{\"id\": %d, \"name\": \"%s\", \"annualTurnover\": %.2f, \"employeesCount\": %d, \"rating\": %d, \"type\": \"%s\"}",
+                    savedOrganization.getId(),
+                    savedOrganization.getName(),
+                    savedOrganization.getAnnualTurnover(),
+                    savedOrganization.getEmployeesCount(),
+                    savedOrganization.getRating(),
+                    savedOrganization.getType()
             );
 
             return Response.ok(jsonResponse).build();

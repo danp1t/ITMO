@@ -5,6 +5,8 @@ import com.danp1t.repository.AddressRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.List;
+
 @ApplicationScoped
 public class AddressService {
 
@@ -15,6 +17,10 @@ public class AddressService {
         address.validate();
 
         return addressRepository.save(address);
+    }
+
+    public List<Address> getAllAddresses() {
+        return addressRepository.findAll();
     }
 
     public Address getAddressById(Long id) {

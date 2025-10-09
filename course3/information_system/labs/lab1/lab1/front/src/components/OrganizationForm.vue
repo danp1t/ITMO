@@ -372,17 +372,17 @@ export default {
 
       const dataToSend = {
         ...formData,
-        coordinatesId: this.formData.coordinates?.id,
-        locationId: this.formData.officialAddress?.id,
-        postalAddressId: this.formData.postalAddress?.id,
+        coordinates: this.formData.coordinates,
+        officialAddress: this.formData.officialAddress,
+        postalAddress: this.formData.postalAddress,
         type: this.formData.type
       }
 
       console.log('Данные для отправки:', dataToSend)
 
       try {
-        // Предполагаем, что $http настроен корректно
-        const response = await this.$axios?.post('/api/organizations', dataToSend)
+
+        const response = await this.$axios?.post('/api/create/organization', dataToSend)
         console.log('Успешный ответ:', response)
         this.$emit('submitted', { response, data: dataToSend })
       } catch (error) {

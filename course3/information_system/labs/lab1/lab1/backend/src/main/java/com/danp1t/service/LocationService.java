@@ -5,6 +5,8 @@ import com.danp1t.repository.LocationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.List;
+
 @ApplicationScoped
 public class LocationService {
 
@@ -15,6 +17,10 @@ public class LocationService {
         location.validate();
 
         return locationRepository.save(location);
+    }
+
+    public List<Location> getAllLocations() {
+        return locationRepository.findAll();
     }
 
     public Location getLocationById(Long id) {

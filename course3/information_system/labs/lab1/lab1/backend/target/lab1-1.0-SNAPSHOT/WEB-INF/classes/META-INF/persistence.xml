@@ -9,6 +9,7 @@
         <class>com.danp1t.bean.Coordinates</class>
         <class>com.danp1t.bean.Location</class>
         <class>com.danp1t.bean.Address</class>
+        <class>com.danp1t.bean.Organization</class>
 
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>

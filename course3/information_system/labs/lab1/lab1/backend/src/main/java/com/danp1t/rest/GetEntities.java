@@ -3,6 +3,12 @@ package com.danp1t.rest;
 import com.danp1t.bean.Address;
 import com.danp1t.bean.Coordinates;
 import com.danp1t.bean.Location;
+import com.danp1t.bean.Organization;
+import com.danp1t.service.AddressService;
+import com.danp1t.service.CoordinatesService;
+import com.danp1t.service.LocationService;
+import com.danp1t.service.OrganizationService;
+import jakarta.inject.Inject;
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonArrayBuilder;
@@ -11,42 +17,45 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.ArrayList;
 import java.util.List;
 
 @Path("/get")
 @Produces(MediaType.APPLICATION_JSON)
 public class GetEntities {
 
+    @Inject
+    private AddressService addressService;
+
+    @Inject
+    private CoordinatesService coordinatesService;
+
+    @Inject
+    private LocationService locationService;
+
+    @Inject
+    private OrganizationService organizationService;
+
     @GET
     @Path("/address")
     public Response getAddresses() {
         try {
-            // TODO: Замените на реальные данные из БД
-            List<Address> addresses = new ArrayList<>();
+            List<Address> addresses = addressService.getAllAddresses();
 
-            // Пример данных для тестирования
-            Address addr1 = new Address();
-            addr1.setId(1L);
-            addr1.setStreet("ул. Примерная");
-            addr1.setZipCode("123456");
+            if (addresses == null || addresses.isEmpty()) {
+                JsonArray emptyArray = Json.createArrayBuilder().build();
+                return Response.ok(emptyArray).build();
+            }
 
-            Address addr2 = new Address();
-            addr2.setId(2L);
-            addr2.setStreet("ул. Тестовая");
-            addr2.setZipCode("654321");
-
-            addresses.add(addr1);
-            addresses.add(addr2);
-
-            // Формируем JSON ответ
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             for (Address address : addresses) {
                 arrayBuilder.add(Json.createObjectBuilder()
                         .add("id", address.getId())
-                        .add("street", address.getStreet())
-                        .add("zipCode", address.getZipCode())
-                        .add("displayName", address.getStreet() + ", " + address.getZipCode())
+                        .add("street", address.getStreet() != null ? address.getStreet() : "")
+                        .add("zipCode", address.getZipCode() != null ? address.getZipCode() : "")
+                        .add("displayName",
+                                (address.getStreet() != null ? address.getStreet() : "") +
+                                        ", " +
+                                        (address.getZipCode() != null ? address.getZipCode() : ""))
                         .build());
             }
 
@@ -56,7 +65,7 @@ public class GetEntities {
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Ошибка при получении адресов: " + e.getMessage())
+                    .entity("{\"error\": \"Ошибка при получении адресов: " + e.getMessage() + "\"}")
                     .build();
         }
     }
@@ -65,31 +74,20 @@ public class GetEntities {
     @Path("/coordinates")
     public Response getCoordinates() {
         try {
-            // TODO: Замените на реальные данные из БД
-            List<Coordinates> coordinatesList = new ArrayList<>();
+            List<Coordinates> coordinatesList = coordinatesService.getAllCoordinates();
 
-            // Пример данных для тестирования
-            Coordinates coord1 = new Coordinates();
-            coord1.setId(1L);
-            coord1.setX(10.5f);
-            coord1.setY(20.3);
+            if (coordinatesList == null || coordinatesList.isEmpty()) {
+                JsonArray emptyArray = Json.createArrayBuilder().build();
+                return Response.ok(emptyArray).build();
+            }
 
-            Coordinates coord2 = new Coordinates();
-            coord2.setId(2L);
-            coord2.setX(15.2f);
-            coord2.setY(25.1);
-
-            coordinatesList.add(coord1);
-            coordinatesList.add(coord2);
-
-            // Формируем JSON ответ
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             for (Coordinates coord : coordinatesList) {
                 arrayBuilder.add(Json.createObjectBuilder()
                         .add("id", coord.getId())
-                        .add("x", coord.getX())
+                        .add("x", coord.getX() != null ? coord.getX() : 0)
                         .add("y", coord.getY())
-                        .add("displayName", "X: " + coord.getX() + ", Y: " + coord.getY())
+                        .add("displayName", "X: " + (coord.getX() != null ? coord.getX() : 0) + ", Y: " + coord.getY())
                         .build());
             }
 
@@ -99,7 +97,7 @@ public class GetEntities {
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Ошибка при получении координат: " + e.getMessage())
+                    .entity("{\"error\": \"Ошибка при получении координат: " + e.getMessage() + "\"}")
                     .build();
         }
     }
@@ -108,37 +106,22 @@ public class GetEntities {
     @Path("/location")
     public Response getLocations() {
         try {
-            // TODO: Замените на реальные данные из БД
-            List<Location> locations = new ArrayList<>();
+            List<Location> locations = locationService.getAllLocations();
 
-            // Пример данных для тестирования
-            Location loc1 = new Location();
-            loc1.setId(1L);
-            loc1.setX(100.0);
-            loc1.setY(200.0f);
-            loc1.setZ(50.0);
-            loc1.setName("Москва");
+            if (locations == null || locations.isEmpty()) {
+                JsonArray emptyArray = Json.createArrayBuilder().build();
+                return Response.ok(emptyArray).build();
+            }
 
-            Location loc2 = new Location();
-            loc2.setId(2L);
-            loc2.setX(300.0);
-            loc2.setY(400.0f);
-            loc2.setZ(60.0);
-            loc2.setName("Санкт-Петербург");
-
-            locations.add(loc1);
-            locations.add(loc2);
-
-            // Формируем JSON ответ
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
             for (Location location : locations) {
                 arrayBuilder.add(Json.createObjectBuilder()
                         .add("id", location.getId())
-                        .add("x", location.getX())
-                        .add("y", location.getY())
+                        .add("x", location.getX() != null ? location.getX() : 0)
+                        .add("y", location.getY() != null ? location.getY() : 0)
                         .add("z", location.getZ())
-                        .add("name", location.getName())
-                        .add("displayName", location.getName())
+                        .add("name", location.getName() != null ? location.getName() : "")
+                        .add("displayName", location.getName() != null ? location.getName() : "")
                         .build());
             }
 
@@ -148,7 +131,38 @@ public class GetEntities {
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Ошибка при получении локаций: " + e.getMessage())
+                    .entity("{\"error\": \"Ошибка при получении локаций: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    // Добавьте в класс GetEntities
+    @GET
+    @Path("/organization")
+    public Response getOrganizations() {
+        try {
+            List<Organization> organizations = organizationService.getAllOrganizations();
+
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            for (Organization org : organizations) {
+                arrayBuilder.add(Json.createObjectBuilder()
+                        .add("id", org.getId())
+                        .add("name", org.getName())
+                        .add("annualTurnover", org.getAnnualTurnover())
+                        .add("employeesCount", org.getEmployeesCount())
+                        .add("rating", org.getRating())
+                        .add("type", org.getType().toString())
+                        .add("creationDate", org.getCreationDate().toString())
+                        .add("displayName", org.getName() + " (" + org.getType() + ")")
+                        .build());
+            }
+
+            JsonArray jsonArray = arrayBuilder.build();
+            return Response.ok(jsonArray).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка при получении организаций: " + e.getMessage() + "\"}")
                     .build();
         }
     }

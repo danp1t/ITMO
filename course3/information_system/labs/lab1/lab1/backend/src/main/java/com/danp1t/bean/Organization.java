@@ -4,20 +4,64 @@ import com.danp1t.error.NotNullError;
 import com.danp1t.error.StringNotEmptyError;
 import com.danp1t.error.ValueTooSmallError;
 import com.danp1t.interfaces.NeedValidate;
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.persistence.*;
 
-@ApplicationScoped
+import java.time.LocalDate;
+
+@Entity
+@Table(name = "organization")
 public class Organization implements NeedValidate {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; //Уникальное. Генерируется автоматически
+
+    @Column(nullable = false)
     private String name;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Coordinates coordinates;
-    private java.time.LocalDate creationDate; //Генерируется автоматически
-    private Address officialAddress;
+
+    @Column(name = "creation_date", nullable = false)
+    private java.time.LocalDate creationDate;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "official_address_id", nullable = false)
+    private Location officialAddress;
+
+    @Column(name = "annual_turnover", nullable = false)
     private float annualTurnover;
+
+    @Column(name = "employees_count", nullable = false)
     private long employeesCount;
+
+    @Column(nullable = false)
     private int rating;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrganizationType type;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "postal_address_id", nullable = false)
     private Address postalAddress;
+
+    public Organization() {
+        this.creationDate = LocalDate.now();
+    }
+
+    public Organization(String name, Coordinates coordinates, Location officialAddress,
+                        float annualTurnover, long employeesCount, int rating,
+                        OrganizationType type, Address postalAddress) {
+        this();
+        this.name = name;
+        this.coordinates = coordinates;
+        this.officialAddress = officialAddress;
+        this.annualTurnover = annualTurnover;
+        this.employeesCount = employeesCount;
+        this.rating = rating;
+        this.type = type;
+        this.postalAddress = postalAddress;
+    }
 
     public Integer getId() {
         return id;
@@ -31,7 +75,7 @@ public class Organization implements NeedValidate {
     public java.time.LocalDate getCreationDate() {
         return creationDate;
     }
-    public Address getOfficialAddress() {
+    public Location getOfficialAddress() {
         return officialAddress;
     }
     public float getAnnualTurnover() {
@@ -43,6 +87,7 @@ public class Organization implements NeedValidate {
     public int getRating() {
         return rating;
     }
+    public OrganizationType getType(){return type;}
     public Address getPostalAddress() {
         return postalAddress;
     }
@@ -60,7 +105,7 @@ public class Organization implements NeedValidate {
     public void setCreationDate(java.time.LocalDate creationDate) {
         this.creationDate = creationDate;
     }
-    public void setOfficialAddress(Address officialAddress) {
+    public void setOfficialAddress(Location officialAddress) {
         this.officialAddress = officialAddress;
     }
     public void setAnnualTurnover(float annualTurnover) {
@@ -72,18 +117,12 @@ public class Organization implements NeedValidate {
     public void setRating(int rating) {
         this.rating = rating;
     }
+    public void setType(OrganizationType type){this.type = type;}
     public void setPostalAddress(Address postalAddress) {
         this.postalAddress = postalAddress;
     }
 
     public void validate() {
-        if (this.id == null) {
-            throw new NotNullError("id");
-        }
-        if (this.id <= 0) {
-            throw new ValueTooSmallError("id", 0);
-        }
-
         if (this.name == null) {
             throw new NotNullError("name");
         }
