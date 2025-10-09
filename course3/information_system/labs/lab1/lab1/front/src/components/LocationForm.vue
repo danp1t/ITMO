@@ -3,7 +3,7 @@
       title="Локация"
       :fields-config="fieldsConfig"
       submit-button-text="Создать"
-      submit-url="/api/location"
+      submit-url="/api/create/location"
       :nested="nested"
       @submitted="onSubmitted"
   >
@@ -71,7 +71,10 @@ export default {
   },
   methods: {
     onSubmitted({ response }) {
-      this.$router.push('/success')
+      this.$emit('submitted', {response})
+      if (!this.nested) {
+        this.$router.push('/success')
+      }
     }
   }
 }

@@ -2,17 +2,38 @@ package com.danp1t.bean;
 
 import com.danp1t.error.NotNullError;
 import com.danp1t.interfaces.NeedValidate;
+import jakarta.persistence.*;
 
-public class Location {
+@Entity
+@Table(name = "location")
+public class Location implements NeedValidate {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "x_location")
     private Double x;
+
+    @Column(name = "y_location")
     private Float y;
+
+    @Column(name = "z_location")
     private double z;
+
+    @Column(name = "name_location")
     private String name;
 
-    public Long getId() {
-        return id;
+    public Location() {}
+
+    public Location(Double x, Float y, double z, String name) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.name = name;
     }
+
+    public Long getId() {return id;}
     public Double getX() {
         return x;
     }
@@ -26,9 +47,7 @@ public class Location {
         return name;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) {this.id = id;    }
     public void setX(Double x) {
         this.x = x;
     }
