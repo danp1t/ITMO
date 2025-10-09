@@ -25,7 +25,12 @@
         <div class="modal-body">
           <!-- Список существующих сущностей -->
           <div class="entities-list">
+            <div v-if="loading" class="loading">Загрузка...</div>
+            <div v-else-if="entities.length === 0" class="no-entities">
+              Нет доступных сущностей
+            </div>
             <div
+                v-else
                 v-for="entity in entities"
                 :key="entity.id"
                 class="entity-item"
@@ -60,7 +65,7 @@ export default {
       type: String,
       required: true
     },
-    value: {
+    modelValue: {
       type: Object,
       default: null
     },
@@ -84,16 +89,17 @@ export default {
   data() {
     return {
       showSelector: false,
-      selectedEntity: this.value,
-      entities: []
+      selectedEntity: this.modelValue,
+      entities: [],
+      loading: false
     }
   },
   watch: {
-    value(newVal) {
+    modelValue(newVal) {
       this.selectedEntity = newVal
     },
     selectedEntity(newVal) {
-      this.$emit('input', newVal)
+      this.$emit('update:modelValue', newVal)
     }
   },
   mounted() {
@@ -101,43 +107,94 @@ export default {
   },
   methods: {
     async loadEntities() {
+      this.loading = true
       try {
-        const response = await this.$axios.get(`/api/get/${this.entityType}`)
+        let endpoint
+        switch (this.entityType) {
+          case 'coordinates':
+            endpoint = '/api/get/coordinates'
+            break
+          case 'location':
+            endpoint = '/api/get/location'
+            break
+          case 'address':
+            endpoint = '/api/get/address'
+            break
+          default:
+            endpoint = `/api/${this.entityType}`
+        }
+
+        const response = await this.$axios.get(endpoint)
         this.entities = response.data
       } catch (error) {
         console.error(`Ошибка загрузки ${this.entityType}:`, error)
+        this.entities = []
+      } finally {
+        this.loading = false
       }
     },
 
     getEntityDisplay(entity) {
-      if (this.entityType === 'address') {
-        return `${entity.street}, ${entity.zipCode}`
-      } else if (this.entityType === 'coordinates') {
-        return `X: ${entity.x}, Y: ${entity.y}`
+      if (!entity) return ''
+
+      if (this.entityType === 'coordinates') {
+        const x = entity.x !== undefined ? entity.x : 'не указано'
+        const y = entity.y !== undefined ? entity.y : 'не указано'
+        return `X: ${x}, Y: ${y}`
       }
       else if (this.entityType === 'location') {
-          return 'location'
+        if (entity.name) {
+          return entity.name
+        } else if (entity.x !== undefined) {
+          return `X: ${entity.x}, Y: ${entity.y}, Z: ${entity.z || 'не указано'}`
+        } else {
+          return 'Локация'
+        }
       }
-      return entity[this.displayField]
+      else if (this.entityType === 'address') {
+        const street = entity.street || 'не указано'
+        const zipCode = entity.zipCode || 'не указано'
+        return `${street}, ${zipCode}`
+      }
+
+      return entity[this.displayField] || 'Неизвестно'
     },
 
     selectExisting(entity) {
       this.selectedEntity = entity
       this.showSelector = false
       this.$emit('selected', entity)
+      this.$emit('update:modelValue', entity)
     },
 
-    onNewEntityCreated({ response }) {
-      const newEntity = response.data
-      this.entities.push(newEntity)
-      this.selectedEntity = newEntity
-      this.showSelector = false
-      this.$emit('selected', newEntity)
+    async onNewEntityCreated({ response }) {
+      try {
+        // После создания новой сущности делаем новый GET-запрос для обновления списка
+        await this.loadEntities()
+
+        // Получаем ID созданной сущности из ответа
+        const newEntityId = response?.data?.id
+
+        if (newEntityId) {
+          // Находим полные данные созданной сущности в обновленном списке
+          const newEntity = this.entities.find(entity => entity.id === newEntityId)
+          if (newEntity) {
+            this.selectedEntity = newEntity
+            this.$emit('selected', newEntity)
+            this.$emit('update:modelValue', newEntity)
+          }
+        }
+
+        this.showSelector = false
+      } catch (error) {
+        console.error('Ошибка при обработке созданной сущности:', error)
+      }
     },
 
     clearSelection() {
       this.selectedEntity = null
       this.$emit('cleared')
+      this.$emit('update:modelValue', null)
     },
 
     validate() {
@@ -162,14 +219,25 @@ export default {
   margin-bottom: 8px;
 }
 
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0;
+}
+
 .select-btn {
   background: #007bff;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.select-btn:hover {
+  background: #0056b3;
 }
 
 .selected-entity {
@@ -177,6 +245,7 @@ export default {
   border: 1px solid #dee2e6;
   border-radius: 4px;
   padding: 8px;
+  margin-top: 8px;
 }
 
 .entity-preview {
@@ -187,6 +256,8 @@ export default {
 
 .entity-info {
   font-size: 14px;
+  font-weight: 500;
+  color: #155724;
 }
 
 .clear-btn {
@@ -195,6 +266,17 @@ export default {
   font-size: 18px;
   cursor: pointer;
   color: #dc3545;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clear-btn:hover {
+  background: #f8d7da;
+  border-radius: 50%;
 }
 
 .modal-overlay {
@@ -217,6 +299,7 @@ export default {
   max-width: 600px;
   max-height: 80vh;
   overflow: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {
@@ -225,6 +308,13 @@ export default {
   align-items: center;
   padding: 15px 20px;
   border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #495057;
 }
 
 .close-btn {
@@ -232,6 +322,19 @@ export default {
   border: none;
   font-size: 24px;
   cursor: pointer;
+  color: #6c757d;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #495057;
+  background: #e9ecef;
+  border-radius: 50%;
 }
 
 .modal-body {
@@ -246,10 +349,18 @@ export default {
   margin-bottom: 20px;
 }
 
+.loading, .no-entities {
+  padding: 20px;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
 .entity-item {
-  padding: 10px;
+  padding: 12px;
   border-bottom: 1px solid #dee2e6;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .entity-item:hover {
@@ -261,8 +372,18 @@ export default {
   color: white;
 }
 
+.entity-item:last-child {
+  border-bottom: none;
+}
+
+.create-new-section {
+  border-top: 1px solid #dee2e6;
+  padding-top: 20px;
+}
+
 .create-new-section h4 {
   margin-bottom: 15px;
   color: #495057;
+  text-align: center;
 }
 </style>
