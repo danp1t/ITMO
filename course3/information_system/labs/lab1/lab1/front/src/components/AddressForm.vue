@@ -3,7 +3,7 @@
       title="Адрес"
       :fields-config="fieldsConfig"
       submit-button-text="Создать"
-      submit-url="/api/addresses"
+      submit-url="/api/create/address"
       :nested="nested"
       :custom-validators="customValidators"
       @submitted="onSubmitted"
