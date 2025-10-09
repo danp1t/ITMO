@@ -33,6 +33,7 @@
                 entity-type="coordinates"
                 display-field="displayName"
                 @selected="onCoordinatesSelected"
+                @cleared="onCoordinatesCleared"
             />
             <div v-if="formData.coordinates" class="selected-entity-info">
               <span class="entity-preview">{{ coordinatesDisplay }}</span>
@@ -52,6 +53,7 @@
                 entity-type="location"
                 display-field="displayName"
                 @selected="onOfficialAddressSelected"
+                @cleared="onOfficialAddressCleared"
             />
             <div v-if="formData.officialAddress" class="selected-entity-info">
               <span class="entity-preview">{{ officialAddressDisplay }}</span>
@@ -71,6 +73,7 @@
                 entity-type="address"
                 display-field="displayName"
                 @selected="onPostalAddressSelected"
+                @cleared="onPostalAddressCleared"
             />
             <div v-if="formData.postalAddress" class="selected-entity-info">
               <span class="entity-preview">{{ postalAddressDisplay }}</span>
@@ -87,6 +90,7 @@
                   v-model="formData.type"
                   class="form-select type-select"
                   :class="{ 'error-input': errors.type }"
+                  @change="onTypeChange"
               >
                 <option value="">Выберите тип организации</option>
                 <option value="COMMERCIAL">COMMERCIAL</option>
@@ -126,6 +130,7 @@
 </template>
 
 <script>
+import { markRaw } from 'vue'
 import BaseForm from './BaseForm.vue'
 import EntitySelector from './EntitySelector.vue'
 import AddressForm from './AddressForm.vue'
@@ -137,9 +142,10 @@ export default {
   components: { BaseForm, EntitySelector },
   data() {
     return {
-      addressForm: AddressForm,
-      locationForm: LocationForm,
-      coordinatesForm: CoordinatesForm,
+      // Используем markRaw для предотвращения ненужной реактивности
+      addressForm: markRaw(AddressForm),
+      locationForm: markRaw(LocationForm),
+      coordinatesForm: markRaw(CoordinatesForm),
       formData: {
         name: '',
         annualTurnover: '',
@@ -232,15 +238,32 @@ export default {
   computed: {
     coordinatesDisplay() {
       if (!this.formData.coordinates) return ''
-      return `X: ${this.formData.coordinates.x}, Y: ${this.formData.coordinates.y}`
+      // Используем оригинальный объект из Proxy если нужно
+      const target = this.formData.coordinates?.['[[Target]]'] || this.formData.coordinates
+      const x = target.x !== undefined ? target.x : 'не указано'
+      const y = target.y !== undefined ? target.y : 'не указано'
+      return `X: ${x}, Y: ${y}`
     },
     officialAddressDisplay() {
       if (!this.formData.officialAddress) return ''
-      return `${this.formData.officialAddress.street}, ${this.formData.officialAddress.zipCode}`
+      // Используем оригинальный объект из Proxy если нужно
+      const target = this.formData.officialAddress?.['[[Target]]'] || this.formData.officialAddress
+
+      if (target.name) {
+        return target.name
+      } else if (target.x !== undefined) {
+        return `X: ${target.x}, Y: ${target.y}, Z: ${target.z}`
+      } else {
+        return 'Локация выбрана'
+      }
     },
     postalAddressDisplay() {
       if (!this.formData.postalAddress) return ''
-      return `${this.formData.postalAddress.street}, ${this.formData.postalAddress.zipCode}`
+      // Используем оригинальный объект из Proxy если нужно
+      const target = this.formData.postalAddress?.['[[Target]]'] || this.formData.postalAddress
+      const street = target.street || 'не указано'
+      const zipCode = target.zipCode || 'не указано'
+      return `${street}, ${zipCode}`
     },
     typeDisplay() {
       const types = {
@@ -260,59 +283,126 @@ export default {
   methods: {
     onCoordinatesSelected(coordinates) {
       console.log('Выбраны координаты:', coordinates)
+      // Принудительно обновляем данные
+      this.formData.coordinates = coordinates
+      this.errors.coordinates = ''
+      this.$forceUpdate() // Принудительное обновление представления
     },
 
-    onOfficialAddressSelected(address) {
-      console.log('Выбран официальный адрес:', address)
+    onCoordinatesCleared() {
+      this.formData.coordinates = null
+      this.errors.coordinates = 'Необходимо выбрать координаты'
+      this.$forceUpdate()
+    },
+
+    onOfficialAddressSelected(location) {
+      console.log('Выбрана локация (официальный адрес):', location)
+      this.formData.officialAddress = location
+      this.errors.officialAddress = ''
+      this.$forceUpdate()
+    },
+
+    onOfficialAddressCleared() {
+      this.formData.officialAddress = null
+      this.errors.officialAddress = 'Необходимо выбрать официальный адрес'
+      this.$forceUpdate()
     },
 
     onPostalAddressSelected(address) {
       console.log('Выбран почтовый адрес:', address)
+      this.formData.postalAddress = address
+      this.errors.postalAddress = ''
+      this.$forceUpdate()
+    },
+
+    onPostalAddressCleared() {
+      this.formData.postalAddress = null
+      this.errors.postalAddress = 'Необходимо выбрать почтовый адрес'
+      this.$forceUpdate()
+    },
+
+    onTypeChange() {
+      this.errors.type = ''
     },
 
     validateForm() {
-      this.errors.coordinates = !this.formData.coordinates ? 'Необходимо выбрать координаты' : ''
-      this.errors.officialAddress = !this.formData.officialAddress ? 'Необходимо выбрать официальный адрес' : ''
-      this.errors.postalAddress = !this.formData.postalAddress ? 'Необходимо выбрать почтовый адрес' : ''
-      this.errors.type = !this.formData.type ? 'Необходимо выбрать тип организации' : ''
+      let isValid = true
 
-      return !Object.values(this.errors).some(error => error !== '')
+      if (!this.formData.coordinates) {
+        this.errors.coordinates = 'Необходимо выбрать координаты'
+        isValid = false
+      } else {
+        this.errors.coordinates = ''
+      }
+
+      if (!this.formData.officialAddress) {
+        this.errors.officialAddress = 'Необходимо выбрать официальный адрес'
+        isValid = false
+      } else {
+        this.errors.officialAddress = ''
+      }
+
+      if (!this.formData.postalAddress) {
+        this.errors.postalAddress = 'Необходимо выбрать почтовый адрес'
+        isValid = false
+      } else {
+        this.errors.postalAddress = ''
+      }
+
+      if (!this.formData.type) {
+        this.errors.type = 'Необходимо выбрать тип организации'
+        isValid = false
+      } else {
+        this.errors.type = ''
+      }
+
+      return isValid
     },
 
     async onSubmit(formData) {
+      console.log('onSubmit вызван, данные формы:', formData)
+      console.log('Дополнительные данные:', this.formData)
+
       if (!this.validateForm()) {
-        this.$notify({
-          title: 'Ошибка валидации',
-          text: 'Пожалуйста, заполните все обязательные поля',
-          type: 'error'
-        })
+        console.log('Валидация не пройдена, ошибки:', this.errors)
+        // Используем правильный метод для показа alert
+        alert('Ошибка валидации: Пожалуйста, заполните все обязательные поля')
         return
       }
 
       const dataToSend = {
         ...formData,
         coordinatesId: this.formData.coordinates?.id,
-        officialAddressId: this.formData.officialAddress?.id,
+        locationId: this.formData.officialAddress?.id,
         postalAddressId: this.formData.postalAddress?.id,
         type: this.formData.type
       }
 
+      console.log('Данные для отправки:', dataToSend)
+
       try {
-        const response = await this.$http.post('/api/organizations', dataToSend)
+        // Предполагаем, что $http настроен корректно
+        const response = await this.$axios?.post('/api/organizations', dataToSend)
+        console.log('Успешный ответ:', response)
         this.$emit('submitted', { response, data: dataToSend })
       } catch (error) {
+        console.error('Ошибка при отправке:', error)
         this.$emit('error', error)
       }
     },
 
     onSubmitted({ response }) {
-      this.$router.push('/success')
+      console.log('Форма успешно отправлена, ответ:', response)
+      if (this.$router) {
+        this.$router.push('/success')
+      }
     }
   }
 }
 </script>
 
 <style scoped>
+/* Стили остаются без изменений */
 .organization-form-wrapper {
   max-width: 900px;
   margin: 0 auto;
