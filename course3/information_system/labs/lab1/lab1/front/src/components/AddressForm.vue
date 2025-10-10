@@ -66,10 +66,10 @@ export default {
   },
   methods: {
     onSubmitted({ response }) {
+      this.$emit('submitted', {response})
       if (!this.nested) {
         this.$router.push('/success')
       }
-      this.$emit('submitted', { response })
     },
 
     onError(error) {

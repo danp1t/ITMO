@@ -173,28 +173,22 @@ export default {
     },
 
     async onNewEntityCreated({ response }) {
-      try {
-        // После создания новой сущности делаем новый GET-запрос для обновления списка
-        await this.loadEntities()
+  try {
+    const newEntity = response?.data
 
-        // Получаем ID созданной сущности из ответа
-        const newEntityId = response?.data?.id
+    if (newEntity && newEntity.id) {
+      this.selectedEntity = newEntity
+      this.$emit('selected', newEntity)
+      this.$emit('update:modelValue', newEntity)
 
-        if (newEntityId) {
-          // Находим полные данные созданной сущности в обновленном списке
-          const newEntity = this.entities.find(entity => entity.id === newEntityId)
-          if (newEntity) {
-            this.selectedEntity = newEntity
-            this.$emit('selected', newEntity)
-            this.$emit('update:modelValue', newEntity)
-          }
-        }
+      await this.loadEntities()
+    }
 
-        this.showSelector = false
-      } catch (error) {
-        console.error('Ошибка при обработке созданной сущности:', error)
-      }
-    },
+    this.showSelector = false
+  } catch (error) {
+    console.error('Ошибка при обработке созданной сущности:', error)
+  }
+},
 
     clearSelection() {
       this.selectedEntity = null
