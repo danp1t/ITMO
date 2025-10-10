@@ -27,31 +27,45 @@
           <tr v-for="org in organizations" :key="org.id">
             <td>{{ org.id }}</td>
             <td>{{ org.name }}</td>
-            <td>{{ org.annualTurnover }}</td>
+            <td>{{ formatCurrency(org.annualTurnover) }}</td>
             <td>{{ org.employeesCount }}</td>
-            <td>{{ org.rating }}</td>
-            <td
-              class="clickable-cell"
-              @click="editChildEntity(org.coordinates, 'coordinates')"
-            >
-              {{ org.coordinates ? org.coordinates.id : 'Не указано' }}
-            </td>
-            <td
-              class="clickable-cell"
-              @click="editChildEntity(org.officialAddress, 'location')"
-            >
-              {{ org.officialAddress ? org.officialAddress.id : 'Не указано' }}
-            </td>
-            <td
-              class="clickable-cell"
-              @click="editChildEntity(org.postalAddress, 'address')"
-            >
-              {{ org.postalAddress ? org.postalAddress.id : 'Не указано' }}
-            </td>
-            <td>{{ org.type }}</td>
             <td>
-              <button class="edit-btn" @click="editOrganization(org)">Редактировать</button>
-              <button class="delete-btn" @click="deleteOrganization(org.id)">Удалить</button>
+              <span class="rating" :class="getRatingClass(org.rating)">
+                {{ org.rating }}
+              </span>
+            </td>
+            <td
+              class="clickable-cell"
+              @click="viewChildEntity(org.coordinates, 'coordinates')"
+            >
+              {{ org.coordinates ? `ID: ${org.coordinates}` : 'Не указано' }}
+            </td>
+            <td
+              class="clickable-cell"
+              @click="viewChildEntity(org.officialAddress, 'location')"
+            >
+              {{ org.officialAddress ? `ID: ${org.officialAddress}` : 'Не указано' }}
+            </td>
+            <td
+              class="clickable-cell"
+              @click="viewChildEntity(org.postalAddress, 'address')"
+            >
+              {{ org.postalAddress ? `ID: ${org.postalAddress}` : 'Не указано' }}
+            </td>
+            <td>
+              <span class="type-badge" :class="getTypeClass(org.type)">
+                {{ org.type }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="edit-btn" @click="editOrganization(org)">
+                  Редактировать
+                </button>
+                <button class="delete-btn" @click="deleteOrganization(org.id)">
+                  Удалить
+                </button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -74,19 +88,33 @@
       </div>
     </div>
 
-    <!-- Модальное окно редактирования дочерней сущности -->
-    <div v-if="showChildEntityModal" class="modal-overlay" @click="showChildEntityModal = false">
+    <!-- Модальное окно просмотра/редактирования дочерней сущности -->
+    <div v-if="showChildEntityModal" class="modal-overlay" @click="closeChildEntityModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
-          <h3>Редактирование {{ getChildEntityTitle }}</h3>
-          <button type="button" class="close-btn" @click="showChildEntityModal = false">×</button>
+          <h3>{{ isEditMode ? 'Редактирование' : 'Просмотр' }} {{ getChildEntityTitle }}</h3>
+          <div class="modal-actions">
+            <button
+              v-if="!isEditMode && currentChildEntity"
+              class="edit-mode-btn"
+              @click="enableEditMode"
+            >
+              Редактировать
+            </button>
+            <button type="button" class="close-btn" @click="closeChildEntityModal">×</button>
+          </div>
         </div>
         <div class="modal-body">
+          <div v-if="loadingChildEntity" class="loading">
+            Загрузка данных...
+          </div>
           <component
+            v-else
             :is="currentChildEntityForm"
             :entity="currentChildEntity"
+            :readonly="!isEditMode"
             @submitted="onChildEntityUpdated"
-            @cancel="showChildEntityModal = false"
+            @cancel="closeChildEntityModal"
           />
         </div>
       </div>
@@ -107,6 +135,11 @@
           />
         </div>
       </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div v-if="notification.show" class="notification" :class="notification.type">
+      {{ notification.message }}
     </div>
   </div>
 </template>
@@ -130,6 +163,13 @@ export default {
       currentChildEntity: null,
       currentChildEntityType: '',
       currentOrganization: null,
+      isEditMode: false,
+      loadingChildEntity: false,
+      notification: {
+        show: false,
+        message: '',
+        type: 'success'
+      },
       addressForm: markRaw(AddressForm),
       coordinatesForm: markRaw(CoordinatesForm),
       locationForm: markRaw(LocationForm)
@@ -159,73 +199,72 @@ export default {
   methods: {
     async loadOrganizations() {
       try {
+        this.showNotification('Загрузка организаций...', 'info')
         const response = await this.$axios.get('/api/get/organization')
         this.organizations = response.data
-
-        // Загружаем полные данные для дочерних сущностей
-        await this.loadChildEntities()
+        this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
         console.error('Ошибка загрузки организаций:', error)
         this.organizations = []
+        this.showNotification('Ошибка загрузки организаций', 'error')
       }
     },
 
-    async loadChildEntities() {
-      try {
-        // Загружаем все дочерние сущности
-        const [coordinatesResponse, addressesResponse, locationsResponse] = await Promise.all([
-          this.$axios.get('/api/get/coordinates'),
-          this.$axios.get('/api/get/address'),
-          this.$axios.get('/api/get/location')
-        ])
-
-        const coordinates = coordinatesResponse.data
-        const addresses = addressesResponse.data
-        const locations = locationsResponse.data
-
-        // Сопоставляем ID с полными объектами
-        this.organizations = this.organizations.map(org => ({
-          ...org,
-          coordinates: coordinates.find(coord => coord.id === org.coordinates) || null,
-          officialAddress: locations.find(loc => loc.id === org.officialAddress) || null,
-          postalAddress: addresses.find(addr => addr.id === org.postalAddress) || null
-        }))
-      } catch (error) {
-        console.error('Ошибка загрузки дочерних сущностей:', error)
+    async viewChildEntity(entityId, type) {
+      if (!entityId) {
+        this.showNotification('Данные не указаны', 'info')
+        return
       }
+      await this.loadChildEntityData(entityId, type, false)
     },
 
-    async editChildEntity(entity, type) {
-      if (!entity) return
-
-      // Если entity - это только ID, загружаем полные данные
-      if (typeof entity === 'number') {
-        try {
-          let endpoint
-          switch (type) {
-            case 'coordinates':
-              endpoint = `/api/get/coordinates/${entity}`
-              break
-            case 'address':
-              endpoint = `/api/get/address/${entity}`
-              break
-            case 'location':
-              endpoint = `/api/get/location/${entity}`
-              break
-          }
-
-          const response = await this.$axios.get(endpoint)
-          this.currentChildEntity = response.data
-        } catch (error) {
-          console.error(`Ошибка загрузки ${type}:`, error)
-          return
-        }
-      } else {
-        this.currentChildEntity = entity
-      }
-
-      this.currentChildEntityType = type
+    async loadChildEntityData(entityId, type, editMode = false) {
+      this.loadingChildEntity = true
       this.showChildEntityModal = true
+
+      try {
+        let endpoint
+        switch (type) {
+          case 'coordinates':
+            endpoint = `/api/get/coordinates/${entityId}`
+            break
+          case 'address':
+            endpoint = `/api/get/address/${entityId}`
+            break
+          case 'location':
+            endpoint = `/api/get/location/${entityId}`
+            break
+          default:
+            console.error('Unknown entity type:', type)
+            return
+        }
+
+        const response = await this.$axios.get(endpoint)
+        this.currentChildEntity = { ...response.data }
+        this.currentChildEntityType = type
+        this.isEditMode = editMode
+
+        console.log(`Загружены данные для ${type}:`, this.currentChildEntity)
+
+      } catch (error) {
+        console.error(`Ошибка загрузки ${type}:`, error)
+        this.showNotification(`Ошибка загрузки ${this.getChildEntityTitle}`, 'error')
+        this.closeChildEntityModal()
+      } finally {
+        this.loadingChildEntity = false
+      }
+    },
+
+    enableEditMode() {
+      this.isEditMode = true
+    },
+
+    closeChildEntityModal() {
+      this.showChildEntityModal = false
+      this.isEditMode = false
+      this.currentChildEntity = null
+      this.currentChildEntityType = ''
+      this.loadingChildEntity = false
     },
 
     editOrganization(organization) {
@@ -237,27 +276,67 @@ export default {
       if (confirm('Вы уверены, что хотите удалить эту организацию?')) {
         try {
           await this.$axios.delete(`/api/delete/organization/${id}`)
+          this.showNotification('Организация успешно удалена', 'success')
           await this.loadOrganizations()
         } catch (error) {
           console.error('Ошибка удаления организации:', error)
-          alert('Ошибка при удалении организации')
+          this.showNotification('Ошибка при удалении организации', 'error')
         }
       }
     },
 
     onOrganizationCreated() {
       this.showCreateForm = false
+      this.showNotification('Организация успешно создана', 'success')
       this.loadOrganizations()
     },
 
     onOrganizationUpdated() {
       this.showEditOrganizationModal = false
+      this.showNotification('Организация успешно обновлена', 'success')
       this.loadOrganizations()
     },
 
     onChildEntityUpdated() {
-      this.showChildEntityModal = false
+      this.closeChildEntityModal()
+      this.showNotification(`${this.getChildEntityTitle} успешно обновлены`, 'success')
       this.loadOrganizations()
+    },
+
+    formatCurrency(value) {
+      if (!value) return '0 ₽'
+      return new Intl.NumberFormat('ru-RU', {
+        style: 'currency',
+        currency: 'RUB',
+        minimumFractionDigits: 0
+      }).format(value)
+    },
+
+    getRatingClass(rating) {
+      if (rating >= 4) return 'rating-high'
+      if (rating >= 3) return 'rating-medium'
+      return 'rating-low'
+    },
+
+    getTypeClass(type) {
+      const typeMap = {
+        'COMMERCIAL': 'type-commercial',
+        'GOVERNMENT': 'type-government',
+        'PRIVATE_LIMITED_COMPANY': 'type-private',
+        'OPEN_JOINT_STOCK_COMPANY': 'type-open'
+      }
+      return typeMap[type] || 'type-default'
+    },
+
+    showNotification(message, type = 'success') {
+      this.notification = {
+        show: true,
+        message,
+        type
+      }
+      setTimeout(() => {
+        this.notification.show = false
+      }, 3000)
     }
   }
 }
@@ -266,8 +345,9 @@ export default {
 <style scoped>
 .organizations-main {
   padding: 20px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
+  position: relative;
 }
 
 .header {
@@ -283,6 +363,7 @@ export default {
   margin: 0;
   color: #2c3e50;
   font-size: 2rem;
+  font-weight: 700;
 }
 
 .create-btn {
@@ -295,18 +376,20 @@ export default {
   font-size: 16px;
   font-weight: 600;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .create-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
 .table-container {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  border: 1px solid #e1e5e9;
 }
 
 .organizations-table {
@@ -318,22 +401,25 @@ export default {
 .organizations-table th {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 15px 12px;
+  padding: 16px 12px;
   text-align: left;
   font-weight: 600;
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 0.5px;
+  border: none;
 }
 
 .organizations-table td {
-  padding: 12px;
-  border-bottom: 1px solid #e9ecef;
+  padding: 14px 12px;
+  border-bottom: 1px solid #f1f3f4;
   vertical-align: middle;
+  transition: background-color 0.2s ease;
 }
 
 .organizations-table tbody tr:hover {
-  background-color: #f8f9fa;
+  background-color: #f8fafc;
+  transform: scale(1);
 }
 
 .organizations-table tbody tr:last-child td {
@@ -344,7 +430,8 @@ export default {
   color: #007bff;
   cursor: pointer;
   text-decoration: underline;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .clickable-cell:hover {
@@ -352,32 +439,97 @@ export default {
   background-color: #f0f8ff;
 }
 
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .edit-btn, .delete-btn {
-  padding: 6px 12px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 12px;
-  margin: 2px;
+  font-weight: 600;
   transition: all 0.3s ease;
+  min-width: 100px;
 }
 
 .edit-btn {
-  background: #28a745;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
 }
 
 .edit-btn:hover {
-  background: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
 }
 
 .delete-btn {
-  background: #dc3545;
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   color: white;
 }
 
 .delete-btn:hover {
-  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.rating {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.rating-high {
+  background: #d4edda;
+  color: #155724;
+}
+
+.rating-medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.rating-low {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.type-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-commercial {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.type-government {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.type-private {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.type-open {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.type-default {
+  background: #f5f5f5;
+  color: #424242;
 }
 
 .modal-overlay {
@@ -386,40 +538,78 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  backdrop-filter: blur(5px);
 }
 
 .modal-content {
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
   overflow: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalAppear 0.3s ease-out;
 }
 
 .large-modal {
   max-width: 900px;
 }
 
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 20px;
-  border-bottom: 1px solid #dee2e6;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
   background: #f8f9fa;
-  border-radius: 8px 8px 0 0;
+  border-radius: 12px 12px 0 0;
 }
 
 .modal-header h3 {
   margin: 0;
-  color: #495057;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.edit-mode-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.edit-mode-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
 }
 
 .close-btn {
@@ -429,31 +619,75 @@ export default {
   cursor: pointer;
   color: #6c757d;
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .close-btn:hover {
   color: #495057;
   background: #e9ecef;
-  border-radius: 50%;
 }
 
 .modal-body {
   padding: 20px;
 }
 
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+.notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  z-index: 1001;
+  animation: slideIn 0.3s ease-out;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.notification.success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.notification.error {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+.notification.info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 /* Адаптивность */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .table-container {
     overflow-x: auto;
   }
 
   .organizations-table {
-    min-width: 1000px;
+    min-width: 1200px;
   }
 }
 
@@ -470,6 +704,41 @@ export default {
 
   .header h1 {
     font-size: 1.5rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 10px;
+  }
+
+  .modal-header {
+    padding: 15px;
+  }
+
+  .modal-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .action-buttons {
+    gap: 4px;
+  }
+
+  .edit-btn, .delete-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-body {
+    padding: 15px;
+  }
+
+  .notification {
+    right: 10px;
+    left: 10px;
+    text-align: center;
   }
 }
 </style>
