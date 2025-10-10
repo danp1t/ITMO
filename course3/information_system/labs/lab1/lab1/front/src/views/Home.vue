@@ -5,12 +5,13 @@ import CoordinatesForm from "@/components/CoordinatesForm.vue";
 import AddressForm from "@/components/AddressForm.vue";
 import LocationForm from "@/components/LocationForm.vue";
 import OrganizationForm from "@/components/OrganizationForm.vue";
+import OrganizationTable from "@/components/OrganizationTable.vue";
 </script>
 
 <template>
   <body>
   <Header />
-  <OrganizationForm />
+  <OrganizationTable />
   </body>
 </template>
 

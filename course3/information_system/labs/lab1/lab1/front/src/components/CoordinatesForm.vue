@@ -1,11 +1,13 @@
 <template>
   <BaseForm
-      title="Координаты"
+      :title="isEditMode ? 'Редактирование координат' : 'Создание координат'"
       :fields-config="fieldsConfig"
-      submit-button-text="Создать"
-      submit-url="/api/create/coordinates"
+      :submit-button-text="isEditMode ? 'Обновить' : 'Создать'"
+      :submit-url="submitUrl"
       :nested="nested"
       :custom-validators="customValidators"
+      :initial-data="initialData"
+      :method="isEditMode ? 'put' : 'post'"
       @submitted="onSubmitted"
   >
   </BaseForm>
@@ -21,6 +23,10 @@ export default {
     nested: {
       type: Boolean,
       default: false
+    },
+    entity: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -57,11 +63,22 @@ export default {
         },
         y: (value) => {
           if (value && value <= -5) {
-            return 'Координата X должна быть больше -5'
+            return 'Координата Y должна быть больше -5'
           }
           return null
         }
       }
+    }
+  },
+  computed: {
+    isEditMode() {
+      return !!this.entity
+    },
+    submitUrl() {
+      return this.isEditMode ? `/api/update/coordinates/${this.entity.id}` : '/api/create/coordinates'
+    },
+    initialData() {
+      return this.entity ? { x: this.entity.x, y: this.entity.y } : null
     }
   },
   methods: {
