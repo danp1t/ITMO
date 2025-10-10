@@ -100,6 +100,11 @@ export default {
     },
     selectedEntity(newVal) {
       this.$emit('update:modelValue', newVal)
+    },
+    showSelector(newVal) {
+      if (newVal) {
+        this.loadEntities()
+      }
     }
   },
   mounted() {

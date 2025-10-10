@@ -1,6 +1,5 @@
 package com.danp1t.repository;
 
-import com.danp1t.bean.Coordinates;
 import com.danp1t.bean.Location;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
