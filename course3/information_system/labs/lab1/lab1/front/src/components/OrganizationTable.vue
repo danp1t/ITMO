@@ -26,13 +26,54 @@
         <tbody>
           <tr v-for="org in organizations" :key="org.id">
             <td>{{ org.id }}</td>
-            <td>{{ org.name }}</td>
-            <td>{{ formatCurrency(org.annualTurnover) }}</td>
-            <td>{{ org.employeesCount }}</td>
             <td>
-              <span class="rating" :class="getRatingClass(org.rating)">
+              <span v-if="!org.editing">{{ org.name }}</span>
+              <input
+                v-else
+                v-model="org.editingData.name"
+                class="inline-input"
+                @keyup.enter="saveOrganization(org)"
+                @keyup.esc="cancelEditing(org)"
+              >
+            </td>
+            <td>
+              <span v-if="!org.editing">{{ formatCurrency(org.annualTurnover) }}</span>
+              <input
+                v-else
+                v-model.number="org.editingData.annualTurnover"
+                type="number"
+                class="inline-input"
+                @keyup.enter="saveOrganization(org)"
+                @keyup.esc="cancelEditing(org)"
+              >
+            </td>
+            <td>
+              <span v-if="!org.editing">{{ org.employeesCount }}</span>
+              <input
+                v-else
+                v-model.number="org.editingData.employeesCount"
+                type="number"
+                min="0"
+                class="inline-input"
+                @keyup.enter="saveOrganization(org)"
+                @keyup.esc="cancelEditing(org)"
+              >
+            </td>
+            <td>
+              <span v-if="!org.editing" class="rating" :class="getRatingClass(org.rating)">
                 {{ org.rating }}
               </span>
+              <input
+                v-else
+                v-model.number="org.editingData.rating"
+                type="number"
+                step="0.1"
+                min="0"
+                max="5"
+                class="inline-input"
+                @keyup.enter="saveOrganization(org)"
+                @keyup.esc="cancelEditing(org)"
+              >
             </td>
             <td
               class="clickable-cell"
@@ -53,18 +94,40 @@
               {{ org.postalAddress ? `ID: ${org.postalAddress}` : 'Не указано' }}
             </td>
             <td>
-              <span class="type-badge" :class="getTypeClass(org.type)">
+              <span v-if="!org.editing" class="type-badge" :class="getTypeClass(org.type)">
                 {{ org.type }}
               </span>
+              <select
+                v-else
+                v-model="org.editingData.type"
+                class="inline-input"
+                @keyup.enter="saveOrganization(org)"
+                @keyup.esc="cancelEditing(org)"
+              >
+                <option value="COMMERCIAL">COMMERCIAL</option>
+                <option value="GOVERNMENT">GOVERNMENT</option>
+                <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
+                <option value="OPEN_JOINT_STOCK_COMPANY">OPEN_JOINT_STOCK_COMPANY</option>
+              </select>
             </td>
             <td>
               <div class="action-buttons">
-                <button class="edit-btn" @click="editOrganization(org)">
-                  Редактировать
-                </button>
-                <button class="delete-btn" @click="deleteOrganization(org.id)">
-                  Удалить
-                </button>
+                <template v-if="!org.editing">
+                  <button class="edit-btn" @click="startEditing(org)">
+                    Редактировать
+                  </button>
+                  <button class="delete-btn" @click="deleteOrganization(org.id)">
+                    Удалить
+                  </button>
+                </template>
+                <template v-else>
+                  <button class="save-btn" @click="saveOrganization(org)">
+                    Сохранить
+                  </button>
+                  <button class="cancel-btn" @click="cancelEditing(org)">
+                    Отмена
+                  </button>
+                </template>
               </div>
             </td>
           </tr>
@@ -72,7 +135,7 @@
       </table>
     </div>
 
-    <!-- Модальное окно создания организации -->
+    <!-- Остальные модальные окна остаются без изменений -->
     <div v-if="showCreateForm" class="modal-overlay" @click="showCreateForm = false">
       <div class="modal-content large-modal" @click.stop>
         <div class="modal-header">
@@ -120,23 +183,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно редактирования организации -->
-    <div v-if="showEditOrganizationModal" class="modal-overlay" @click="showEditOrganizationModal = false">
-      <div class="modal-content large-modal" @click.stop>
-        <div class="modal-header">
-          <h3>Редактирование организации</h3>
-          <button type="button" class="close-btn" @click="showEditOrganizationModal = false">×</button>
-        </div>
-        <div class="modal-body">
-          <OrganizationForm
-            :organization="currentOrganization"
-            @submitted="onOrganizationUpdated"
-            @cancel="showEditOrganizationModal = false"
-          />
-        </div>
-      </div>
-    </div>
-
     <!-- Уведомления -->
     <div v-if="notification.show" class="notification" :class="notification.type">
       {{ notification.message }}
@@ -159,10 +205,8 @@ export default {
       organizations: [],
       showCreateForm: false,
       showChildEntityModal: false,
-      showEditOrganizationModal: false,
       currentChildEntity: null,
       currentChildEntityType: '',
-      currentOrganization: null,
       isEditMode: false,
       loadingChildEntity: false,
       notification: {
@@ -201,13 +245,108 @@ export default {
       try {
         this.showNotification('Загрузка организаций...', 'info')
         const response = await this.$axios.get('/api/get/organization')
-        this.organizations = response.data
+        // Добавляем флаг редактирования и копию данных для каждой организации
+        this.organizations = response.data.map(org => ({
+          ...org,
+          editing: false,
+          editingData: {}
+        }))
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
         console.error('Ошибка загрузки организаций:', error)
         this.organizations = []
         this.showNotification('Ошибка загрузки организаций', 'error')
       }
+    },
+
+    startEditing(org) {
+      // Выходим из режима редактирования для всех других организаций
+      this.organizations.forEach(o => {
+        if (o.id !== org.id) {
+          o.editing = false
+        }
+      })
+
+      // Входим в режим редактирования для выбранной организации
+      org.editing = true
+      // Создаем копию данных для редактирования
+      org.editingData = {
+        name: org.name,
+        annualTurnover: org.annualTurnover,
+        employeesCount: org.employeesCount,
+        rating: org.rating,
+        type: org.type
+      }
+    },
+
+    cancelEditing(org) {
+      org.editing = false
+      org.editingData = {}
+    },
+
+    async saveOrganization(org) {
+      try {
+        // Валидация данных
+        if (!this.validateOrganizationData(org.editingData)) {
+          return
+        }
+
+        // Подготавливаем данные для отправки
+        const updateData = {
+          name: org.editingData.name,
+          annualTurnover: org.editingData.annualTurnover,
+          employeesCount: org.editingData.employeesCount,
+          rating: org.editingData.rating,
+          type: org.editingData.type
+        }
+
+        // Отправляем запрос на обновление
+        await this.$axios.put(`/api/update/organization/${org.id}`, updateData)
+
+        // Обновляем данные в локальном состоянии
+        org.name = org.editingData.name
+        org.annualTurnover = org.editingData.annualTurnover
+        org.employeesCount = org.editingData.employeesCount
+        org.rating = org.editingData.rating
+        org.type = org.editingData.type
+
+        // Выходим из режима редактирования
+        org.editing = false
+        org.editingData = {}
+
+        this.showNotification('Данные организации успешно обновлены', 'success')
+      } catch (error) {
+        console.error('Ошибка обновления организации:', error)
+        this.showNotification('Ошибка при обновлении данных организации', 'error')
+      }
+    },
+
+    validateOrganizationData(data) {
+      // Проверка названия
+      if (!data.name || data.name.trim() === '') {
+        this.showNotification('Название организации не может быть пустым', 'error')
+        return false
+      }
+
+      // Проверка годового оборота
+      if (data.annualTurnover < 0) {
+        this.showNotification('Годовой оборот не может быть отрицательным', 'error')
+        return false
+      }
+
+      // Проверка количества сотрудников
+      if (data.employeesCount < 0) {
+        this.showNotification('Количество сотрудников не может быть отрицательным', 'error')
+        return false
+      }
+
+      // Проверка рейтинга
+      if (data.rating < 0) {
+        this.showNotification('Рейтинг должен быть больше 0', 'error')
+        return false
+      }
+
+      return true
     },
 
     async viewChildEntity(entityId, type) {
@@ -267,11 +406,6 @@ export default {
       this.loadingChildEntity = false
     },
 
-    editOrganization(organization) {
-      this.currentOrganization = organization
-      this.showEditOrganizationModal = true
-    },
-
     async deleteOrganization(id) {
       if (confirm('Вы уверены, что хотите удалить эту организацию?')) {
         try {
@@ -288,12 +422,6 @@ export default {
     onOrganizationCreated() {
       this.showCreateForm = false
       this.showNotification('Организация успешно создана', 'success')
-      this.loadOrganizations()
-    },
-
-    onOrganizationUpdated() {
-      this.showEditOrganizationModal = false
-      this.showNotification('Организация успешно обновлена', 'success')
       this.loadOrganizations()
     },
 
@@ -445,7 +573,7 @@ export default {
   gap: 8px;
 }
 
-.edit-btn, .delete-btn {
+.edit-btn, .delete-btn, .save-btn, .cancel-btn {
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
@@ -474,6 +602,46 @@ export default {
 .delete-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+}
+
+.save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.cancel-btn {
+  background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+  color: white;
+}
+
+.cancel-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+}
+
+.inline-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.inline-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.inline-input[type="number"] {
+  text-align: right;
 }
 
 .rating {
@@ -723,7 +891,7 @@ export default {
     gap: 4px;
   }
 
-  .edit-btn, .delete-btn {
+  .edit-btn, .delete-btn, .save-btn, .cancel-btn {
     padding: 6px 10px;
     font-size: 11px;
     min-width: 80px;
