@@ -7,24 +7,111 @@
       </button>
     </div>
 
+    <!-- Панель фильтров и сортировки -->
+    <div class="filters-panel">
+      <div class="search-section">
+        <div class="search-input-wrapper">
+          <input
+            v-model="filters.search"
+            type="text"
+            placeholder="Поиск по названию..."
+            class="search-input"
+            @input="applyFilters"
+          >
+          <span class="search-icon">🔍</span>
+        </div>
+      </div>
+
+      <div class="filter-controls">
+        <select v-model="filters.sortBy" class="filter-select" @change="applySorting">
+          <option value="">Сортировка по...</option>
+          <option value="name">Названию</option>
+          <option value="annualTurnover">Годовому обороту</option>
+          <option value="employeesCount">Количеству сотрудников</option>
+          <option value="rating">Рейтингу</option>
+          <option value="type">Типу</option>
+        </select>
+
+        <select v-model="filters.sortOrder" class="filter-select" @change="applySorting">
+          <option value="asc">По возрастанию</option>
+          <option value="desc">По убыванию</option>
+        </select>
+
+        <select v-model="filters.type" class="filter-select" @change="applyFilters">
+          <option value="">Все типы</option>
+          <option value="COMMERCIAL">COMMERCIAL</option>
+          <option value="GOVERNMENT">GOVERNMENT</option>
+          <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
+          <option value="OPEN_JOINT_STOCK_COMPANY">OPEN_JOINT_STOCK_COMPANY</option>
+        </select>
+
+        <button class="clear-filters-btn" @click="clearFilters">
+          Сбросить фильтры
+        </button>
+      </div>
+    </div>
+
+    <!-- Информация о фильтрации -->
+    <div v-if="isFiltered" class="filter-info">
+      <span>Найдено организаций: {{ filteredOrganizations.length }}</span>
+      <button class="clear-filters-small" @click="clearFilters">
+        × Сбросить
+      </button>
+    </div>
+
     <div class="table-container">
       <table class="organizations-table">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Название</th>
-            <th>Годовой оборот</th>
-            <th>Количество сотрудников</th>
-            <th>Рейтинг</th>
+            <th>
+              <div class="sortable-header" @click="toggleSort('name')">
+                Название
+                <span v-if="filters.sortBy === 'name'" class="sort-indicator">
+                  {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </div>
+            </th>
+            <th>
+              <div class="sortable-header" @click="toggleSort('annualTurnover')">
+                Годовой оборот
+                <span v-if="filters.sortBy === 'annualTurnover'" class="sort-indicator">
+                  {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </div>
+            </th>
+            <th>
+              <div class="sortable-header" @click="toggleSort('employeesCount')">
+                Количество сотрудников
+                <span v-if="filters.sortBy === 'employeesCount'" class="sort-indicator">
+                  {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </div>
+            </th>
+            <th>
+              <div class="sortable-header" @click="toggleSort('rating')">
+                Рейтинг
+                <span v-if="filters.sortBy === 'rating'" class="sort-indicator">
+                  {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </div>
+            </th>
             <th>Координаты</th>
             <th>Официальный адрес</th>
             <th>Почтовый адрес</th>
-            <th>Тип</th>
+            <th>
+              <div class="sortable-header" @click="toggleSort('type')">
+                Тип
+                <span v-if="filters.sortBy === 'type'" class="sort-indicator">
+                  {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </div>
+            </th>
             <th>Действия</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="org in organizations" :key="org.id">
+          <tr v-for="org in filteredOrganizations" :key="org.id">
             <td>{{ org.id }}</td>
             <td>
               <span v-if="!org.editing">{{ org.name }}</span>
@@ -133,6 +220,14 @@
           </tr>
         </tbody>
       </table>
+
+      <!-- Сообщение, если ничего не найдено -->
+      <div v-if="filteredOrganizations.length === 0" class="no-results">
+        <p>Организации не найдены</p>
+        <button v-if="isFiltered" class="clear-filters-btn" @click="clearFilters">
+          Сбросить фильтры
+        </button>
+      </div>
     </div>
 
     <!-- Остальные модальные окна остаются без изменений -->
@@ -203,6 +298,7 @@ export default {
   data() {
     return {
       organizations: [],
+      filteredOrganizations: [],
       showCreateForm: false,
       showChildEntityModal: false,
       currentChildEntity: null,
@@ -213,6 +309,12 @@ export default {
         show: false,
         message: '',
         type: 'success'
+      },
+      filters: {
+        search: '',
+        type: '',
+        sortBy: '',
+        sortOrder: 'asc'
       },
       addressForm: markRaw(AddressForm),
       coordinatesForm: markRaw(CoordinatesForm),
@@ -235,6 +337,9 @@ export default {
         case 'location': return 'локации'
         default: return 'сущности'
       }
+    },
+    isFiltered() {
+      return this.filters.search || this.filters.type || this.filters.sortBy
     }
   },
   mounted() {
@@ -251,12 +356,84 @@ export default {
           editing: false,
           editingData: {}
         }))
+        this.filteredOrganizations = [...this.organizations]
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
         console.error('Ошибка загрузки организаций:', error)
         this.organizations = []
+        this.filteredOrganizations = []
         this.showNotification('Ошибка загрузки организаций', 'error')
       }
+    },
+
+    applyFilters() {
+      let filtered = [...this.organizations]
+
+      // Фильтрация по поисковому запросу (неполное совпадение по названию)
+      if (this.filters.search) {
+        const searchLower = this.filters.search.toLowerCase()
+        filtered = filtered.filter(org =>
+          org.name.toLowerCase().includes(searchLower)
+        )
+      }
+
+      // Фильтрация по типу
+      if (this.filters.type) {
+        filtered = filtered.filter(org => org.type === this.filters.type)
+      }
+
+      this.filteredOrganizations = filtered
+      this.applySorting()
+    },
+
+    applySorting() {
+      if (!this.filters.sortBy) {
+        return
+      }
+
+      this.filteredOrganizations.sort((a, b) => {
+        let aValue = a[this.filters.sortBy]
+        let bValue = b[this.filters.sortBy]
+
+        // Приведение к нижнему регистру для строковых сравнений
+        if (typeof aValue === 'string') {
+          aValue = aValue.toLowerCase()
+          bValue = bValue.toLowerCase()
+        }
+
+        let result = 0
+        if (aValue < bValue) result = -1
+        if (aValue > bValue) result = 1
+
+        // Инвертирование результата для сортировки по убыванию
+        if (this.filters.sortOrder === 'desc') {
+          result = -result
+        }
+
+        return result
+      })
+    },
+
+    toggleSort(field) {
+      if (this.filters.sortBy === field) {
+        // Если уже сортируем по этому полю, меняем порядок
+        this.filters.sortOrder = this.filters.sortOrder === 'asc' ? 'desc' : 'asc'
+      } else {
+        // Если сортируем по новому полю, устанавливаем его и порядок по возрастанию
+        this.filters.sortBy = field
+        this.filters.sortOrder = 'asc'
+      }
+      this.applySorting()
+    },
+
+    clearFilters() {
+      this.filters = {
+        search: '',
+        type: '',
+        sortBy: '',
+        sortOrder: 'asc'
+      }
+      this.filteredOrganizations = [...this.organizations]
     },
 
     startEditing(org) {
@@ -303,14 +480,21 @@ export default {
         // Отправляем запрос на обновление
         await this.$axios.put(`/api/update/organization/${org.id}`, updateData)
 
-        org.name = org.editingData.name
-        org.annualTurnover = org.editingData.annualTurnover
-        org.employeesCount = org.editingData.employeesCount
-        org.rating = org.editingData.rating
-        org.type = org.editingData.type
+        // Обновляем данные в исходном массиве
+        const originalOrg = this.organizations.find(o => o.id === org.id)
+        if (originalOrg) {
+          originalOrg.name = org.editingData.name
+          originalOrg.annualTurnover = org.editingData.annualTurnover
+          originalOrg.employeesCount = org.editingData.employeesCount
+          originalOrg.rating = org.editingData.rating
+          originalOrg.type = org.editingData.type
+        }
 
         org.editing = false
         org.editingData = {}
+
+        // Переприменяем фильтры после обновления
+        this.applyFilters()
 
         this.showNotification('Данные организации успешно обновлены', 'success')
       } catch (error) {
@@ -510,6 +694,141 @@ export default {
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
+/* Стили для панели фильтров */
+.filters-panel {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  border: 1px solid #e1e5e9;
+}
+
+.search-section {
+  margin-bottom: 15px;
+}
+
+.search-input-wrapper {
+  position: relative;
+  max-width: 400px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 45px 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-select {
+  padding: 10px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.clear-filters-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-left: auto;
+}
+
+.clear-filters-btn:hover {
+  background: #545b62;
+  transform: translateY(-1px);
+}
+
+/* Информация о фильтрации */
+.filter-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #e7f3ff;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 4px solid #007bff;
+}
+
+.clear-filters-small {
+  background: none;
+  border: 1px solid #007bff;
+  color: #007bff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.clear-filters-small:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* Сортируемые заголовки */
+.sortable-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s ease;
+  padding: 8px 0;
+}
+
+.sortable-header:hover {
+  color: #667eea;
+}
+
+.sort-indicator {
+  font-weight: bold;
+  color: #667eea;
+  font-size: 14px;
+}
+
 .table-container {
   background: white;
   border-radius: 12px;
@@ -698,6 +1017,17 @@ export default {
   color: #424242;
 }
 
+.no-results {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.no-results p {
+  margin: 0 0 15px 0;
+  font-size: 16px;
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -870,6 +1200,25 @@ export default {
 
   .header h1 {
     font-size: 1.5rem;
+  }
+
+  .filters-panel {
+    padding: 15px;
+  }
+
+  .filter-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .clear-filters-btn {
+    margin-left: 0;
+    width: 100%;
   }
 
   .modal-content {
