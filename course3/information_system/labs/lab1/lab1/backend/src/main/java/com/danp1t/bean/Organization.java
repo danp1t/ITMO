@@ -18,13 +18,13 @@ public class Organization implements NeedValidate {
     @Column(nullable = false)
     private String name;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne
     private Coordinates coordinates;
 
     @Column(name = "creation_date", nullable = false)
     private java.time.LocalDate creationDate;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "official_address_id", nullable = false)
     private Location officialAddress;
 
@@ -41,7 +41,7 @@ public class Organization implements NeedValidate {
     @Column(nullable = false)
     private OrganizationType type;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "postal_address_id", nullable = false)
     private Address postalAddress;
 

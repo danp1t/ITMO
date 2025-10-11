@@ -303,14 +303,12 @@ export default {
         // Отправляем запрос на обновление
         await this.$axios.put(`/api/update/organization/${org.id}`, updateData)
 
-        // Обновляем данные в локальном состоянии
         org.name = org.editingData.name
         org.annualTurnover = org.editingData.annualTurnover
         org.employeesCount = org.editingData.employeesCount
         org.rating = org.editingData.rating
         org.type = org.editingData.type
 
-        // Выходим из режима редактирования
         org.editing = false
         org.editingData = {}
 

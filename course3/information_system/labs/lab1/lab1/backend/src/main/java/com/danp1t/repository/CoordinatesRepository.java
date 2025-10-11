@@ -37,6 +37,21 @@ public class CoordinatesRepository {
                 .getResultList();
     }
 
+    public Coordinates update(Coordinates coordinates) {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            Coordinates mergedCoordinates = entityManager.merge(coordinates);
+            transaction.commit();
+            return mergedCoordinates;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Error updating coordinates", e);
+        }
+    }
+
     public void delete(Coordinates coordinates) {
         EntityTransaction transaction = entityManager.getTransaction();
         try {

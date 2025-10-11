@@ -58,7 +58,7 @@ public class OrganizationRepository {
                 .getResultList();
     }
 
-    public Organization findById(Integer id) {
+    public Organization findById(Long id) {
         return entityManager.createQuery(
                         "SELECT o FROM Organization o " +
                                 "LEFT JOIN FETCH o.coordinates " +
@@ -69,11 +69,37 @@ public class OrganizationRepository {
                 .getSingleResult();
     }
 
+    public Organization update(Organization organization) {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            Organization mergedOrganization = entityManager.merge(organization);
+            transaction.commit();
+            return mergedOrganization;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Error updating organization", e);
+        }
+    }
+
     public void delete(Organization organization) {
         EntityTransaction transaction = entityManager.getTransaction();
         try {
             transaction.begin();
+
+            // Отключаем связи перед удалением (опционально, зависит от настроек БД)
+            organization.setCoordinates(null);
+            organization.setOfficialAddress(null);
+            organization.setPostalAddress(null);
+
+            // Сливаем изменения
+            entityManager.merge(organization);
+
+            // Удаляем организацию
             entityManager.remove(entityManager.contains(organization) ? organization : entityManager.merge(organization));
+
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {

@@ -1,6 +1,5 @@
 package com.danp1t.service;
 
-import com.danp1t.bean.Address;
 import com.danp1t.bean.Coordinates;
 import com.danp1t.repository.CoordinatesRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,7 +15,6 @@ public class CoordinatesService {
 
     public Coordinates createCoordinates(Coordinates coordinates) {
         coordinates.validate();
-
         return coordinatesRepository.save(coordinates);
     }
 
@@ -26,5 +24,25 @@ public class CoordinatesService {
 
     public Coordinates getCoordinatesById(Long id) {
         return coordinatesRepository.findById(id);
+    }
+
+    public Coordinates updateCoordinates(Coordinates coordinates) {
+        coordinates.validate();
+
+        Coordinates existingCoordinates = coordinatesRepository.findById(coordinates.getId());
+        if (existingCoordinates == null) {
+            return null;
+        }
+
+        return coordinatesRepository.update(coordinates);
+    }
+
+    public boolean deleteCoordinates(Long id) {
+        Coordinates coordinates = coordinatesRepository.findById(id);
+        if (coordinates != null) {
+            coordinatesRepository.delete(coordinates);
+            return true;
+        }
+        return false;
     }
 }

@@ -1,6 +1,7 @@
 package com.danp1t.repository;
 
 import com.danp1t.bean.Address;
+import com.danp1t.bean.Coordinates;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -35,6 +36,21 @@ public class AddressRepository {
     public List<Address> findAll() {
         return entityManager.createQuery("SELECT c FROM Address c", Address.class)
                 .getResultList();
+    }
+
+    public Address update(Address address) {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            Address mergedAddress = entityManager.merge(address);
+            transaction.commit();
+            return mergedAddress;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Error updating address", e);
+        }
     }
 
     public void delete(Address address) {

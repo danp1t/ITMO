@@ -15,7 +15,6 @@ public class AddressService {
 
     public Address createAddress(Address address) {
         address.validate();
-
         return addressRepository.save(address);
     }
 
@@ -25,5 +24,25 @@ public class AddressService {
 
     public Address getAddressById(Long id) {
         return addressRepository.findById(id);
+    }
+
+    public Address updateAddress(Address address) {
+        address.validate();
+
+        Address existingAddress = addressRepository.findById(address.getId());
+        if (existingAddress == null) {
+            return null;
+        }
+
+        return addressRepository.update(address);
+    }
+
+    public boolean deleteAddress(Long id) {
+        Address address = addressRepository.findById(id);
+        if (address != null) {
+            addressRepository.delete(address);
+            return true;
+        }
+        return false;
     }
 }

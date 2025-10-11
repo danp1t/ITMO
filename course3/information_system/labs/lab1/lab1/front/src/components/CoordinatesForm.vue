@@ -158,9 +158,6 @@ export default {
         const response = await this.$axios(config)
         this.$emit('submitted', { response })
 
-        if (!this.nested) {
-          this.$router.push('/success')
-        }
       } catch (error) {
         console.error('Ошибка отправки формы:', error)
         this.$emit('error', error)

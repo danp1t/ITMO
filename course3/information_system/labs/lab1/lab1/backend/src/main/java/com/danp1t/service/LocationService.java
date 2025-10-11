@@ -15,7 +15,6 @@ public class LocationService {
 
     public Location createLocation(Location location) {
         location.validate();
-
         return locationRepository.save(location);
     }
 
@@ -25,5 +24,25 @@ public class LocationService {
 
     public Location getLocationById(Long id) {
         return locationRepository.findById(id);
+    }
+
+    public Location updateLocation(Location location) {
+        location.validate();
+
+        Location existingLocation = locationRepository.findById(location.getId());
+        if (existingLocation == null) {
+            return null;
+        }
+
+        return locationRepository.update(location);
+    }
+
+    public boolean deleteLocation(Long id) {
+        Location location = locationRepository.findById(id);
+        if (location != null) {
+            locationRepository.delete(location);
+            return true;
+        }
+        return false;
     }
 }

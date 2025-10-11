@@ -37,6 +37,21 @@ public class LocationRepository {
                 .getResultList();
     }
 
+    public Location update(Location location) {
+        EntityTransaction transaction = entityManager.getTransaction();
+        try {
+            transaction.begin();
+            Location mergedLocation = entityManager.merge(location);
+            transaction.commit();
+            return mergedLocation;
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Error updating location", e);
+        }
+    }
+
     public void delete(Location location) {
         EntityTransaction transaction = entityManager.getTransaction();
         try {
