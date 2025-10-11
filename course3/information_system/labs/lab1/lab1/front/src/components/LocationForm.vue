@@ -26,27 +26,68 @@
       </tbody>
     </table>
   </div>
-  <BaseForm
-    v-else
-    :title="isEditMode ? 'Редактирование локации' : 'Создание локации'"
-    :fields-config="fieldsConfig"
-    :submit-button-text="isEditMode ? 'Обновить' : 'Создать'"
-    :submit-url="submitUrl"
-    :nested="nested"
-    :custom-validators="customValidators"
-    :initial-data="initialData"
-    :method="isEditMode ? 'put' : 'post'"
-    @submitted="onSubmitted"
-  >
-  </BaseForm>
+
+  <!-- Кастомная форма, если BaseForm не поддерживает initial-data -->
+  <form v-else @submit.prevent="submitForm" class="custom-form">
+    <h3>{{ isEditMode ? 'Редактирование локации' : 'Создание локации' }}</h3>
+
+    <div class="form-field">
+      <label for="x">Координата X *</label>
+      <input
+        id="x"
+        v-model="formData.x"
+        type="number"
+        required
+        class="form-input"
+      >
+      <div v-if="errors.x" class="error-message">{{ errors.x }}</div>
+    </div>
+
+    <div class="form-field">
+      <label for="y">Координата Y *</label>
+      <input
+        id="y"
+        v-model="formData.y"
+        type="number"
+        required
+        class="form-input"
+      >
+      <div v-if="errors.y" class="error-message">{{ errors.y }}</div>
+    </div>
+
+    <div class="form-field">
+      <label for="z">Координата Z</label>
+      <input
+        id="z"
+        v-model="formData.z"
+        type="number"
+        class="form-input"
+      >
+      <div v-if="errors.z" class="error-message">{{ errors.z }}</div>
+    </div>
+
+    <div class="form-field">
+      <label for="name">Название локации *</label>
+      <input
+        id="name"
+        v-model="formData.name"
+        type="text"
+        required
+        maxlength="255"
+        class="form-input"
+      >
+      <div v-if="errors.name" class="error-message">{{ errors.name }}</div>
+    </div>
+
+    <button type="submit" class="submit-button">
+      {{ isEditMode ? 'Обновить' : 'Создать' }}
+    </button>
+  </form>
 </template>
 
 <script>
-import BaseForm from './BaseForm.vue'
-
 export default {
   name: 'LocationForm',
-  components: { BaseForm },
   props: {
     nested: {
       type: Boolean,
@@ -63,62 +104,13 @@ export default {
   },
   data() {
     return {
-      fieldsConfig: [
-        {
-          name: 'x',
-          label: 'Координата X',
-          type: 'number',
-          required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
-          errorMessages: {
-            required: 'Ввод координаты X обязателен',
-            pattern: 'Координата X должна быть вещественным числом'
-          }
-        },
-        {
-          name: 'y',
-          label: 'Координата Y',
-          type: 'number',
-          required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
-          errorMessages: {
-            required: 'Ввод координаты Y обязателен',
-            pattern: 'Координата Y должна быть вещественным числом'
-          }
-        },
-        {
-          name: 'z',
-          label: 'Координата Z',
-          type: 'number',
-          required: false,
-          pattern: /^(|0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
-          errorMessages: {
-            pattern: 'Координата Z должна быть вещественным числом'
-          }
-        },
-        {
-          name: 'name',
-          label: 'Название локации',
-          type: 'text',
-          required: true,
-          maxLength: 255,
-          errorMessages: {
-            required: 'Ввод названия локации обязателен',
-            maxLength: 'Длина названия не должна превышать 255 символов'
-          }
-        },
-      ],
-      customValidators: {
-        name: (value) => {
-          if (value && value.trim().length === 0) {
-            return 'Название локации не может быть пустым'
-          }
-          if (value && value.length > 255) {
-            return 'Длина названия не должна превышать 255 символов'
-          }
-          return null
-        }
-      }
+      formData: {
+        x: '',
+        y: '',
+        z: '',
+        name: ''
+      },
+      errors: {}
     }
   },
   computed: {
@@ -127,21 +119,103 @@ export default {
     },
     submitUrl() {
       return this.isEditMode ? `/api/update/location/${this.entity.id}` : '/api/create/location'
-    },
-    initialData() {
-      return this.entity ? {
-        x: this.entity.x,
-        y: this.entity.y,
-        z: this.entity.z,
-        name: this.entity.name
-      } : null
+    }
+  },
+  watch: {
+    entity: {
+      handler(newEntity) {
+        if (newEntity) {
+          this.initializeForm()
+        }
+      },
+      immediate: true,
+      deep: true
     }
   },
   methods: {
-    onSubmitted({ response }) {
-      this.$emit('submitted', {response})
-      if (!this.nested) {
-        this.$router.push('/success')
+    initializeForm() {
+      if (this.entity) {
+        this.formData = {
+          x: this.entity.x || '',
+          y: this.entity.y || '',
+          z: this.entity.z || '',
+          name: this.entity.name || ''
+        }
+      } else {
+        this.formData = {
+          x: '',
+          y: '',
+          z: '',
+          name: ''
+        }
+      }
+      this.errors = {}
+    },
+
+    validateForm() {
+      this.errors = {}
+      let isValid = true
+
+      // Проверка X
+      if (!this.formData.x && this.formData.x !== 0) {
+        this.errors.x = 'Ввод координаты X обязателен'
+        isValid = false
+      } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.x.toString())) {
+        this.errors.x = 'Координата X должна быть вещественным числом'
+        isValid = false
+      }
+
+      // Проверка Y
+      if (!this.formData.y && this.formData.y !== 0) {
+        this.errors.y = 'Ввод координаты Y обязателен'
+        isValid = false
+      } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.y.toString())) {
+        this.errors.y = 'Координата Y должна быть вещественным числом'
+        isValid = false
+      }
+
+      // Проверка Z
+      if (this.formData.z && !/^(|0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.z.toString())) {
+        this.errors.z = 'Координата Z должна быть вещественным числом'
+        isValid = false
+      }
+
+      // Проверка названия
+      if (!this.formData.name) {
+        this.errors.name = 'Ввод названия локации обязателен'
+        isValid = false
+      } else if (this.formData.name.trim().length === 0) {
+        this.errors.name = 'Название локации не может быть пустым'
+        isValid = false
+      } else if (this.formData.name.length > 255) {
+        this.errors.name = 'Длина названия не должна превышать 255 символов'
+        isValid = false
+      }
+
+      return isValid
+    },
+
+    async submitForm() {
+      if (!this.validateForm()) {
+        return
+      }
+
+      try {
+        const config = {
+          method: this.isEditMode ? 'put' : 'post',
+          url: this.submitUrl,
+          data: this.formData
+        }
+
+        const response = await this.$axios(config)
+        this.$emit('submitted', { response })
+
+        if (!this.nested) {
+          this.$router.push('/success')
+        }
+      } catch (error) {
+        console.error('Ошибка отправки формы:', error)
+        this.$emit('error', error)
       }
     }
   }
@@ -174,5 +248,49 @@ export default {
 
 .data-table td {
   background-color: white;
+}
+
+.custom-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.submit-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.submit-button:hover {
+  background-color: #2980b9;
 }
 </style>

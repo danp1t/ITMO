@@ -2,41 +2,61 @@
   <div v-if="readonly" class="readonly-view">
     <h4>Текущие данные координат</h4>
     <table class="data-table">
-      <tr>
-        <th>ID</th>
-        <td>{{ entity.id }}</td>
-      </tr>
-      <tr>
-        <th>Координата X</th>
-        <td>{{ entity.x }}</td>
-      </tr>
-      <tr>
-        <th>Координата Y</th>
-        <td>{{ entity.y || 'Не указано' }}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <th>ID</th>
+          <td>{{ entity.id }}</td>
+        </tr>
+        <tr>
+          <th>Координата X</th>
+          <td>{{ entity.x }}</td>
+        </tr>
+        <tr>
+          <th>Координата Y</th>
+          <td>{{ entity.y || 'Не указано' }}</td>
+        </tr>
+      </tbody>
     </table>
   </div>
-  <BaseForm
-    v-else
-    :title="isEditMode ? 'Редактирование координат' : 'Создание координат'"
-    :fields-config="fieldsConfig"
-    :submit-button-text="isEditMode ? 'Обновить' : 'Создать'"
-    :submit-url="submitUrl"
-    :nested="nested"
-    :custom-validators="customValidators"
-    :initial-data="initialData"
-    :method="isEditMode ? 'put' : 'post'"
-    @submitted="onSubmitted"
-  >
-  </BaseForm>
+
+  <!-- Кастомная форма для гарантированного заполнения -->
+  <form v-else @submit.prevent="submitForm" class="custom-form">
+    <h3>{{ isEditMode ? 'Редактирование координат' : 'Создание координат' }}</h3>
+
+    <div class="form-field">
+      <label for="x">Координата X *</label>
+      <input
+        id="x"
+        v-model="formData.x"
+        type="number"
+        required
+        step="any"
+        class="form-input"
+      >
+      <div v-if="errors.x" class="error-message">{{ errors.x }}</div>
+    </div>
+
+    <div class="form-field">
+      <label for="y">Координата Y</label>
+      <input
+        id="y"
+        v-model="formData.y"
+        type="number"
+        step="any"
+        class="form-input"
+      >
+      <div v-if="errors.y" class="error-message">{{ errors.y }}</div>
+    </div>
+
+    <button type="submit" class="submit-button">
+      {{ isEditMode ? 'Обновить' : 'Создать' }}
+    </button>
+  </form>
 </template>
 
 <script>
-import BaseForm from './BaseForm.vue'
-
 export default {
   name: 'CoordinatesForm',
-  components: { BaseForm },
   props: {
     nested: {
       type: Boolean,
@@ -53,43 +73,11 @@ export default {
   },
   data() {
     return {
-      fieldsConfig: [
-        {
-          name: 'x',
-          label: 'Координата x',
-          type: 'number',
-          required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
-          errorMessages: {
-            required: 'Ввод координаты X обязательный',
-            pattern: 'Координата X - это вещественное число'
-          }
-        },
-        {
-          name: 'y',
-          label: 'Координата y',
-          type: 'number',
-          required: false,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
-          errorMessages: {
-            pattern: 'Координата Y - это вещественное число'
-          }
-        },
-      ],
-      customValidators: {
-        x: (value) => {
-          if (value && value <= -59) {
-            return 'Координата X должна быть больше -59'
-          }
-          return null
-        },
-        y: (value) => {
-          if (value && value <= -5) {
-            return 'Координата Y должна быть больше -5'
-          }
-          return null
-        }
-      }
+      formData: {
+        x: '',
+        y: ''
+      },
+      errors: {}
     }
   },
   computed: {
@@ -98,16 +86,84 @@ export default {
     },
     submitUrl() {
       return this.isEditMode ? `/api/update/coordinates/${this.entity.id}` : '/api/create/coordinates'
-    },
-    initialData() {
-      return this.entity ? { x: this.entity.x, y: this.entity.y } : null
+    }
+  },
+  watch: {
+    entity: {
+      handler(newEntity) {
+        if (newEntity) {
+          this.initializeForm()
+        }
+      },
+      immediate: true,
+      deep: true
     }
   },
   methods: {
-    onSubmitted({ response }) {
-      this.$emit('submitted', {response})
-      if (!this.nested) {
-        this.$router.push('/success')
+    initializeForm() {
+      if (this.entity) {
+        this.formData = {
+          x: this.entity.x || '',
+          y: this.entity.y || ''
+        }
+      } else {
+        this.formData = {
+          x: '',
+          y: ''
+        }
+      }
+      this.errors = {}
+    },
+
+    validateForm() {
+      this.errors = {}
+      let isValid = true
+
+      // Проверка X
+      if (!this.formData.x && this.formData.x !== 0) {
+        this.errors.x = 'Ввод координаты X обязателен'
+        isValid = false
+      } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.x.toString())) {
+        this.errors.x = 'Координата X должна быть вещественным числом'
+        isValid = false
+      } else if (parseFloat(this.formData.x) <= -59) {
+        this.errors.x = 'Координата X должна быть больше -59'
+        isValid = false
+      }
+
+      // Проверка Y
+      if (this.formData.y && !/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.y.toString())) {
+        this.errors.y = 'Координата Y должна быть вещественным числом'
+        isValid = false
+      } else if (this.formData.y && parseFloat(this.formData.y) <= -5) {
+        this.errors.y = 'Координата Y должна быть больше -5'
+        isValid = false
+      }
+
+      return isValid
+    },
+
+    async submitForm() {
+      if (!this.validateForm()) {
+        return
+      }
+
+      try {
+        const config = {
+          method: this.isEditMode ? 'put' : 'post',
+          url: this.submitUrl,
+          data: this.formData
+        }
+
+        const response = await this.$axios(config)
+        this.$emit('submitted', { response })
+
+        if (!this.nested) {
+          this.$router.push('/success')
+        }
+      } catch (error) {
+        console.error('Ошибка отправки формы:', error)
+        this.$emit('error', error)
       }
     }
   }
@@ -140,5 +196,49 @@ export default {
 
 .data-table td {
   background-color: white;
+}
+
+.custom-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.submit-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.submit-button:hover {
+  background-color: #2980b9;
 }
 </style>

@@ -2,42 +2,62 @@
   <div v-if="readonly" class="readonly-view">
     <h4>Текущие данные адреса</h4>
     <table class="data-table">
-      <tr>
-        <th>ID</th>
-        <td>{{ entity.id }}</td>
-      </tr>
-      <tr>
-        <th>Улица</th>
-        <td>{{ entity.street }}</td>
-      </tr>
-      <tr>
-        <th>Почтовый индекс</th>
-        <td>{{ entity.zipCode || 'Не указано' }}</td>
-      </tr>
+      <tbody>
+        <tr>
+          <th>ID</th>
+          <td>{{ entity.id }}</td>
+        </tr>
+        <tr>
+          <th>Улица</th>
+          <td>{{ entity.street }}</td>
+        </tr>
+        <tr>
+          <th>Почтовый индекс</th>
+          <td>{{ entity.zipCode || 'Не указано' }}</td>
+        </tr>
+      </tbody>
     </table>
   </div>
-  <BaseForm
-    v-else
-    :title="isEditMode ? 'Редактирование адреса' : 'Создание адреса'"
-    :fields-config="fieldsConfig"
-    :submit-button-text="isEditMode ? 'Обновить' : 'Создать'"
-    :submit-url="submitUrl"
-    :nested="nested"
-    :custom-validators="customValidators"
-    :initial-data="initialData"
-    :method="isEditMode ? 'put' : 'post'"
-    @submitted="onSubmitted"
-    @error="onError"
-  >
-  </BaseForm>
+
+  <!-- Кастомная форма для гарантированного заполнения -->
+  <form v-else @submit.prevent="submitForm" class="custom-form">
+    <h3>{{ isEditMode ? 'Редактирование адреса' : 'Создание адреса' }}</h3>
+
+    <div class="form-field">
+      <label for="street">Улица *</label>
+      <input
+        id="street"
+        v-model="formData.street"
+        type="text"
+        required
+        maxlength="180"
+        class="form-input"
+      >
+      <div v-if="errors.street" class="error-message">{{ errors.street }}</div>
+    </div>
+
+    <div class="form-field">
+      <label for="zipCode">Почтовый индекс *</label>
+      <input
+        id="zipCode"
+        v-model="formData.zipCode"
+        type="text"
+        required
+        maxlength="30"
+        class="form-input"
+      >
+      <div v-if="errors.zipCode" class="error-message">{{ errors.zipCode }}</div>
+    </div>
+
+    <button type="submit" class="submit-button">
+      {{ isEditMode ? 'Обновить' : 'Создать' }}
+    </button>
+  </form>
 </template>
 
 <script>
-import BaseForm from './BaseForm.vue'
-
 export default {
   name: 'AddressForm',
-  components: { BaseForm },
   props: {
     nested: {
       type: Boolean,
@@ -54,50 +74,11 @@ export default {
   },
   data() {
     return {
-      fieldsConfig: [
-        {
-          name: 'street',
-          label: 'Улица',
-          type: 'text',
-          required: true,
-          maxLength: 180,
-          errorMessages: {
-            required: 'Ввод улицы обязателен',
-            maxLength: 'Длина улицы не должна превышать 180 символов'
-          }
-        },
-        {
-          name: 'zipCode',
-          label: 'Почтовый индекс',
-          type: 'text',
-          required: true,
-          maxLength: 30,
-          errorMessages: {
-            required: 'Ввод почтового индекса обязателен',
-            maxLength: 'Длина почтового индекса не должна превышать 30 символов'
-          }
-        },
-      ],
-      customValidators: {
-        street: (value) => {
-          if (value && value.trim().length === 0) {
-            return 'Улица не может быть пустой строкой'
-          }
-          if (value && value.length > 180) {
-            return 'Длина улицы не должна превышать 180 символов'
-          }
-          return null
-        },
-        zipCode: (value) => {
-          if (value && value.trim().length === 0) {
-            return 'Почтовый индекс не может быть пустым'
-          }
-          if (value && value.length > 30) {
-            return 'Длина почтового индекса не должна превышать 30 символов'
-          }
-          return null
-        }
-      }
+      formData: {
+        street: '',
+        zipCode: ''
+      },
+      errors: {}
     }
   },
   computed: {
@@ -106,24 +87,88 @@ export default {
     },
     submitUrl() {
       return this.isEditMode ? `/api/update/address/${this.entity.id}` : '/api/create/address'
-    },
-    initialData() {
-      return this.entity ? {
-        street: this.entity.street,
-        zipCode: this.entity.zipCode
-      } : null
+    }
+  },
+  watch: {
+    entity: {
+      handler(newEntity) {
+        if (newEntity) {
+          this.initializeForm()
+        }
+      },
+      immediate: true,
+      deep: true
     }
   },
   methods: {
-    onSubmitted({ response }) {
-      this.$emit('submitted', {response})
-      if (!this.nested) {
-        this.$router.push('/success')
+    initializeForm() {
+      if (this.entity) {
+        this.formData = {
+          street: this.entity.street || '',
+          zipCode: this.entity.zipCode || ''
+        }
+      } else {
+        this.formData = {
+          street: '',
+          zipCode: ''
+        }
       }
+      this.errors = {}
     },
-    onError(error) {
-      console.error('Ошибка создания/обновления адреса:', error)
-      this.$emit('error', error)
+
+    validateForm() {
+      this.errors = {}
+      let isValid = true
+
+      // Проверка улицы
+      if (!this.formData.street) {
+        this.errors.street = 'Ввод улицы обязателен'
+        isValid = false
+      } else if (this.formData.street.trim().length === 0) {
+        this.errors.street = 'Улица не может быть пустой строкой'
+        isValid = false
+      } else if (this.formData.street.length > 180) {
+        this.errors.street = 'Длина улицы не должна превышать 180 символов'
+        isValid = false
+      }
+
+      // Проверка почтового индекса
+      if (!this.formData.zipCode) {
+        this.errors.zipCode = 'Ввод почтового индекса обязателен'
+        isValid = false
+      } else if (this.formData.zipCode.trim().length === 0) {
+        this.errors.zipCode = 'Почтовый индекс не может быть пустым'
+        isValid = false
+      } else if (this.formData.zipCode.length > 30) {
+        this.errors.zipCode = 'Длина почтового индекса не должна превышать 30 символов'
+        isValid = false
+      }
+
+      return isValid
+    },
+
+    async submitForm() {
+      if (!this.validateForm()) {
+        return
+      }
+
+      try {
+        const config = {
+          method: this.isEditMode ? 'put' : 'post',
+          url: this.submitUrl,
+          data: this.formData
+        }
+
+        const response = await this.$axios(config)
+        this.$emit('submitted', { response })
+
+        if (!this.nested) {
+          this.$router.push('/success')
+        }
+      } catch (error) {
+        console.error('Ошибка отправки формы:', error)
+        this.$emit('error', error)
+      }
     }
   }
 }
@@ -155,5 +200,49 @@ export default {
 
 .data-table td {
   background-color: white;
+}
+
+.custom-form {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-field {
+  margin-bottom: 20px;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+.submit-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.submit-button:hover {
+  background-color: #2980b9;
 }
 </style>
