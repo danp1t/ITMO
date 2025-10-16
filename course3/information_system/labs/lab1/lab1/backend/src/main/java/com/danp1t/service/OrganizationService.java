@@ -32,20 +32,19 @@ public class OrganizationService {
         }
     }
 
-    public Organization getOrganizationById(Long id) {
+    public Organization getOrganizationById(Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
 
         try {
-            Organization organization = organizationRepository.findById(id);
-            return organization;
+            return organizationRepository.findById(id);
         } catch (Exception e) {
             throw new RuntimeException("Failed to retrieve organization: " + e.getMessage(), e);
         }
     }
 
-    public boolean deleteOrganization(Long id) {
+    public boolean deleteOrganization(Integer id) {
         if (id == null) {
             throw new IllegalArgumentException("ID cannot be null");
         }
@@ -63,7 +62,7 @@ public class OrganizationService {
         }
     }
 
-    public Organization updateOrganization(Long id, OrganizationDTO updateDto) {
+    public Organization updateOrganization(Integer id, OrganizationDTO updateDto) {
         Organization existingOrganization = organizationRepository.findById(id);
 
         if (updateDto.getName() != null) {

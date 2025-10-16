@@ -27,7 +27,7 @@ public class DeleteEntity {
 
     @DELETE
     @Path("/organization/{id}")
-    public Response deleteOrganization(@PathParam("id") Long id) {
+    public Response deleteOrganization(@PathParam("id") Integer id) {
         try {
             boolean deleted = organizationService.deleteOrganization(id);
 

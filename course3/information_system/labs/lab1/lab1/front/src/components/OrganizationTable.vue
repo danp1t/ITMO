@@ -41,7 +41,8 @@
           <option value="COMMERCIAL">COMMERCIAL</option>
           <option value="GOVERNMENT">GOVERNMENT</option>
           <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
-          <option value="OPEN_JOINT_STOCK_COMPANY">OPEN_JOINT_STOCK_COMPANY</option>
+          <option value="PUBLIC">PUBLIC</option>
+          <option value="TRUST">TRUST</option>
         </select>
 
         <button class="clear-filters-btn" @click="clearFilters">
@@ -192,7 +193,8 @@
                 <option value="COMMERCIAL">COMMERCIAL</option>
                 <option value="GOVERNMENT">GOVERNMENT</option>
                 <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
-                <option value="OPEN_JOINT_STOCK_COMPANY">OPEN_JOINT_STOCK_COMPANY</option>
+                <option value="PUBLIC">PUBLIC</option>
+                <option value="TRUST">TRUST</option>
               </select>
             </td>
             <td>
@@ -648,15 +650,9 @@ export default {
     },
 
     async deleteOrganization(id) {
-      if (confirm('Вы уверены, что хотите удалить эту организацию?')) {
-        try {
           await this.$axios.delete(`/api/delete/organization/${id}`)
           this.showNotification('Организация успешно удалена', 'success')
           await this.loadOrganizations()
-        } catch (error) {
-          this.showNotification('Ошибка при удалении организации', 'error')
-        }
-      }
     },
 
     onOrganizationCreated() {
@@ -691,7 +687,9 @@ export default {
         'COMMERCIAL': 'type-commercial',
         'GOVERNMENT': 'type-government',
         'PRIVATE_LIMITED_COMPANY': 'type-private',
-        'OPEN_JOINT_STOCK_COMPANY': 'type-open'
+        'PUBLIC': 'type-public',
+        'TRUST': 'type-trust',
+
       }
       return typeMap[type] || 'type-default'
     },
@@ -1024,21 +1022,6 @@ export default {
   font-size: 12px;
 }
 
-.rating-high {
-  background: #d4edda;
-  color: #155724;
-}
-
-.rating-medium {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.rating-low {
-  background: #f8d7da;
-  color: #721c24;
-}
-
 .type-badge {
   padding: 6px 12px;
   border-radius: 20px;
@@ -1063,9 +1046,14 @@ export default {
   color: #2e7d32;
 }
 
-.type-open {
+.type-trust {
   background: #fff3e0;
   color: #ef6c00;
+}
+
+.type-public {
+  background: #bfcdea;
+  color: #424242;
 }
 
 .type-default {

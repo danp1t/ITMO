@@ -70,7 +70,7 @@ public class OrganizationRepository {
         }
     }
 
-    public Organization findById(Long id) {
+    public Organization findById(Integer id) {
         try (Session session = sessionFactory.openSession()) {
             Organization organization = session.createQuery(
                             "SELECT o FROM Organization o " +

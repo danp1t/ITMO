@@ -113,17 +113,20 @@ public class UpdateEntity {
 
     @PUT
     @Path("/organization/{id}")
-    public Response updateOrganization(@PathParam("id") Long id, @Valid OrganizationDTO organizationUpdateDto) {
+    public Response updateOrganization(@PathParam("id") Integer id, @Valid OrganizationDTO organizationUpdateDto) {
         try {
             Organization updatedOrganization = organizationService.updateOrganization(id, organizationUpdateDto);
 
             if (updatedOrganization == null) {
                 return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Organization not found with id: " + id)
+                        .entity("{\"error\": \"Organization not found with id: " + id + "\"}")
                         .build();
             }
 
-            return Response.ok(updatedOrganization).build();
+            // Преобразуем в OrganizationSearchDTO
+            OrganizationSearchDTO responseDto = convertToOrganizationSearchDTO(updatedOrganization);
+
+            return Response.ok(responseDto).build();
 
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.BAD_REQUEST)
@@ -134,5 +137,44 @@ public class UpdateEntity {
                     .entity("{\"error\": \"Ошибка при обновлении организации: " + e.getMessage() + "\"}")
                     .build();
         }
+    }
+
+    // Метод для преобразования Organization в OrganizationSearchDTO
+    private OrganizationSearchDTO convertToOrganizationSearchDTO(Organization organization) {
+        OrganizationSearchDTO dto = new OrganizationSearchDTO();
+        dto.setId(organization.getId());
+        dto.setName(organization.getName());
+
+        // Преобразование annualTurnover (BigDecimal → Float)
+        if (organization.getAnnualTurnover() != null) {
+            dto.setAnnualTurnover(organization.getAnnualTurnover().floatValue());
+        }
+
+        // Преобразование employeesCount (Integer → Long)
+        if (organization.getEmployeesCount() != null) {
+            dto.setEmployeesCount(organization.getEmployeesCount().longValue());
+        }
+
+        // Преобразование rating (Double → Integer)
+        if (organization.getRating() != null) {
+            dto.setRating(organization.getRating().intValue());
+        }
+
+        dto.setType(organization.getType());
+
+        // Получаем ID связанных сущностей вместо полных объектов
+        if (organization.getCoordinates() != null) {
+            dto.setCoordinates(organization.getCoordinates().getId());
+        }
+
+        if (organization.getOfficialAddress() != null) {
+            dto.setOfficialAddress(organization.getOfficialAddress().getId());
+        }
+
+        if (organization.getPostalAddress() != null) {
+            dto.setPostalAddress(organization.getPostalAddress().getId());
+        }
+
+        return dto;
     }
 }
