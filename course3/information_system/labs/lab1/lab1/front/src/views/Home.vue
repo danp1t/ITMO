@@ -7,7 +7,8 @@ import SpecialOperations from '@/components/SpecialOperations.vue'
 export default {
   components: {
     OrganizationsTable,
-    SpecialOperations
+    SpecialOperations,
+    Header
   },
   data() {
     return {
@@ -18,6 +19,7 @@ export default {
 </script>
 
 <template>
+  <Header />
   <div>
     <nav class="main-nav">
       <button

@@ -5,7 +5,6 @@
     </div>
 
     <div class="operations-grid">
-      <!-- Операция 1: Средний рейтинг -->
       <div class="operation-card">
         <h3>Средний рейтинг организаций</h3>
         <p>Рассчитать среднее значение поля rating для всех объектов</p>
@@ -17,7 +16,6 @@
         </div>
       </div>
 
-      <!-- Операция 2: Поиск по имени -->
       <div class="operation-card">
         <h3>Поиск по названию</h3>
         <p>Вернуть массив объектов, значение поля name которых начинается с заданной подстроки</p>
@@ -36,13 +34,15 @@
           <h4>Найдено организаций: {{ nameSearchResults.length }}</h4>
           <ul class="results-list">
             <li v-for="org in nameSearchResults" :key="org.id" class="result-item">
-              {{ org.name }} (ID: {{ org.id }})
+              {{ org.name }} (ID: {{ org.id }}, Рейтинг: {{ org.rating }})
             </li>
           </ul>
         </div>
+        <div v-else-if="nameSearchPerformed && !loadingNameSearch" class="no-results">
+          Организации не найдены
+        </div>
       </div>
 
-      <!-- Операция 3: Фильтр по адресу -->
       <div class="operation-card">
         <h3>Фильтр по почтовому адресу</h3>
         <p>Вернуть массив объектов, значение поля postalAddress которых больше заданного</p>
@@ -52,6 +52,7 @@
             type="number"
             placeholder="Введите минимальный ID адреса..."
             class="search-input"
+            min="0"
           >
           <button class="operation-btn" @click="filterByAddress" :disabled="loadingAddressFilter">
             {{ loadingAddressFilter ? 'Фильтрация...' : 'Фильтровать' }}
@@ -61,13 +62,15 @@
           <h4>Найдено организаций: {{ addressFilterResults.length }}</h4>
           <ul class="results-list">
             <li v-for="org in addressFilterResults" :key="org.id" class="result-item">
-              {{ org.name }} (Адрес ID: {{ org.postalAddress }})
+              {{ org.name }} (Адрес ID: {{ org.postalAddress }}, ID организации: {{ org.id }})
             </li>
           </ul>
         </div>
+        <div v-else-if="addressFilterPerformed && !loadingAddressFilter" class="no-results">
+          Организации не найдены
+        </div>
       </div>
 
-      <!-- Операция 4: Объединение организаций -->
       <div class="operation-card wide-card">
         <h3>Объединение организаций</h3>
         <p>Объединить организации, создав новую и зачислив в неё всех сотрудников двух исходных</p>
@@ -75,19 +78,19 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Первая организация (ID):</label>
-            <input v-model.number="mergeData.firstOrgId" type="number" class="form-input">
+            <input v-model.number="mergeData.firstOrgId" type="number" class="form-input" min="1">
           </div>
           <div class="form-group">
             <label>Вторая организация (ID):</label>
-            <input v-model.number="mergeData.secondOrgId" type="number" class="form-input">
+            <input v-model.number="mergeData.secondOrgId" type="number" class="form-input" min="1">
           </div>
           <div class="form-group">
             <label>Название новой организации:</label>
-            <input v-model="mergeData.newName" type="text" class="form-input">
+            <input v-model="mergeData.newName" type="text" class="form-input" placeholder="Введите название">
           </div>
           <div class="form-group">
             <label>Адрес новой организации (ID):</label>
-            <input v-model.number="mergeData.newAddressId" type="number" class="form-input">
+            <input v-model.number="mergeData.newAddressId" type="number" class="form-input" min="1">
           </div>
         </div>
 
@@ -100,7 +103,6 @@
         </div>
       </div>
 
-      <!-- Операция 5: Поглощение организации -->
       <div class="operation-card wide-card">
         <h3>Поглощение организации</h3>
         <p>Поглотить одну организацию другой без увольнения сотрудников</p>
@@ -108,11 +110,11 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Поглощающая организация (ID):</label>
-            <input v-model.number="absorbData.absorbingOrgId" type="number" class="form-input">
+            <input v-model.number="absorbData.absorbingOrgId" type="number" class="form-input" min="1">
           </div>
           <div class="form-group">
             <label>Поглощаемая организация (ID):</label>
-            <input v-model.number="absorbData.absorbedOrgId" type="number" class="form-input">
+            <input v-model.number="absorbData.absorbedOrgId" type="number" class="form-input" min="1">
           </div>
         </div>
 
@@ -137,21 +139,19 @@ export default {
   name: 'SpecialOperations',
   data() {
     return {
-      // Операция 1: Средний рейтинг
       averageRating: null,
       loadingAvgRating: false,
 
-      // Операция 2: Поиск по имени
       nameSearch: '',
       nameSearchResults: [],
       loadingNameSearch: false,
+      nameSearchPerformed: false,
 
-      // Операция 3: Фильтр по адресу
       addressFilter: '',
       addressFilterResults: [],
       loadingAddressFilter: false,
+      addressFilterPerformed: false,
 
-      // Операция 4: Объединение
       mergeData: {
         firstOrgId: '',
         secondOrgId: '',
@@ -161,7 +161,6 @@ export default {
       mergeResult: '',
       loadingMerge: false,
 
-      // Операция 5: Поглощение
       absorbData: {
         absorbingOrgId: '',
         absorbedOrgId: ''
@@ -169,7 +168,6 @@ export default {
       absorbResult: '',
       loadingAbsorb: false,
 
-      // Уведомления
       notification: {
         show: false,
         message: '',
@@ -178,22 +176,21 @@ export default {
     }
   },
   methods: {
-    // Операция 1: Расчет среднего рейтинга
     async calculateAverageRating() {
       this.loadingAvgRating = true
       try {
         const response = await this.$axios.post('/api/special/avg-rating')
         this.averageRating = response.data.averageRating
-        this.showNotification('Средний рейтинг успешно рассчитан', 'success')
+        this.showNotification(response.data.message || 'Средний рейтинг успешно рассчитан', 'success')
       } catch (error) {
-        console.error('Ошибка при расчете среднего рейтинга:', error)
-        this.showNotification('Ошибка при расчете среднего рейтинга', 'error')
+        const errorMessage = error.response?.data?.error || 'Ошибка при расчете среднего рейтинга'
+        this.showNotification(errorMessage, 'error')
+        this.averageRating = null
       } finally {
         this.loadingAvgRating = false
       }
     },
 
-    // Операция 2: Поиск по имени
     async searchByName() {
       if (!this.nameSearch.trim()) {
         this.showNotification('Введите подстроку для поиска', 'error')
@@ -201,47 +198,56 @@ export default {
       }
 
       this.loadingNameSearch = true
+      this.nameSearchPerformed = true
       try {
         const response = await this.$axios.post('/api/special/search-by-name', {
           substring: this.nameSearch
         })
-        this.nameSearchResults = response.data
-        this.showNotification(`Найдено ${response.data.length} организаций`, 'success')
+        this.nameSearchResults = response.data.organizations || []
+        const count = response.data.count || this.nameSearchResults.length
+        this.showNotification(response.data.message || `Найдено ${count} организаций`, 'success')
       } catch (error) {
-        console.error('Ошибка при поиске по имени:', error)
-        this.showNotification('Ошибка при поиске по имени', 'error')
+        const errorMessage = error.response?.data?.error || 'Ошибка при поиске по имени'
+        this.showNotification(errorMessage, 'error')
+        this.nameSearchResults = []
       } finally {
         this.loadingNameSearch = false
       }
     },
 
-    // Операция 3: Фильтр по адресу
     async filterByAddress() {
-      if (!this.addressFilter) {
-        this.showNotification('Введите значение для фильтрации', 'error')
+      if (!this.addressFilter || this.addressFilter < 0) {
+        this.showNotification('Введите корректное значение для фильтрации (положительное число)', 'error')
         return
       }
 
       this.loadingAddressFilter = true
+      this.addressFilterPerformed = true
       try {
         const response = await this.$axios.post('/api/special/filter-by-address', {
           minAddressId: this.addressFilter
         })
-        this.addressFilterResults = response.data
-        this.showNotification(`Найдено ${response.data.length} организаций`, 'success')
+        this.addressFilterResults = response.data.organizations || []
+        const count = response.data.count || this.addressFilterResults.length
+        this.showNotification(response.data.message || `Найдено ${count} организаций`, 'success')
       } catch (error) {
-        console.error('Ошибка при фильтрации по адресу:', error)
-        this.showNotification('Ошибка при фильтрации по адресу', 'error')
+        const errorMessage = error.response?.data?.error || 'Ошибка при фильтрации по адресу'
+        this.showNotification(errorMessage, 'error')
+        this.addressFilterResults = []
       } finally {
         this.loadingAddressFilter = false
       }
     },
 
-    // Операция 4: Объединение организаций
     async mergeOrganizations() {
       if (!this.mergeData.firstOrgId || !this.mergeData.secondOrgId ||
-          !this.mergeData.newName || !this.mergeData.newAddressId) {
+          !this.mergeData.newName?.trim() || !this.mergeData.newAddressId) {
         this.showNotification('Заполните все поля для объединения', 'error')
+        return
+      }
+
+      if (this.mergeData.firstOrgId === this.mergeData.secondOrgId) {
+        this.showNotification('Нельзя объединить организацию саму с собой', 'error')
         return
       }
 
@@ -251,26 +257,34 @@ export default {
         this.mergeResult = response.data.message
         this.showNotification('Организации успешно объединены', 'success')
 
-        // Очистка формы
         this.mergeData = {
           firstOrgId: '',
           secondOrgId: '',
           newName: '',
           newAddressId: ''
         }
+
+        this.nameSearchResults = []
+        this.addressFilterResults = []
+        this.nameSearchPerformed = false
+        this.addressFilterPerformed = false
       } catch (error) {
-        console.error('Ошибка при объединении организаций:', error)
-        this.mergeResult = 'Ошибка при объединении организаций'
-        this.showNotification('Ошибка при объединении организаций', 'error')
+        const errorMessage = error.response?.data?.error || 'Ошибка при объединении организаций'
+        this.mergeResult = errorMessage
+        this.showNotification(errorMessage, 'error')
       } finally {
         this.loadingMerge = false
       }
     },
 
-    // Операция 5: Поглощение организации
     async absorbOrganization() {
       if (!this.absorbData.absorbingOrgId || !this.absorbData.absorbedOrgId) {
         this.showNotification('Заполните ID обеих организаций', 'error')
+        return
+      }
+
+      if (this.absorbData.absorbingOrgId === this.absorbData.absorbedOrgId) {
+        this.showNotification('Нельзя поглотить организацию саму себя', 'error')
         return
       }
 
@@ -280,15 +294,19 @@ export default {
         this.absorbResult = response.data.message
         this.showNotification('Организация успешно поглощена', 'success')
 
-        // Очистка формы
         this.absorbData = {
           absorbingOrgId: '',
           absorbedOrgId: ''
         }
+
+        this.nameSearchResults = []
+        this.addressFilterResults = []
+        this.nameSearchPerformed = false
+        this.addressFilterPerformed = false
       } catch (error) {
-        console.error('Ошибка при поглощении организации:', error)
-        this.absorbResult = 'Ошибка при поглощении организации'
-        this.showNotification('Ошибка при поглощении организации', 'error')
+        const errorMessage = error.response?.data?.error || 'Ошибка при поглощении организации'
+        this.absorbResult = errorMessage
+        this.showNotification(errorMessage, 'error')
       } finally {
         this.loadingAbsorb = false
       }
@@ -443,6 +461,16 @@ export default {
   border-radius: 8px;
   border-left: 4px solid #28a745;
   margin-top: 15px;
+}
+
+.no-results {
+  background: #fff3cd;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #ffc107;
+  margin-top: 15px;
+  color: #856404;
+  text-align: center;
 }
 
 .results-list {

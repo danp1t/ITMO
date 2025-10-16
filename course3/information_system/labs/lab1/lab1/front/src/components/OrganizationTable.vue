@@ -428,7 +428,6 @@ export default {
         this.currentPage = 1 // Сброс на первую страницу при загрузке
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
-        console.error('Ошибка загрузки организаций:', error)
         this.organizations = []
         this.filteredOrganizations = []
         this.showNotification('Ошибка загрузки организаций', 'error')
@@ -566,7 +565,6 @@ export default {
 
         this.showNotification('Данные организации успешно обновлены', 'success')
       } catch (error) {
-        console.error('Ошибка обновления организации:', error)
         this.showNotification('Ошибка при обновлении данных организации', 'error')
       }
     },
@@ -620,7 +618,6 @@ export default {
             endpoint = `/api/get/location/${entityId}`
             break
           default:
-            console.error('Unknown entity type:', type)
             return
         }
 
@@ -629,10 +626,8 @@ export default {
         this.currentChildEntityType = type
         this.isEditMode = editMode
 
-        console.log(`Загружены данные для ${type}:`, this.currentChildEntity)
 
       } catch (error) {
-        console.error(`Ошибка загрузки ${type}:`, error)
         this.showNotification(`Ошибка загрузки ${this.getChildEntityTitle}`, 'error')
         this.closeChildEntityModal()
       } finally {
@@ -659,7 +654,6 @@ export default {
           this.showNotification('Организация успешно удалена', 'success')
           await this.loadOrganizations()
         } catch (error) {
-          console.error('Ошибка удаления организации:', error)
           this.showNotification('Ошибка при удалении организации', 'error')
         }
       }

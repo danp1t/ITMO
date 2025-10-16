@@ -142,7 +142,6 @@ export default {
   components: { BaseForm, EntitySelector },
   data() {
     return {
-      // Используем markRaw для предотвращения ненужной реактивности
       addressForm: markRaw(AddressForm),
       locationForm: markRaw(LocationForm),
       coordinatesForm: markRaw(CoordinatesForm),
@@ -279,7 +278,6 @@ export default {
   },
   methods: {
     onCoordinatesSelected(coordinates) {
-      console.log('Выбраны координаты:', coordinates)
       this.formData.coordinates = coordinates
       this.errors.coordinates = ''
       this.$forceUpdate()
@@ -292,7 +290,6 @@ export default {
     },
 
     onOfficialAddressSelected(location) {
-      console.log('Выбрана локация (официальный адрес):', location)
       this.formData.officialAddress = location
       this.errors.officialAddress = ''
       this.$forceUpdate()
@@ -305,7 +302,6 @@ export default {
     },
 
     onPostalAddressSelected(address) {
-      console.log('Выбран почтовый адрес:', address)
       this.formData.postalAddress = address
       this.errors.postalAddress = ''
       this.$forceUpdate()
@@ -356,14 +352,6 @@ export default {
     },
 
     async onSubmit(formData) {
-      console.log('onSubmit вызван, данные формы:', formData)
-      console.log('Дополнительные данные:', this.formData)
-
-      if (!this.validateForm()) {
-        console.log('Валидация не пройдена, ошибки:', this.errors)
-        alert('Ошибка валидации: Пожалуйста, заполните все обязательные поля')
-        return
-      }
 
       const dataToSend = {
         ...formData,
@@ -373,21 +361,17 @@ export default {
         type: this.formData.type
       }
 
-      console.log('Данные для отправки:', dataToSend)
 
       try {
 
         const response = await this.$axios?.post('/api/create/organization', dataToSend)
-        console.log('Успешный ответ:', response)
         this.$emit('submitted', { response, data: dataToSend })
       } catch (error) {
-        console.error('Ошибка при отправке:', error)
         this.$emit('error', error)
       }
     },
 
     onSubmitted({ response }) {
-      console.log('Форма успешно отправлена, ответ:', response)
       if (this.$router) {
         this.$router.push('/success')
       }

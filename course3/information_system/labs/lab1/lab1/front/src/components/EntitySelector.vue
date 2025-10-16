@@ -129,7 +129,6 @@ export default {
         const response = await this.$axios.get(endpoint)
         this.entities = response.data
       } catch (error) {
-        console.error(`Ошибка загрузки ${this.entityType}:`, error)
         this.entities = []
       } finally {
         this.loading = false
@@ -170,7 +169,6 @@ export default {
     },
 
     async onNewEntityCreated({ response }) {
-  try {
     const newEntity = response?.data
 
     if (newEntity && newEntity.id) {
@@ -182,9 +180,7 @@ export default {
     }
 
     this.showSelector = false
-  } catch (error) {
-    console.error('Ошибка при обработке созданной сущности:', error)
-  }
+
 },
 
     clearSelection() {
