@@ -168,19 +168,26 @@ export default {
       this.$emit('update:modelValue', entity)
     },
 
-    async onNewEntityCreated({ response }) {
-    const newEntity = response?.data
+    async onNewEntityCreated(event) {
+  let newEntity;
 
-    if (newEntity && newEntity.id) {
-      this.selectedEntity = newEntity
-      this.$emit('selected', newEntity)
-      this.$emit('update:modelValue', newEntity)
+  if (event && event.response) {
+    newEntity = event.response.data;
+  } else if (event && event.data) {
+    newEntity = event.data;
+  } else {
+    newEntity = event;
+  }
 
-      await this.loadEntities()
-    }
+  if (newEntity && newEntity.id) {
+    this.selectedEntity = newEntity;
+    this.$emit('selected', newEntity);
+    this.$emit('update:modelValue', newEntity);
 
-    this.showSelector = false
+    await this.loadEntities();
+  }
 
+  this.showSelector = false;
 },
 
     clearSelection() {
