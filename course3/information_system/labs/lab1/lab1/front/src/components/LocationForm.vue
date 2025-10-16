@@ -27,7 +27,6 @@
     </table>
   </div>
 
-  <!-- Кастомная форма, если BaseForm не поддерживает initial-data -->
   <form v-else @submit.prevent="submitForm" class="custom-form">
     <h3>{{ isEditMode ? 'Редактирование локации' : 'Создание локации' }}</h3>
 
@@ -156,7 +155,6 @@ export default {
       this.errors = {}
       let isValid = true
 
-      // Проверка X
       if (!this.formData.x && this.formData.x !== 0) {
         this.errors.x = 'Ввод координаты X обязателен'
         isValid = false
@@ -165,7 +163,6 @@ export default {
         isValid = false
       }
 
-      // Проверка Y
       if (!this.formData.y && this.formData.y !== 0) {
         this.errors.y = 'Ввод координаты Y обязателен'
         isValid = false
@@ -174,13 +171,11 @@ export default {
         isValid = false
       }
 
-      // Проверка Z
       if (this.formData.z && !/^(|0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.z.toString())) {
         this.errors.z = 'Координата Z должна быть вещественным числом'
         isValid = false
       }
 
-      // Проверка названия
       if (!this.formData.name) {
         this.errors.name = 'Ввод названия локации обязателен'
         isValid = false

@@ -188,22 +188,6 @@ export default {
         this.isSubmitting = false
       }
     },
-
-    getFormData() {
-      return { ...this.formData }
-    },
-
-    validateAll() {
-      this.fieldsConfig.forEach(field => this.validateField(field.name))
-      return !this.hasErrors
-    },
-
-    resetForm() {
-      this.fieldsConfig.forEach(field => {
-        this.formData[field.name] = field.defaultValue || ''
-        this.errors[field.name] = ''
-      })
-    }
   },
   watch: {
     formData: {

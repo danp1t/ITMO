@@ -14,7 +14,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно выбора -->
     <div v-if="showSelector" class="modal-overlay" @click="showSelector = false">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -23,7 +22,6 @@
         </div>
 
         <div class="modal-body">
-          <!-- Список существующих сущностей -->
           <div class="entities-list">
             <div v-if="loading" class="loading">Загрузка...</div>
             <div v-else-if="entities.length === 0" class="no-entities">
@@ -41,7 +39,6 @@
             </div>
           </div>
 
-          <!-- Или создать новую -->
           <div class="create-new-section">
             <h4>Или создайте новую</h4>
             <component

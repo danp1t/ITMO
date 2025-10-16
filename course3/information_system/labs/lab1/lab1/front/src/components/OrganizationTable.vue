@@ -7,7 +7,6 @@
       </button>
     </div>
 
-    <!-- Панель фильтров и сортировки -->
     <div class="filters-panel">
       <div class="search-section">
         <div class="search-input-wrapper">
@@ -51,7 +50,6 @@
       </div>
     </div>
 
-    <!-- Информация о фильтрации -->
     <div v-if="isFiltered" class="filter-info">
       <span>Найдено организаций: {{ filteredOrganizations.length }}</span>
       <button class="clear-filters-small" @click="clearFilters">
@@ -221,7 +219,6 @@
         </tbody>
       </table>
 
-      <!-- Сообщение, если ничего не найдено -->
       <div v-if="filteredOrganizations.length === 0" class="no-results">
         <p>Организации не найдены</p>
         <button v-if="isFiltered" class="clear-filters-btn" @click="clearFilters">
@@ -230,7 +227,6 @@
       </div>
     </div>
 
-    <!-- Остальные модальные окна остаются без изменений -->
     <div v-if="showCreateForm" class="modal-overlay" @click="showCreateForm = false">
       <div class="modal-content large-modal" @click.stop>
         <div class="modal-header">
@@ -246,7 +242,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно просмотра/редактирования дочерней сущности -->
     <div v-if="showChildEntityModal" class="modal-overlay" @click="closeChildEntityModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -278,7 +273,6 @@
       </div>
     </div>
 
-    <!-- Уведомления -->
     <div v-if="notification.show" class="notification" :class="notification.type">
       {{ notification.message }}
     </div>
@@ -350,7 +344,6 @@ export default {
       try {
         this.showNotification('Загрузка организаций...', 'info')
         const response = await this.$axios.get('/api/get/organization')
-        // Добавляем флаг редактирования и копию данных для каждой организации
         this.organizations = response.data.map(org => ({
           ...org,
           editing: false,
@@ -369,7 +362,6 @@ export default {
     applyFilters() {
       let filtered = [...this.organizations]
 
-      // Фильтрация по поисковому запросу (неполное совпадение по названию)
       if (this.filters.search) {
         const searchLower = this.filters.search.toLowerCase()
         filtered = filtered.filter(org =>
@@ -377,7 +369,6 @@ export default {
         )
       }
 
-      // Фильтрация по типу
       if (this.filters.type) {
         filtered = filtered.filter(org => org.type === this.filters.type)
       }
@@ -395,7 +386,6 @@ export default {
         let aValue = a[this.filters.sortBy]
         let bValue = b[this.filters.sortBy]
 
-        // Приведение к нижнему регистру для строковых сравнений
         if (typeof aValue === 'string') {
           aValue = aValue.toLowerCase()
           bValue = bValue.toLowerCase()
@@ -405,7 +395,6 @@ export default {
         if (aValue < bValue) result = -1
         if (aValue > bValue) result = 1
 
-        // Инвертирование результата для сортировки по убыванию
         if (this.filters.sortOrder === 'desc') {
           result = -result
         }
@@ -416,10 +405,8 @@ export default {
 
     toggleSort(field) {
       if (this.filters.sortBy === field) {
-        // Если уже сортируем по этому полю, меняем порядок
         this.filters.sortOrder = this.filters.sortOrder === 'asc' ? 'desc' : 'asc'
       } else {
-        // Если сортируем по новому полю, устанавливаем его и порядок по возрастанию
         this.filters.sortBy = field
         this.filters.sortOrder = 'asc'
       }
@@ -437,16 +424,13 @@ export default {
     },
 
     startEditing(org) {
-      // Выходим из режима редактирования для всех других организаций
       this.organizations.forEach(o => {
         if (o.id !== org.id) {
           o.editing = false
         }
       })
 
-      // Входим в режим редактирования для выбранной организации
       org.editing = true
-      // Создаем копию данных для редактирования
       org.editingData = {
         name: org.name,
         annualTurnover: org.annualTurnover,
@@ -463,12 +447,10 @@ export default {
 
     async saveOrganization(org) {
       try {
-        // Валидация данных
         if (!this.validateOrganizationData(org.editingData)) {
           return
         }
 
-        // Подготавливаем данные для отправки
         const updateData = {
           name: org.editingData.name,
           annualTurnover: org.editingData.annualTurnover,
@@ -477,10 +459,8 @@ export default {
           type: org.editingData.type
         }
 
-        // Отправляем запрос на обновление
         await this.$axios.put(`/api/update/organization/${org.id}`, updateData)
 
-        // Обновляем данные в исходном массиве
         const originalOrg = this.organizations.find(o => o.id === org.id)
         if (originalOrg) {
           originalOrg.name = org.editingData.name
@@ -493,7 +473,6 @@ export default {
         org.editing = false
         org.editingData = {}
 
-        // Переприменяем фильтры после обновления
         this.applyFilters()
 
         this.showNotification('Данные организации успешно обновлены', 'success')
@@ -504,25 +483,21 @@ export default {
     },
 
     validateOrganizationData(data) {
-      // Проверка названия
       if (!data.name || data.name.trim() === '') {
         this.showNotification('Название организации не может быть пустым', 'error')
         return false
       }
 
-      // Проверка годового оборота
       if (data.annualTurnover < 0) {
         this.showNotification('Годовой оборот не может быть отрицательным', 'error')
         return false
       }
 
-      // Проверка количества сотрудников
       if (data.employeesCount < 0) {
         this.showNotification('Количество сотрудников не может быть отрицательным', 'error')
         return false
       }
 
-      // Проверка рейтинга
       if (data.rating < 0) {
         this.showNotification('Рейтинг должен быть больше 0', 'error')
         return false
@@ -694,7 +669,6 @@ export default {
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
 }
 
-/* Стили для панели фильтров */
 .filters-panel {
   background: white;
   padding: 20px;
@@ -780,7 +754,6 @@ export default {
   transform: translateY(-1px);
 }
 
-/* Информация о фильтрации */
 .filter-info {
   display: flex;
   justify-content: space-between;

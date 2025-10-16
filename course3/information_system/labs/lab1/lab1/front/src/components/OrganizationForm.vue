@@ -238,7 +238,6 @@ export default {
   computed: {
     coordinatesDisplay() {
       if (!this.formData.coordinates) return ''
-      // Используем оригинальный объект из Proxy если нужно
       const target = this.formData.coordinates?.['[[Target]]'] || this.formData.coordinates
       const x = target.x !== undefined ? target.x : 'не указано'
       const y = target.y !== undefined ? target.y : 'не указано'
@@ -246,7 +245,6 @@ export default {
     },
     officialAddressDisplay() {
       if (!this.formData.officialAddress) return ''
-      // Используем оригинальный объект из Proxy если нужно
       const target = this.formData.officialAddress?.['[[Target]]'] || this.formData.officialAddress
 
       if (target.name) {
@@ -259,7 +257,6 @@ export default {
     },
     postalAddressDisplay() {
       if (!this.formData.postalAddress) return ''
-      // Используем оригинальный объект из Proxy если нужно
       const target = this.formData.postalAddress?.['[[Target]]'] || this.formData.postalAddress
       const street = target.street || 'не указано'
       const zipCode = target.zipCode || 'не указано'
@@ -283,10 +280,9 @@ export default {
   methods: {
     onCoordinatesSelected(coordinates) {
       console.log('Выбраны координаты:', coordinates)
-      // Принудительно обновляем данные
       this.formData.coordinates = coordinates
       this.errors.coordinates = ''
-      this.$forceUpdate() // Принудительное обновление представления
+      this.$forceUpdate()
     },
 
     onCoordinatesCleared() {
@@ -365,7 +361,6 @@ export default {
 
       if (!this.validateForm()) {
         console.log('Валидация не пройдена, ошибки:', this.errors)
-        // Используем правильный метод для показа alert
         alert('Ошибка валидации: Пожалуйста, заполните все обязательные поля')
         return
       }
@@ -402,7 +397,6 @@ export default {
 </script>
 
 <style scoped>
-/* Стили остаются без изменений */
 .organization-form-wrapper {
   max-width: 900px;
   margin: 0 auto;
@@ -547,7 +541,6 @@ export default {
   }
 }
 
-/* Анимации */
 .entity-group {
   animation: fadeInUp 0.5s ease-out;
 }
@@ -563,7 +556,6 @@ export default {
   }
 }
 
-/* Стили для BaseForm контейнера */
 :deep(.organization-form.form-container) {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;

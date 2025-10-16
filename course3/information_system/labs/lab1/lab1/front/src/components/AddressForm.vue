@@ -19,7 +19,6 @@
     </table>
   </div>
 
-  <!-- Кастомная форма для гарантированного заполнения -->
   <form v-else @submit.prevent="submitForm" class="custom-form">
     <h3>{{ isEditMode ? 'Редактирование адреса' : 'Создание адреса' }}</h3>
 
@@ -120,7 +119,6 @@ export default {
       this.errors = {}
       let isValid = true
 
-      // Проверка улицы
       if (!this.formData.street) {
         this.errors.street = 'Ввод улицы обязателен'
         isValid = false
@@ -132,7 +130,6 @@ export default {
         isValid = false
       }
 
-      // Проверка почтового индекса
       if (!this.formData.zipCode) {
         this.errors.zipCode = 'Ввод почтового индекса обязателен'
         isValid = false
