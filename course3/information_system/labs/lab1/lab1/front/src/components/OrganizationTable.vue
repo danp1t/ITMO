@@ -109,7 +109,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="org in filteredOrganizations" :key="org.id">
+          <tr v-for="org in paginatedOrganizations" :key="org.id">
             <td>{{ org.id }}</td>
             <td>
               <span v-if="!org.editing">{{ org.name }}</span>
@@ -225,6 +225,47 @@
           Сбросить фильтры
         </button>
       </div>
+
+      <!-- Пагинация -->
+      <div v-if="filteredOrganizations.length > 0" class="pagination">
+        <div class="pagination-info">
+          Показано {{ startItem }}-{{ endItem }} из {{ filteredOrganizations.length }}
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="pagination-btn"
+            :disabled="currentPage === 1"
+            @click="changePage(currentPage - 1)"
+          >
+            ‹
+          </button>
+
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            class="pagination-btn"
+            :class="{ active: page === currentPage }"
+            @click="changePage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            class="pagination-btn"
+            :disabled="currentPage === totalPages"
+            @click="changePage(currentPage + 1)"
+          >
+            ›
+          </button>
+        </div>
+        <div class="pagination-size">
+          <select v-model="itemsPerPage" class="page-size-select" @change="changePageSize">
+            <option value="10">10 на странице</option>
+            <option value="25">25 на странице</option>
+            <option value="50">50 на странице</option>
+          </select>
+        </div>
+      </div>
     </div>
 
     <div v-if="showCreateForm" class="modal-overlay" @click="showCreateForm = false">
@@ -312,7 +353,10 @@ export default {
       },
       addressForm: markRaw(AddressForm),
       coordinatesForm: markRaw(CoordinatesForm),
-      locationForm: markRaw(LocationForm)
+      locationForm: markRaw(LocationForm),
+      // Пагинация
+      currentPage: 1,
+      itemsPerPage: 10
     }
   },
   computed: {
@@ -334,6 +378,37 @@ export default {
     },
     isFiltered() {
       return this.filters.search || this.filters.type || this.filters.sortBy
+    },
+    // Вычисляемые свойства для пагинации
+    totalPages() {
+      return Math.ceil(this.filteredOrganizations.length / this.itemsPerPage)
+    },
+    startItem() {
+      return (this.currentPage - 1) * this.itemsPerPage + 1
+    },
+    endItem() {
+      const end = this.currentPage * this.itemsPerPage
+      return end > this.filteredOrganizations.length ? this.filteredOrganizations.length : end
+    },
+    paginatedOrganizations() {
+      const startIndex = (this.currentPage - 1) * this.itemsPerPage
+      const endIndex = startIndex + this.itemsPerPage
+      return this.filteredOrganizations.slice(startIndex, endIndex)
+    },
+    visiblePages() {
+      const pages = []
+      const total = this.totalPages
+      let start = Math.max(1, this.currentPage - 2)
+      let end = Math.min(total, start + 4)
+
+      if (end - start < 4) {
+        start = Math.max(1, end - 4)
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i)
+      }
+      return pages
     }
   },
   mounted() {
@@ -350,6 +425,7 @@ export default {
           editingData: {}
         }))
         this.filteredOrganizations = [...this.organizations]
+        this.currentPage = 1 // Сброс на первую страницу при загрузке
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
         console.error('Ошибка загрузки организаций:', error)
@@ -374,6 +450,7 @@ export default {
       }
 
       this.filteredOrganizations = filtered
+      this.currentPage = 1 // Сброс на первую страницу при применении фильтров
       this.applySorting()
     },
 
@@ -421,6 +498,18 @@ export default {
         sortOrder: 'asc'
       }
       this.filteredOrganizations = [...this.organizations]
+      this.currentPage = 1 // Сброс на первую страницу при сбросе фильтров
+    },
+
+    // Методы пагинации
+    changePage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page
+      }
+    },
+
+    changePageSize() {
+      this.currentPage = 1 // Сброс на первую страницу при изменении размера страницы
     },
 
     startEditing(org) {
@@ -1001,6 +1090,85 @@ export default {
   font-size: 16px;
 }
 
+/* Пагинация */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.pagination-info {
+  color: #6c757d;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #007bff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: #e7f1ff;
+  border-color: #007bff;
+  transform: translateY(-1px);
+}
+
+.pagination-btn.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+  color: #6c757d;
+  cursor: not-allowed;
+  background: #f8f9fa;
+}
+
+.pagination-size {
+  display: flex;
+  align-items: center;
+}
+
+.page-size-select {
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-size-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1194,6 +1362,24 @@ export default {
     width: 100%;
   }
 
+  .pagination {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .pagination-controls {
+    order: 1;
+  }
+
+  .pagination-info {
+    order: 2;
+  }
+
+  .pagination-size {
+    order: 3;
+  }
+
   .modal-content {
     width: 95%;
     margin: 10px;
@@ -1227,6 +1413,11 @@ export default {
     right: 10px;
     left: 10px;
     text-align: center;
+  }
+
+  .pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 }
 </style>
