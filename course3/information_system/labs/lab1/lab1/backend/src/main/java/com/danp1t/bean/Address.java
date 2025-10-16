@@ -3,20 +3,11 @@ package com.danp1t.bean;
 import com.danp1t.error.NotNullError;
 import com.danp1t.error.StringTooLongError;
 import com.danp1t.interfaces.NeedValidate;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "address")
 public class Address implements NeedValidate {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "street")
     private String street;
-
-    @Column(name = "zip_code")
     private String zipCode;
 
     public Address() {}

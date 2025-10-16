@@ -1,69 +1,124 @@
 package com.danp1t.repository;
 
 import com.danp1t.bean.Address;
-import com.danp1t.bean.Coordinates;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import java.util.List;
 
 @ApplicationScoped
 public class AddressRepository {
 
     @Inject
-    private EntityManager entityManager;
+    private SessionFactory sessionFactory;
 
     public Address save(Address address) {
-        EntityTransaction transaction = entityManager.getTransaction();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            transaction.begin();
-            entityManager.persist(address);
+            transaction = session.beginTransaction();
+            session.persist(address);
             transaction.commit();
+
             return address;
         } catch (Exception e) {
-            if (transaction.isActive()) {
+            e.printStackTrace();
+
+            if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error saving address", e);
+            throw new RuntimeException("Error saving address: " + e.getMessage(), e);
+        } finally {
+            session.close();
         }
     }
 
     public Address findById(Long id) {
-        return entityManager.find(Address.class, id);
+
+        try (Session session = sessionFactory.openSession()) {
+            Address address = session.get(Address.class, id);
+            return address;
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding address: " + e.getMessage(), e);
+        }
     }
 
     public List<Address> findAll() {
-        return entityManager.createQuery("SELECT c FROM Address c", Address.class)
-                .getResultList();
+
+        try (Session session = sessionFactory.openSession()) {
+            List<Address> addresses = session.createQuery("FROM Address", Address.class).list();
+            return addresses;
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding all addresses: " + e.getMessage(), e);
+        }
     }
 
     public Address update(Address address) {
-        EntityTransaction transaction = entityManager.getTransaction();
+
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            transaction.begin();
-            Address mergedAddress = entityManager.merge(address);
+            transaction = session.beginTransaction();
+            Address mergedAddress = session.merge(address);
             transaction.commit();
+
             return mergedAddress;
         } catch (Exception e) {
-            if (transaction.isActive()) {
+            e.printStackTrace();
+
+            if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error updating address", e);
+            throw new RuntimeException("Error updating address: " + e.getMessage(), e);
+        } finally {
+            session.close();
         }
     }
 
     public void delete(Address address) {
-        EntityTransaction transaction = entityManager.getTransaction();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            transaction.begin();
-            entityManager.remove(entityManager.contains(address) ? address : entityManager.merge(address));
+            transaction = session.beginTransaction();
+            Address attachedAddress = session.contains(address)
+                    ? address
+                    : session.merge(address);
+            session.remove(attachedAddress);
+
             transaction.commit();
         } catch (Exception e) {
-            if (transaction.isActive()) {
+            e.printStackTrace();
+
+            if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error deleting address", e);
+            throw new RuntimeException("Error deleting address: " + e.getMessage(), e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void deleteById(Long id) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            Address address = session.get(Address.class, id);
+            if (address != null) {
+                session.remove(address);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Error deleting address by ID: " + e.getMessage(), e);
+        } finally {
+            session.close();
         }
     }
 }

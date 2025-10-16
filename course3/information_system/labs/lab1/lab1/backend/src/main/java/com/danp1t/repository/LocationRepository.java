@@ -1,68 +1,104 @@
 package com.danp1t.repository;
 
 import com.danp1t.bean.Location;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import java.util.List;
 
 @ApplicationScoped
 public class LocationRepository {
 
     @Inject
-    private EntityManager entityManager;
+    private SessionFactory sessionFactory;
 
     public Location save(Location location) {
-        EntityTransaction transaction = entityManager.getTransaction();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            transaction.begin();
-            entityManager.persist(location);
+            transaction = session.beginTransaction();
+            session.persist(location);
             transaction.commit();
             return location;
         } catch (Exception e) {
-            if (transaction.isActive()) {
+            if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
             throw new RuntimeException("Error saving location", e);
+        } finally {
+            session.close();
         }
     }
 
     public Location findById(Long id) {
-        return entityManager.find(Location.class, id);
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(Location.class, id);
+        }
     }
 
     public List<Location> findAll() {
-        return entityManager.createQuery("SELECT c FROM Location c", Location.class)
-                .getResultList();
+        try (Session session = sessionFactory.openSession()) {
+            return session.createQuery("FROM Location", Location.class).list();
+        }
     }
 
     public Location update(Location location) {
-        EntityTransaction transaction = entityManager.getTransaction();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            transaction.begin();
-            Location mergedLocation = entityManager.merge(location);
+            transaction = session.beginTransaction();
+            Location mergedLocation = session.merge(location);
             transaction.commit();
             return mergedLocation;
         } catch (Exception e) {
-            if (transaction.isActive()) {
+            if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
             throw new RuntimeException("Error updating location", e);
+        } finally {
+            session.close();
         }
     }
 
     public void delete(Location location) {
-        EntityTransaction transaction = entityManager.getTransaction();
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
         try {
-            transaction.begin();
-            entityManager.remove(entityManager.contains(location) ? location : entityManager.merge(location));
+            transaction = session.beginTransaction();
+            Location attachedLocation = session.contains(location)
+                    ? location
+                    : session.merge(location);
+            session.remove(attachedLocation);
             transaction.commit();
         } catch (Exception e) {
-            if (transaction.isActive()) {
+            if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
             throw new RuntimeException("Error deleting location", e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public void deleteById(Long id) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+            Location location = session.get(Location.class, id);
+            if (location != null) {
+                session.remove(location);
+            }
+            transaction.commit();
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Error deleting location by id", e);
+        } finally {
+            session.close();
         }
     }
 }

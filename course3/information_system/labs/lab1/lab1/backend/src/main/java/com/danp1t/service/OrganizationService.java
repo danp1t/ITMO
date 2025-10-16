@@ -14,36 +14,58 @@ public class OrganizationService {
     private OrganizationRepository organizationRepository;
 
     public Organization createOrganization(Organization organization) {
-        organization.validate();
 
-        return organizationRepository.save(organization);
+        try {
+            organization.validate();
+
+            return organizationRepository.save(organization);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create organization: " + e.getMessage(), e);
+        }
     }
 
     public List<Organization> getAllOrganizations() {
-        return organizationRepository.findAll();
+        try {
+            return organizationRepository.findAll();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve organizations: " + e.getMessage(), e);
+        }
     }
 
     public Organization getOrganizationById(Long id) {
-        return organizationRepository.findById(id);
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null");
+        }
+
+        try {
+            Organization organization = organizationRepository.findById(id);
+            return organization;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve organization: " + e.getMessage(), e);
+        }
     }
 
     public boolean deleteOrganization(Long id) {
-        Organization organization = organizationRepository.findById(id);
-        if (organization != null) {
-            organizationRepository.delete(organization);
-            return true;
+        if (id == null) {
+            throw new IllegalArgumentException("ID cannot be null");
         }
-        return false;
+
+        try {
+            Organization organization = organizationRepository.findById(id);
+            if (organization != null) {
+                organizationRepository.delete(organization);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete organization: " + e.getMessage(), e);
+        }
     }
 
     public Organization updateOrganization(Long id, OrganizationDTO updateDto) {
-        // Находим существующую организацию
         Organization existingOrganization = organizationRepository.findById(id);
-        if (existingOrganization == null) {
-            return null;
-        }
 
-        // Обновляем только те поля, которые пришли в DTO
         if (updateDto.getName() != null) {
             existingOrganization.setName(updateDto.getName());
         }
@@ -59,10 +81,22 @@ public class OrganizationService {
         if (updateDto.getType() != null) {
             existingOrganization.setType(updateDto.getType());
         }
-
-        // Валидируем организацию после обновления
         existingOrganization.validate();
 
-        return organizationRepository.update(existingOrganization);
+        try {
+            return organizationRepository.update(existingOrganization);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update organization: " + e.getMessage(), e);
+        }
+    }
+
+    public Organization updateOrganization(Organization organization) {
+        organization.validate();
+
+        try {
+            return organizationRepository.update(organization);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update organization: " + e.getMessage(), e);
+        }
     }
 }

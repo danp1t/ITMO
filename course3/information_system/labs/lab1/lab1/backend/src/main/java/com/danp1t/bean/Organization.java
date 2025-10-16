@@ -4,45 +4,19 @@ import com.danp1t.error.NotNullError;
 import com.danp1t.error.StringNotEmptyError;
 import com.danp1t.error.ValueTooSmallError;
 import com.danp1t.interfaces.NeedValidate;
-import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@Entity
-@Table(name = "organization")
 public class Organization implements NeedValidate {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id; //Уникальное. Генерируется автоматически
-
-    @Column(nullable = false)
+    private Integer id;
     private String name;
-
-    @ManyToOne
     private Coordinates coordinates;
-
-    @Column(name = "creation_date", nullable = false)
     private java.time.LocalDate creationDate;
-
-    @ManyToOne
-    @JoinColumn(name = "official_address_id", nullable = false)
     private Location officialAddress;
-
-    @Column(name = "annual_turnover", nullable = false)
-    private float annualTurnover;
-
-    @Column(name = "employees_count", nullable = false)
-    private long employeesCount;
-
-    @Column(nullable = false)
-    private int rating;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    private Float annualTurnover;
+    private Long employeesCount;
+    private Integer rating;
     private OrganizationType type;
-
-    @ManyToOne
-    @JoinColumn(name = "postal_address_id", nullable = false)
     private Address postalAddress;
 
     public Organization() {
@@ -50,7 +24,7 @@ public class Organization implements NeedValidate {
     }
 
     public Organization(String name, Coordinates coordinates, Location officialAddress,
-                        float annualTurnover, long employeesCount, int rating,
+                        Float annualTurnover, Long employeesCount, Integer rating,
                         OrganizationType type, Address postalAddress) {
         this();
         this.name = name;
@@ -78,13 +52,13 @@ public class Organization implements NeedValidate {
     public Location getOfficialAddress() {
         return officialAddress;
     }
-    public float getAnnualTurnover() {
+    public Float getAnnualTurnover() {
         return annualTurnover;
     }
-    public long getEmployeesCount() {
+    public Long getEmployeesCount() {
         return employeesCount;
     }
-    public int getRating() {
+    public Integer getRating() {
         return rating;
     }
     public OrganizationType getType(){return type;}
@@ -108,13 +82,13 @@ public class Organization implements NeedValidate {
     public void setOfficialAddress(Location officialAddress) {
         this.officialAddress = officialAddress;
     }
-    public void setAnnualTurnover(float annualTurnover) {
+    public void setAnnualTurnover(Float annualTurnover) {
         this.annualTurnover = annualTurnover;
     }
-    public void setEmployeesCount(long employeesCount) {
+    public void setEmployeesCount(Long employeesCount) {
         this.employeesCount = employeesCount;
     }
-    public void setRating(int rating) {
+    public void setRating(Integer rating) {
         this.rating = rating;
     }
     public void setType(OrganizationType type){this.type = type;}

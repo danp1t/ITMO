@@ -3,36 +3,27 @@ package com.danp1t.bean;
 import com.danp1t.error.NotNullError;
 import com.danp1t.error.ValueTooSmallError;
 import com.danp1t.interfaces.NeedValidate;
-import jakarta.persistence.*;
 
-@Entity
-@Table(name = "coordinates")
 public class Coordinates implements NeedValidate {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "x_coordinate")
     private Float x;
-
-    @Column(name = "y_coordinate")
-    private double y;
+    private Double y;
 
     public Coordinates() {}
 
-    public Coordinates(Float x, double y) {
+    public Coordinates(Float x, Double y) {
         this.x = x;
         this.y = y;
     }
 
     public Long getId() {return id;}
     public Float getX() {return x;}
-    public double getY() {return y;}
+    public Double getY() {return y;}
 
     public void setId(Long id) {this.id = id;}
     public void setX(Float x) {this.x = x;}
-    public void setY(double y) {this.y = y;}
+    public void setY(Double y) {this.y = y;}
 
     @Override
     public void validate() {

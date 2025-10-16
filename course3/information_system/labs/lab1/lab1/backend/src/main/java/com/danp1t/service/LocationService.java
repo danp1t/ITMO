@@ -4,7 +4,6 @@ import com.danp1t.bean.Location;
 import com.danp1t.repository.LocationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import java.util.List;
 
 @ApplicationScoped
@@ -44,5 +43,14 @@ public class LocationService {
             return true;
         }
         return false;
+    }
+
+    public boolean deleteLocationById(Long id) {
+        try {
+            locationRepository.deleteById(id);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

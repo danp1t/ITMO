@@ -12,10 +12,10 @@ public class OrganizationDTO {
     private String name;
 
     @Min(value = 0, message = "Annual turnover must be positive")
-    private Long annualTurnover;
+    private Float annualTurnover;
 
     @Min(value = 0, message = "Employees count must be positive")
-    private Integer employeesCount;
+    private Long employeesCount;
 
     @Min(value = 0, message = "Rating must be positive")
     private Integer rating;
@@ -26,7 +26,7 @@ public class OrganizationDTO {
     // Конструкторы
     public OrganizationDTO() {}
 
-    public OrganizationDTO(String name, Long annualTurnover, Integer employeesCount, int rating, OrganizationType type) {
+    public OrganizationDTO(String name, Float annualTurnover, Long employeesCount, Integer rating, OrganizationType type) {
         this.name = name;
         this.annualTurnover = annualTurnover;
         this.employeesCount = employeesCount;
@@ -34,15 +34,14 @@ public class OrganizationDTO {
         this.type = type;
     }
 
-    // Геттеры и сеттеры
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public Long getAnnualTurnover() { return annualTurnover; }
-    public void setAnnualTurnover(Long annualTurnover) { this.annualTurnover = annualTurnover; }
+    public Float getAnnualTurnover() { return annualTurnover; }
+    public void setAnnualTurnover(Float annualTurnover) { this.annualTurnover = annualTurnover; }
 
-    public Integer getEmployeesCount() { return employeesCount; }
-    public void setEmployeesCount(Integer employeesCount) { this.employeesCount = employeesCount; }
+    public Long getEmployeesCount() { return employeesCount; }
+    public void setEmployeesCount(Long employeesCount) { this.employeesCount = employeesCount; }
 
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
