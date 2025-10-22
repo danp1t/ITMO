@@ -17,7 +17,6 @@
             class="search-input"
             @input="applyFilters"
           >
-          <span class="search-icon">🔍</span>
         </div>
       </div>
 
@@ -229,16 +228,16 @@
       </div>
 
       <!-- Пагинация -->
-      <div v-if="filteredOrganizations.length > 0" class="pagination">
+      <div v-if="showPagination" class="pagination">
         <div class="pagination-info">
-          Показано {{ startItem }}-{{ endItem }} из {{ filteredOrganizations.length }}
+        Показано {{ startItem }}-{{ endItem }} из {{ filteredOrganizations.length }}
         </div>
         <div class="pagination-controls">
           <button
             class="pagination-btn"
             :disabled="currentPage === 1"
             @click="changePage(currentPage - 1)"
-          >
+            >
             ‹
           </button>
 
@@ -249,7 +248,7 @@
             :class="{ active: page === currentPage }"
             @click="changePage(page)"
           >
-            {{ page }}
+          {{ page }}
           </button>
 
           <button
@@ -257,17 +256,16 @@
             :disabled="currentPage === totalPages"
             @click="changePage(currentPage + 1)"
           >
-            ›
           </button>
-        </div>
-        <div class="pagination-size">
-          <select v-model="itemsPerPage" class="page-size-select" @change="changePageSize">
-            <option value="10">10 на странице</option>
-            <option value="25">25 на странице</option>
-            <option value="50">50 на странице</option>
-          </select>
-        </div>
       </div>
+      <div class="pagination-size">
+        <select v-model="itemsPerPage" class="page-size-select" @change="changePageSize">
+          <option value="10">10 на странице</option>
+          <option value="25">25 на странице</option>
+          <option value="50">50 на странице</option>
+        </select>
+      </div>
+    </div>
     </div>
 
     <div v-if="showCreateForm" class="modal-overlay" @click="showCreateForm = false">
@@ -369,6 +367,9 @@ export default {
         case 'location': return this.locationForm
         default: return null
       }
+    },
+    showPagination() {
+      return this.filteredOrganizations.length > this.itemsPerPage
     },
     getChildEntityTitle() {
       switch (this.currentChildEntityType) {
