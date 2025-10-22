@@ -8,6 +8,7 @@
         container-class="organization-form"
         @submitted="onSubmitted"
         @submit="onSubmit"
+        :key="formKey"
     >
       <template #before-fields>
         <div class="form-section-header">
@@ -161,6 +162,8 @@ export default {
         postalAddress: '',
         type: ''
       },
+      isSubmitting: false,
+      formKey: 0,
       fieldsConfig: [
         {
           name: 'name',
@@ -176,30 +179,36 @@ export default {
           name: 'annualTurnover',
           label: 'Годовой оборот',
           type: 'text',
+          required: true,
           pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
           placeholder: 'Введите годовой оборот',
           errorMessages: {
-            pattern: 'Годовой оборот должен быть положительным числом'
+            pattern: 'Годовой оборот должен быть положительным числом',
+            required: 'Годовой оборот обязательно для заполнения'
           }
         },
         {
           name: 'employeesCount',
           label: 'Количество сотрудников',
           type: 'text',
+          required: true,
           pattern: /\d+/,
           placeholder: 'Введите количество сотрудников',
           errorMessages: {
-            pattern: 'Количество сотрудников должно быть целым числом'
+            pattern: 'Количество сотрудников должно быть целым числом',
+            required: 'Количество сотрудников обязательно для заполнения'
           }
         },
         {
           name: 'rating',
           label: 'Рейтинг организации',
           type: 'text',
+          required: true,
           pattern: /\d+/,
           placeholder: 'Введите рейтинг',
           errorMessages: {
-            pattern: 'Рейтинг должен быть целым числом'
+            pattern: 'Рейтинг должен быть целым числом',
+            required: 'Рейтинг обязателен для заполнения'
           }
         },
       ],
@@ -280,37 +289,31 @@ export default {
     onCoordinatesSelected(coordinates) {
       this.formData.coordinates = coordinates
       this.errors.coordinates = ''
-      this.$forceUpdate()
     },
 
     onCoordinatesCleared() {
       this.formData.coordinates = null
       this.errors.coordinates = 'Необходимо выбрать координаты'
-      this.$forceUpdate()
     },
 
     onOfficialAddressSelected(location) {
       this.formData.officialAddress = location
       this.errors.officialAddress = ''
-      this.$forceUpdate()
     },
 
     onOfficialAddressCleared() {
       this.formData.officialAddress = null
       this.errors.officialAddress = 'Необходимо выбрать официальный адрес'
-      this.$forceUpdate()
     },
 
     onPostalAddressSelected(address) {
       this.formData.postalAddress = address
       this.errors.postalAddress = ''
-      this.$forceUpdate()
     },
 
     onPostalAddressCleared() {
       this.formData.postalAddress = null
       this.errors.postalAddress = 'Необходимо выбрать почтовый адрес'
-      this.$forceUpdate()
     },
 
     onTypeChange() {
@@ -352,6 +355,17 @@ export default {
     },
 
     async onSubmit(formData) {
+      // Предотвращаем множественные отправки
+      if (this.isSubmitting) {
+        return
+      }
+
+      // Валидация дополнительных полей
+      if (!this.validateForm()) {
+        return
+      }
+
+      this.isSubmitting = true
 
       const dataToSend = {
         ...formData,
@@ -361,14 +375,43 @@ export default {
         type: this.formData.type
       }
 
-
       try {
-
         const response = await this.$axios?.post('/api/create/organization', dataToSend)
         this.$emit('submitted', { response, data: dataToSend })
+
+        // Сбрасываем форму после успешной отправки
+        this.resetForm()
       } catch (error) {
+        console.error('Ошибка при создании организации:', error)
         this.$emit('error', error)
+      } finally {
+        this.isSubmitting = false
       }
+    },
+
+    resetForm() {
+      // Сбрасываем данные формы
+      this.formData = {
+        name: '',
+        annualTurnover: '',
+        employeesCount: '',
+        rating: '',
+        coordinates: null,
+        officialAddress: null,
+        postalAddress: null,
+        type: ''
+      }
+
+      // Сбрасываем ошибки
+      this.errors = {
+        coordinates: '',
+        officialAddress: '',
+        postalAddress: '',
+        type: ''
+      }
+
+      // Принудительно обновляем ключ формы для сброса BaseForm
+      this.formKey++
     },
 
     onSubmitted({ response }) {
@@ -381,6 +424,7 @@ export default {
 </script>
 
 <style scoped>
+/* Стили остаются без изменений */
 .organization-form-wrapper {
   max-width: 900px;
   margin: 0 auto;
@@ -603,5 +647,11 @@ export default {
 :deep(.organization-form .submit-btn:hover:not(:disabled)) {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+:deep(.organization-form .submit-btn:disabled) {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

@@ -3,12 +3,12 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
     vueDevTools(),
   ],
+  base: '/lab1/',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -16,8 +16,8 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': {  // Теперь используем /api как префикс
-        target: 'http://localhost:8080/lab1-1.0-SNAPSHOT',
+      '/api': {
+        target: 'http://localhost:20041/lab1/api/',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }

@@ -261,6 +261,9 @@
     <Declaration>
         <NamedIndividual IRI="#marriage_victor_marina"/>
     </Declaration>
+    <Declaration>
+        <NamedIndividual IRI="#4232"/>
+    </Declaration>
     <SubClassOf>
         <Class IRI="#Birth"/>
         <Class IRI="#Event"/>
@@ -564,6 +567,10 @@
     <ClassAssertion>
         <Class IRI="#Marriage"/>
         <NamedIndividual IRI="#marriage_victor_marina"/>
+    </ClassAssertion>
+    <ClassAssertion>
+        <Class IRI="#Male"/>
+        <NamedIndividual IRI="#4232"/>
     </ClassAssertion>
     <ObjectPropertyAssertion>
         <ObjectProperty IRI="#hasParent"/>

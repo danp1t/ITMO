@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const app = createApp(App);
 
-axios.defaults.baseURL = 'http://localhost:8080/lab1-1.0-SNAPSHOT'
+axios.defaults.baseURL = 'http://localhost:20041/lab1/api/'
 app.config.globalProperties.$axios = axios;
 
 app.use(router).mount('#app');

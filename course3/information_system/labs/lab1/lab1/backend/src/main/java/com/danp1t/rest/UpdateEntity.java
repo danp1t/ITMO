@@ -123,9 +123,7 @@ public class UpdateEntity {
                         .build();
             }
 
-            // Преобразуем в OrganizationSearchDTO
             OrganizationSearchDTO responseDto = convertToOrganizationSearchDTO(updatedOrganization);
-
             return Response.ok(responseDto).build();
 
         } catch (IllegalArgumentException e) {
@@ -139,30 +137,25 @@ public class UpdateEntity {
         }
     }
 
-    // Метод для преобразования Organization в OrganizationSearchDTO
     private OrganizationSearchDTO convertToOrganizationSearchDTO(Organization organization) {
         OrganizationSearchDTO dto = new OrganizationSearchDTO();
         dto.setId(organization.getId());
         dto.setName(organization.getName());
 
-        // Преобразование annualTurnover (BigDecimal → Float)
         if (organization.getAnnualTurnover() != null) {
             dto.setAnnualTurnover(organization.getAnnualTurnover().floatValue());
         }
 
-        // Преобразование employeesCount (Integer → Long)
         if (organization.getEmployeesCount() != null) {
             dto.setEmployeesCount(organization.getEmployeesCount().longValue());
         }
 
-        // Преобразование rating (Double → Integer)
         if (organization.getRating() != null) {
             dto.setRating(organization.getRating().intValue());
         }
 
         dto.setType(organization.getType());
 
-        // Получаем ID связанных сущностей вместо полных объектов
         if (organization.getCoordinates() != null) {
             dto.setCoordinates(organization.getCoordinates().getId());
         }

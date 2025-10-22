@@ -186,7 +186,6 @@ public class SpecialOperationsResource {
         private String newName;
         private Long newAddressId;
 
-        // Геттеры и сеттеры
         public Long getFirstOrgId() { return firstOrgId; }
         public void setFirstOrgId(Long firstOrgId) { this.firstOrgId = firstOrgId; }
 

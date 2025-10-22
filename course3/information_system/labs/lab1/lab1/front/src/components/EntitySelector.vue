@@ -178,7 +178,6 @@ export default {
   } else {
     newEntity = event;
   }
-
   if (newEntity && newEntity.id) {
     this.selectedEntity = newEntity;
     this.$emit('selected', newEntity);

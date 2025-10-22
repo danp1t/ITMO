@@ -136,7 +136,6 @@ public class GetEntities {
         }
     }
 
-    // Добавьте в класс GetEntities
     @GET
     @Path("/organization")
     public Response getOrganizations() {

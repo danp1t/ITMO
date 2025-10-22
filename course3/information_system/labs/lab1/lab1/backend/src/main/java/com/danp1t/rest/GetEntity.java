@@ -20,6 +20,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
 
+
 @Path("/get")
 @Produces(MediaType.APPLICATION_JSON)
 public class GetEntity {
@@ -89,6 +90,7 @@ public class GetEntity {
                         .entity("Location not found with id: " + id)
                         .build();
             }
+
 
             return Response.ok(location).build();
 

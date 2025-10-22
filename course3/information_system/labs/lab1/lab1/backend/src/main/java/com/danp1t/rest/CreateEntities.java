@@ -64,7 +64,7 @@ public class CreateEntities {
             Location savedLocation = locationService.createLocation(location);
 
             String jsonResponse = String.format(
-                    "{\"id\": %d, \"x\": %s, \"y\": %s, \"z\": %s, \"name\": %s}",
+                    "{\"id\": %d, \"x\": \"%s\", \"y\": \"%s\", \"z\": \"%s\", \"name\": \"%s\"}",
                     savedLocation.getId(),
                     savedLocation.getX(),
                     savedLocation.getY(),
@@ -93,7 +93,7 @@ public class CreateEntities {
             Address savedAddress = addressService.createAddress(address);
 
             String jsonResponse = String.format(
-                    "{\"id\": %d, \"street\": %s, \"zipCode\": %s}",
+                    "{\"id\": %d, \"street\": \"%s\", \"zipCode\": \"%s\"}",
                     savedAddress.getId(),
                     savedAddress.getStreet(),
                     savedAddress.getZipCode()
