@@ -11,6 +11,7 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+import com.danp1t.websocket.OrganizationsWebSocket;
 
 @Path("/update")
 public class UpdateEntity {
@@ -124,6 +125,7 @@ public class UpdateEntity {
             }
 
             OrganizationSearchDTO responseDto = convertToOrganizationSearchDTO(updatedOrganization);
+            OrganizationsWebSocket.notifyTableUpdate();
             return Response.ok(responseDto).build();
 
         } catch (IllegalArgumentException e) {

@@ -338,6 +338,7 @@ export default {
       showChildEntityModal: false,
       currentChildEntity: null,
       currentChildEntityType: '',
+      websocket: null,
       isEditMode: false,
       loadingChildEntity: false,
       notification: {
@@ -415,9 +416,39 @@ export default {
     }
   },
   mounted() {
-    this.loadOrganizations()
+    this.loadOrganizations();
+    this.initWebSocket();
   },
   methods: {
+    initWebSocket() {
+      const wsUrl = `ws://localhost:20042/backend_lab1/websocket/organizations`;
+
+      try {
+        this.websocket = new WebSocket(wsUrl);
+
+        this.websocket.onmessage = (event) => {
+          if (event.data === 'refresh_table') {
+            console.log('Table refresh requested via WebSocket');
+            this.loadOrganizations();
+          }
+        };
+
+        this.websocket.onclose = () => {
+          setTimeout(() => {
+            this.initWebSocket();
+          }, 5000);
+        };
+
+      } catch (error) {
+        console.error('WebSocket initialization failed:', error);
+      }
+    },
+
+    beforeUnmount() {
+      if (this.websocket) {
+        this.websocket.close();
+      }
+    },
     async loadOrganizations() {
       try {
         this.showNotification('Загрузка организаций...', 'info')

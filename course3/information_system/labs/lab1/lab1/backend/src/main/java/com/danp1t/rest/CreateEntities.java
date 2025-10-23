@@ -14,6 +14,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import com.danp1t.websocket.OrganizationsWebSocket;
 
 @Path("/create")
 @Produces(MediaType.APPLICATION_JSON)
@@ -128,6 +129,7 @@ public class CreateEntities {
                     savedOrganization.getType()
             );
 
+            OrganizationsWebSocket.notifyTableUpdate();
             return Response.ok(jsonResponse).build();
 
         } catch (Exception e) {

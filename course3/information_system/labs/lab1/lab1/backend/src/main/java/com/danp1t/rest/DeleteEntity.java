@@ -9,6 +9,7 @@ import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+import com.danp1t.websocket.OrganizationsWebSocket;
 
 @Path("/delete")
 public class DeleteEntity {
@@ -37,6 +38,7 @@ public class DeleteEntity {
                         .build();
             }
 
+            OrganizationsWebSocket.notifyTableUpdate();
             return Response.ok()
                     .entity("{\"message\": \"Organization deleted successfully\"}")
                     .build();
