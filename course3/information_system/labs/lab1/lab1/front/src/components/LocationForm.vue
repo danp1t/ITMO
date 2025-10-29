@@ -136,7 +136,7 @@ export default {
       if (this.entity) {
         this.formData = {
           x: this.entity.x || '',
-          y: this.entity.y || null,
+          y: this.entity.y ?? null,
           z: this.entity.z || '',
           name: this.entity.name || ''
         }
@@ -151,20 +151,43 @@ export default {
       this.errors = {}
     },
 
+    prepareFormData() {
+      const data = {
+        x: parseFloat(this.formData.x),
+        z: parseFloat(this.formData.z),
+        name: this.formData.name.trim()
+      }
+
+      if (this.formData.y === '' || this.formData.y === null) {
+        data.y = null
+      } else {
+        data.y = parseFloat(this.formData.y)
+      }
+
+      return data
+    },
+
     validateForm() {
       this.errors = {}
       let isValid = true
 
-      if (!this.formData.x && this.formData.x !== 0) {
+     const x = parseFloat(this.formData.x)
+      if (isNaN(x)) {
         this.errors.x = 'Ввод координаты X обязателен'
-        isValid = false
-      } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.x.toString())) {
-        this.errors.x = 'Координата X должна быть вещественным числом'
         isValid = false
       }
 
-      if (this.formData.z && !/^(|0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.z.toString())) {
-        this.errors.z = 'Координата Z должна быть вещественным числом'
+      if (this.formData.y !== null && this.formData.y !== '') {
+        const y = parseFloat(this.formData.y)
+        if (isNaN(y)) {
+          this.errors.y = 'Координата Y должна быть числом'
+          isValid = false
+        }
+      }
+
+      const z = parseFloat(this.formData.z)
+      if (isNaN(z)) {
+        this.errors.z = 'Ввод координаты Z обязателен'
         isValid = false
       }
 
@@ -187,11 +210,13 @@ export default {
         return
       }
 
+      const dataToSend = this.prepareFormData()
+
       try {
         const config = {
           method: this.isEditMode ? 'put' : 'post',
           url: this.submitUrl,
-          data: this.formData
+          data: dataToSend
         }
 
         const response = await this.$axios(config)

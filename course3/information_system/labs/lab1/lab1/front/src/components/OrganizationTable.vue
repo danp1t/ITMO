@@ -126,9 +126,13 @@
                 v-else
                 v-model="org.editingData.name"
                 class="inline-input"
+                :class="{ 'error-input': org.editingErrors.name }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
               >
+              <div v-if="org.editing && org.editingErrors.name" class="field-error">
+                {{ org.editingErrors.name }}
+              </div>
             </td>
             <td>
               <span v-if="!org.editing">{{ formatCurrency(org.annualTurnover) }}</span>
@@ -137,9 +141,13 @@
                 v-model.number="org.editingData.annualTurnover"
                 type="number"
                 class="inline-input"
+                :class="{ 'error-input': org.editingErrors.annualTurnover }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
               >
+              <div v-if="org.editing && org.editingErrors.annualTurnover" class="field-error">
+                {{ org.editingErrors.annualTurnover }}
+              </div>
             </td>
             <td>
               <span v-if="!org.editing">{{ org.employeesCount }}</span>
@@ -153,6 +161,9 @@
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
               >
+              <div v-if="org.editing && org.editingErrors.employeesCount" class="field-error">
+                {{ org.editingErrors.employeesCount }}
+              </div>
             </td>
             <td>
               <span v-if="!org.editing" class="rating" :class="getRatingClass(org.rating)">
@@ -162,12 +173,14 @@
                 v-else
                 v-model.number="org.editingData.rating"
                 type="text"
-                pattern="^\d+$"
-                min="0"
                 class="inline-input"
+                :class="{ 'error-input': org.editingErrors.employeesCount }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
               >
+              <div v-if="org.editing && org.editingErrors.rating" class="field-error">
+                {{ org.editingErrors.rating }}
+              </div>
             </td>
             <td>
               {{ org.creationDate }}
@@ -544,6 +557,7 @@ export default {
       this.organizations.forEach(o => {
         if (o.id !== org.id) {
           o.editing = false
+          o.editingErrors = {}
         }
       })
 
@@ -555,28 +569,34 @@ export default {
         rating: org.rating,
         type: org.type
       }
+      org.editingErrors = {}
     },
 
     cancelEditing(org) {
       org.editing = false
       org.editingData = {}
+      org.editingErrors = {}
     },
 
     async saveOrganization(org) {
       try {
-        if (!this.validateOrganizationData(org.editingData)) {
-          return
-        }
-
+        const validationErrors = this.validateOrganizationData(org.editingData)
+        if (Object.keys(validationErrors).length > 0) {
+            org.editingErrors = validationErrors
+            this.showNotification('Исправьте ошибки в форме', 'error')
+            return
+         }
         const updateData = {
           name: org.editingData.name,
-          annualTurnover: org.editingData.annualTurnover,
-          employeesCount: org.editingData.employeesCount,
-          rating: org.editingData.rating,
+          annualTurnover: parseFloat(org.editingData.annualTurnover),
+          employeesCount: parseInt(org.editingData.employeesCount),
+          rating: parseInt(org.editingData.rating),
           type: org.editingData.type
         }
 
         await this.$axios.put(`/api/update/organization/${org.id}`, updateData)
+
+        org.editingErrors = {}
 
         const originalOrg = this.organizations.find(o => o.id === org.id)
         if (originalOrg) {
@@ -599,27 +619,26 @@ export default {
     },
 
     validateOrganizationData(data) {
+      const errors = {}
       if (!data.name || data.name.trim() === '') {
-        this.showNotification('Название организации не может быть пустым', 'error')
-        return false
+        errors.name = 'Название организации не может быть пустым'
       }
 
-      if (data.annualTurnover < 0) {
-        this.showNotification('Годовой оборот не может быть отрицательным', 'error')
-        return false
+      const annualTurnover = parseFloat(data.annualTurnover)
+      if (isNaN(annualTurnover) || annualTurnover <= 0) {
+          errors.annualTurnover = 'Годовой оборот должен быть положительным числом'
       }
 
-      if (data.employeesCount < 0) {
-        this.showNotification('Количество сотрудников не может быть отрицательным', 'error')
-        return false
+      const employeesCount = parseInt(data.employeesCount)
+      if (isNaN(employeesCount) || employeesCount <= 0) {
+        errors.employeesCount = 'Количество сотрудников должно быть целым положительным числом'
       }
 
-      if (data.rating < 0) {
-        this.showNotification('Рейтинг должен быть больше 0', 'error')
-        return false
+      const rating = parseInt(data.rating)
+      if (isNaN(rating) || rating <= 0) {
+        errors.rating = 'Рейтинг должен быть целым положительным числом'
       }
-
-      return true
+      return errors
     },
 
     async viewChildEntity(entityId, type) {
@@ -1037,9 +1056,6 @@ export default {
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-.inline-input[type="number"] {
-  text-align: right;
-}
 
 .rating {
   padding: 4px 8px;
@@ -1313,6 +1329,17 @@ export default {
   background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 }
 
+.inline-input.error-input {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.field-error {
+  color: #dc3545;
+  font-size: 11px;
+  margin-top: 4px;
+  font-weight: 500;
+}
 @keyframes slideIn {
   from {
     opacity: 0;
