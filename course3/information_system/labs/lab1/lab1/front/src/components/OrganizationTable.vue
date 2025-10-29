@@ -24,6 +24,7 @@
         <select v-model="filters.sortBy" class="filter-select" @change="applySorting">
           <option value="">Сортировка по...</option>
           <option value="name">Названию</option>
+          <option value="creationDate">Дата создания</option>
           <option value="annualTurnover">Годовому обороту</option>
           <option value="employeesCount">Количеству сотрудников</option>
           <option value="rating">Рейтингу</option>
@@ -94,6 +95,14 @@
                 </span>
               </div>
             </th>
+            <th>
+              <div class="sortable-header" @click="toggleSort('creationDate')">
+                Дата создания
+                <span v-if="filters.sortBy === 'creationDate'" class="sort-indicator">
+                  {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
+                </span>
+              </div>
+            </th>
             <th>Координаты</th>
             <th>Официальный адрес</th>
             <th>Почтовый адрес</th>
@@ -159,6 +168,9 @@
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
               >
+            </td>
+            <td>
+              {{ org.creationDate }}
             </td>
             <td
               class="clickable-cell"
@@ -227,7 +239,6 @@
         </button>
       </div>
 
-      <!-- Пагинация -->
       <div v-if="showPagination" class="pagination">
         <div class="pagination-info">
         Показано {{ startItem }}-{{ endItem }} из {{ filteredOrganizations.length }}
@@ -238,7 +249,6 @@
             :disabled="currentPage === 1"
             @click="changePage(currentPage - 1)"
             >
-            ‹
           </button>
 
           <button
@@ -257,13 +267,6 @@
             @click="changePage(currentPage + 1)"
           >
           </button>
-      </div>
-      <div class="pagination-size">
-        <select v-model="itemsPerPage" class="page-size-select" @change="changePageSize">
-          <option value="10">10 на странице</option>
-          <option value="25">25 на странице</option>
-          <option value="50">50 на странице</option>
-        </select>
       </div>
     </div>
     </div>
@@ -355,7 +358,6 @@ export default {
       addressForm: markRaw(AddressForm),
       coordinatesForm: markRaw(CoordinatesForm),
       locationForm: markRaw(LocationForm),
-      // Пагинация
       currentPage: 1,
       itemsPerPage: 10
     }
@@ -383,7 +385,6 @@ export default {
     isFiltered() {
       return this.filters.search || this.filters.type || this.filters.sortBy
     },
-    // Вычисляемые свойства для пагинации
     totalPages() {
       return Math.ceil(this.filteredOrganizations.length / this.itemsPerPage)
     },
@@ -459,7 +460,7 @@ export default {
           editingData: {}
         }))
         this.filteredOrganizations = [...this.organizations]
-        this.currentPage = 1 // Сброс на первую страницу при загрузке
+        this.currentPage = 1
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
         this.organizations = []
@@ -483,7 +484,7 @@ export default {
       }
 
       this.filteredOrganizations = filtered
-      this.currentPage = 1 // Сброс на первую страницу при применении фильтров
+      this.currentPage = 1
       this.applySorting()
     },
 
@@ -531,18 +532,13 @@ export default {
         sortOrder: 'asc'
       }
       this.filteredOrganizations = [...this.organizations]
-      this.currentPage = 1 // Сброс на первую страницу при сбросе фильтров
+      this.currentPage = 1
     },
 
-    // Методы пагинации
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page
       }
-    },
-
-    changePageSize() {
-      this.currentPage = 1 // Сброс на первую страницу при изменении размера страницы
     },
 
     startEditing(org) {
@@ -894,7 +890,6 @@ export default {
   color: white;
 }
 
-/* Сортируемые заголовки */
 .sortable-header {
   display: flex;
   align-items: center;
@@ -1104,7 +1099,6 @@ export default {
   font-size: 16px;
 }
 
-/* Пагинация */
 .pagination {
   display: flex;
   justify-content: space-between;
@@ -1331,7 +1325,6 @@ export default {
   }
 }
 
-/* Адаптивность */
 @media (max-width: 1400px) {
   .table-container {
     overflow-x: auto;

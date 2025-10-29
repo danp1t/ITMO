@@ -13,11 +13,11 @@
         </tr>
         <tr>
           <th>Координата Y</th>
-          <td>{{ entity.y }}</td>
+          <td>{{ entity.y || 'Не указано'}}</td>
         </tr>
         <tr>
           <th>Координата Z</th>
-          <td>{{ entity.z || 'Не указано' }}</td>
+          <td>{{ entity.z }}</td>
         </tr>
         <tr>
           <th>Название</th>
@@ -43,23 +43,23 @@
     </div>
 
     <div class="form-field">
-      <label for="y">Координата Y *</label>
+      <label for="y">Координата Y</label>
       <input
         id="y"
         v-model="formData.y"
         type="number"
-        required
         class="form-input"
       >
       <div v-if="errors.y" class="error-message">{{ errors.y }}</div>
     </div>
 
     <div class="form-field">
-      <label for="z">Координата Z</label>
+      <label for="z">Координата Z *</label>
       <input
         id="z"
         v-model="formData.z"
         type="number"
+        required
         class="form-input"
       >
       <div v-if="errors.z" class="error-message">{{ errors.z }}</div>
@@ -160,14 +160,6 @@ export default {
         isValid = false
       } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.x.toString())) {
         this.errors.x = 'Координата X должна быть вещественным числом'
-        isValid = false
-      }
-
-      if (!this.formData.y && this.formData.y !== 0) {
-        this.errors.y = 'Ввод координаты Y обязателен'
-        isValid = false
-      } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.y.toString())) {
-        this.errors.y = 'Координата Y должна быть вещественным числом'
         isValid = false
       }
 
