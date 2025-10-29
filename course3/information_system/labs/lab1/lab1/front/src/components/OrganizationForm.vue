@@ -178,21 +178,19 @@ export default {
         {
           name: 'annualTurnover',
           label: 'Годовой оборот',
-          type: 'text',
+          type: 'number',
           required: true,
-          pattern: /^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/,
           placeholder: 'Введите годовой оборот',
           errorMessages: {
-            pattern: 'Годовой оборот должен быть положительным числом',
             required: 'Годовой оборот обязательно для заполнения'
           }
         },
         {
           name: 'employeesCount',
           label: 'Количество сотрудников',
-          type: 'text',
+          type: 'number',
           required: true,
-          pattern: /\d+/,
+          pattern: /^\d+$/,
           placeholder: 'Введите количество сотрудников',
           errorMessages: {
             pattern: 'Количество сотрудников должно быть целым числом',
@@ -202,9 +200,9 @@ export default {
         {
           name: 'rating',
           label: 'Рейтинг организации',
-          type: 'text',
+          type: 'number',
           required: true,
-          pattern: /\d+/,
+          pattern: /^\d+$/,
           placeholder: 'Введите рейтинг',
           errorMessages: {
             pattern: 'Рейтинг должен быть целым числом',
@@ -402,7 +400,6 @@ export default {
         type: ''
       }
 
-      // Сбрасываем ошибки
       this.errors = {
         coordinates: '',
         officialAddress: '',
@@ -410,7 +407,6 @@ export default {
         type: ''
       }
 
-      // Принудительно обновляем ключ формы для сброса BaseForm
       this.formKey++
     },
 
@@ -424,7 +420,6 @@ export default {
 </script>
 
 <style scoped>
-/* Стили остаются без изменений */
 .organization-form-wrapper {
   max-width: 900px;
   margin: 0 auto;
@@ -497,13 +492,33 @@ export default {
 
 .type-selector {
   position: relative;
+  width: 100%;
 }
 
 .type-select {
   appearance: none;
   padding-right: 35px;
   background: white;
+  width: 100%;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px 15px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+  cursor: pointer;
 }
+
+.type-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  outline: none;
+}
+
+.type-select.error-input {
+  border-color: #e53e3e;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+ }
 
 .select-arrow {
   position: absolute;
@@ -512,6 +527,11 @@ export default {
   transform: translateY(-50%);
   pointer-events: none;
   color: #6c757d;
+  transition: transform 0.2s ease;
+}
+
+.type-select:focus + .select-arrow {
+  transform: translateY(-50%) rotate(180deg);
 }
 
 .selected-summary {

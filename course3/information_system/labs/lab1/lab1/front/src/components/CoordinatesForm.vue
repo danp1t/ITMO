@@ -13,7 +13,7 @@
       </tr>
       <tr>
         <th>Координата Y</th>
-        <td>{{ entity.y || 'Не указано' }}</td>
+        <td>{{ entity.y }}</td>
       </tr>
       </tbody>
     </table>
@@ -36,11 +36,12 @@
     </div>
 
     <div class="form-field">
-      <label for="y">Координата Y</label>
+      <label for="y">Координата Y *</label>
       <input
           id="y"
           v-model="formData.y"
           type="number"
+          required
           step="any"
           class="form-input"
       >
