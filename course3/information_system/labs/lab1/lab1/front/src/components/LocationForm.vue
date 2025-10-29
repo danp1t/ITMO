@@ -136,14 +136,14 @@ export default {
       if (this.entity) {
         this.formData = {
           x: this.entity.x || '',
-          y: this.entity.y || '',
+          y: this.entity.y || null,
           z: this.entity.z || '',
           name: this.entity.name || ''
         }
       } else {
         this.formData = {
           x: '',
-          y: '',
+          y: null,
           z: '',
           name: ''
         }

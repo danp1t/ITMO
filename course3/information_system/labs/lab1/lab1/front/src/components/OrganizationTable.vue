@@ -146,7 +146,8 @@
               <input
                 v-else
                 v-model.number="org.editingData.employeesCount"
-                type="number"
+                type="text"
+                pattern= "^\d+$"
                 min="0"
                 class="inline-input"
                 @keyup.enter="saveOrganization(org)"
@@ -160,10 +161,9 @@
               <input
                 v-else
                 v-model.number="org.editingData.rating"
-                type="number"
-                step="0.1"
+                type="text"
+                pattern="^\d+$"
                 min="0"
-                max="5"
                 class="inline-input"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
@@ -462,7 +462,6 @@ export default {
           editingData: {}
         }))
         this.filteredOrganizations = [...this.organizations]
-        this.currentPage = 1
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
         this.organizations = []
@@ -486,7 +485,6 @@ export default {
       }
 
       this.filteredOrganizations = filtered
-      this.currentPage = 1
       this.applySorting()
     },
 
@@ -534,7 +532,6 @@ export default {
         sortOrder: 'asc'
       }
       this.filteredOrganizations = [...this.organizations]
-      this.currentPage = 1
     },
 
     changePage(page) {
