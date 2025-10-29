@@ -24,7 +24,7 @@
         <select v-model="filters.sortBy" class="filter-select" @change="applySorting">
           <option value="">Сортировка по...</option>
           <option value="name">Названию</option>
-          <option value="creationDate">Дата создания</option>
+          <option value="creationDate">Дате создания</option>
           <option value="annualTurnover">Годовому обороту</option>
           <option value="employeesCount">Количеству сотрудников</option>
           <option value="rating">Рейтингу</option>
@@ -249,6 +249,7 @@
             :disabled="currentPage === 1"
             @click="changePage(currentPage - 1)"
             >
+            ‹
           </button>
 
           <button
@@ -266,6 +267,7 @@
             :disabled="currentPage === totalPages"
             @click="changePage(currentPage + 1)"
           >
+          ›
           </button>
       </div>
     </div>

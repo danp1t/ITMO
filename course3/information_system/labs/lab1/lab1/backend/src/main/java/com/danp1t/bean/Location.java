@@ -52,8 +52,8 @@ public class Location implements NeedValidate {
         if (this.x == null) {
             throw new NotNullError("x");
         }
-        if (this.y == null) {
-            throw new NotNullError("y");
+        if (this.z == null) {
+            throw new NotNullError("z");
         }
         if (this.name == null) {
             throw new NotNullError("name");

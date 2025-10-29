@@ -18,7 +18,7 @@
         </property>
 
         <property name="y" type="float">
-            <column name="y" not-null="true"/>
+            <column name="y" not-null="false"/>
         </property>
 
         <property name="z" type="double">

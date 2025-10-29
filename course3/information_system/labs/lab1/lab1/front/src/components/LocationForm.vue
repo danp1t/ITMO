@@ -105,7 +105,7 @@ export default {
     return {
       formData: {
         x: '',
-        y: '',
+        y: null,
         z: '',
         name: ''
       },
