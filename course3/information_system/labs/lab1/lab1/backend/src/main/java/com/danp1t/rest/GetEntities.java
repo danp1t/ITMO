@@ -155,7 +155,6 @@ public class GetEntities {
                         .add("rating", org.getRating())
                         .add("type", org.getType().toString())
                         .add("creationDate", org.getCreationDate().toString())
-                        .add("displayName", org.getName() + " (" + org.getType() + ")")
                         .build());
             }
 

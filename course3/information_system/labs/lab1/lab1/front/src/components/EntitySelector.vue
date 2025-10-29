@@ -138,16 +138,26 @@ export default {
     getEntityDisplay(entity) {
       if (!entity) return ''
 
+      const normalizeValue = (value) => {
+      if (value === "null" || value === null || value === undefined) {
+        return 'не указано'
+      }
+        return value
+      }
+
       if (this.entityType === 'coordinates') {
         const x = entity.x !== undefined ? entity.x : 'не указано'
         const y = entity.y !== undefined ? entity.y : 'не указано'
         return `X: ${x}, Y: ${y}`
       }
       else if (this.entityType === 'location') {
-        if (entity.name) {
+        const name = normalizeValue(entity.name)
+        const x = normalizeValue(entity.x)
+        const y = normalizeValue(entity.y)
+        const z = normalizeValue(entity.z)
+
+        if (name) {
           return entity.name
-        } else if (entity.x !== undefined) {
-          return `X: ${entity.x}, Y: ${entity.y}, Z: ${entity.z || 'не указано'}`
         } else {
           return 'Локация'
         }
@@ -178,6 +188,20 @@ export default {
   } else {
     newEntity = event;
   }
+
+  const normalizeEntity = (entity) => {
+    if (entity && typeof entity === 'object') {
+      Object.keys(entity).forEach(key => {
+        if (entity[key] === "null") {
+          entity[key] = null;
+        } else if (typeof entity[key] === 'object' && entity[key] !== null) {
+          normalizeEntity(entity[key]);
+        }
+      });
+    }
+    return entity;
+  };
+  newEntity = normalizeEntity(newEntity);
   if (newEntity && newEntity.id) {
     this.selectedEntity = newEntity;
     this.$emit('selected', newEntity);

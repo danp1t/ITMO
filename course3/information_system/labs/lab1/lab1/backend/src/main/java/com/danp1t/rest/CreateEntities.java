@@ -14,6 +14,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.json.JsonObject;
+import jakarta.json.Json;
 import com.danp1t.websocket.OrganizationsWebSocket;
 
 @Path("/create")
@@ -119,26 +121,25 @@ public class CreateEntities {
         try {
             Organization savedOrganization = organizationService.createOrganization(organization);
 
-            String jsonResponse = String.format(
-                    "{\"id\": %d, \"name\": \"%s\", \"annualTurnover\": %.2f, \"employeesCount\": %d, \"rating\": %d, \"type\": \"%s\"}",
-                    savedOrganization.getId(),
-                    savedOrganization.getName(),
-                    savedOrganization.getAnnualTurnover(),
-                    savedOrganization.getEmployeesCount(),
-                    savedOrganization.getRating(),
-                    savedOrganization.getType()
-            );
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("id", savedOrganization.getId())
+                    .add("name", savedOrganization.getName())
+                    .add("annualTurnover", savedOrganization.getAnnualTurnover())
+                    .add("employeesCount", savedOrganization.getEmployeesCount())
+                    .add("rating", savedOrganization.getRating())
+                    .add("type", savedOrganization.getType().toString())
+                    .build();
 
             OrganizationsWebSocket.notifyTableUpdate();
-            return Response.ok(jsonResponse).build();
+            return Response.ok(jsonResponse.toString()).build();
 
         } catch (Exception e) {
-            String errorResponse = String.format(
-                    "{\"error\": \"%s\"}",
-                    e.getMessage()
-            );
+            JsonObject errorResponse = Json.createObjectBuilder()
+                    .add("error", e.getMessage())
+                    .build();
+
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(errorResponse)
+                    .entity(errorResponse.toString())
                     .build();
         }
     }
