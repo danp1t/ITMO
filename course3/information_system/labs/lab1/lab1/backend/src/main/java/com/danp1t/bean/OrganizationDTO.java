@@ -1,38 +1,36 @@
 package com.danp1t.bean;
 
-
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
 public class OrganizationDTO {
-
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 1, max = 255, message = "Name must be between 1 and 255 characters")
+    private Integer id;
     private String name;
-
-    @Min(value = 0, message = "Annual turnover must be positive")
     private Float annualTurnover;
-
-    @Min(value = 0, message = "Employees count must be positive")
     private Long employeesCount;
-
-    @Min(value = 0, message = "Rating must be positive")
     private Integer rating;
-
-    @NotNull(message = "Type cannot be null")
     private OrganizationType type;
+    private Long coordinates;
+    private Long officialAddress;
+    private Long postalAddress;
 
     // Конструкторы
     public OrganizationDTO() {}
 
-    public OrganizationDTO(String name, Float annualTurnover, Long employeesCount, Integer rating, OrganizationType type) {
+    public OrganizationDTO(Integer id, String name, Float annualTurnover, Long employeesCount,
+                           Integer rating, OrganizationType type, Long coordinates,
+                           Long officialAddress, Long postalAddress) {
+        this.id = id;
         this.name = name;
         this.annualTurnover = annualTurnover;
         this.employeesCount = employeesCount;
         this.rating = rating;
         this.type = type;
+        this.coordinates = coordinates;
+        this.officialAddress = officialAddress;
+        this.postalAddress = postalAddress;
     }
+
+    // Геттеры и сеттеры
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -48,4 +46,13 @@ public class OrganizationDTO {
 
     public OrganizationType getType() { return type; }
     public void setType(OrganizationType type) { this.type = type; }
+
+    public Long getCoordinates() { return coordinates; }
+    public void setCoordinates(Long coordinates) { this.coordinates = coordinates; }
+
+    public Long getOfficialAddress() { return officialAddress; }
+    public void setOfficialAddress(Long officialAddress) { this.officialAddress = officialAddress; }
+
+    public Long getPostalAddress() { return postalAddress; }
+    public void setPostalAddress(Long postalAddress) { this.postalAddress = postalAddress; }
 }

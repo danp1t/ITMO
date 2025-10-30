@@ -2,7 +2,7 @@ package com.danp1t.repository;
 
 import com.danp1t.bean.Organization;
 import com.danp1t.bean.Address;
-import com.danp1t.bean.OrganizationSearchDTO;
+import com.danp1t.bean.OrganizationDTO;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -31,7 +31,7 @@ public class SpecialOperationsRepository {
         }
     }
 
-    public List<OrganizationSearchDTO> findOrganizationsByNameStartingWith(String substring) {
+    public List<OrganizationDTO> findOrganizationsByNameStartingWith(String substring) {
         try (Session session = sessionFactory.openSession()) {
             String hql = "SELECT o FROM Organization o WHERE LOWER(o.name) LIKE LOWER(:substring)";
             List<Organization> organizations = session.createQuery(hql, Organization.class)
@@ -46,7 +46,7 @@ public class SpecialOperationsRepository {
         }
     }
 
-    public List<OrganizationSearchDTO> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
+    public List<OrganizationDTO> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
         try (Session session = sessionFactory.openSession()) {
             String hql = "SELECT o FROM Organization o WHERE o.postalAddress.id > :minAddressId";
             List<Organization> organizations = session.createQuery(hql, Organization.class)
@@ -62,8 +62,8 @@ public class SpecialOperationsRepository {
         }
     }
 
-    private OrganizationSearchDTO convertToSearchDTO(Organization organization) {
-        OrganizationSearchDTO dto = new OrganizationSearchDTO();
+    private OrganizationDTO convertToSearchDTO(Organization organization) {
+        OrganizationDTO dto = new OrganizationDTO();
         dto.setId(organization.getId());
         dto.setName(organization.getName());
 

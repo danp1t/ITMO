@@ -1,12 +1,11 @@
 package com.danp1t.service;
 
 import com.danp1t.bean.Organization;
-import com.danp1t.bean.OrganizationSearchDTO;
+import com.danp1t.bean.OrganizationDTO;
 import com.danp1t.repository.SpecialOperationsRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.logging.Logger;
 
 @ApplicationScoped
 public class SpecialOperationsService {
@@ -22,7 +21,7 @@ public class SpecialOperationsService {
         }
     }
 
-    public List<OrganizationSearchDTO> findOrganizationsByNameStartingWith(String substring) {
+    public List<OrganizationDTO> findOrganizationsByNameStartingWith(String substring) {
         try {
             return specialOperationsRepository.findOrganizationsByNameStartingWith(substring);
         } catch (Exception e) {
@@ -30,7 +29,7 @@ public class SpecialOperationsService {
         }
     }
 
-    public List<OrganizationSearchDTO> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
+    public List<OrganizationDTO> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
         try {
             return specialOperationsRepository.findOrganizationsByPostalAddressGreaterThan(minAddressId);
         } catch (Exception e) {

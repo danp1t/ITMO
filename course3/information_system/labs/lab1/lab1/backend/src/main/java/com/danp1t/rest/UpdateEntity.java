@@ -124,7 +124,7 @@ public class UpdateEntity {
                         .build();
             }
 
-            OrganizationSearchDTO responseDto = convertToOrganizationSearchDTO(updatedOrganization);
+            OrganizationDTO responseDto = convertToOrganizationSearchDTO(updatedOrganization);
             OrganizationsWebSocket.notifyTableUpdate();
             return Response.ok(responseDto).build();
 
@@ -139,8 +139,8 @@ public class UpdateEntity {
         }
     }
 
-    private OrganizationSearchDTO convertToOrganizationSearchDTO(Organization organization) {
-        OrganizationSearchDTO dto = new OrganizationSearchDTO();
+    private OrganizationDTO convertToOrganizationSearchDTO(Organization organization) {
+        OrganizationDTO dto = new OrganizationDTO();
         dto.setId(organization.getId());
         dto.setName(organization.getName());
 

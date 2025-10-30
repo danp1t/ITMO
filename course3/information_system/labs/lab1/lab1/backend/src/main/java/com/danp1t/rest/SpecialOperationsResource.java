@@ -1,7 +1,7 @@
 package com.danp1t.rest;
 
 import com.danp1t.bean.Organization;
-import com.danp1t.bean.OrganizationSearchDTO;
+import com.danp1t.bean.OrganizationDTO;
 import com.danp1t.service.SpecialOperationsService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -53,7 +53,7 @@ public class SpecialOperationsResource {
                         .build();
             }
 
-            List<OrganizationSearchDTO> organizations = specialOperationsService.findOrganizationsByNameStartingWith(substring);
+            List<OrganizationDTO> organizations = specialOperationsService.findOrganizationsByNameStartingWith(substring);
 
             Map<String, Object> response = new HashMap<>();
             response.put("organizations", organizations);
@@ -93,7 +93,7 @@ public class SpecialOperationsResource {
                         .build();
             }
 
-            List<OrganizationSearchDTO> organizations = specialOperationsService.findOrganizationsByPostalAddressGreaterThan(minAddressId);
+            List<OrganizationDTO> organizations = specialOperationsService.findOrganizationsByPostalAddressGreaterThan(minAddressId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("organizations", organizations);
