@@ -10,11 +10,11 @@
         </id>
 
         <property name="x" type="float">
-            <column name="x" not-null="true"/>
+            <column name="x" not-null="true" check="x > -59"/>
         </property>
 
         <property name="y" type="double">
-            <column name="y" not-null="true"/>
+            <column name="y" not-null="true" check="y > -5"/>
         </property>
     </class>
 </hibernate-mapping>
