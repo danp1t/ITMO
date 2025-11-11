@@ -1,13 +1,12 @@
 package com.danp1t.repository;
 
-import com.danp1t.bean.Coordinates;
+import com.danp1t.model.Coordinates;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.logging.Logger;
 
 @ApplicationScoped
 public class CoordinatesRepository {
@@ -31,7 +30,7 @@ public class CoordinatesRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error saving coordinates: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка сохранения координат: " + e.getMessage(), e);
         } finally {
             session.close();
         }
@@ -62,28 +61,7 @@ public class CoordinatesRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error updating coordinates", e);
-        } finally {
-            session.close();
-        }
-    }
-
-    public void delete(Coordinates coordinates) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            Coordinates attachedCoordinates = session.contains(coordinates)
-                    ? coordinates
-                    : session.merge(coordinates);
-            session.remove(attachedCoordinates);
-            transaction.commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw new RuntimeException("Error deleting coordinates", e);
+            throw new RuntimeException("Ошибка обновления координат:", e);
         } finally {
             session.close();
         }
@@ -104,7 +82,7 @@ public class CoordinatesRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error deleting coordinates by id", e);
+            throw new RuntimeException("Ошибка удаления координат по ID:", e);
         } finally {
             session.close();
         }

@@ -39,7 +39,7 @@ public class OrganizationsWebSocket {
                     try {
                         session.getAsyncRemote().sendText("refresh_table");
                     } catch (Exception e) {
-                        System.err.println("Error sending refresh message: " + e.getMessage());
+                        System.err.println("Ошибка отправки уведомления: " + e.getMessage());
                     }
                 }
             }

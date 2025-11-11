@@ -1,6 +1,6 @@
 package com.danp1t.repository;
 
-import com.danp1t.bean.Location;
+import com.danp1t.model.Location;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -26,7 +26,7 @@ public class LocationRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error saving location", e);
+            throw new RuntimeException("Ошибка сохранения локации", e);
         } finally {
             session.close();
         }
@@ -56,7 +56,7 @@ public class LocationRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error updating location", e);
+            throw new RuntimeException("Ошибка обновления локации", e);
         } finally {
             session.close();
         }
@@ -76,27 +76,7 @@ public class LocationRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error deleting location", e);
-        } finally {
-            session.close();
-        }
-    }
-
-    public void deleteById(Long id) {
-        Session session = sessionFactory.openSession();
-        Transaction transaction = null;
-        try {
-            transaction = session.beginTransaction();
-            Location location = session.get(Location.class, id);
-            if (location != null) {
-                session.remove(location);
-            }
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null && transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw new RuntimeException("Error deleting location by id", e);
+            throw new RuntimeException("Ошибка удаления локации", e);
         } finally {
             session.close();
         }

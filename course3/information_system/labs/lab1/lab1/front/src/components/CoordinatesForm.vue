@@ -85,7 +85,7 @@ export default {
       return !!this.entity
     },
     submitUrl() {
-      return this.isEditMode ? `/api/update/coordinates/${this.entity.id}` : '/api/create/coordinates'
+      return this.isEditMode ? `/api/coordinates/${this.entity.id}` : '/api/coordinates'
     }
   },
   watch: {

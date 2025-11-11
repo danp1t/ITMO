@@ -1,9 +1,15 @@
-package com.danp1t.rest;
+package com.danp1t.controller;
 
-import com.danp1t.bean.Organization;
-import com.danp1t.bean.OrganizationDTO;
+import com.danp1t.dto.OrganizationDTO;
+import com.danp1t.model.Organization;
+import com.danp1t.service.OrganizationService;
 import com.danp1t.service.SpecialOperationsService;
+import com.danp1t.websocket.OrganizationsWebSocket;
 import jakarta.inject.Inject;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -11,13 +17,125 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Path("/special")
+@Path("/organization")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class SpecialOperationsResource {
+public class OrganizationController {
+
+    @Inject
+    private OrganizationService organizationService;
 
     @Inject
     private SpecialOperationsService specialOperationsService;
+
+    @GET
+    public Response getAllOrganizations() {
+        try {
+            List<Organization> organizations = organizationService.getAllOrganizations();
+
+            JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+            for (Organization org : organizations) {
+                arrayBuilder.add(Json.createObjectBuilder()
+                        .add("id", org.getId())
+                        .add("name", org.getName())
+                        .add("coordinates", org.getCoordinates().getId())
+                        .add("officialAddress", org.getOfficialAddress().getId())
+                        .add("postalAddress", org.getPostalAddress().getId())
+                        .add("annualTurnover", org.getAnnualTurnover())
+                        .add("employeesCount", org.getEmployeesCount())
+                        .add("rating", org.getRating())
+                        .add("type", org.getType().toString())
+                        .add("creationDate", org.getCreationDate().toString())
+                        .build());
+            }
+
+            return Response.ok(arrayBuilder.build()).build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка при получении организаций: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    @POST
+    public Response createOrganization(Organization organization) {
+        try {
+            Organization savedOrganization = organizationService.createOrganization(organization);
+
+            JsonObject jsonResponse = Json.createObjectBuilder()
+                    .add("id", savedOrganization.getId())
+                    .add("name", savedOrganization.getName())
+                    .add("annualTurnover", savedOrganization.getAnnualTurnover())
+                    .add("employeesCount", savedOrganization.getEmployeesCount())
+                    .add("rating", savedOrganization.getRating())
+                    .add("type", savedOrganization.getType().toString())
+                    .build();
+
+            OrganizationsWebSocket.notifyTableUpdate();
+            return Response.ok(jsonResponse.toString()).build();
+
+        } catch (Exception e) {
+            JsonObject errorResponse = Json.createObjectBuilder()
+                    .add("error", e.getMessage())
+                    .build();
+
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponse.toString())
+                    .build();
+        }
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response updateOrganization(@PathParam("id") Integer id, @Valid OrganizationDTO organizationUpdateDto) {
+        try {
+            Organization updatedOrganization = organizationService.updateOrganization(id, organizationUpdateDto);
+
+            if (updatedOrganization == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("{\"error\": \"Организация не найдена по ID: " + id + "\"}")
+                        .build();
+            }
+
+            OrganizationDTO responseDto = convertToOrganizationSearchDTO(updatedOrganization);
+            OrganizationsWebSocket.notifyTableUpdate();
+            return Response.ok(responseDto).build();
+
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Ошибка валидации: " + e.getMessage() + "\"}")
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка при обновлении организации: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteOrganization(@PathParam("id") Integer id) {
+        try {
+            boolean deleted = organizationService.deleteOrganization(id);
+
+            if (!deleted) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Организация не найдена по ID: " + id)
+                        .build();
+            }
+
+            OrganizationsWebSocket.notifyTableUpdate();
+            return Response.ok()
+                    .entity("{\"message\": \"Организация успешно удалена\"}")
+                    .build();
+
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка при удалении организации: " + e.getMessage() + "\"}")
+                    .build();
+        }
+    }
 
     @POST
     @Path("/avg-rating")
@@ -112,7 +230,7 @@ public class SpecialOperationsResource {
     }
 
     @POST
-    @Path("/merge-organizations")
+    @Path("/merge")
     public Response mergeOrganizations(MergeRequest mergeRequest) {
         try {
             if (mergeRequest.getFirstOrgId() == null || mergeRequest.getSecondOrgId() == null ||
@@ -148,7 +266,7 @@ public class SpecialOperationsResource {
     }
 
     @POST
-    @Path("/absorb-organization")
+    @Path("/absorb")
     public Response absorbOrganization(AbsorbRequest absorbRequest) {
         try {
             if (absorbRequest.getAbsorbingOrgId() == null || absorbRequest.getAbsorbedOrgId() == null) {
@@ -178,6 +296,40 @@ public class SpecialOperationsResource {
                     .entity(errorResponse)
                     .build();
         }
+    }
+
+    private OrganizationDTO convertToOrganizationSearchDTO(Organization organization) {
+        OrganizationDTO dto = new OrganizationDTO();
+        dto.setId(organization.getId());
+        dto.setName(organization.getName());
+
+        if (organization.getAnnualTurnover() != null) {
+            dto.setAnnualTurnover(organization.getAnnualTurnover().floatValue());
+        }
+
+        if (organization.getEmployeesCount() != null) {
+            dto.setEmployeesCount(organization.getEmployeesCount().longValue());
+        }
+
+        if (organization.getRating() != null) {
+            dto.setRating(organization.getRating().intValue());
+        }
+
+        dto.setType(organization.getType());
+
+        if (organization.getCoordinates() != null) {
+            dto.setCoordinates(organization.getCoordinates().getId());
+        }
+
+        if (organization.getOfficialAddress() != null) {
+            dto.setOfficialAddress(organization.getOfficialAddress().getId());
+        }
+
+        if (organization.getPostalAddress() != null) {
+            dto.setPostalAddress(organization.getPostalAddress().getId());
+        }
+
+        return dto;
     }
 
     public static class MergeRequest {

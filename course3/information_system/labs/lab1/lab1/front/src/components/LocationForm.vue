@@ -117,7 +117,7 @@ export default {
       return !!this.entity
     },
     submitUrl() {
-      return this.isEditMode ? `/api/update/location/${this.entity.id}` : '/api/create/location'
+      return this.isEditMode ? `/api/location/${this.entity.id}` : '/api/location'
     }
   },
   watch: {

@@ -1,4 +1,4 @@
-package com.danp1t.bean;
+package com.danp1t.model;
 
 import com.danp1t.error.NotNullError;
 import com.danp1t.error.ValueTooSmallError;

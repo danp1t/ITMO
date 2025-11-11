@@ -468,7 +468,7 @@ export default {
     async loadOrganizations() {
       try {
         this.showNotification('Загрузка организаций...', 'info')
-        const response = await this.$axios.get('/api/get/organization')
+        const response = await this.$axios.get('/api/organization')
         this.organizations = response.data.map(org => ({
           ...org,
           editing: false,
@@ -594,7 +594,7 @@ export default {
           type: org.editingData.type
         }
 
-        await this.$axios.put(`/api/update/organization/${org.id}`, updateData)
+        await this.$axios.put(`/api/organization/${org.id}`, updateData)
 
         org.editingErrors = {}
 
@@ -657,13 +657,13 @@ export default {
         let endpoint
         switch (type) {
           case 'coordinates':
-            endpoint = `/api/get/coordinates/${entityId}`
+            endpoint = `/api/coordinates/${entityId}`
             break
           case 'address':
-            endpoint = `/api/get/address/${entityId}`
+            endpoint = `/api/address/${entityId}`
             break
           case 'location':
-            endpoint = `/api/get/location/${entityId}`
+            endpoint = `/api/location/${entityId}`
             break
           default:
             return
@@ -696,7 +696,7 @@ export default {
     },
 
     async deleteOrganization(id) {
-          await this.$axios.delete(`/api/delete/organization/${id}`)
+          await this.$axios.delete(`/api/organization/${id}`)
           this.showNotification('Организация успешно удалена', 'success')
           await this.loadOrganizations()
     },

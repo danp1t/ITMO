@@ -1,7 +1,7 @@
 package com.danp1t.service;
 
-import com.danp1t.bean.Organization;
-import com.danp1t.bean.OrganizationDTO;
+import com.danp1t.model.Organization;
+import com.danp1t.dto.OrganizationDTO;
 import com.danp1t.repository.SpecialOperationsRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

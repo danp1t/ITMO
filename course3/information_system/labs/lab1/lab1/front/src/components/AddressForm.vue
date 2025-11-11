@@ -85,7 +85,7 @@ export default {
       return !!this.entity
     },
     submitUrl() {
-      return this.isEditMode ? `/api/update/address/${this.entity.id}` : '/api/create/address'
+      return this.isEditMode ? `/api/address/${this.entity.id}` : '/api/address'
     }
   },
   watch: {

@@ -300,7 +300,6 @@ export default {
   box-shadow: none;
 }
 
-/* Компактный стиль для вложенных форм */
 .nested-form .form-fields {
   padding: 0;
 }

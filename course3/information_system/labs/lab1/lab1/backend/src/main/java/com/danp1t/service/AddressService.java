@@ -1,6 +1,6 @@
 package com.danp1t.service;
 
-import com.danp1t.bean.Address;
+import com.danp1t.model.Address;
 import com.danp1t.repository.AddressRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,32 +16,30 @@ public class AddressService {
         address.validate();
 
         if (address.getStreet() == null || address.getStreet().trim().isEmpty()) {
-            throw new IllegalArgumentException("Street cannot be null or empty");
+            throw new IllegalArgumentException("Название улицы не может быть пустой строкой или null");
         }
         if (address.getZipCode() == null || address.getZipCode().trim().isEmpty()) {
-            throw new IllegalArgumentException("Zip code cannot be null or empty");
+            throw new IllegalArgumentException("Индекс не может быть пустой строкой или null");
         }
 
         try {
-            Address savedAddress = addressRepository.save(address);
-            return savedAddress;
+            return addressRepository.save(address);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create address: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка создания адреса: " + e.getMessage(), e);
         }
     }
 
     public List<Address> getAllAddresses() {
         try {
-            List<Address> addresses = addressRepository.findAll();
-            return addresses;
+            return addressRepository.findAll();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve addresses: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка получения адресов: " + e.getMessage(), e);
         }
     }
 
     public Address getAddressById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null");
+            throw new IllegalArgumentException("ID не может быть NULL");
         }
 
         try {
@@ -50,16 +48,16 @@ public class AddressService {
             }
             return address;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve address: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поиска адреса: " + e.getMessage(), e);
         }
     }
 
     public Address updateAddress(Address address) {
         if (address == null) {
-            throw new IllegalArgumentException("Address cannot be null");
+            throw new IllegalArgumentException("Адрес не может быть NULL");
         }
         if (address.getId() == null) {
-            throw new IllegalArgumentException("Address ID cannot be null for update");
+            throw new IllegalArgumentException("Адрес ID не может быть NULL");
         }
         address.validate();
 
@@ -69,23 +67,22 @@ public class AddressService {
         }
 
         try {
-            Address updatedAddress = addressRepository.update(address);
-            return updatedAddress;
+            return addressRepository.update(address);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update address: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка обновления адреса: " + e.getMessage(), e);
         }
     }
 
     public boolean deleteAddress(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null");
+            throw new IllegalArgumentException("ID не может быть NULL");
         }
 
         try {
             addressRepository.deleteById(id);
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete address: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка удаления адреса: " + e.getMessage(), e);
         }
     }
 }

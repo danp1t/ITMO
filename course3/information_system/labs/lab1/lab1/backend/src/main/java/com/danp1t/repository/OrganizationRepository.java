@@ -1,13 +1,12 @@
 package com.danp1t.repository;
 
-import com.danp1t.bean.Organization;
+import com.danp1t.model.Organization;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.logging.Logger;
 
 @ApplicationScoped
 public class OrganizationRepository {
@@ -49,7 +48,7 @@ public class OrganizationRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error saving organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка сохранения организации: " + e.getMessage(), e);
         } finally {
             session.close();
         }
@@ -58,21 +57,21 @@ public class OrganizationRepository {
     public List<Organization> findAll() {
 
         try (Session session = sessionFactory.openSession()) {
-            List<Organization> organizations = session.createQuery(
+            return session.createQuery(
                             "SELECT o FROM Organization o " +
                                     "LEFT JOIN FETCH o.coordinates " +
                                     "LEFT JOIN FETCH o.officialAddress " +
                                     "LEFT JOIN FETCH o.postalAddress", Organization.class)
                     .list();
-            return organizations;
         } catch (Exception e) {
-            throw new RuntimeException("Error finding all organizations: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поиска организации: " + e.getMessage(), e);
         }
     }
 
     public Organization findById(Integer id) {
         try (Session session = sessionFactory.openSession()) {
-            Organization organization = session.createQuery(
+
+            return session.createQuery(
                             "SELECT o FROM Organization o " +
                                     "LEFT JOIN FETCH o.coordinates " +
                                     "LEFT JOIN FETCH o.officialAddress " +
@@ -80,10 +79,8 @@ public class OrganizationRepository {
                                     "WHERE o.id = :id", Organization.class)
                     .setParameter("id", id)
                     .uniqueResult();
-
-            return organization;
         } catch (Exception e) {
-            throw new RuntimeException("Error finding organization by ID: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поиска организации по ID: " + e.getMessage(), e);
         }
     }
 
@@ -103,7 +100,7 @@ public class OrganizationRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error updating organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка обновления организации: " + e.getMessage(), e);
         } finally {
             session.close();
         }
@@ -133,7 +130,7 @@ public class OrganizationRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error deleting organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка удаления организации: " + e.getMessage(), e);
         } finally {
             session.close();
         }

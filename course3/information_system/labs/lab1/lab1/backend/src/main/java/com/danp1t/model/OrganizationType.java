@@ -1,4 +1,4 @@
-package com.danp1t.bean;
+package com.danp1t.model;
 
 public enum OrganizationType {
     COMMERCIAL,

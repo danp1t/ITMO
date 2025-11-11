@@ -1,7 +1,7 @@
 package com.danp1t.service;
 
-import com.danp1t.bean.Organization;
-import com.danp1t.bean.OrganizationDTO;
+import com.danp1t.model.Organization;
+import com.danp1t.dto.OrganizationDTO;
 import com.danp1t.repository.OrganizationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,7 +20,7 @@ public class OrganizationService {
 
             return organizationRepository.save(organization);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка создания организации: " + e.getMessage(), e);
         }
     }
 
@@ -28,25 +28,13 @@ public class OrganizationService {
         try {
             return organizationRepository.findAll();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve organizations: " + e.getMessage(), e);
-        }
-    }
-
-    public Organization getOrganizationById(Integer id) {
-        if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null");
-        }
-
-        try {
-            return organizationRepository.findById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка получения организаций: " + e.getMessage(), e);
         }
     }
 
     public boolean deleteOrganization(Integer id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null");
+            throw new IllegalArgumentException("ID не может быть null");
         }
 
         try {
@@ -58,7 +46,7 @@ public class OrganizationService {
                 return false;
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка удаления организации: " + e.getMessage(), e);
         }
     }
 
@@ -85,17 +73,7 @@ public class OrganizationService {
         try {
             return organizationRepository.update(existingOrganization);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update organization: " + e.getMessage(), e);
-        }
-    }
-
-    public Organization updateOrganization(Organization organization) {
-        organization.validate();
-
-        try {
-            return organizationRepository.update(organization);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка обновления организации: " + e.getMessage(), e);
         }
     }
 }

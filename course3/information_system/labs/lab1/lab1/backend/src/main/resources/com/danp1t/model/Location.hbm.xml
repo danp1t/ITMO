@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-    <class name="com.danp1t.bean.Location" table="location">
+    <class name="com.danp1t.model.Location" table="location">
         <id name="id" column="id" type="long">
             <generator class="identity"/>
         </id>

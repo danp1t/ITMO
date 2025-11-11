@@ -353,12 +353,10 @@ export default {
     },
 
     async onSubmit(formData) {
-      // Предотвращаем множественные отправки
       if (this.isSubmitting) {
         return
       }
 
-      // Валидация дополнительных полей
       if (!this.validateForm()) {
         return
       }
@@ -374,10 +372,9 @@ export default {
       }
 
       try {
-        const response = await this.$axios?.post('/api/create/organization', dataToSend)
+        const response = await this.$axios?.post('/api/organization', dataToSend)
         this.$emit('submitted', { response, data: dataToSend })
 
-        // Сбрасываем форму после успешной отправки
         this.resetForm()
       } catch (error) {
         console.error('Ошибка при создании организации:', error)
@@ -388,7 +385,6 @@ export default {
     },
 
     resetForm() {
-      // Сбрасываем данные формы
       this.formData = {
         name: '',
         annualTurnover: '',

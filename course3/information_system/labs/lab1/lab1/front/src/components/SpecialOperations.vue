@@ -179,7 +179,7 @@ export default {
     async calculateAverageRating() {
       this.loadingAvgRating = true
       try {
-        const response = await this.$axios.post('/api/special/avg-rating')
+        const response = await this.$axios.post('/api/organization/avg-rating')
         this.averageRating = response.data.averageRating
         this.showNotification(response.data.message || 'Средний рейтинг успешно рассчитан', 'success')
       } catch (error) {
@@ -200,7 +200,7 @@ export default {
       this.loadingNameSearch = true
       this.nameSearchPerformed = true
       try {
-        const response = await this.$axios.post('/api/special/search-by-name', {
+        const response = await this.$axios.post('/api/organization/search-by-name', {
           substring: this.nameSearch
         })
         this.nameSearchResults = response.data.organizations || []
@@ -224,7 +224,7 @@ export default {
       this.loadingAddressFilter = true
       this.addressFilterPerformed = true
       try {
-        const response = await this.$axios.post('/api/special/filter-by-address', {
+        const response = await this.$axios.post('/api/organization/filter-by-address', {
           minAddressId: this.addressFilter
         })
         this.addressFilterResults = response.data.organizations || []
@@ -253,7 +253,7 @@ export default {
 
       this.loadingMerge = true
       try {
-        const response = await this.$axios.post('/api/special/merge-organizations', this.mergeData)
+        const response = await this.$axios.post('/api/organization/merge', this.mergeData)
         this.mergeResult = response.data.message
         this.showNotification('Организации успешно объединены', 'success')
 
@@ -290,7 +290,7 @@ export default {
 
       this.loadingAbsorb = true
       try {
-        const response = await this.$axios.post('/api/special/absorb-organization', this.absorbData)
+        const response = await this.$axios.post('/api/organization/absorb', this.absorbData)
         this.absorbResult = response.data.message
         this.showNotification('Организация успешно поглощена', 'success')
 

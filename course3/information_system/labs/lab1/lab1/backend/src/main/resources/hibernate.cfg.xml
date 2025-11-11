@@ -18,9 +18,9 @@
 
         <property name="hbm2ddl.auto">update</property>
 
-        <mapping resource="com/danp1t/bean/Coordinates.hbm.xml"/>
-        <mapping resource="com/danp1t/bean/Location.hbm.xml"/>
-        <mapping resource="com/danp1t/bean/Address.hbm.xml"/>
-        <mapping resource="com/danp1t/bean/Organization.hbm.xml"/>
+        <mapping resource="com/danp1t/model/Coordinates.hbm.xml"/>
+        <mapping resource="com/danp1t/model/Location.hbm.xml"/>
+        <mapping resource="com/danp1t/model/Address.hbm.xml"/>
+        <mapping resource="com/danp1t/model/Organization.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

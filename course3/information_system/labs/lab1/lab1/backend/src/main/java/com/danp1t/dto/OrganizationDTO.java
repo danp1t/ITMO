@@ -1,4 +1,6 @@
-package com.danp1t.bean;
+package com.danp1t.dto;
+
+import com.danp1t.model.OrganizationType;
 
 public class OrganizationDTO {
     private Integer id;
@@ -11,7 +13,6 @@ public class OrganizationDTO {
     private Long officialAddress;
     private Long postalAddress;
 
-    // Конструкторы
     public OrganizationDTO() {}
 
     public OrganizationDTO(Integer id, String name, Float annualTurnover, Long employeesCount,
@@ -28,7 +29,6 @@ public class OrganizationDTO {
         this.postalAddress = postalAddress;
     }
 
-    // Геттеры и сеттеры
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

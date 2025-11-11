@@ -114,13 +114,13 @@ export default {
         let endpoint
         switch (this.entityType) {
           case 'coordinates':
-            endpoint = '/api/get/coordinates'
+            endpoint = '/api/coordinates'
             break
           case 'location':
-            endpoint = '/api/get/location'
+            endpoint = '/api/location'
             break
           case 'address':
-            endpoint = '/api/get/address'
+            endpoint = '/api/address'
             break
           default:
             endpoint = `/api/${this.entityType}`

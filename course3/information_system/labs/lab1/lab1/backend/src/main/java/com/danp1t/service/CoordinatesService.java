@@ -1,11 +1,10 @@
 package com.danp1t.service;
 
-import com.danp1t.bean.Coordinates;
+import com.danp1t.model.Coordinates;
 import com.danp1t.repository.CoordinatesRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.logging.Logger;
 
 @ApplicationScoped
 public class CoordinatesService {
@@ -17,47 +16,45 @@ public class CoordinatesService {
 
         coordinates.validate();
         if (coordinates.getX() == null) {
-            throw new IllegalArgumentException("X coordinate cannot be null");
+            throw new IllegalArgumentException("Координата X не может быть null");
         }
         if (coordinates.getY() == null) {
-            throw new IllegalArgumentException("Y coordinate cannot be null");
+            throw new IllegalArgumentException("Координата Y не может быть null");
         }
 
         try {
-            Coordinates savedCoordinates = coordinatesRepository.save(coordinates);
-            return savedCoordinates;
+            return coordinatesRepository.save(coordinates);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create coordinates: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка создания координат: " + e.getMessage(), e);
         }
     }
 
     public List<Coordinates> getAllCoordinates() {
         try {
-            List<Coordinates> coordinates = coordinatesRepository.findAll();
-            return coordinates;
+            return coordinatesRepository.findAll();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve coordinates: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поиска координат: " + e.getMessage(), e);
         }
     }
 
     public Coordinates getCoordinatesById(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null");
+            throw new IllegalArgumentException("ID не может быть NULL");
         }
 
         try {
             return coordinatesRepository.findById(id);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to retrieve coordinates: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поиска координат: " + e.getMessage(), e);
         }
     }
 
     public Coordinates updateCoordinates(Coordinates coordinates) {
         if (coordinates == null) {
-            throw new IllegalArgumentException("Coordinates cannot be null");
+            throw new IllegalArgumentException("Координаты не могут быть NULL");
         }
         if (coordinates.getId() == null) {
-            throw new IllegalArgumentException("Coordinates ID cannot be null for update");
+            throw new IllegalArgumentException("ID координат не может быть NULL");
         }
 
         coordinates.validate();
@@ -68,42 +65,22 @@ public class CoordinatesService {
         }
 
         try {
-            Coordinates updatedCoordinates = coordinatesRepository.update(coordinates);
-            return updatedCoordinates;
+            return coordinatesRepository.update(coordinates);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update coordinates: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка обновления координат: " + e.getMessage(), e);
         }
     }
 
     public boolean deleteCoordinates(Long id) {
         if (id == null) {
-            throw new IllegalArgumentException("ID cannot be null");
+            throw new IllegalArgumentException("ID не может быть NULL");
         }
 
         try {
             coordinatesRepository.deleteById(id);
             return true;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete coordinates: " + e.getMessage(), e);
-        }
-    }
-
-    public List<Coordinates> createMultipleCoordinates(List<Coordinates> coordinatesList) {
-        if (coordinatesList == null || coordinatesList.isEmpty()) {
-            throw new IllegalArgumentException("Coordinates list cannot be null or empty");
-        }
-
-        for (Coordinates coordinates : coordinatesList) {
-            coordinates.validate();
-        }
-
-        try {
-            for (Coordinates coordinates : coordinatesList) {
-                coordinatesRepository.save(coordinates);
-            }
-            return coordinatesList;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create multiple coordinates: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка удаления координат: " + e.getMessage(), e);
         }
     }
 }

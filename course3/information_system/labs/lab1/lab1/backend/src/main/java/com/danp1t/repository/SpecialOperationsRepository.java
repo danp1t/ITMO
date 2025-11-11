@@ -1,15 +1,14 @@
 package com.danp1t.repository;
 
-import com.danp1t.bean.Organization;
-import com.danp1t.bean.Address;
-import com.danp1t.bean.OrganizationDTO;
+import com.danp1t.model.Organization;
+import com.danp1t.model.Address;
+import com.danp1t.dto.OrganizationDTO;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -18,8 +17,6 @@ public class SpecialOperationsRepository {
     @Inject
     private SessionFactory sessionFactory;
 
-    private static final Logger logger = Logger.getLogger(SpecialOperationsRepository.class.getName());
-
     public Double calculateAverageRating() {
         try (Session session = sessionFactory.openSession()) {
             String hql = "SELECT AVG(o.rating) FROM Organization o";
@@ -27,7 +24,7 @@ public class SpecialOperationsRepository {
                     .uniqueResult();
             return result != null ? result : 0.0;
         } catch (Exception e) {
-            throw new RuntimeException("Error calculating average rating: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка расчета среднего рейтинга организаций: " + e.getMessage(), e);
         }
     }
 
@@ -42,7 +39,7 @@ public class SpecialOperationsRepository {
                     .map(this::convertToSearchDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new RuntimeException("Error searching organizations by name: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поиска организации по имени: " + e.getMessage(), e);
         }
     }
 
@@ -57,8 +54,7 @@ public class SpecialOperationsRepository {
                     .map(this::convertToSearchDTO)
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            logger.severe("Error filtering organizations by address: " + e.getMessage());
-            throw new RuntimeException("Error filtering organizations by address: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка фильтрации по адресу: " + e.getMessage(), e);
         }
     }
 
@@ -144,7 +140,7 @@ public class SpecialOperationsRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error merging organizations: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка объединения организации: " + e.getMessage(), e);
         } finally {
             session.close();
         }
@@ -186,7 +182,7 @@ public class SpecialOperationsRepository {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
             }
-            throw new RuntimeException("Error absorbing organization: " + e.getMessage(), e);
+            throw new RuntimeException("Ошибка поглощения организаций: " + e.getMessage(), e);
         } finally {
             session.close();
         }
