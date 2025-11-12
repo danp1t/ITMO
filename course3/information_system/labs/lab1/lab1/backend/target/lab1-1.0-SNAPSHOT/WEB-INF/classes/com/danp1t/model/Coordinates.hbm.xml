@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.danp1t.model.Coordinates" table="coordinates">
+        <id name="id" column="id" type="long">
+            <generator class="identity"/>
+        </id>
+
+        <property name="x" type="float">
+            <column name="x" not-null="true" check="x > -59"/>
+        </property>
+
+        <property name="y" type="double">
+            <column name="y" not-null="true" check="y > -5"/>
+        </property>
+    </class>
+</hibernate-mapping>

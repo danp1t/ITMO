@@ -6,6 +6,7 @@ import com.danp1t.repository.OrganizationRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class OrganizationService {
@@ -74,6 +75,87 @@ public class OrganizationService {
             return organizationRepository.update(existingOrganization);
         } catch (Exception e) {
             throw new RuntimeException("Ошибка обновления организации: " + e.getMessage(), e);
+        }
+    }
+
+    public Double calculateAverageRating() {
+        try {
+            return organizationRepository.calculateAverageRating();
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public List<OrganizationDTO> findOrganizationsByNameStartingWith(String substring) {
+        try {
+            List<Organization> organizations = organizationRepository.findOrganizationsByNameStartingWith(substring);
+            return organizations.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    private OrganizationDTO convertToDTO(Organization organization) {
+        OrganizationDTO dto = new OrganizationDTO();
+        dto.setId(organization.getId());
+        dto.setName(organization.getName());
+
+        if (organization.getAnnualTurnover() != null) {
+            dto.setAnnualTurnover(organization.getAnnualTurnover().floatValue());
+        }
+
+        if (organization.getEmployeesCount() != null) {
+            dto.setEmployeesCount(organization.getEmployeesCount().longValue());
+        }
+
+        if (organization.getRating() != null) {
+            dto.setRating(organization.getRating().intValue());
+        }
+
+        dto.setType(organization.getType());
+
+        if (organization.getCoordinates() != null) {
+            dto.setCoordinates(organization.getCoordinates().getId());
+        }
+
+        if (organization.getOfficialAddress() != null) {
+            dto.setOfficialAddress(organization.getOfficialAddress().getId());
+        }
+
+        if (organization.getPostalAddress() != null) {
+            dto.setPostalAddress(organization.getPostalAddress().getId());
+        }
+
+        return dto;
+    }
+
+    public List<OrganizationDTO> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
+        try {
+            List<Organization> organizations =  organizationRepository.findOrganizationsByPostalAddressGreaterThan(minAddressId);
+            return organizations.stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public Organization mergeOrganizations(Long firstOrgId, Long secondOrgId, String newName, Long newAddressId) {
+        try {
+            return organizationRepository.mergeOrganizations(firstOrgId, secondOrgId, newName, newAddressId);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public Organization absorbOrganization(Long absorbingOrgId, Long absorbedOrgId) {
+        try {
+            return organizationRepository.absorbOrganization(absorbingOrgId, absorbedOrgId);
+        } catch (Exception e) {
+            throw e;
         }
     }
 }

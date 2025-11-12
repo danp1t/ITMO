@@ -3,7 +3,6 @@ package com.danp1t.controller;
 import com.danp1t.dto.OrganizationDTO;
 import com.danp1t.model.Organization;
 import com.danp1t.service.OrganizationService;
-import com.danp1t.service.SpecialOperationsService;
 import com.danp1t.websocket.OrganizationsWebSocket;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
@@ -24,9 +23,6 @@ public class OrganizationController {
 
     @Inject
     private OrganizationService organizationService;
-
-    @Inject
-    private SpecialOperationsService specialOperationsService;
 
     @GET
     public Response getAllOrganizations() {
@@ -141,7 +137,7 @@ public class OrganizationController {
     @Path("/avg-rating")
     public Response calculateAverageRating() {
         try {
-            Double averageRating = specialOperationsService.calculateAverageRating();
+            Double averageRating = organizationService.calculateAverageRating();
 
             Map<String, Object> response = new HashMap<>();
             response.put("averageRating", averageRating);
@@ -171,7 +167,7 @@ public class OrganizationController {
                         .build();
             }
 
-            List<OrganizationDTO> organizations = specialOperationsService.findOrganizationsByNameStartingWith(substring);
+            List<OrganizationDTO> organizations = organizationService.findOrganizationsByNameStartingWith(substring);
 
             Map<String, Object> response = new HashMap<>();
             response.put("organizations", organizations);
@@ -211,7 +207,7 @@ public class OrganizationController {
                         .build();
             }
 
-            List<OrganizationDTO> organizations = specialOperationsService.findOrganizationsByPostalAddressGreaterThan(minAddressId);
+            List<OrganizationDTO> organizations = organizationService.findOrganizationsByPostalAddressGreaterThan(minAddressId);
 
             Map<String, Object> response = new HashMap<>();
             response.put("organizations", organizations);
@@ -243,7 +239,7 @@ public class OrganizationController {
                         .build();
             }
 
-            Organization mergedOrganization = specialOperationsService.mergeOrganizations(
+            Organization mergedOrganization = organizationService.mergeOrganizations(
                     mergeRequest.getFirstOrgId(),
                     mergeRequest.getSecondOrgId(),
                     mergeRequest.getNewName(),
@@ -277,7 +273,7 @@ public class OrganizationController {
                         .build();
             }
 
-            Organization resultOrganization = specialOperationsService.absorbOrganization(
+            Organization resultOrganization = organizationService.absorbOrganization(
                     absorbRequest.getAbsorbingOrgId(),
                     absorbRequest.getAbsorbedOrgId()
             );

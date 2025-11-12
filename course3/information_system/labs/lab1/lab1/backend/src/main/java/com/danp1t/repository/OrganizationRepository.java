@@ -1,5 +1,6 @@
 package com.danp1t.repository;
 
+import com.danp1t.model.Address;
 import com.danp1t.model.Organization;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -131,6 +132,136 @@ public class OrganizationRepository {
                 transaction.rollback();
             }
             throw new RuntimeException("Ошибка удаления организации: " + e.getMessage(), e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public Double calculateAverageRating() {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT AVG(o.rating) FROM Organization o";
+            Double result = session.createQuery(hql, Double.class)
+                    .uniqueResult();
+            return result != null ? result : 0.0;
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка расчета среднего рейтинга организаций: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Organization> findOrganizationsByNameStartingWith(String substring) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT o FROM Organization o WHERE LOWER(o.name) LIKE LOWER(:substring)";
+
+            return session.createQuery(hql, Organization.class)
+                    .setParameter("substring", substring + "%")
+                    .list();
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка поиска организации по имени: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Organization> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT o FROM Organization o WHERE o.postalAddress.id > :minAddressId";
+
+            return session.createQuery(hql, Organization.class)
+                    .setParameter("minAddressId", minAddressId)
+                    .list();
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка фильтрации по адресу: " + e.getMessage(), e);
+        }
+    }
+
+    public Organization mergeOrganizations(Long firstOrgId, Long secondOrgId, String newName, Long newAddressId) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+
+            Organization firstOrg = session.createQuery(
+                            "SELECT o FROM Organization o LEFT JOIN FETCH o.coordinates " +
+                                    "LEFT JOIN FETCH o.officialAddress LEFT JOIN FETCH o.postalAddress WHERE o.id = :id", Organization.class)
+                    .setParameter("id", firstOrgId)
+                    .uniqueResult();
+
+            Organization secondOrg = session.createQuery(
+                            "SELECT o FROM Organization o LEFT JOIN FETCH o.coordinates " +
+                                    "LEFT JOIN FETCH o.officialAddress LEFT JOIN FETCH o.postalAddress WHERE o.id = :id", Organization.class)
+                    .setParameter("id", secondOrgId)
+                    .uniqueResult();
+
+            if (firstOrg == null || secondOrg == null) {
+                throw new IllegalArgumentException("Одна или обе организации не найдены");
+            }
+
+            Address newAddress = session.get(Address.class, newAddressId);
+            if (newAddress == null) {
+                throw new IllegalArgumentException("Адрес с ID " + newAddressId + " не найден");
+            }
+
+            Organization newOrganization = new Organization();
+            newOrganization.setName(newName);
+            newOrganization.setAnnualTurnover(firstOrg.getAnnualTurnover() + secondOrg.getAnnualTurnover());
+            newOrganization.setEmployeesCount(firstOrg.getEmployeesCount() + secondOrg.getEmployeesCount());
+            newOrganization.setRating((firstOrg.getRating() + secondOrg.getRating()) / 2);
+            newOrganization.setType(firstOrg.getType());
+            newOrganization.setCoordinates(firstOrg.getCoordinates());
+            newOrganization.setOfficialAddress(firstOrg.getOfficialAddress());
+            newOrganization.setPostalAddress(newAddress);
+
+            session.persist(newOrganization);
+
+            session.remove(firstOrg);
+            session.remove(secondOrg);
+
+            transaction.commit();
+            return newOrganization;
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Ошибка объединения организации: " + e.getMessage(), e);
+        } finally {
+            session.close();
+        }
+    }
+
+    public Organization absorbOrganization(Long absorbingOrgId, Long absorbedOrgId) {
+        Session session = sessionFactory.openSession();
+        Transaction transaction = null;
+        try {
+            transaction = session.beginTransaction();
+
+            Organization absorbingOrg = session.createQuery(
+                            "SELECT o FROM Organization o LEFT JOIN FETCH o.coordinates " +
+                                    "LEFT JOIN FETCH o.officialAddress LEFT JOIN FETCH o.postalAddress WHERE o.id = :id", Organization.class)
+                    .setParameter("id", absorbingOrgId)
+                    .uniqueResult();
+
+            Organization absorbedOrg = session.createQuery(
+                            "SELECT o FROM Organization o LEFT JOIN FETCH o.coordinates " +
+                                    "LEFT JOIN FETCH o.officialAddress LEFT JOIN FETCH o.postalAddress WHERE o.id = :id", Organization.class)
+                    .setParameter("id", absorbedOrgId)
+                    .uniqueResult();
+
+            if (absorbingOrg == null || absorbedOrg == null) {
+                throw new IllegalArgumentException("Одна или обе организации не найдены");
+            }
+
+            long totalEmployees = absorbingOrg.getEmployeesCount() + absorbedOrg.getEmployeesCount();
+            absorbingOrg.setEmployeesCount(totalEmployees);
+            absorbingOrg.setAnnualTurnover(absorbingOrg.getAnnualTurnover() + absorbedOrg.getAnnualTurnover());
+            absorbingOrg.setRating((absorbingOrg.getRating() + absorbedOrg.getRating()) / 2);
+            Organization updatedOrganization = session.merge(absorbingOrg);
+            session.remove(absorbedOrg);
+
+            transaction.commit();
+            return updatedOrganization;
+        } catch (Exception e) {
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new RuntimeException("Ошибка поглощения организаций: " + e.getMessage(), e);
         } finally {
             session.close();
         }
