@@ -623,20 +623,38 @@ export default {
       if (!data.name || data.name.trim() === '') {
         errors.name = 'Название организации не может быть пустым'
       }
+      else if (data.name && data.name.trim().length > 256) {
+        errors.name = 'Название организации слишком длинное'
+      }
 
       const annualTurnover = parseFloat(data.annualTurnover)
       if (isNaN(annualTurnover) || annualTurnover <= 0) {
           errors.annualTurnover = 'Годовой оборот должен быть положительным числом'
+      }
+      else if (data.annualTurnover && annualTurnover > 1000000000000000) {
+            errors.annualTurnover = 'Введенный годовой оборот слишком большой'
       }
 
       const employeesCount = parseInt(data.employeesCount)
       if (isNaN(employeesCount) || employeesCount <= 0) {
         errors.employeesCount = 'Количество сотрудников должно быть целым положительным числом'
       }
+      else if (data.employeesCount && employeesCount > 100000000000) {
+        errors.employeesCount = 'Введенное количество соотрудников слишком большое'
+      }
+      else if (!/^\d+$/.test(data.employeesCount.toString())) {
+          errors.employeesCount = 'Количество сотрудников должно быть целым числом'
+      }
 
       const rating = parseInt(data.rating)
       if (isNaN(rating) || rating <= 0) {
         errors.rating = 'Рейтинг должен быть целым положительным числом'
+      }
+      else if (data.rating && rating > 100000000000) {
+        errors.rating = 'Введенный рейтинг слишком большой'
+      }
+      else if (!/^\d+$/.test(data.rating.toString())) {
+        errors.rating = 'Рейтинг должен быть целым числом'
       }
       return errors
     },

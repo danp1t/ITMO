@@ -122,20 +122,28 @@ export default {
       if (!this.formData.x && this.formData.x !== 0) {
         this.errors.x = 'Ввод координаты X обязателен'
         isValid = false
-      } else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.x.toString())) {
-        this.errors.x = 'Координата X должна быть вещественным числом'
-        isValid = false
       } else if (parseFloat(this.formData.x) <= -59) {
         this.errors.x = 'Координата X должна быть больше -59'
         isValid = false
+      } else if (parseFloat(this.formData.x) >= 100000000000) {
+        this.errors.x = 'Введенная координата X слишком большая'
+        isValid = false
+      }
+      else if (!/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.x.toString())) {
+        this.errors.x = 'Координата X должна быть вещественным числом'
+        isValid = false
       }
 
-      if (this.formData.y && !/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.y.toString())) {
-        this.errors.y = 'Координата Y должна быть вещественным числом'
-        isValid = false
-      } else if (this.formData.y && parseFloat(this.formData.y) <= -5) {
+
+      if (this.formData.y && parseFloat(this.formData.y) <= -5) {
         this.errors.y = 'Координата Y должна быть больше -5'
         isValid = false
+      } else if (parseFloat(this.formData.y) >= 100000000000) {
+        this.errors.y = 'Введенная координата Y слишком большая'
+        isValid = false
+      } else if (this.formData.y && !/^(0$|-?[1-9]\d*(\.\d*[0-9]$)?|-?0\.\d*[0-9])$/.test(this.formData.y.toString())) {
+          this.errors.y = 'Координата Y должна быть вещественным числом'
+          isValid = false
       }
 
       return isValid

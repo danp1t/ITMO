@@ -1,5 +1,12 @@
 <template>
   <div class="organization-form-wrapper">
+    <div v-if="serverError" class="server-error">
+        <div class="error-content">
+          <h4>Ошибка создания организации</h4>
+          <p>{{ serverError }}</p>
+        </div>
+        <button class="close-error" @click="serverError = ''">×</button>
+      </div>
     <BaseForm
         title="Создание организации"
         :fields-config="fieldsConfig"
@@ -108,6 +115,8 @@
           </div>
         </div>
 
+
+
         <div v-if="hasSelectedEntities" class="selected-summary">
           <h4>Выбранные данные:</h4>
           <div class="summary-grid">
@@ -162,6 +171,7 @@ export default {
         postalAddress: '',
         type: ''
       },
+      serverError: '',
       isSubmitting: false,
       formKey: 0,
       fieldsConfig: [
@@ -190,10 +200,8 @@ export default {
           label: 'Количество сотрудников',
           type: 'number',
           required: true,
-          pattern: /^\d+$/,
           placeholder: 'Введите количество сотрудников',
           errorMessages: {
-            pattern: 'Количество сотрудников должно быть целым числом',
             required: 'Количество сотрудников обязательно для заполнения'
           }
         },
@@ -202,10 +210,8 @@ export default {
           label: 'Рейтинг организации',
           type: 'number',
           required: true,
-          pattern: /^\d+$/,
           placeholder: 'Введите рейтинг',
           errorMessages: {
-            pattern: 'Рейтинг должен быть целым числом',
             required: 'Рейтинг обязателен для заполнения'
           }
         },
@@ -215,12 +221,18 @@ export default {
           if (value && value.trim().length === 0) {
             return 'Название организации не может быть пустым'
           }
+          else if (value && value.trim().length > 256) {
+            return 'Название организации слишком длинное'
+          }
           return null
         },
         annualTurnover: (value) => {
           const num = parseFloat(value)
           if (value && num <= 0) {
             return 'Годовой оборот должен быть больше 0'
+          }
+          else if (value && num > 1000000000000000) {
+            return 'Введенный годовой оборот слишком большой'
           }
           return null
         },
@@ -229,12 +241,24 @@ export default {
           if (value && num <= 0) {
             return 'Количество сотрудников должно быть больше 0'
           }
+          else if (value && num > 100000000000) {
+            return 'Введенное количество соотрудников слишком большое'
+          }
+          else if (!/^\d+$/.test(value.toString())) {
+            return 'Количество сотрудников должно быть целым числом'
+          }
           return null
         },
         rating: (value) => {
           const num = parseInt(value)
           if (value && num <= 0) {
             return 'Рейтинг должен быть больше 0'
+          }
+          else if (value && num > 100000000000) {
+            return 'Введенный рейтинг слишком большой'
+          }
+          else if (!/^\d+$/.test(value.toString())) {
+            return 'Рейтинг должен быть целым числом'
           }
           return null
         },
@@ -357,6 +381,8 @@ export default {
         return
       }
 
+      this.serverError = ''
+
       if (!this.validateForm()) {
         return
       }
@@ -384,6 +410,26 @@ export default {
       }
     },
 
+    handleServerError(error) {
+      if (error.response?.data?.error) {
+        const errorMessage = error.response.data.error
+
+        if (errorMessage.includes('Длина строки name не должна быть больше 256')) {
+          this.serverError = 'Название организации слишком длинное. Максимальная длина - 256 символов.'
+        } else if (errorMessage.includes('annualTurnover') || errorMessage.includes('годовой оборот')) {
+          this.serverError = 'Ошибка в данных годового оборота. Проверьте введенное значение.'
+        } else if (errorMessage.includes('employeesCount') || errorMessage.includes('количество сотрудников')) {
+          this.serverError = 'Ошибка в данных о количестве сотрудников. Проверьте введенное значение.'
+        } else if (errorMessage.includes('rating') || errorMessage.includes('рейтинг')) {
+          this.serverError = 'Ошибка в данных рейтинга. Проверьте введенное значение.'
+        } else {
+          this.serverError = errorMessage
+        }
+      } else {
+        this.serverError = 'Произошла ошибка при создании организации. Пожалуйста, попробуйте еще раз.'
+      }
+    },
+
     resetForm() {
       this.formData = {
         name: '',
@@ -403,6 +449,7 @@ export default {
         type: ''
       }
 
+      this.serverError = ''
       this.formKey++
     },
 
@@ -526,6 +573,60 @@ export default {
   transition: transform 0.2s ease;
 }
 
+.server-error {
+  display: flex;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+  border: 1px solid #fc8181;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  color: #c53030;
+  animation: shake 0.5s ease-in-out;
+}
+
+.error-content {
+  flex: 1;
+}
+
+.error-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.error-content p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.close-error {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #c53030;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.close-error:hover {
+  background-color: rgba(197, 48, 48, 0.1);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
 .type-select:focus + .select-arrow {
   transform: translateY(-50%) rotate(180deg);
 }
@@ -564,10 +665,20 @@ export default {
   opacity: 0.9;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .organization-form-wrapper {
     padding: 10px;
+  }
+
+  .server-error {
+    padding: 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .close-error {
+    align-self: flex-end;
+    margin-top: -8px;
   }
 
   .entities-grid {

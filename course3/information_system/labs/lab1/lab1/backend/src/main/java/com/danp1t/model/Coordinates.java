@@ -1,6 +1,7 @@
 package com.danp1t.model;
 
 import com.danp1t.error.NotNullError;
+import com.danp1t.error.ValueTooBigError;
 import com.danp1t.error.ValueTooSmallError;
 import com.danp1t.interfaces.NeedValidate;
 
@@ -34,9 +35,15 @@ public class Coordinates implements NeedValidate {
         if (this.x <= -59) {
             throw new ValueTooSmallError("x", -59);
         }
+        else if (this.x >= Float.MAX_VALUE) {
+            throw new ValueTooBigError("x", (long) Float.MAX_VALUE);
+        }
 
         if (this.y <= -5) {
             throw new ValueTooSmallError("y", -5);
+        }
+        else if (this.y >= Double.MAX_VALUE) {
+            throw new ValueTooBigError("y", (long) Double.MAX_VALUE);
         }
     }
 }

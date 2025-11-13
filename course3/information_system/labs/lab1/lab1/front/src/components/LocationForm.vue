@@ -176,11 +176,28 @@ export default {
         this.errors.x = 'Ввод координаты X обязателен'
         isValid = false
       }
+      else if (x > 100000000000) {
+       this.errors.x = 'Введенное значение координаты X слишком большое'
+       isValid = false
+      }
+      else if (x < -100000000000) {
+       this.errors.x = 'Введенное значение координаты X слишком маленькое'
+       isValid = false
+      }
 
       if (this.formData.y !== null && this.formData.y !== '') {
         const y = parseFloat(this.formData.y)
         if (isNaN(y)) {
           this.errors.y = 'Координата Y должна быть числом'
+          isValid = false
+        }
+
+        else if (y > 100000000000) {
+          this.errors.y = 'Введенное значение координаты Y слишком большое'
+          isValid = false
+        }
+        else if (y < -100000000000) {
+          this.errors.y = 'Введенное значение координаты Y слишком маленькое'
           isValid = false
         }
       }
@@ -190,6 +207,14 @@ export default {
         this.errors.z = 'Ввод координаты Z обязателен'
         isValid = false
       }
+      else if (z > 100000000000) {
+          this.errors.z = 'Введенное значение координаты Z слишком большое'
+          isValid = false
+        }
+        else if (z < -100000000000) {
+          this.errors.z = 'Введенное значение координаты Z слишком маленькое'
+          isValid = false
+        }
 
       if (!this.formData.name) {
         this.errors.name = 'Ввод названия локации обязателен'
@@ -201,6 +226,9 @@ export default {
         this.errors.name = 'Длина названия не должна превышать 255 символов'
         isValid = false
       }
+
+
+
 
       return isValid
     },

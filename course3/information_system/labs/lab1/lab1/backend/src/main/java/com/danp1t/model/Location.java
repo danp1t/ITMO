@@ -1,6 +1,9 @@
 package com.danp1t.model;
 
 import com.danp1t.error.NotNullError;
+import com.danp1t.error.StringTooLongError;
+import com.danp1t.error.ValueTooBigError;
+import com.danp1t.error.ValueTooSmallError;
 import com.danp1t.interfaces.NeedValidate;
 
 public class Location implements NeedValidate {
@@ -52,11 +55,36 @@ public class Location implements NeedValidate {
         if (this.x == null) {
             throw new NotNullError("x");
         }
+        else if (this.x < Double.MIN_VALUE) {
+            throw new ValueTooSmallError("x", (int) -Double.MAX_VALUE);
+        }
+        else if (this.x > Double.MAX_VALUE) {
+            throw new ValueTooBigError("x", (long) Double.MAX_VALUE);
+        }
+
+        if (this.y == null) {}
+        else if (this.y < Float.MIN_VALUE) {
+            throw new ValueTooSmallError("y", (int) -Float.MAX_VALUE);
+        }
+        else if (this.y > Float.MAX_VALUE) {
+            throw new ValueTooBigError("y", (long) Float.MAX_VALUE);
+        }
+
         if (this.z == null) {
             throw new NotNullError("z");
         }
+        else if (this.z < Double.MIN_VALUE) {
+            throw new ValueTooSmallError("z", (int) -Double.MAX_VALUE);
+        }
+        else if (this.z > Double.MAX_VALUE) {
+            throw new ValueTooBigError("z", (long) Double.MAX_VALUE);
+        }
+
         if (this.name == null) {
             throw new NotNullError("name");
+        }
+        else if (this.name.length() >= 256) {
+            throw new StringTooLongError("name", 181);
         }
     }
 }

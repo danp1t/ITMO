@@ -1,8 +1,6 @@
 package com.danp1t.model;
 
-import com.danp1t.error.NotNullError;
-import com.danp1t.error.StringNotEmptyError;
-import com.danp1t.error.ValueTooSmallError;
+import com.danp1t.error.*;
 import com.danp1t.interfaces.NeedValidate;
 
 import java.time.LocalDate;
@@ -100,8 +98,11 @@ public class Organization implements NeedValidate {
         if (this.name == null) {
             throw new NotNullError("name");
         }
-        if (this.name.isEmpty()) {
+        else if (this.name.isEmpty()) {
             throw new StringNotEmptyError("name");
+        }
+        else if (this.name.length() > 256) {
+            throw new StringTooLongError("name", 256);
         }
 
         if (this.coordinates == null) {
@@ -119,14 +120,24 @@ public class Organization implements NeedValidate {
         if (this.annualTurnover <= 0) {
             throw new ValueTooSmallError("annualTurnover", 0);
         }
+        else if (this.annualTurnover > 1_000_000_000_000_000.0f) {
+            throw new ValueTooBigError("annualTurnover", 1_000_000_000_000_000L);
+        }
 
         if (this.employeesCount <= 0) {
             throw new ValueTooSmallError("employeesCount", 0);
+        }
+        else if (this.employeesCount > 10_000_000_000L) {
+            throw new ValueTooBigError("employeesCount", 10_000_000_000L);
         }
 
         if (this.rating <= 0) {
             throw new ValueTooSmallError("rating", 0);
         }
+        else if (this.rating > Integer.MAX_VALUE - 1) {
+            throw new ValueTooBigError("employeesCount", (long) Integer.MAX_VALUE);
+        }
+
 
         if (this.type == null) {
             throw new NotNullError("type");

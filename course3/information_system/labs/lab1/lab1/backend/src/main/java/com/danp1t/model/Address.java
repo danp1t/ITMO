@@ -37,7 +37,7 @@ public class Address implements NeedValidate {
         if (this.street == null) {
             throw new NotNullError("street");
         }
-        if (this.street.length() >= 181) {
+        else if (this.street.length() >= 181) {
             throw new StringTooLongError("street", 181);
         }
 
