@@ -142,7 +142,6 @@ public class OrganizationController {
             Map<String, Object> response = new HashMap<>();
             response.put("averageRating", averageRating);
             response.put("message", "Средний рейтинг успешно рассчитан");
-
             return Response.ok(response).build();
 
         } catch (Exception e) {
@@ -245,11 +244,11 @@ public class OrganizationController {
                     mergeRequest.getNewName(),
                     mergeRequest.getNewAddressId()
             );
-
             Map<String, Object> response = new HashMap<>();
             response.put("organization", mergedOrganization);
             response.put("message", "Организации успешно объединены в новую организацию с ID: " + mergedOrganization.getId());
 
+            OrganizationsWebSocket.notifyTableUpdate();
             return Response.ok(response).build();
 
         } catch (Exception e) {
@@ -278,11 +277,12 @@ public class OrganizationController {
                     absorbRequest.getAbsorbedOrgId()
             );
 
+
             Map<String, Object> response = new HashMap<>();
             response.put("organization", resultOrganization);
             response.put("message", "Организация " + absorbRequest.getAbsorbedOrgId() +
                     " успешно поглощена организацией " + absorbRequest.getAbsorbingOrgId());
-
+            OrganizationsWebSocket.notifyTableUpdate();
             return Response.ok(response).build();
 
         } catch (Exception e) {

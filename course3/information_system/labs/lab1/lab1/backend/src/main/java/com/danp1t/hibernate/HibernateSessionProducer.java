@@ -1,4 +1,4 @@
-package com.danp1t.repository;
+package com.danp1t.hibernate;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
