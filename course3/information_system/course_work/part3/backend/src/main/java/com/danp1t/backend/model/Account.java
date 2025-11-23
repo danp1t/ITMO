@@ -3,7 +3,7 @@ package com.danp1t.backend.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -22,13 +22,23 @@ public class Account {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Access(AccessType.PROPERTY)
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "password", nullable = false)
+    private String password;
 
-    @Access(AccessType.PROPERTY)
-    @Column(name = "salt", nullable = false)
-    private String salt;
+    @Column(name = "enabled")
+    private boolean enabled = false;
+
+    @Column(name = "verification_code")
+    private String verificationCode;
+
+    @Column(name = "verification_code_expiry")
+    private LocalDateTime verificationCodeExpiry;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_token_expiry")
+    private LocalDateTime resetPasswordTokenExpiry;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<Post> posts;
@@ -36,7 +46,7 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "AccountRole",
             joinColumns = @JoinColumn(name = "account_id"),
@@ -46,5 +56,4 @@ public class Account {
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL)
     private List<Order> orders;
-
 }

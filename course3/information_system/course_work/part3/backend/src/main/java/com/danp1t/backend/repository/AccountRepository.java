@@ -15,6 +15,12 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @Query("SELECT a FROM Account a LEFT JOIN FETCH a.roles WHERE a.id = :id")
     Optional<Account> findByIdWithRoles(@Param("id") Integer id);
 
-    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.posts LEFT JOIN FETCH a.comments LEFT JOIN FETCH a.roles WHERE a.id = :id")
-    Optional<Account> findByIdWithDetails(@Param("id") Integer id);
+    Optional<Account> findByVerificationCode(String verificationCode);
+    Optional<Account> findByResetPasswordToken(String resetPasswordToken);
+
+    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.posts WHERE a.id = :id")
+    Optional<Account> findByIdWithPosts(@Param("id") Integer id);
+
+    @Query("SELECT a FROM Account a LEFT JOIN FETCH a.comments WHERE a.id = :id")
+    Optional<Account> findByIdWithComments(@Param("id") Integer id);
 }
