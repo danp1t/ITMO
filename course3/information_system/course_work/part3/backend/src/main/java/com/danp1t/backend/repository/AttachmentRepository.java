@@ -10,9 +10,14 @@ import java.util.Optional;
 
 @Repository
 public interface AttachmentRepository extends JpaRepository<Attachment, Integer> {
+
     List<Attachment> findByPostId(Integer postId);
+
     List<Attachment> findByTypeAttachmentId(Integer typeAttachmentId);
 
     @Query("SELECT a FROM Attachment a LEFT JOIN FETCH a.typeAttachment WHERE a.id = :id")
     Optional<Attachment> findByIdWithType(@Param("id") Integer id);
+
+    @Query("SELECT a FROM Attachment a LEFT JOIN FETCH a.post LEFT JOIN FETCH a.typeAttachment WHERE a.id = :id")
+    Optional<Attachment> findByIdWithDetails(@Param("id") Integer id);
 }
