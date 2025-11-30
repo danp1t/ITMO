@@ -6,6 +6,8 @@ import com.danp1t.backend.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -47,28 +49,67 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO) {
-        PostDTO created = postService.save(postDTO);
+    public ResponseEntity<PostDTO> createPost(@RequestBody PostDTO postDTO,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
+        PostDTO created = postService.save(postDTO, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+
     @PutMapping("/{id}")
-    public ResponseEntity<PostDTO> updatePost(@PathVariable Integer id, @RequestBody PostDTO postDTO) {
+    public ResponseEntity<PostDTO> updatePost(@PathVariable Integer id,
+                                              @RequestBody PostDTO postDTO,
+                                              @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            PostDTO updated = postService.update(id, postDTO);
+            PostDTO updated = postService.update(id, postDTO, userDetails.getUsername());
             return ResponseEntity.ok(updated);
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Integer id) {
+    public ResponseEntity<Void> deletePost(@PathVariable Integer id,
+                                           @AuthenticationPrincipal UserDetails userDetails) {
         try {
-            postService.deleteById(id);
+            postService.deleteById(id, userDetails.getUsername());
             return ResponseEntity.noContent().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likePost(@PathVariable Integer id) {
+        try {
+            postService.likePost(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/{id}/unlike")
+    public ResponseEntity<Void> unlikePost(@PathVariable Integer id) {
+        try {
+            postService.unlikePost(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/tag/{tagId}")
+    public ResponseEntity<List<PostDTO>> getPostsByTagId(@PathVariable Integer tagId) {
+        return ResponseEntity.ok(postService.findByTagId(tagId));
+    }
+
+    @GetMapping("/tag/name/{tagName}")
+    public ResponseEntity<List<PostDTO>> getPostsByTagName(@PathVariable String tagName) {
+        return ResponseEntity.ok(postService.findByTagName(tagName));
     }
 }

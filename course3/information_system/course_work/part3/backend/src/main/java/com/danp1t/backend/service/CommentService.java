@@ -4,10 +4,14 @@ import com.danp1t.backend.dto.CommentDTO;
 import com.danp1t.backend.dto.CommentDetailDTO;
 import com.danp1t.backend.dto.PostSimpleDTO;
 import com.danp1t.backend.dto.AccountSimpleDTO;
+import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Comment;
+import com.danp1t.backend.model.Post;
 import com.danp1t.backend.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,8 +59,23 @@ public class CommentService {
     private Comment toEntity(CommentDTO dto) {
         Comment comment = new Comment();
         comment.setId(dto.getId());
-        comment.setCreatedAt(dto.getCreatedAt());
+        comment.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : LocalDateTime.now());
         comment.setUserComment(dto.getUserComment());
+
+        // Устанавливаем связь с постом
+        if (dto.getPostId() != null) {
+            Post post = new Post();
+            post.setId(dto.getPostId());
+            comment.setPost(post);
+        }
+
+        // Устанавливаем связь с аккаунтом
+        if (dto.getAccountId() != null) {
+            Account account = new Account();
+            account.setId(dto.getAccountId());
+            comment.setAccount(account);
+        }
+
         return comment;
     }
 

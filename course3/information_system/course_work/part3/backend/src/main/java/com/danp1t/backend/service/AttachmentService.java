@@ -21,8 +21,7 @@ public class AttachmentService {
                 attachment.getPost().getId(),
                 attachment.getName(),
                 attachment.getPath(),
-                attachment.getTypeAttachment().getId(),
-                attachment.getTypeAttachment().getName()
+                attachment.getTypeAttachment().getId()
         );
     }
 

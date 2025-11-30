@@ -15,5 +15,4 @@ public class AttachmentDTO {
     private String name;
     private String path;
     private Integer typeAttachmentId;
-    private String typeAttachmentName;
 }

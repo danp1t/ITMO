@@ -6,10 +6,14 @@ import com.danp1t.backend.dto.AttachmentSimpleDTO;
 import com.danp1t.backend.dto.TagDTO;
 import com.danp1t.backend.dto.CommentSimpleDTO;
 import com.danp1t.backend.dto.AccountSimpleDTO;
+import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Post;
+import com.danp1t.backend.repository.AccountRepository;
 import com.danp1t.backend.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,6 +23,9 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     private PostDTO toDTO(Post post) {
         return new PostDTO(
@@ -79,9 +86,15 @@ public class PostService {
         post.setId(dto.getId());
         post.setTitle(dto.getTitle());
         post.setText(dto.getText());
-        post.setCreatedAt(dto.getCreatedAt());
-        post.setCountLike(dto.getCountLike());
-        // Owner устанавливается отдельно через ID
+        post.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : LocalDateTime.now());
+        post.setCountLike(dto.getCountLike() != null ? dto.getCountLike() : 0);
+
+        if (dto.getOwnerId() != null) {
+            Account owner = new Account();
+            owner.setId(dto.getOwnerId());
+            post.setOwner(owner);
+        }
+
         return post;
     }
 
@@ -109,26 +122,94 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    public PostDTO save(PostDTO postDTO) {
+    public PostDTO save(PostDTO postDTO, String currentUserEmail) {
+        // Проверяем, имеет ли пользователь роль публикации
+        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean canPublish = currentUser.getRoles().stream()
+                .anyMatch(role -> "OAPI:ROLE:PublishPost".equals(role.getName()));
+
+        if (!canPublish) {
+            throw new SecurityException("User doesn't have permission to publish posts");
+        }
+
         Post post = toEntity(postDTO);
         Post saved = postRepository.save(post);
         return toDTO(saved);
     }
 
-    public PostDTO update(Integer id, PostDTO postDTO) {
-        if (!postRepository.existsById(id)) {
-            throw new RuntimeException("Post not found with id: " + id);
+    public PostDTO update(Integer id, PostDTO postDTO, String currentUserEmail) {
+        Post existingPost = postRepository.findByIdWithOwner(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Проверяем, является ли пользователь владельцем или имеет роль редактирования
+        boolean isOwner = existingPost.getOwner().getEmail().equals(currentUserEmail);
+        boolean canEdit = currentUser.getRoles().stream()
+                .anyMatch(role -> "OAPI:ROLE:EditPost".equals(role.getName()));
+
+        if (!isOwner && !canEdit) {
+            throw new SecurityException("Not authorized to edit this post");
         }
-        Post post = toEntity(postDTO);
-        post.setId(id);
-        Post updated = postRepository.save(post);
+
+        // Обновляем пост
+        existingPost.setTitle(postDTO.getTitle());
+        existingPost.setText(postDTO.getText());
+        if (postDTO.getCreatedAt() != null) {
+            existingPost.setCreatedAt(postDTO.getCreatedAt());
+        }
+
+        Post updated = postRepository.save(existingPost);
         return toDTO(updated);
     }
 
-    public void deleteById(Integer id) {
-        if (!postRepository.existsById(id)) {
-            throw new RuntimeException("Post not found with id: " + id);
+    public void deleteById(Integer id, String currentUserEmail) {
+        Post existingPost = postRepository.findByIdWithOwner(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
+
+        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Проверяем, является ли пользователь владельцем или имеет роль удаления
+        boolean isOwner = existingPost.getOwner().getEmail().equals(currentUserEmail);
+        boolean canDelete = currentUser.getRoles().stream()
+                .anyMatch(role -> "OAPI:ROLE:DeletePost".equals(role.getName()));
+
+        if (!isOwner && !canDelete) {
+            throw new SecurityException("Not authorized to delete this post");
         }
+
         postRepository.deleteById(id);
+    }
+
+    public void likePost(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        post.setCountLike(post.getCountLike() + 1);
+        postRepository.save(post);
+    }
+
+    public void unlikePost(Integer postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        if (post.getCountLike() > 0) {
+            post.setCountLike(post.getCountLike() - 1);
+            postRepository.save(post);
+        }
+    }
+
+    public List<PostDTO> findByTagId(Integer tagId) {
+        return postRepository.findByTagId(tagId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<PostDTO> findByTagName(String tagName) {
+        return postRepository.findByTagName(tagName).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 }
