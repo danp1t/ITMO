@@ -213,7 +213,7 @@ export default {
           placeholder: 'Введите рейтинг',
           errorMessages: {
             required: 'Рейтинг обязателен для заполнения'
-          }
+          }maxlength="30"
         },
       ],
       customValidators: {
@@ -228,7 +228,10 @@ export default {
         },
         annualTurnover: (value) => {
           const num = parseFloat(value)
-          if (value && num <= 0) {
+          if (value && value.trim().length > 40) {
+            return 'Введенный годовой оборот слишком большой'
+          }
+          else if (value && num <= 0) {
             return 'Годовой оборот должен быть больше 0'
           }
           else if (value && num > 1000000000000000) {
@@ -238,7 +241,10 @@ export default {
         },
         employeesCount: (value) => {
           const num = parseInt(value)
-          if (value && num <= 0) {
+          if (value && value.trim().length > 40) {
+            return 'Введенное количество соотрудников слишком большое'
+          }
+          else if (value && num <= 0) {
             return 'Количество сотрудников должно быть больше 0'
           }
           else if (value && num > 100000000000) {
@@ -251,7 +257,10 @@ export default {
         },
         rating: (value) => {
           const num = parseInt(value)
-          if (value && num <= 0) {
+          if (value && value.trim().length > 40) {
+            return 'Введенный рейтинг слишком большой'
+          }
+          else if (value && num <= 0) {
             return 'Рейтинг должен быть больше 0'
           }
           else if (value && num > 100000000000) {

@@ -126,6 +126,7 @@
                 v-else
                 v-model="org.editingData.name"
                 class="inline-input"
+                maxlength="40"
                 :class="{ 'error-input': org.editingErrors.name }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
@@ -140,6 +141,7 @@
                 v-else
                 v-model.number="org.editingData.annualTurnover"
                 type="number"
+                maxlength="40"
                 class="inline-input"
                 :class="{ 'error-input': org.editingErrors.annualTurnover }"
                 @keyup.enter="saveOrganization(org)"
@@ -156,6 +158,7 @@
                 v-model.number="org.editingData.employeesCount"
                 type="text"
                 pattern= "^\d+$"
+                maxlength="40"
                 min="0"
                 class="inline-input"
                 @keyup.enter="saveOrganization(org)"
@@ -172,6 +175,7 @@
               <input
                 v-else
                 v-model.number="org.editingData.rating"
+                maxlength="40"
                 type="text"
                 class="inline-input"
                 :class="{ 'error-input': org.editingErrors.employeesCount }"

@@ -36,6 +36,7 @@
         id="x"
         v-model="formData.x"
         type="number"
+        maxlength="30"
         required
         class="form-input"
       >
@@ -48,6 +49,7 @@
         id="y"
         v-model="formData.y"
         type="number"
+        maxlength="30"
         class="form-input"
       >
       <div v-if="errors.y" class="error-message">{{ errors.y }}</div>

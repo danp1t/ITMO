@@ -19,4 +19,6 @@ public class TournamentDTO {
     private String link;
     private Integer rangId;
     private String rangName;
+    private Boolean archived;
+    private Integer minimalAge;
 }

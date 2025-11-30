@@ -30,8 +30,13 @@ public class Tournament {
     @Column(name = "link")
     private String link;
 
+    @Column(name = "archived", nullable = false)
+    private Boolean archived = false;
+
+    @Column(name = "minimal_age")
+    private Integer minimalAge;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "rang_id", nullable = false)
     private Rang rang;
-
 }

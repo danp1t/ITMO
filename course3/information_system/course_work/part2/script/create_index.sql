@@ -1,5 +1,5 @@
 -- Для быстрого поиска по email при регистрации и входе
-CREATE UNIQUE INDEX idx_account_email_lower ON "Account" (LOWER(email));
+CREATE UNIQUE INDEX idx_account_email_lower_hash ON "Account" USING HASH (LOWER(email));
 
 -- Для быстрого получения постов с сортировкой по дате
 CREATE INDEX idx_post_created_at_desc ON "Post" (created_at DESC);

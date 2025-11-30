@@ -5,7 +5,10 @@ import com.danp1t.backend.model.Tournament;
 import com.danp1t.backend.repository.TournamentRepository;
 import com.danp1t.backend.repository.RangRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,7 +31,9 @@ public class TournamentService {
                 tournament.getAddress(),
                 tournament.getLink(),
                 tournament.getRang().getId(),
-                tournament.getRang().getName()
+                tournament.getRang().getName(),
+                tournament.getArchived(),
+                tournament.getMinimalAge()
         );
     }
 
@@ -40,12 +45,20 @@ public class TournamentService {
         tournament.setFinishDate(dto.getFinishDate());
         tournament.setAddress(dto.getAddress());
         tournament.setLink(dto.getLink());
-        // Rang устанавливается отдельно через ID
+        tournament.setArchived(dto.getArchived() != null ? dto.getArchived() : false);
+        tournament.setMinimalAge(dto.getMinimalAge());
         return tournament;
     }
 
+    public List<TournamentDTO> findAll(String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return tournamentRepository.findAll(sort).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<TournamentDTO> findAll() {
-        return tournamentRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return findAll("startDate", "desc");
     }
 
     public Optional<TournamentDTO> findById(Integer id) {
@@ -54,7 +67,6 @@ public class TournamentService {
 
     public TournamentDTO save(TournamentDTO tournamentDTO) {
         Tournament tournament = toEntity(tournamentDTO);
-        // Установка Rang по ID
         rangRepository.findById(tournamentDTO.getRangId()).ifPresent(tournament::setRang);
         Tournament saved = tournamentRepository.save(tournament);
         return toDTO(saved);
@@ -78,15 +90,70 @@ public class TournamentService {
         tournamentRepository.deleteById(id);
     }
 
+    public List<TournamentDTO> findByNameContaining(String name, String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return tournamentRepository.findByNameContainingIgnoreCase(name, sort).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     public List<TournamentDTO> findByNameContaining(String name) {
-        return tournamentRepository.findByNameContainingIgnoreCase(name).stream()
+        return findByNameContaining(name, "name", "asc");
+    }
+
+    public List<TournamentDTO> findByRangId(Integer rangId, String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return tournamentRepository.findByRangId(rangId, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
     public List<TournamentDTO> findByRangId(Integer rangId) {
-        return tournamentRepository.findByRangId(rangId).stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        return findByRangId(rangId, "startDate", "desc");
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?")
+    public void archiveOldTournaments() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime seasonEnd;
+        if (now.getMonthValue() >= 9) { // если сейчас сентябрь или позже
+            seasonEnd = LocalDateTime.of(now.getYear(), 8, 31, 23, 59, 59);
+        } else {
+            seasonEnd = LocalDateTime.of(now.getYear() - 1, 8, 31, 23, 59, 59);
+        }
+
+        tournamentRepository.archiveOldTournaments(seasonEnd);
+    }
+
+    public void manualArchiveOldTournaments() {
+        archiveOldTournaments();
+    }
+
+    private Sort createSort(String sortBy, String sortDirection) {
+        if (sortBy == null) {
+            return Sort.by(Sort.Direction.DESC, "startDate");
+        }
+
+        Sort.Direction direction = Sort.Direction.ASC;
+        if ("desc".equalsIgnoreCase(sortDirection)) {
+            direction = Sort.Direction.DESC;
+        }
+
+        switch (sortBy.toLowerCase()) {
+            case "name":
+                return Sort.by(direction, "name");
+            case "startdate":
+            case "start_date":
+                return Sort.by(direction, "startDate");
+            case "minimalage":
+            case "minimal_age":
+                return Sort.by(direction, "minimalAge");
+            case "rang":
+            case "rangname":
+            case "rang_name":
+                return Sort.by(direction, "rang.name");
+            default:
+                return Sort.by(Sort.Direction.DESC, "startDate");
+        }
     }
 }

@@ -30,6 +30,7 @@
           type="number"
           required
           step="any"
+          maxlength="30"
           class="form-input"
       >
       <div v-if="errors.x" class="error-message">{{ errors.x }}</div>
@@ -43,6 +44,7 @@
           type="number"
           required
           step="any"
+          maxlength="30"
           class="form-input"
       >
       <div v-if="errors.y" class="error-message">{{ errors.y }}</div>
