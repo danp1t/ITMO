@@ -1,0 +1,325 @@
+<template>
+  <div class="verify-email-view">
+    <div class="columns is-centered">
+      <div class="column is-half-tablet is-one-third-desktop">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-header-title">Подтверждение Email</h2>
+          </div>
+
+          <div class="card-content">
+            <div v-if="!verificationComplete">
+              <!-- Автоматическая проверка при наличии параметров -->
+              <div v-if="autoVerifying" class="has-text-centered">
+                <div class="mb-4">
+                  <i class="fas fa-spinner fa-spin fa-2x"></i>
+                </div>
+                <p>Подтверждаем ваш email...</p>
+              </div>
+
+              <!-- Форма для ручного ввода кода -->
+              <div v-else>
+                <p class="mb-4">
+                  Введите код подтверждения, который был отправлен на ваш email.
+                  Если вы не получили код, проверьте папку "Спам" или запросите новый.
+                </p>
+
+                <form @submit.prevent="handleSubmit">
+                  <!-- Email -->
+                  <div class="field">
+                    <label class="label">Email</label>
+                    <div class="control has-icons-left">
+                      <input
+                        v-model="form.email"
+                        type="email"
+                        class="input"
+                        :class="{ 'is-danger': errors.email }"
+                        placeholder="Введите ваш email"
+                        :disabled="!!routeEmail"
+                        required
+                      >
+                      <span class="icon is-small is-left">
+                        <i class="fas fa-envelope"></i>
+                      </span>
+                    </div>
+                    <p v-if="errors.email" class="help is-danger">{{ errors.email }}</p>
+                  </div>
+
+                  <!-- Код подтверждения -->
+                  <div class="field">
+                    <label class="label">Код подтверждения</label>
+                    <div class="control">
+                      <div class="field has-addons">
+                        <div class="control is-expanded">
+                          <input
+                            v-model="form.code"
+                            type="text"
+                            class="input"
+                            :class="{ 'is-danger': errors.code }"
+                            placeholder="Введите 6-значный код"
+                            maxlength="6"
+                            required
+                          >
+                        </div>
+                        <div class="control">
+                          <button
+                            type="button"
+                            class="button"
+                            :class="{ 'is-loading': resending }"
+                            :disabled="resending || !canResend"
+                            @click="resendCode"
+                          >
+                            <span class="icon">
+                              <i class="fas fa-redo"></i>
+                            </span>
+                            <span v-if="canResend">Отправить снова</span>
+                            <span v-else>Повторно через {{ countdown }}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <p v-if="errors.code" class="help is-danger">{{ errors.code }}</p>
+                    <p class="help">Код состоит из 6 цифр</p>
+                  </div>
+
+                  <!-- Ошибка -->
+                  <div v-if="error" class="notification is-danger is-light mb-4">
+                    {{ error }}
+                  </div>
+
+                  <!-- Кнопки -->
+                  <div class="field">
+                    <div class="control">
+                      <button
+                        type="submit"
+                        class="button is-primary is-fullwidth"
+                        :class="{ 'is-loading': isLoading }"
+                        :disabled="isLoading"
+                      >
+                        Подтвердить Email
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- Успешное подтверждение -->
+            <div v-else class="has-text-centered">
+              <div class="notification is-success is-light">
+                <div class="mb-3">
+                  <i class="fas fa-check-circle fa-2x has-text-success"></i>
+                </div>
+                <p class="is-size-5 mb-2">Email успешно подтвержден!</p>
+                <p>Ваш аккаунт активирован. Теперь вы можете войти в систему.</p>
+              </div>
+
+              <div class="buttons is-centered mt-4">
+                <router-link to="/login" class="button is-primary">
+                  Войти в систему
+                </router-link>
+                <router-link to="/" class="button is-light">
+                  На главную
+                </router-link>
+              </div>
+            </div>
+
+            <!-- Ссылка на вход -->
+            <div v-if="!verificationComplete && !autoVerifying" class="has-text-centered mt-4">
+              <router-link to="/login" class="is-size-7">
+                Вернуться к входу
+              </router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, reactive, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
+const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+
+const form = reactive({
+  email: '',
+  code: '',
+})
+
+const errors = reactive({
+  email: '',
+  code: '',
+})
+
+const error = ref('')
+const isLoading = ref(false)
+const autoVerifying = ref(false)
+const verificationComplete = ref(false)
+const resending = ref(false)
+const canResend = ref(true)
+const countdown = ref(60)
+
+const routeEmail = computed(() => route.query.email as string)
+const routeCode = computed(() => route.query.code as string)
+
+onMounted(() => {
+  // Если email и код есть в URL, автоматически подтверждаем
+  if (routeEmail.value && routeCode.value) {
+    form.email = routeEmail.value
+    form.code = routeCode.value
+    autoVerifyEmail()
+  }
+})
+
+// Таймер для повторной отправки кода
+let countdownInterval: number | null = null
+
+const startCountdown = () => {
+  canResend.value = false
+  countdown.value = 60
+
+  countdownInterval = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0) {
+      canResend.value = true
+      if (countdownInterval) {
+        clearInterval(countdownInterval)
+        countdownInterval = null
+      }
+    }
+  }, 1000)
+}
+
+const validateForm = () => {
+  let isValid = true
+
+  errors.email = ''
+  errors.code = ''
+
+  if (!form.email) {
+    errors.email = 'Email обязателен'
+    isValid = false
+  } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+    errors.email = 'Некорректный формат email'
+    isValid = false
+  }
+
+  if (!form.code) {
+    errors.code = 'Код подтверждения обязателен'
+    isValid = false
+  } else if (!/^\d{6}$/.test(form.code)) {
+    errors.code = 'Код должен состоять из 6 цифр'
+    isValid = false
+  }
+
+  return isValid
+}
+
+const autoVerifyEmail = async () => {
+  autoVerifying.value = true
+  error.value = ''
+
+  try {
+    const result = await authStore.verifyEmail(form.email, form.code)
+
+    if (result.success) {
+      verificationComplete.value = true
+    } else {
+      error.value = result.error || 'Ошибка подтверждения email'
+    }
+  } catch (err: any) {
+    error.value = 'Произошла ошибка при подтверждении email'
+  } finally {
+    autoVerifying.value = false
+  }
+}
+
+const handleSubmit = async () => {
+  if (!validateForm()) {
+    return
+  }
+
+  isLoading.value = true
+  error.value = ''
+
+  try {
+    const result = await authStore.verifyEmail(form.email, form.code)
+
+    if (result.success) {
+      verificationComplete.value = true
+    } else {
+      error.value = result.error || 'Ошибка подтверждения email'
+    }
+  } catch (err: any) {
+    error.value = 'Произошла ошибка при подтверждении email'
+  } finally {
+    isLoading.value = false
+  }
+}
+
+const resendCode = async () => {
+  if (!form.email) {
+    error.value = 'Введите email для отправки кода'
+    return
+  }
+
+  resending.value = true
+  error.value = ''
+
+  try {
+    // Используем метод forgotPassword для отправки кода подтверждения
+    const result = await authStore.forgotPassword(form.email)
+
+    if (result.success) {
+      // Запускаем таймер для повторной отправки
+      startCountdown()
+      error.value = 'Новый код подтверждения отправлен на ваш email'
+    } else {
+      error.value = result.error || 'Ошибка отправки кода'
+    }
+  } catch (err: any) {
+    error.value = 'Произошла ошибка при отправке кода'
+  } finally {
+    resending.value = false
+  }
+}
+
+// Очищаем интервал при размонтировании
+import { onUnmounted } from 'vue'
+onUnmounted(() => {
+  if (countdownInterval) {
+    clearInterval(countdownInterval)
+  }
+})
+</script>
+
+<style scoped>
+.verify-email-view {
+  padding: 4rem 1rem;
+  min-height: calc(100vh - 60px);
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  background-color: #f5f5f5;
+  padding: 1rem 1.5rem;
+}
+
+.fa-spinner {
+  color: #3273dc;
+}
+
+.notification {
+  border: 1px solid #e6e6e6;
+}
+</style>

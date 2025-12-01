@@ -19,7 +19,7 @@ export const authAPI = {
 
   // Подтверждение email
   verifyEmail(email: string, code: string) {
-    return apiClient.post('/api/auth/verify', null, {
+    return apiClient.post<{ message: string }>('/api/auth/verify', null, {
       params: { email, code },
     })
   },
