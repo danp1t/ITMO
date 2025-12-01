@@ -56,6 +56,36 @@ const routes = [
     component: () => import('../views/VerifyEmailView.vue'),
     meta: { requiresAuth: false },
   },
+  {
+    path: '/shop',
+    name: 'shop',
+    component: () => import('../views/ShopView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/shop/checkout',
+    name: 'checkout',
+    component: () => import('../views/CheckoutView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/shop/orders',
+    name: 'orders',
+    component: () => import('../views/OrdersView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/shop/orders/:id',
+    name: 'order-details',
+    component: () => import('../views/OrderDetailsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/shop/products/:id',
+    name: 'product-details',
+    component: () => import('../views/ProductDetailView.vue'),
+    meta: { requiresAuth: false } // Можно просматривать без авторизации
+  }
 ]
 
 const router = createRouter({
