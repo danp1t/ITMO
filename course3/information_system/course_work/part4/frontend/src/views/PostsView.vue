@@ -8,7 +8,7 @@
           </div>
           <div class="level-right">
             <button
-              v-if="authStore.isAuthenticated"
+              v-if="authStore.isAuthenticated && authStore.canPublishPosts()"
               class="button is-primary"
               @click="showCreateModal = true"
             >
@@ -17,6 +17,29 @@
               </span>
               <span>Создать пост</span>
             </button>
+
+            <div
+              v-else-if="authStore.isAuthenticated && !authStore.canPublishPosts()"
+              class="notification is-light is-small"
+            >
+              <p class="is-size-7">
+                <i class="fas fa-lock mr-1"></i>
+                Для создания постов требуется роль публикации
+                <router-link to="/profile" class="has-text-primary ml-1">
+                  (Обратитесь к администратору)
+                </router-link>
+              </p>
+            </div>
+
+            <div v-else class="notification is-light is-small">
+              <p class="is-size-7">
+                <i class="fas fa-sign-in-alt mr-1"></i>
+                <router-link to="/login" class="has-text-primary">
+                  Войдите в систему
+                </router-link>
+                , чтобы создавать посты
+              </p>
+            </div>
           </div>
         </div>
 
@@ -37,6 +60,7 @@
             :post="post"
             @like="handleLike"
             @edit="handleEdit"
+            @delete="handleDelete"
           />
         </div>
       </div>
@@ -118,6 +142,65 @@
         </footer>
       </div>
     </div>
+
+    <!-- Модальное окно редактирования поста -->
+    <div class="modal" :class="{ 'is-active': showEditModal }">
+      <div class="modal-background" @click="closeEditModal"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Редактировать пост</p>
+          <button class="delete" @click="closeEditModal"></button>
+        </header>
+
+        <section class="modal-card-body">
+          <div class="field">
+            <label class="label">Заголовок</label>
+            <div class="control">
+              <input
+                v-model="editingPost.title"
+                class="input"
+                type="text"
+                placeholder="Введите заголовок"
+                :disabled="isSaving"
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Текст</label>
+            <div class="control">
+              <textarea
+                v-model="editingPost.text"
+                class="textarea"
+                placeholder="Введите текст поста"
+                rows="6"
+                :disabled="isSaving"
+              ></textarea>
+            </div>
+          </div>
+        </section>
+
+        <footer class="modal-card-foot">
+          <button
+            class="button is-primary"
+            @click="updatePost"
+            :disabled="isSaving || !editingPost.title.trim()"
+          >
+            <span v-if="isSaving" class="icon">
+              <i class="fas fa-spinner fa-spin"></i>
+            </span>
+            <span>{{ isSaving ? 'Сохранение...' : 'Сохранить' }}</span>
+          </button>
+          <button
+            class="button"
+            @click="closeEditModal"
+            :disabled="isSaving"
+          >
+            Отмена
+          </button>
+        </footer>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -132,12 +215,22 @@ const authStore = useAuthStore()
 const posts = ref<Post[]>([])
 const loading = ref(false)
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
 const sortBy = ref('createdAt')
 const sortDirection = ref('desc')
+const isSaving = ref(false)
 
 const newPost = ref({
   title: '',
   text: '',
+})
+
+// Данные для редактирования поста - инициализируем с пустыми значениями
+const editingPost = ref({
+  id: 0,
+  title: '',
+  text: '',
+  ownerId: 0
 })
 
 const loadPosts = async () => {
@@ -175,6 +268,91 @@ const createPost = async () => {
   }
 }
 
+// Обработчик редактирования поста
+const handleEdit = (post: Post) => {
+  // Копируем данные поста в объект редактирования
+  editingPost.value = {
+    id: post.id,
+    title: post.title || '',
+    text: post.text || '',
+    ownerId: post.ownerId
+  }
+  showEditModal.value = true
+}
+
+// Функция обновления поста
+const updatePost = async () => {
+  if (!authStore.user) return
+
+  // Валидация
+  if (!editingPost.value.title.trim()) {
+    alert('Введите заголовок поста')
+    return
+  }
+
+  if (!editingPost.value.text.trim()) {
+    alert('Введите текст поста')
+    return
+  }
+
+  isSaving.value = true
+
+  try {
+    const postData = {
+      title: editingPost.value.title,
+      text: editingPost.value.text,
+      ownerId: editingPost.value.ownerId,
+    }
+
+    await postsAPI.updatePost(editingPost.value.id, postData)
+
+    // Обновляем пост в списке
+    const index = posts.value.findIndex(p => p.id === editingPost.value.id)
+    if (index !== -1) {
+      posts.value[index] = { ...posts.value[index], ...postData }
+    }
+
+    closeEditModal()
+    alert('Пост успешно обновлен!')
+  } catch (error: any) {
+    console.error('Ошибка при обновлении поста:', error)
+    const message = error.response?.data?.message || 'Не удалось обновить пост'
+    alert(message)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// Закрытие модального окна редактирования
+const closeEditModal = () => {
+  showEditModal.value = false
+  // Сбрасываем форму редактирования
+  editingPost.value = {
+    id: 0,
+    title: '',
+    text: '',
+    ownerId: 0
+  }
+}
+
+// Обработчик удаления поста
+const handleDelete = async (postId: number) => {
+  if (!confirm('Вы уверены, что хотите удалить этот пост? Это действие нельзя отменить.')) {
+    return
+  }
+
+  try {
+    await postsAPI.deletePost(postId)
+    // Удаляем пост из списка
+    posts.value = posts.value.filter(p => p.id !== postId)
+    alert('Пост успешно удален!')
+  } catch (error: any) {
+    console.error('Ошибка при удалении поста:', error)
+    const message = error.response?.data?.message || 'Не удалось удалить пост'
+    alert(message)
+  }
+}
+
 const handleLike = async (postId: number) => {
   try {
     await postsAPI.likePost(postId)
@@ -184,12 +362,13 @@ const handleLike = async (postId: number) => {
   }
 }
 
-const handleEdit = (post: Post) => {
-  // Реализовать редактирование поста
-  console.log('Редактировать пост:', post)
-}
-
 onMounted(loadPosts)
 
 watch([sortBy, sortDirection], loadPosts)
 </script>
+
+<style scoped>
+.posts-view {
+  padding: 20px;
+}
+</style>

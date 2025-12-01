@@ -4,16 +4,27 @@
       <p class="card-header-title">
         {{ post.title }}
       </p>
-      <button
-        v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)"
-        class="card-header-icon"
-        @click="$emit('edit', post)"
-        title="Редактировать пост"
-      >
-        <span class="icon">
-          <i class="fas fa-edit"></i>
-        </span>
-      </button>
+      <div class="card-header-icons" v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)">
+        <button
+          class="card-header-icon mr-1"
+          @click="$emit('edit', post)"
+          title="Редактировать пост"
+        >
+          <span class="icon">
+            <i class="fas fa-edit"></i>
+          </span>
+        </button>
+        <button
+          v-if="authStore.canDeletePost(post.ownerId)"
+          class="card-header-icon"
+          @click="confirmDelete"
+          title="Удалить пост"
+        >
+          <span class="icon">
+            <i class="fas fa-trash"></i>
+          </span>
+        </button>
+      </div>
     </header>
 
     <div class="card-content">
@@ -25,7 +36,7 @@
         <small>
           Автор: {{ post.ownerName }} |
           {{ formatDate(post.createdAt) }} |
-          Лайки: {{ post.countLike }}
+          Лайки: {{ currentLikeCount }}
         </small>
       </div>
     </div>
@@ -35,11 +46,12 @@
         class="card-footer-item like-button"
         @click="toggleLike"
         :disabled="isLiking || !authStore.isAuthenticated"
+        :title="!authStore.isAuthenticated ? 'Войдите, чтобы поставить лайк' : ''"
       >
         <span class="icon">
-          <i class="fas fa-heart" :class="{ 'has-text-danger': isLiked }"></i>
+          <i class="fas fa-heart" :class="{ 'has-text-danger': isLikedByCurrentUser }"></i>
         </span>
-        <span>Лайк ({{ post.countLike }})</span>
+        <span>{{ isLikedByCurrentUser ? 'Убрать лайк' : 'Поставить лайк' }} ({{ currentLikeCount }})</span>
         <span v-if="isLiking" class="icon">
           <i class="fas fa-spinner fa-spin ml-2"></i>
         </span>
@@ -58,8 +70,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth.ts'
+import { postsAPI } from '@/api/posts.ts'
 import type { Post } from '@/types/posts.ts'
 
 const props = defineProps<{
@@ -69,11 +82,34 @@ const props = defineProps<{
 const emit = defineEmits<{
   edit: [post: Post]
   like: [postId: number]
+  delete: [postId: number]
 }>()
 
 const authStore = useAuthStore()
-const isLiked = ref(false)
+
+// Состояние для отслеживания, лайкал ли текущий пользователь этот пост
+const isLikedByCurrentUser = ref(false)
+// Состояние загрузки для предотвращения множественных кликов
 const isLiking = ref(false)
+// Локальное состояние счетчика лайков
+const currentLikeCount = ref(props.post.countLike || 0)
+
+// Проверяем, лайкал ли пользователь этот пост
+const checkIfLiked = () => {
+  // В реальном приложении эту информацию должен возвращать сервер
+  // Сейчас просто сбрасываем состояние
+  isLikedByCurrentUser.value = false
+}
+
+// При изменении поста обновляем счетчик
+watch(() => props.post.countLike, (newCount) => {
+  currentLikeCount.value = newCount
+})
+
+// При изменении пользователя проверяем лайки
+watch(() => authStore.user, () => {
+  checkIfLiked()
+})
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
@@ -84,7 +120,7 @@ const formatDate = (dateString: string) => {
   })
 }
 
-const toggleLike = () => {
+const toggleLike = async () => {
   if (!authStore.isAuthenticated) {
     alert('Для оценки постов необходимо войти в систему')
     return
@@ -93,18 +129,47 @@ const toggleLike = () => {
   if (isLiking.value) return
 
   isLiking.value = true
-  isLiked.value = !isLiked.value
 
-  // Оптимистичное обновление счетчика
-  props.post.countLike += isLiked.value ? 1 : -1
+  try {
+    // Сохраняем предыдущее состояние для возможности отката
+    const wasLiked = isLikedByCurrentUser.value
+    const oldCount = currentLikeCount.value
 
-  emit('like', props.post.id)
+    // Оптимистичное обновление UI
+    isLikedByCurrentUser.value = !wasLiked
+    currentLikeCount.value = wasLiked ? oldCount - 1 : oldCount + 1
 
-  // Через секунду сбросим состояние загрузки
-  setTimeout(() => {
+    // Отправляем запрос на сервер
+    await postsAPI.likePost(props.post.id)
+
+    // Если запрос успешен, эмитируем событие
+    emit('like', props.post.id)
+
+  } catch (error: any) {
+    // Откатываем изменения в случае ошибки
+    isLikedByCurrentUser.value = !isLikedByCurrentUser.value
+    currentLikeCount.value = isLikedByCurrentUser.value
+      ? currentLikeCount.value + 1
+      : currentLikeCount.value - 1
+
+    console.error('Ошибка при оценке поста:', error)
+
+    // Показываем пользователю понятное сообщение
+    const errorMessage = error.response?.data?.message || 'Не удалось поставить лайк'
+    alert(errorMessage)
+  } finally {
     isLiking.value = false
-  }, 300)
+  }
 }
+
+const confirmDelete = () => {
+  if (confirm(`Вы уверены, что хотите удалить пост "${props.post.title}"?`)) {
+    emit('delete', props.post.id)
+  }
+}
+
+// Инициализация при монтировании
+checkIfLiked()
 </script>
 
 <style scoped>
@@ -124,12 +189,21 @@ const toggleLike = () => {
   background-color: #405ca3;
   color: white;
   padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .card-header-title {
   color: white;
   margin: 0;
   font-weight: 600;
+  flex-grow: 1;
+}
+
+.card-header-icons {
+  display: flex;
+  align-items: center;
 }
 
 .card-header-icon {

@@ -53,7 +53,7 @@ export const postsAPI = {
 
   // Получить комментарии поста
   async getComments(postId: number) {
-    const response = await apiClient.get<Comment[]>(`/api/comments?postId=${postId}`)
+    const response = await apiClient.get<Comment[]>(`/api/comments/post/${postId}`)
     return response
   },
 
