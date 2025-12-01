@@ -53,7 +53,6 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         // Для AU01 - гостевой режим, разрешаем просмотр постов/комментариев
                         .requestMatchers("/api/posts/**", "/api/comments/**").permitAll() // Разрешаем GET и другие методы для публичного доступа
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/tournaments/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/tournaments").hasAuthority("OAPI:ROLE:PublishTournament") // TT02
                         .requestMatchers(HttpMethod.PUT, "/api/tournaments/**").hasAuthority("OAPI:ROLE:EditTournament") // TT03
@@ -95,9 +94,9 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(Arrays.asList(
-                "http://localhost:3000",
+                "http://localhost:5173",
                 "http://localhost:8080",
-                "http://127.0.0.1:3000",
+                "http://127.0.0.1:5173",
                 "http://127.0.0.1:8080"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

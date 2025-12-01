@@ -22,7 +22,14 @@ public class ProductService {
     private ProductRepository productRepository;
 
     private ProductDTO toDTO(Product product) {
-        return new ProductDTO(product.getId(), product.getName(), product.getDescription(), product.getCategory(), product.getBasePrice(), product.getPopularity());
+        return new ProductDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getCategory(),
+                product.getBasePrice(),
+                product.getPopularity()
+        );
     }
 
     private ProductDetailDTO toDetailDTO(Product product) {
@@ -62,6 +69,17 @@ public class ProductService {
                 inStock,
                 availabilityMessage
         );
+    }
+
+    private Product toEntity(ProductDTO dto) {
+        Product product = new Product();
+        product.setId(dto.getId());
+        product.setName(dto.getName());
+        product.setDescription(dto.getDescription());
+        product.setCategory(dto.getCategory()); // Добавляем категорию
+        product.setBasePrice(dto.getBasePrice()); // Добавляем базовую цену
+        product.setPopularity(dto.getPopularity() != null ? dto.getPopularity() : 0); // Добавляем популярность
+        return product;
     }
 
     // IS01, IS03, IS04: Получение товаров с сортировкой и фильтрацией
@@ -108,7 +126,7 @@ public class ProductService {
             case "popularity":
                 return Comparator.comparing(Product::getPopularity);
             case "price":
-                return Comparator.comparing(Product::getBasePrice);
+                return Comparator.comparing(Product::getBasePrice, Comparator.nullsFirst(Comparator.naturalOrder()));
             default:
                 return Comparator.comparing(Product::getId);
         }
@@ -164,33 +182,53 @@ public class ProductService {
                 });
     }
 
-    // Остальные методы остаются без изменений
+    // Остальные методы с исправлениями
     public List<ProductDTO> findAll() {
-        return productRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return productRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<ProductDTO> findById(Integer id) {
-        return productRepository.findById(id).map(this::toDTO);
+        return productRepository.findById(id)
+                .map(this::toDTO);
     }
 
     public Optional<ProductDetailDTO> findByIdWithProductInfos(Integer id) {
-        return productRepository.findByIdWithProductInfos(id).map(this::toDetailDTO);
+        return productRepository.findByIdWithProductInfos(id)
+                .map(this::toDetailDTO);
     }
 
     public ProductDTO save(ProductDTO productDTO) {
-        Product product = new Product();
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
+        Product product = toEntity(productDTO);
+        // Убедимся, что ID null для нового товара
+        product.setId(null);
         Product saved = productRepository.save(product);
         return toDTO(saved);
     }
 
     public ProductDTO update(Integer id, ProductDTO productDTO) {
-        Product product = productRepository.findById(id)
+        Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
-        product.setName(productDTO.getName());
-        product.setDescription(productDTO.getDescription());
-        Product updated = productRepository.save(product);
+
+        // Обновляем только те поля, которые пришли в DTO (если они не null)
+        if (productDTO.getName() != null) {
+            existingProduct.setName(productDTO.getName());
+        }
+        if (productDTO.getDescription() != null) {
+            existingProduct.setDescription(productDTO.getDescription());
+        }
+        if (productDTO.getCategory() != null) {
+            existingProduct.setCategory(productDTO.getCategory());
+        }
+        if (productDTO.getBasePrice() != null) {
+            existingProduct.setBasePrice(productDTO.getBasePrice());
+        }
+        if (productDTO.getPopularity() != null) {
+            existingProduct.setPopularity(productDTO.getPopularity());
+        }
+
+        Product updated = productRepository.save(existingProduct);
         return toDTO(updated);
     }
 

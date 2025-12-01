@@ -1,0 +1,2294 @@
+{
+  "info": {
+    "_postman_id": "f9e73af4-13ad-4de0-a1bc-07eedfd49c1b",
+    "name": "Курсач",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50290805",
+    "_collection_link": "https://danp1t-b80b9aa7-4969370.postman.co/workspace/Andrew-Rogov's-Workspace~c2a34218-2e7e-4cd0-816c-79947a175705/collection/50290805-f9e73af4-13ad-4de0-a1bc-07eedfd49c1b?action=share&source=collection_link&creator=50290805"
+  },
+  "item": [
+    {
+      "name": "SSO",
+      "item": [
+        {
+          "name": "Регистрация пользователя",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "eda8a1b0-576a-4a46-902a-cec92627f4b7",
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "id": "18d156f0-854d-4ce5-b808-ea6df32dc294",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"name\": \"test2\",\n    \"email\": \"example2@example.com\",\n    \"password\": \"password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/auth/register",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+          },
+          "response": []
+        },
+        {
+          "name": "Подтверждение email",
+          "id": "e4c5473f-de4c-44fc-9311-00429a92f810",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/auth/verify?email=example2@example.com&code=985322",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "auth",
+                "verify"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "example2@example.com"
+                },
+                {
+                  "key": "code",
+                  "value": "985322"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Выход из системы",
+          "id": "95579aec-3b2f-4be3-8226-db939f34270c",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTQwOSwiZXhwIjoxNzYzOTk3ODA5fQ.jtge7rMLauXZoG180XiokXaHqDieLp0mkgkP09TrVfZjdkIRHl-hS4SeGstO_KK6csxlYZSvqarSG3VuXGnu6Q",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/auth/logout",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запрос сброса пароля",
+          "id": "374f4c5b-a10c-46eb-a048-2b83c71afcaf",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/auth/forgot-password?email=example@example.com",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "auth",
+                "forgot-password"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "example@example.com"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Сброс пароля по токену",
+          "id": "a8c1cfba-f437-4baa-ba32-5d7c725ef279",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"token\": \"ba07d15f-3b80-48a5-bb10-9ed82b80d56c\",\n    \"newPassword\": \"password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/auth/reset-password",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Вход в систему",
+          "id": "beae28bb-2d32-480f-9618-e444c8fcfd3a",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n   \"email\": \"example33@example.com\",\n   \"password\": \"password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/auth/login",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "9996c621-e659-4763-97cc-803e9d252ada"
+    },
+    {
+      "name": "Управление пользователями",
+      "item": [
+        {
+          "name": "Получить все аккаунты",
+          "id": "b61c88c7-fedf-4a95-9432-10ead96787ee",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/accounts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "accounts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить аккаунт по id",
+          "id": "d639fd55-9d51-42b5-a54d-d0898cf1d8af",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/accounts/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "accounts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить аккаунт по email",
+          "id": "905b8343-dea9-4fc6-ba6c-a176ddefae12",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/accounts/email/example@example.com",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "accounts",
+                "email",
+                "example@example.com"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновить аккаунт по email Copy",
+          "id": "facf63eb-8353-428d-abd8-ab63ee7d1851",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"example@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/accounts/email/example@example.com",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "accounts",
+                "email",
+                "example@example.com"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получить детальную информацию об аккаунте",
+          "id": "5084da2e-d5de-48b9-baee-eade8bcf7e20",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/accounts/1/detail",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "accounts",
+                "1",
+                "detail"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создать новую роль",
+          "id": "79fdbb28-e251-46a7-88be-fe5c358852fd",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"ROLE_MODERATOR\",\n    \"description\": \"Moderator role\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/roles",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "roles"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "7c419ee4-729d-4a78-97e9-029a16d4f853"
+    },
+    {
+      "name": "Таблица соревнований",
+      "item": [
+        {
+          "name": "Поиск турниров по названию",
+          "id": "6b077fd2-4ce5-493b-aa99-9c492574fbe5",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments/search?name=чемпионат&sortBy=startDate&sortDirection=desc\nContent-Type: application/json",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "чемпионат"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "startDate"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "desc\nContent-Type: application/json"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Поиск турниров по рангу",
+          "id": "053a2436-35aa-4059-87f9-acdbd4958260",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments/rang/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments",
+                "rang",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение турнира по ID",
+          "id": "c4b68dc8-34d7-4bbd-94bb-18ca8a49cc28",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Просмотр таблицы с сортировкой",
+          "id": "545a81ca-bad5-4cb1-aa2e-6e37826047f0",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments?sortBy=name&sortDirection=asc",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments"
+              ],
+              "query": [
+                {
+                  "key": "sortBy",
+                  "value": "name"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "asc"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание турнира",
+          "id": "2c05637a-a1e6-454a-b997-9c09fff820ed",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE0OTUsImV4cCI6MTc2NDYwNzg5NX0.AY3-iNdVox7S7-wMJMSRfWk0qPvBKUKZREgUlac4EdqhHMA60aibF-E5lge9WB0y5_ukhhZUfzvPnXwtNH6KPw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Мисс грация\",\n  \"startDate\": \"2026-06-15T10:00:00\",\n  \"finishDate\": \"2026-06-17T18:00:00\",\n  \"address\": \"Москва, ул. Спортивная, 23\",\n  \"link\": \"https://example.com/tournament\",\n  \"rangId\": 1,\n  \"minimalAge\": 3,\n  \"archived\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновление турнира",
+          "id": "4d606652-07d4-43c7-9705-492b21282490",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 6,\n  \"name\": \"Мисс грация\",\n  \"startDate\": \"2024-06-20T10:00:00\",\n  \"finishDate\": \"2024-06-22T18:00:00\",\n  \"address\": \"Москва, ул. Спортивная, 20\",\n  \"link\": \"https://example.com/tournament-updated\",\n  \"rangId\": 2,\n  \"minimalAge\": 18,\n  \"archived\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments/6",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments",
+                "6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Удаление турнира",
+          "id": "7474e212-b443-46b0-bf1e-16f32f1b7216",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 6,\n  \"name\": \"Мисс грация\",\n  \"startDate\": \"2024-06-20T10:00:00\",\n  \"finishDate\": \"2024-06-22T18:00:00\",\n  \"address\": \"Москва, ул. Спортивная, 20\",\n  \"link\": \"https://example.com/tournament-updated\",\n  \"rangId\": 2,\n  \"minimalAge\": 18,\n  \"archived\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Запуск архивации турниров",
+          "id": "a42feda0-8638-451d-827f-d9375f0a2ead",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/tournaments/archive-old",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "tournaments",
+                "archive-old"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение всех рангов",
+          "id": "abf5a0cd-56cb-450f-82b2-818d5bab71f3",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rangs",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "rangs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновление ранга",
+          "id": "f43a17fa-12fb-44bc-8ac0-8e09083d7046",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 8,\n  \"name\": \"Городской\",\n  \"description\": \"Соревнования городского уровня с обновленным описанием\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rangs/8",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "rangs",
+                "8"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание ранга",
+          "id": "968957ce-b314-4cd5-a52c-87ee14ba6d41",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Тестовый\",\n  \"description\": \"Соревнования тестового уровня\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rangs",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "rangs"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Удаление ранга",
+          "id": "d21075cd-9801-4850-a294-12024cd512dd",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1MjE2NjUsImV4cCI6MTc2NDYwODA2NX0.9vpuvGCSvZ_Htdc6cgQCu0OylHDIrK3_uT-vvPbK_6R5U_yLmaJ6TKVuf4uLNo58_nTcjckweOYNpuPHryg4_A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/rangs/8",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "rangs",
+                "8"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "05028073-e2c7-46d8-8939-b144e880b08d"
+    },
+    {
+      "name": "Лента постов",
+      "item": [
+        {
+          "name": "Отображение ленты постов",
+          "id": "23ec138b-8505-4dcd-9aec-a4b8c1d332e3",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Просмотр конкретного поста",
+          "id": "22e06776-47e6-430e-94d1-515a62325a19",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание комментария",
+          "id": "7d7f99c3-ac49-4ef9-a94e-49e30e728c65",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userComment\": \"Это тестовый комментарий\",\n  \"postId\": 1,\n  \"accountId\": 2,\n  \"createdAt\": \"2025-11-30T17:55:24.097\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/comments",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "comments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Оценивание постов",
+          "id": "f2ab81bc-d846-41d8-a685-a384cf54fdd5",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts/1/like",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts",
+                "1",
+                "like"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Публикация постов",
+          "id": "e03b14ba-a70a-472c-a992-5c4a224a31cb",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Тестовый пост с ролью\",\n  \"text\": \"Этот пост создан пользователем с ролью публикации\",\n  \"ownerId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Удаление постов",
+          "id": "cbf1a962-474f-4068-82ba-389aa06b6582",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Тестовый пост с ролью\",\n  \"text\": \"Этот пост создан пользователем с ролью публикации\",\n  \"ownerId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts/4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Удаление комментария",
+          "id": "504cccca-63e9-446c-be88-1ebd90ba4f8f",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/comments/4",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "comments",
+                "4"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновление поста",
+          "id": "97bea234-83da-4122-b618-b0234e18157d",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Обновленный пост\",\n  \"text\": \"Обновленный текст\",\n  \"ownerId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts/3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts",
+                "3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Добавление вложений",
+          "id": "c3f47928-d58c-429c-a89d-97a6e9bcfda0",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/attachments",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "attachments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Фильтрация по тегам",
+          "id": "e005b5ac-3c44-42e9-a90e-e5b978b54c5e",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/posts/tag/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "posts",
+                "tag",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "e87d7a25-39bf-40c6-820a-dcafec151a21"
+    },
+    {
+      "name": "Интернет-магазин",
+      "item": [
+        {
+          "name": "Обновление информации о товаре",
+          "id": "943a9eda-3e68-4209-ba3f-f5d9fb7bc9a9",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"sizeName\": \"пара\",\n  \"countItems\": 20,\n  \"price\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/product-infos/16",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "product-infos",
+                "16"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение всех товаров",
+          "id": "05b6a3c9-a969-4bb1-b717-d26d03b1720c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение информации о товарах",
+          "id": "eb81a877-4f93-44e9-b648-57caa4f96fc1",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/5",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "5"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение детальной информации о товаре",
+          "id": "aed51866-e7c6-49a7-b890-9588734dd529",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/1/view",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "1",
+                "view"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение товаров с фильтрацией",
+          "id": "961fa73d-439e-44fc-938d-21c3653e1286",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/filtered?category&size=5м&sortBy=name&sortOrder",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "filtered"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": null
+                },
+                {
+                  "key": "size",
+                  "value": "5м"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "name"
+                },
+                {
+                  "key": "sortOrder",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Информация об отсутствии товара",
+          "id": "fb5ed5cf-fff4-4844-9f48-ac11ceb28ef7",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/3/availability",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "3",
+                "availability"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Детальная проверка наличия товара",
+          "id": "1ae98727-be68-4934-afa8-a3829bac547f",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/1/available?size=пара&quantity=2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "1",
+                "available"
+              ],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "пара"
+                },
+                {
+                  "key": "quantity",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Публикация товара",
+          "id": "8ab6a66f-69e2-4687-9700-263eeb4b0552",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Новые булавы Pro\",\n  \"description\": \"Улучшенная модель булав\",\n  \"category\": \"Снаряды\",\n  \"basePrice\": 6000,\n  \"popularity\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Обновление товара",
+          "id": "3e349616-dcfd-4e5e-b055-74678d4609a4",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Булавы Sasaki Pro Max\",\n  \"description\": \"Обновленное описание\",\n  \"category\": \"Снаряды\",\n  \"basePrice\": 5500,\n  \"popularity\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/9",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Удаление товара",
+          "id": "2b753a10-73a7-44fc-a1fd-6909c8a0da69",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/9",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Добавление информации о товаре",
+          "id": "886cc53b-2984-4cbf-af5b-ca0369c2bf49",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"sizeName\": \"XL\",\n  \"countItems\": 15,\n  \"price\": 5200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/product-infos",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "product-infos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание заказа",
+          "id": "96eb5a2b-3fd0-4810-b95b-20c4791a45b1",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"Москва, ул. Ленина, 10\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"totalAmount\": 12500,\n  \"accountId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Купальник для выступлений\",\n      \"description\": \"Кристалл-купальник ручной работы\",\n      \"category\": \"Одежда\",\n      \"basePrice\": 8000,\n      \"popularity\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/orders",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение информации о товаре по размеру",
+          "id": "05acdcaa-4cea-408c-894f-1ea8c8890110",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": 1,\n  \"sizeName\": \"пара\",\n  \"countItems\": 20,\n  \"price\": 5000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/product-infos/size/пара",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "product-infos",
+                "size",
+                "пара"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение всех заказов пользователем",
+          "id": "95605a85-ba0a-434a-95fd-5499e6899a6a",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"Москва, ул. Ленина, 10\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"totalAmount\": 12500,\n  \"accountId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Купальник для выступлений\",\n      \"description\": \"Кристалл-купальник ручной работы\",\n      \"category\": \"Одежда\",\n      \"basePrice\": 8000,\n      \"popularity\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/orders/account/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "orders",
+                "account",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение заказа по ID",
+          "id": "1c7f50ad-6ea1-4660-aecc-3a3b7cfc2f2e",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/orders/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "orders",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение заказа по ID Copy",
+          "id": "2e3b2126-b45d-449c-b5e0-29dbf0149d86",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"Москва, ул. Обновленная, 5\",\n  \"phone\": \"+7 (999) 987-65-43\",\n  \"totalAmount\": 13000,\n  \"accountId\": 2,\n  \"orderStatusId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/orders/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "orders",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Удаление заказа",
+          "id": "e4d5e00e-0281-44d3-b751-1e2cc3ff925e",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address\": \"Москва, ул. Обновленная, 5\",\n  \"phone\": \"+7 (999) 987-65-43\",\n  \"totalAmount\": 13000,\n  \"accountId\": 2,\n  \"orderStatusId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/orders/2",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "orders",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Просмотр остатков товара",
+          "id": "258b75d2-79cb-4c74-bb17-80b4d0939028",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/stock",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "stock"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Поиск товара по названию",
+          "id": "d82650cc-8064-4a5e-a233-cf6bca9efd9c",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/products/search?name=булавы",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "products",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "булавы"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение информации о товаре по ID",
+          "id": "49a3e566-401e-4637-bb3e-6f6337948fe1",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/product-infos/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "product-infos",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение информации о товарах по продукту",
+          "id": "64545b5c-77d8-4ebf-bd3e-89312c623c93",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/product-infos/product/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "product-infos",
+                "product",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Получение заказов по статусу",
+          "id": "5bcbd18e-d7e1-4275-a4f4-e8877abbae13",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ1Mjc0MTgsImV4cCI6MTc2NDYxMzgxOH0.D2NLz8PhD3lMwjid8BlpPKIz8TSiHhIg1ZLUjTMLbuO0nMpGbgoblSnuFXgHr_rmc7VH88j3Wv64fIhiW2Pdtg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/orders/status/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "orders",
+                "status",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "id": "c01e44a3-5b8b-4d66-b551-e3cbfd9002a3"
+    }
+  ]
+}

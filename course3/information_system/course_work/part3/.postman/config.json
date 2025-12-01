@@ -1,0 +1,14 @@
+{
+  "workspace": {
+    "id": "c2a34218-2e7e-4cd0-816c-79947a175705"
+  },
+  "entities": {
+    "collections": [
+      "../postman/collections/Курсач.postman_collection.json"
+    ],
+    "environments": [],
+    "specs": [],
+    "flows": [],
+    "globals": []
+  }
+}
