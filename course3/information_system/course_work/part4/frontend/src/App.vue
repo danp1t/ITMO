@@ -1,116 +1,113 @@
 <template>
   <div id="app">
-    <!-- Обновленная шапка -->
-    <header class="header">
-      <div class="header-container">
-        <!-- Логотип и название -->
-        <div class="header-brand">
-          <router-link to="/" class="logo-link">
-            <div class="logo-icon">
-              <svg width="28" height="32" viewBox="0 0 28 32" fill="none">
-                <path d="M14 2L26 10V22L14 30L2 22V10L14 2Z" stroke="currentColor" stroke-width="2"/>
-                <path d="M14 8L20 12V20L14 24L8 20V12L14 8Z" fill="currentColor"/>
-                <circle cx="14" cy="16" r="3" fill="white"/>
-              </svg>
-            </div>
-            <div class="logo-text">
-              <span class="logo-title">Гимнастика</span>
-              <span class="logo-subtitle">Artistic</span>
-            </div>
-          </router-link>
-        </div>
-
-        <!-- Основная навигация -->
-        <nav class="header-nav">
-          <router-link to="/" class="nav-link">
-            <span class="nav-icon">🏠</span>
-            <span class="nav-text">Главная</span>
-          </router-link>
-          <router-link to="/posts" class="nav-link">
-            <span class="nav-icon">📰</span>
-            <span class="nav-text">Лента</span>
-          </router-link>
-          <router-link to="/tournaments" class="nav-link">
-            <span class="nav-icon">🏆</span>
-            <span class="nav-text">Соревнования</span>
-          </router-link>
-          <router-link
-            v-if="authStore.isAuthenticated"
-            to="/shop"
-            class="nav-link"
-          >
-            <span class="nav-icon">🛍️</span>
-            <span class="nav-text">Магазин</span>
-          </router-link>
-        </nav>
-
-        <!-- Действия пользователя -->
-        <div class="header-actions">
-          <!-- Корзина -->
-          <button
-            v-if="authStore.isAuthenticated"
-            class="action-btn cart-btn"
-            @click="toggleCart"
-            :class="{ 'has-items': cartStore.totalItems > 0 }"
-          >
-            <span class="cart-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </span>
-            <span v-if="cartStore.totalItems > 0" class="cart-badge">
-              {{ cartStore.totalItems }}
-            </span>
-            <span v-if="cartStore.totalItems > 0" class="cart-total">
-              {{ cartStore.totalAmount }} ₽
-            </span>
-          </button>
-
-          <!-- Авторизация -->
-          <template v-if="!authStore.isAuthenticated">
-            <router-link to="/register" class="action-btn register-btn">
-              Регистрация
-            </router-link>
-            <router-link to="/login" class="action-btn login-btn">
-              Войти
-            </router-link>
-          </template>
-
-          <!-- Профиль пользователя -->
-          <template v-else>
-            <div class="user-dropdown">
-              <button class="user-btn">
-                <div class="user-avatar">
-                  {{ authStore.user?.name?.charAt(0) || '👤' }}
-                </div>
-                <span class="user-name">{{ authStore.user?.name }}</span>
-                <span class="dropdown-arrow">▼</span>
-              </button>
-              <div class="dropdown-menu">
-                <router-link to="/profile" class="dropdown-item">
-                  <span class="item-icon">👤</span>
-                  <span>Профиль</span>
-                </router-link>
-                <router-link to="/shop/orders" class="dropdown-item">
-                  <span class="item-icon">📦</span>
-                  <span>Мои заказы</span>
-                </router-link>
-                <div class="dropdown-divider"></div>
-                <button class="dropdown-item logout-item" @click="logout">
-                  <span class="item-icon">🚪</span>
-                  <span>Выйти</span>
-                </button>
+    <nav class="navbar is-primary custom-navbar" role="navigation" aria-label="main navigation">
+      <div class="container">
+        <div class="navbar-brand">
+          <router-link to="/" class="navbar-item brand-item">
+            <div class="brand-content">
+              <span class="brand-icon">💫</span>
+              <div class="brand-text">
+                <strong class="brand-title">Художественная Гимнастика</strong>
+                <span class="brand-subtitle">Artistic Rhythmic</span>
               </div>
             </div>
-          </template>
+          </router-link>
+        </div>
+
+        <div class="navbar-menu">
+          <div class="navbar-start">
+            <router-link to="/" class="navbar-item nav-item">
+              <span class="nav-icon">🏠</span>
+              <span>Главная</span>
+            </router-link>
+            <router-link to="/posts" class="navbar-item nav-item">
+              <span class="nav-icon">📰</span>
+              <span>Лента постов</span>
+            </router-link>
+            <router-link to="/tournaments" class="navbar-item nav-item">
+              <span class="nav-icon">🏆</span>
+              <span>Соревнования</span>
+            </router-link>
+            <router-link
+              v-if="authStore.isAuthenticated"
+              to="/shop"
+              class="navbar-item nav-item"
+            >
+              <span class="nav-icon">🛍️</span>
+              <span>Магазин</span>
+            </router-link>
+          </div>
+
+          <div class="navbar-end">
+            <div class="navbar-item">
+              <div class="buttons">
+                <!-- Корзина -->
+                <button
+                  v-if="authStore.isAuthenticated"
+                  class="button cart-button"
+                  @click="toggleCart"
+                  :class="{ 'has-items': cartStore.totalItems > 0 }"
+                >
+                  <span class="icon">
+                    <i class="fas fa-shopping-cart"></i>
+                  </span>
+                  <span v-if="cartStore.totalItems > 0" class="cart-info">
+                    <span class="cart-count">{{ cartStore.totalItems }}</span>
+                    <span class="cart-amount">{{ cartStore.totalAmount }} ₽</span>
+                  </span>
+                  <span v-else class="cart-label">Корзина</span>
+                </button>
+
+                <!-- Авторизация -->
+                <template v-if="!authStore.isAuthenticated">
+                  <router-link to="/register" class="button register-button">
+                    Регистрация
+                  </router-link>
+                  <router-link to="/login" class="button login-button">
+                    <strong>Вход</strong>
+                  </router-link>
+                </template>
+                <template v-else>
+                  <div class="dropdown is-hoverable custom-dropdown">
+                    <div class="dropdown-trigger">
+                      <button class="button user-button" aria-haspopup="true" aria-controls="user-menu">
+                        <span class="user-avatar">
+                          {{ authStore.user?.name?.charAt(0) || '👤' }}
+                        </span>
+                        <span class="user-name">{{ authStore.user?.name }}</span>
+                        <span class="icon is-small">
+                          <i class="fas fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                      </button>
+                    </div>
+                    <div class="dropdown-menu" id="user-menu" role="menu">
+                      <div class="dropdown-content custom-dropdown-content">
+                        <router-link to="/profile" class="dropdown-item">
+                          <i class="fas fa-user dropdown-icon"></i>
+                          <span>Профиль</span>
+                        </router-link>
+                        <router-link to="/shop/orders" class="dropdown-item">
+                          <i class="fas fa-box dropdown-icon"></i>
+                          <span>Мои заказы</span>
+                        </router-link>
+                        <hr class="dropdown-divider">
+                        <a class="dropdown-item logout-item" @click="logout">
+                          <i class="fas fa-sign-out-alt dropdown-icon"></i>
+                          <span>Выйти</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </header>
+    </nav>
 
     <!-- Основной контент -->
-    <main class="main-content">
+    <main class="container main-content">
       <router-view />
     </main>
 
@@ -147,360 +144,333 @@ const logout = async () => {
 </script>
 
 <style scoped>
-/* Основные стили шапки */
-.header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* Общие стили для навбара */
+.custom-navbar {
+  background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  padding: 0.5rem 0;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.header-container {
+.container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 1rem;
+}
+
+/* Бренд */
+.brand-item {
+  padding: 0.5rem 0;
+}
+
+.brand-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 70px;
+  gap: 0.75rem;
 }
 
-/* Логотип */
-.header-brand .logo-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: white;
-  transition: opacity 0.3s;
+.brand-icon {
+  font-size: 1.8rem;
+  animation: sparkle 3s infinite;
 }
 
-.logo-link:hover {
-  opacity: 0.9;
-}
-
-.logo-icon {
-  margin-right: 12px;
-  color: white;
-}
-
-.logo-text {
+.brand-text {
   display: flex;
   flex-direction: column;
+  line-height: 1.2;
 }
 
-.logo-title {
-  font-size: 20px;
+.brand-title {
+  font-size: 1.25rem;
   font-weight: 700;
+  color: white;
   letter-spacing: 0.5px;
 }
 
-.logo-subtitle {
-  font-size: 12px;
+.brand-subtitle {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 300;
-  opacity: 0.9;
   letter-spacing: 1px;
 }
 
-/* Навигация */
-.header-nav {
-  display: flex;
-  gap: 32px;
-  margin-left: 48px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.9);
-  padding: 8px 0;
+/* Навигационные пункты */
+.nav-item {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 500;
+  margin: 0 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
   position: relative;
-  transition: color 0.3s;
+  overflow: hidden;
 }
 
-.nav-link:hover {
-  color: white;
+.nav-item:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
 }
 
-.nav-link.router-link-active {
-  color: white;
+.nav-item.router-link-active {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.15);
 }
 
-.nav-link.router-link-active::after {
+.nav-item.router-link-active::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
   height: 2px;
   background: white;
   border-radius: 1px;
 }
 
 .nav-icon {
-  font-size: 16px;
-  margin-right: 8px;
+  margin-right: 0.5rem;
+  font-size: 0.9rem;
 }
 
-.nav-text {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-/* Действия пользователя */
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.action-btn {
-  padding: 8px 20px;
-  border-radius: 25px;
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.3s;
+/* Кнопки */
+.button {
   border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.register-btn {
-  background: transparent;
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.register-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.login-btn {
-  background: white;
-  color: #667eea;
-}
-
-.login-btn:hover {
-  background: rgba(255, 255, 255, 0.95);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 25px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  height: auto;
+  padding: 0.5rem 1.25rem;
 }
 
 /* Кнопка корзины */
-.cart-btn {
-  position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 8px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.cart-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.cart-btn.has-items {
+.cart-button {
   background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: visible;
 }
 
-.cart-icon {
+.cart-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cart-button.has-items {
+  background: rgba(255, 107, 107, 0.2);
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.cart-button.has-items::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 10px;
+  height: 10px;
+  background: #ff6b6b;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.cart-info {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  margin-left: 0.5rem;
 }
 
-.cart-badge {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background: #ff4757;
+.cart-count {
+  background: #ff6b6b;
   color: white;
-  font-size: 11px;
-  font-weight: 600;
   width: 20px;
   height: 20px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.cart-total {
-  margin-left: 8px;
-  font-size: 13px;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
-/* Профиль пользователя */
-.user-dropdown {
-  position: relative;
+.cart-amount {
+  font-weight: 600;
 }
 
-.user-btn {
+.cart-label {
+  margin-left: 0.5rem;
+}
+
+/* Кнопки регистрации и входа */
+.register-button {
+  background: transparent;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.register-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.login-button {
+  background: white;
+  color: #8e2de2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-button:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Кнопка пользователя */
+.user-button {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 25px;
-  color: white;
-  cursor: pointer;
-  transition: all 0.3s;
+  gap: 0.5rem;
 }
 
-.user-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+.user-button:hover {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.875rem;
   font-weight: 600;
-  font-size: 14px;
 }
 
 .user-name {
-  font-size: 14px;
-  font-weight: 500;
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dropdown-arrow {
-  font-size: 10px;
-  opacity: 0.7;
-}
-
 /* Выпадающее меню */
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
+.custom-dropdown-content {
   background: white;
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition: all 0.3s;
-  z-index: 1000;
-}
-
-.user-dropdown:hover .dropdown-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  text-decoration: none;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
   color: #333;
-  font-size: 14px;
-  transition: background-color 0.3s;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .dropdown-item:hover {
   background: #f8f9fa;
+  color: #8e2de2;
 }
 
-.item-icon {
-  font-size: 16px;
-  width: 20px;
+.dropdown-icon {
+  width: 16px;
   text-align: center;
+  font-size: 0.875rem;
 }
 
 .dropdown-divider {
-  height: 1px;
+  margin: 0.5rem 0;
   background: #e9ecef;
-  margin: 4px 0;
-}
-
-.logout-item {
-  color: #ff4757;
 }
 
 .logout-item:hover {
-  background: #fff5f5;
+  color: #ff4757;
 }
 
 /* Основной контент */
 .main-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 32px 24px;
+  padding: 2rem 0;
   min-height: calc(100vh - 70px);
+}
+
+/* Анимации */
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
 }
 
 /* Адаптивность */
 @media (max-width: 1024px) {
-  .header-nav {
-    gap: 24px;
-    margin-left: 32px;
+  .brand-title {
+    font-size: 1.1rem;
+  }
+
+  .nav-item {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.9rem;
   }
 }
 
 @media (max-width: 768px) {
-  .header-container {
-    padding: 0 16px;
-    height: 60px;
+  .navbar-menu {
+    background: linear-gradient(135deg, #4a00e0 0%, #8e2de2 100%);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 
-  .header-nav {
-    display: none; /* Можно заменить на гамбургер-меню */
-  }
-
-  .nav-text {
+  .brand-subtitle {
     display: none;
   }
 
-  .action-btn {
-    padding: 8px 12px;
+  .cart-amount {
+    display: none;
   }
 
   .user-name {
-    display: none;
-  }
-
-  .header-actions {
-    gap: 8px;
+    max-width: 80px;
   }
 }
 
 @media (max-width: 480px) {
-  .logo-title {
-    font-size: 18px;
+  .brand-title {
+    font-size: 1rem;
   }
 
-  .logo-subtitle {
-    font-size: 11px;
+  .nav-icon {
+    display: none;
   }
 
-  .cart-total {
+  .cart-label {
     display: none;
   }
 }
