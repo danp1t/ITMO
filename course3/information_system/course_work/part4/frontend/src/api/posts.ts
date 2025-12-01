@@ -1,5 +1,5 @@
 import apiClient from '.'
-import type { Post, Comment } from '../types/posts'
+import type {Comment, Post} from '../types/posts'
 
 export const postsAPI = {
   // Получить все посты
@@ -58,8 +58,13 @@ export const postsAPI = {
   },
 
   // Создать комментарий
-  createComment(data: { userComment: string; postId: number; accountId: number }) {
-    return apiClient.post<Comment>('/api/comments', data)
+  async createComment(data: { userComment: string; postId: number; accountId: number }) {
+    try {
+      return await apiClient.post<Comment>('/api/comments', data)
+    } catch (error) {
+      console.error('Error creating comment:', error)
+      throw error
+    }
   },
 
   // Удалить комментарий
