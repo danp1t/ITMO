@@ -437,7 +437,7 @@ onMounted(() => {
 }
 
 .shop-header {
-  background: white;
+  background: #323932;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -457,7 +457,7 @@ onMounted(() => {
 
 .cart-indicator:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(166, 136, 136, 0.15);
 }
 
 .cart-icon {

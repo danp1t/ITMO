@@ -102,7 +102,7 @@ const toggleLike = () => {
 }
 
 .post-card .card-header {
-  background-color: #f5f5f5;
+  background-color: #405ca3;
 }
 
 .tags {
@@ -111,7 +111,7 @@ const toggleLike = () => {
 }
 
 .post-meta {
-  color: #666;
+  color: #d3a94b;
   font-size: 0.9em;
   margin-top: 10px;
 }

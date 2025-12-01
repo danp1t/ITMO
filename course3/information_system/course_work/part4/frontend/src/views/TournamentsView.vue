@@ -357,12 +357,12 @@ onMounted(() => {
 }
 
 .title {
-  color: #2d3748;
+  color: #afd5a5;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  color: #718096;
+  color: #aad6ac;
 }
 
 .box {
@@ -372,7 +372,7 @@ onMounted(() => {
 }
 
 .box h3 {
-  color: #4a5568;
+  color: #8fb891;
 }
 
 .radio {

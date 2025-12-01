@@ -279,12 +279,12 @@ if (availableSizes.value.length > 0) {
 }
 
 .title {
-  color: #2d3748;
+  color: #3e74d1;
   line-height: 1.3;
 }
 
 .description {
-  color: #718096;
+  color: #a460d1;
   font-size: 0.9rem;
   flex: 1;
 }
@@ -296,7 +296,7 @@ if (availableSizes.value.length > 0) {
 }
 
 .price {
-  color: #2d3748;
+  color: #6c631f;
   font-size: 1.25rem;
 }
 

@@ -331,7 +331,7 @@ onMounted(() => {
 
 <style scoped>
 .tournament-table {
-  background: white;
+  background: #252e2e;
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
@@ -346,19 +346,19 @@ onMounted(() => {
 }
 
 .table th {
-  background-color: #f8f9fa;
+  background-color: #3e4736;
   font-weight: 600;
-  color: #495057;
+  color: #fdfcfc;
   border-bottom: 2px solid #dee2e6;
 }
 
 .table td {
   vertical-align: middle;
-  border-bottom: 1px solid #f1f3f5;
+  border-bottom: 1px solid #114e8f;
 }
 
 .table tbody tr:hover {
-  background-color: #f8f9fa !important;
+  background-color: rgba(60, 157, 248, 0.27) !important;
 }
 
 .tag {

@@ -446,7 +446,7 @@ populateUserData()
 }
 
 .title {
-  color: #2d3748;
+  color: #3b5987;
 }
 
 .subtitle {

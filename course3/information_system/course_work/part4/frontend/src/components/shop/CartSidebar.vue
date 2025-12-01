@@ -204,7 +204,7 @@ const clearCart = () => {
   right: 0;
   bottom: 0;
   width: 100%;
-  background: white;
+  background: rgb(30, 27, 27);
   display: flex;
   flex-direction: column;
   box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);

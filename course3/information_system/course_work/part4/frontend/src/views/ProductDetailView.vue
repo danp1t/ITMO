@@ -345,9 +345,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useCartStore } from '../../stores/cart'
-import { shopAPI } from '../../api/shop'
-import type { Product, ProductInfo } from '../../types/shop'
+import { useCartStore } from '../stores/cart'
+import { shopAPI } from '../api/shop'
+import type { Product, ProductInfo } from '../types/shop'
 
 const route = useRoute()
 const router = useRouter()
