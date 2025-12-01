@@ -1,19 +1,27 @@
 package com.danp1t.backend.service;
 
 import com.danp1t.backend.dto.ProductInfoDTO;
+import com.danp1t.backend.model.Product;
 import com.danp1t.backend.model.ProductInfo;
 import com.danp1t.backend.repository.ProductInfoRepository;
+import com.danp1t.backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ProductInfoService {
 
     @Autowired
     private ProductInfoRepository productInfoRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
 
     private ProductInfoDTO toDTO(ProductInfo productInfo) {
         return new ProductInfoDTO(
@@ -21,21 +29,15 @@ public class ProductInfoService {
                 productInfo.getProduct().getId(),
                 productInfo.getProduct().getName(),
                 productInfo.getSizeName(),
-                productInfo.getCountItems()
+                productInfo.getCountItems(),
+                productInfo.getPrice()
         );
     }
 
-    private ProductInfo toEntity(ProductInfoDTO dto) {
-        ProductInfo productInfo = new ProductInfo();
-        productInfo.setId(dto.getId());
-        productInfo.setSizeName(dto.getSizeName());
-        productInfo.setCountItems(dto.getCountItems());
-        // Product устанавливается отдельно через ID
-        return productInfo;
-    }
-
     public List<ProductInfoDTO> findAll() {
-        return productInfoRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
+        return productInfoRepository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<ProductInfoDTO> findById(Integer id) {
@@ -55,18 +57,34 @@ public class ProductInfoService {
     }
 
     public ProductInfoDTO save(ProductInfoDTO productInfoDTO) {
-        ProductInfo productInfo = toEntity(productInfoDTO);
+        ProductInfo productInfo = new ProductInfo();
+        productInfo.setSizeName(productInfoDTO.getSizeName());
+        productInfo.setCountItems(productInfoDTO.getCountItems());
+
+        // Set Product
+        Product product = productRepository.findById(productInfoDTO.getProductId())
+                .orElseThrow(() -> new RuntimeException("Product not found with id: " + productInfoDTO.getProductId()));
+        productInfo.setProduct(product);
+
         ProductInfo saved = productInfoRepository.save(productInfo);
         return toDTO(saved);
     }
 
     public ProductInfoDTO update(Integer id, ProductInfoDTO productInfoDTO) {
-        if (!productInfoRepository.existsById(id)) {
-            throw new RuntimeException("ProductInfo not found with id: " + id);
+        ProductInfo existingProductInfo = productInfoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ProductInfo not found with id: " + id));
+
+        existingProductInfo.setSizeName(productInfoDTO.getSizeName());
+        existingProductInfo.setCountItems(productInfoDTO.getCountItems());
+
+        // Update Product if changed
+        if (!existingProductInfo.getProduct().getId().equals(productInfoDTO.getProductId())) {
+            Product product = productRepository.findById(productInfoDTO.getProductId())
+                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + productInfoDTO.getProductId()));
+            existingProductInfo.setProduct(product);
         }
-        ProductInfo productInfo = toEntity(productInfoDTO);
-        productInfo.setId(id);
-        ProductInfo updated = productInfoRepository.save(productInfo);
+
+        ProductInfo updated = productInfoRepository.save(existingProductInfo);
         return toDTO(updated);
     }
 

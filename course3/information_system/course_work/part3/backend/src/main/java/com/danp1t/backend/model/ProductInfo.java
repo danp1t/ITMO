@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @Entity
@@ -26,4 +24,6 @@ public class ProductInfo {
     @Column(name = "count_items", nullable = false)
     private Integer countItems;
 
+    @Column(name = "price")
+    private Integer price; // Цена для конкретного размера
 }

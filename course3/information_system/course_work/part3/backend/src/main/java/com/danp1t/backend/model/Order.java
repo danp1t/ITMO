@@ -24,6 +24,9 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private Integer totalAmount;
 
+    @Column(name = "phone", nullable = true)
+    private String phone;
+
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;

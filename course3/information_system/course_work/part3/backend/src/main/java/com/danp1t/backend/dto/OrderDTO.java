@@ -14,6 +14,7 @@ import java.util.List;
 public class OrderDTO {
     private Integer id;
     private String address;
+    private String phone; // IS15: номер телефона
     private LocalDateTime createdAt;
     private Integer totalAmount;
     private Integer accountId;

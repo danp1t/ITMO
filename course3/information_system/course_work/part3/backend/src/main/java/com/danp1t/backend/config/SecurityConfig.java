@@ -61,7 +61,29 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/posts").hasAuthority("OAPI:ROLE:PublishPost")
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasAuthority("OAPI:ROLE:EditPost")
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasAuthority("OAPI:ROLE:DeletePost")
+
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // IS01, IS02
+                        .requestMatchers(HttpMethod.GET, "/api/products/filtered").permitAll() // IS03, IS04
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/availability").permitAll() // IS12
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/available").permitAll() // IS12
+
+                                // Защищенные endpoints для товаров
+                        .requestMatchers(HttpMethod.POST, "/api/products").hasAuthority("OAPI:ROLE:PublishProduct") // IS05
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("OAPI:ROLE:EditProduct") // IS07
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("OAPI:ROLE:DeleteProduct") // IS06
+
+                                // Защищенные endpoints для информации о товарах
+                        .requestMatchers(HttpMethod.GET, "/api/products/stock").hasAuthority("OAPI:ROLE:GetProductInfo") // IS14
+                        .requestMatchers(HttpMethod.POST, "/api/product-infos").hasAuthority("OAPI:ROLE:UpdateProductInfo") // IS11
+                        .requestMatchers(HttpMethod.PUT, "/api/product-infos/**").hasAuthority("OAPI:ROLE:UpdateProductInfo") // IS11
+
+                                // Защищенные endpoints для заказов (корзины)
+                        .requestMatchers(HttpMethod.POST, "/api/orders").authenticated() // IS08, IS15
+                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").authenticated() // IS09
+
+                                // Остальные настройки
                         .anyRequest().authenticated()
+
                 );
 
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

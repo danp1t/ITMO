@@ -16,6 +16,19 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    // IS15: Создание заказа с телефоном
+    @PostMapping
+    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO) {
+        // Проверяем, что указан телефон
+        if (orderDTO.getPhone() == null || orderDTO.getPhone().trim().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        OrderDTO created = orderService.createOrder(orderDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    // Остальные методы остаются
     @GetMapping
     public ResponseEntity<List<OrderDTO>> getAllOrders() {
         return ResponseEntity.ok(orderService.findAll());
@@ -36,12 +49,6 @@ public class OrderController {
     @GetMapping("/status/{orderStatusId}")
     public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable Integer orderStatusId) {
         return ResponseEntity.ok(orderService.findByOrderStatusId(orderStatusId));
-    }
-
-    @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO orderDTO) {
-        OrderDTO created = orderService.save(orderDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
