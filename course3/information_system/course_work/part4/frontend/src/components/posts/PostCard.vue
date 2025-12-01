@@ -5,9 +5,10 @@
         {{ post.title }}
       </p>
       <button
-        v-if="authStore.isAuthenticated && authStore.user?.id === post.ownerId"
+        v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)"
         class="card-header-icon"
         @click="$emit('edit', post)"
+        title="Редактировать пост"
       >
         <span class="icon">
           <i class="fas fa-edit"></i>

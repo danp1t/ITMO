@@ -180,10 +180,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
-import { useCartStore } from '../../stores/cart'
-import { shopAPI } from '../../api/shop'
-import type { Order, OrderStatus } from '../../types/shop'
+import { useAuthStore } from '../stores/auth'
+import { useCartStore } from '../stores/cart'
+import { shopAPI } from '../api/shop'
+import type { Order, OrderStatus } from '../types/shop'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()

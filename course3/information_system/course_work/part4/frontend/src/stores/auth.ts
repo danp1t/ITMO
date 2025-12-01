@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '../api/auth'
-import type { User, LoginResponse } from '../types/user'
+import type { User } from '../types/user'
 
 export const useAuthStore = defineStore('auth', () => {
   // Загружаем данные из localStorage при инициализации
@@ -11,11 +11,82 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
+  // Computed свойство для получения ролей
+  const roles = computed(() => {
+    return user.value?.roles || []
+  })
+
   // Computed свойство для получения ID пользователя
   const userId = computed(() => {
     if (!user.value) return null
     return user.value.id
   })
+
+  // Проверка наличия конкретной роли
+  const hasRole = (roleName: string): boolean => {
+    return roles.value.includes(roleName)
+  }
+
+  // Проверка наличия хотя бы одной роли из списка
+  const hasAnyRole = (roleNames: string[]): boolean => {
+    return roleNames.some(role => roles.value.includes(role))
+  }
+
+  // Проверка наличия всех ролей из списка
+  const hasAllRoles = (roleNames: string[]): boolean => {
+    return roleNames.every(role => roles.value.includes(role))
+  }
+
+  // Проверка конкретной разрешающей роли для публикации постов
+  const canPublishPosts = (): boolean => {
+    // Проверяем наличие роли для публикации постов
+    return hasRole('OAPI:ROLE:PublishPost')
+  }
+
+  // Проверка для редактирования постов (своих или если есть роль модератора)
+  const canEditPost = (postOwnerId: number): boolean => {
+    if (!user.value) return false
+
+    // Может редактировать, если:
+    // 1. Это его собственный пост
+    // 2. ИЛИ у него есть роль для редактирования любых постов
+    return user.value.id === postOwnerId || hasRole('OAPI:ROLE:EditPost')
+  }
+
+  // Проверка для удаления постов
+  const canDeletePost = (postOwnerId: number): boolean => {
+    if (!user.value) return false
+
+    return user.value.id === postOwnerId || hasRole('OAPI:ROLE:DeletePost')
+  }
+
+  // Проверка для публикации турниров
+  const canPublishTournaments = (): boolean => {
+    return hasRole('OAPI:ROLE:PublishTournament')
+  }
+
+  // Проверка для редактирования турниров
+  const canEditTournaments = (): boolean => {
+    return hasRole('OAPI:ROLE:EditTournament')
+  }
+
+  // Проверка для удаления турниров
+  const canDeleteTournaments = (): boolean => {
+    return hasRole('OAPI:ROLE:DeleteTournament')
+  }
+
+  // Проверка для управления товарами
+  const canPublishProducts = (): boolean => {
+    return hasRole('OAPI:ROLE:PublishProduct')
+  }
+
+  const canEditProducts = (): boolean => {
+    return hasRole('OAPI:ROLE:EditProduct')
+  }
+
+  const canDeleteProducts = (): boolean => {
+    return hasRole('OAPI:ROLE:DeleteProduct')
+  }
 
   // Сохранение токена
   const setToken = (newToken: string) => {
@@ -23,11 +94,17 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('auth_token', newToken)
   }
 
-  // Сохранение пользователя
+  // Сохранение пользователя (с ролями)
   const setUser = (userData: User) => {
     user.value = userData
     localStorage.setItem('auth_user', JSON.stringify(userData))
-    console.log('Пользователь сохранен:', userData)
+    console.log('Пользователь сохранен с ролями:', userData.roles)
+  }
+
+  // Установка всех данных аутентификации
+  const setAuthData = (authData: { user: User; token: string }) => {
+    setToken(authData.token)
+    setUser(authData.user)
   }
 
   // Очистка данных
@@ -44,18 +121,17 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authAPI.login({ email, password })
       const { token: authToken, id, email: userEmail, name, roles } = response.data
 
-      console.log('Ответ от сервера при входе:', response.data)
+      console.log('Ответ от сервера при входе (роли):', roles)
 
       // Создаем объект пользователя из данных ответа
       const userData: User = {
         id,
         email: userEmail,
         name,
-        roles
+        roles: roles || [] // Убедимся, что roles всегда массив
       }
 
-      setToken(authToken)
-      setUser(userData)
+      setAuthData({ token: authToken, user: userData })
 
       return { success: true }
     } catch (error: any) {
@@ -72,12 +148,13 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       // Пытаемся получить данные пользователя по токену
       // Если у вас есть endpoint для получения текущего пользователя
-      if (!user.value) {
+      if (!user.value && token.value) {
         // Можно попробовать декодировать JWT токен
         const payload = decodeJWT(token.value)
         if (payload && payload.sub) {
           // Если в токене есть email, можем использовать его
           console.log('Данные из JWT токена:', payload)
+          // Запросить данные пользователя с сервера, если нужно
         }
       }
       return true
@@ -174,8 +251,23 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     user,
     isAuthenticated,
+    roles,
+    userId,
+    hasRole,
+    hasAnyRole,
+    hasAllRoles,
+    canPublishPosts,
+    canEditPost,
+    canDeletePost,
+    canPublishTournaments,
+    canEditTournaments,
+    canDeleteTournaments,
+    canPublishProducts,
+    canEditProducts,
+    canDeleteProducts,
     setToken,
     setUser,
+    setAuthData,
     clearAuth,
     login,
     logout,
