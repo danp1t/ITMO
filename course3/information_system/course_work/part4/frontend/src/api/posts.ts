@@ -1,15 +1,34 @@
 import apiClient from '.'
-import type { Post, Comment, Tag } from '../types/posts'
+import type { Post, Comment } from '../types/posts'
 
 export const postsAPI = {
   // Получить все посты
-  getPosts(params?: { tagId?: number; sortBy?: string; sortDirection?: string }) {
-    return apiClient.get<Post[]>('/api/posts', { params })
+  async getPosts(params?: { tagId?: number; sortBy?: string; sortDirection?: string }) {
+    const response = await apiClient.get<any[]>('/api/posts', { params })
+
+    // Преобразуем данные из сервера в наш формат
+    const posts: Post[] = response.data.map(post => ({
+      ...post,
+      // Убедимся, что у нас есть все необходимые поля
+      tags: post.tags || [],
+      commentsCount: post.commentsCount || 0
+    }))
+
+    return { ...response, data: posts }
   },
 
   // Получить пост по ID
-  getPostById(id: number) {
-    return apiClient.get<Post>(`/api/posts/${id}`)
+  async getPostById(id: number) {
+    const response = await apiClient.get<any>(`/api/posts/${id}`)
+
+    // Преобразуем данные
+    const post: Post = {
+      ...response.data,
+      tags: response.data.tags || [],
+      commentsCount: response.data.commentsCount || 0
+    }
+
+    return { ...response, data: post }
   },
 
   // Создать пост
@@ -33,8 +52,9 @@ export const postsAPI = {
   },
 
   // Получить комментарии поста
-  getComments(postId: number) {
-    return apiClient.get<Comment[]>(`/api/comments?postId=${postId}`)
+  async getComments(postId: number) {
+    const response = await apiClient.get<Comment[]>(`/api/comments?postId=${postId}`)
+    return response
   },
 
   // Создать комментарий
@@ -47,8 +67,16 @@ export const postsAPI = {
     return apiClient.delete(`/api/comments/${id}`)
   },
 
-  // Получить теги
-  getTags() {
-    return apiClient.get<Tag[]>('/api/tags')
+  // Фильтрация по тегам
+  async getPostsByTag(tagId: number) {
+    const response = await apiClient.get<any[]>(`/api/posts/tag/${tagId}`)
+
+    const posts: Post[] = response.data.map(post => ({
+      ...post,
+      tags: post.tags || [],
+      commentsCount: post.commentsCount || 0
+    }))
+
+    return { ...response, data: posts }
   },
 }

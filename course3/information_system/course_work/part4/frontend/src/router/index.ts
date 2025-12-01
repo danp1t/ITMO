@@ -15,6 +15,12 @@ const routes = [
     meta: { requiresAuth: false },
   },
   {
+    path: '/posts/:id',
+    name: 'post-detail',
+    component: () => import('../views/PostDetailView.vue'),
+    meta: { requiresAuth: false },
+  },
+  {
     path: '/tournaments',
     name: 'tournaments',
     component: () => import('../views/TournamentsView.vue'),
