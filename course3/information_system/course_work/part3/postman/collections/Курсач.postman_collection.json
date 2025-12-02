@@ -3,9 +3,7 @@
     "_postman_id": "f9e73af4-13ad-4de0-a1bc-07eedfd49c1b",
     "name": "Курсач",
     "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "50290805",
-    "_collection_link": "https://danp1t-b80b9aa7-4969370.postman.co/workspace/Andrew-Rogov's-Workspace~c2a34218-2e7e-4cd0-816c-79947a175705/collection/50290805-f9e73af4-13ad-4de0-a1bc-07eedfd49c1b?action=share&source=collection_link&creator=50290805"
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
@@ -24,16 +22,13 @@
                   "});",
                   ""
                 ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "type": "text/javascript"
               }
             }
           ],
           "id": "18d156f0-854d-4ce5-b808-ea6df32dc294",
           "request": {
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n\t\"name\": \"test2\",\n    \"email\": \"example2@example.com\",\n    \"password\": \"password\"\n}",
@@ -57,15 +52,13 @@
               ]
             },
             "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
-          },
-          "response": []
+          }
         },
         {
           "name": "Подтверждение email",
           "id": "e4c5473f-de4c-44fc-9311-00429a92f810",
           "request": {
             "method": "POST",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/auth/verify?email=example2@example.com&code=985322",
               "protocol": "http",
@@ -89,8 +82,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Выход из системы",
@@ -107,7 +99,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/auth/logout",
               "protocol": "http",
@@ -121,15 +112,13 @@
                 "logout"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Запрос сброса пароля",
           "id": "374f4c5b-a10c-46eb-a048-2b83c71afcaf",
           "request": {
             "method": "POST",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/auth/forgot-password?email=example@example.com",
               "protocol": "http",
@@ -149,15 +138,13 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Сброс пароля по токену",
           "id": "a8c1cfba-f437-4baa-ba32-5d7c725ef279",
           "request": {
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"token\": \"ba07d15f-3b80-48a5-bb10-9ed82b80d56c\",\n    \"newPassword\": \"password\"\n}",
@@ -180,15 +167,13 @@
                 "reset-password"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Вход в систему",
           "id": "beae28bb-2d32-480f-9618-e444c8fcfd3a",
           "request": {
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n   \"email\": \"example33@example.com\",\n   \"password\": \"password\"\n}",
@@ -211,8 +196,7 @@
                 "login"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "9996c621-e659-4763-97cc-803e9d252ada"
@@ -235,7 +219,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/accounts",
               "protocol": "http",
@@ -248,8 +231,7 @@
                 "accounts"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получить аккаунт по id",
@@ -266,7 +248,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/accounts/1",
               "protocol": "http",
@@ -280,8 +261,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получить аккаунт по email",
@@ -298,7 +278,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/accounts/email/example@example.com",
               "protocol": "http",
@@ -313,8 +292,7 @@
                 "example@example.com"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Обновить аккаунт по email Copy",
@@ -331,7 +309,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"name\": \"Updated Name\",\n    \"email\": \"example@example.com\"\n}",
@@ -355,8 +332,7 @@
                 "example@example.com"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получить детальную информацию об аккаунте",
@@ -367,15 +343,14 @@
               "bearer": [
                 {
                   "key": "token",
-                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMkBleGFtcGxlLmNvbSIsImlhdCI6MTc2MzkxMTg4NCwiZXhwIjoxNzYzOTk4Mjg0fQ.Z6GHMG7H2h0Zd0ktS4iefJS_dZ5uK2ANJGzX9mUIiTalkK7xJOJfaCgaOsmwdl-Aof1rFQSPY3TxltBpz2KPug",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ2NzI5NDgsImV4cCI6MTc2NDc1OTM0OH0.gBs41Ne5-rgBftPBJsHoLKWgft7JJmc1OWPmQs3oanlPANAAUxSyXdz0eOBtazZ7dPCHuXlYNPDm8CC-RF6K0w",
                   "type": "string"
                 }
               ]
             },
             "method": "GET",
-            "header": [],
             "url": {
-              "raw": "http://localhost:8080/api/accounts/1/detail",
+              "raw": "http://localhost:8080/api/accounts/5/detail",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -384,12 +359,11 @@
               "path": [
                 "api",
                 "accounts",
-                "1",
+                "5",
                 "detail"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Создать новую роль",
@@ -406,7 +380,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"name\": \"ROLE_MODERATOR\",\n    \"description\": \"Moderator role\"\n}",
@@ -428,8 +401,7 @@
                 "roles"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "7c419ee4-729d-4a78-97e9-029a16d4f853"
@@ -442,7 +414,6 @@
           "id": "6b077fd2-4ce5-493b-aa99-9c492574fbe5",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/tournaments/search?name=чемпионат&sortBy=startDate&sortDirection=desc\nContent-Type: application/json",
               "protocol": "http",
@@ -470,15 +441,13 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Поиск турниров по рангу",
           "id": "053a2436-35aa-4059-87f9-acdbd4958260",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/tournaments/rang/2",
               "protocol": "http",
@@ -493,15 +462,13 @@
                 "2"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение турнира по ID",
           "id": "c4b68dc8-34d7-4bbd-94bb-18ca8a49cc28",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/tournaments/1",
               "protocol": "http",
@@ -515,15 +482,13 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Просмотр таблицы с сортировкой",
           "id": "545a81ca-bad5-4cb1-aa2e-6e37826047f0",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "http://localhost:8080/api/tournaments?sortBy=name&sortDirection=asc",
               "protocol": "http",
@@ -546,8 +511,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Создание турнира",
@@ -564,7 +528,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Мисс грация\",\n  \"startDate\": \"2026-06-15T10:00:00\",\n  \"finishDate\": \"2026-06-17T18:00:00\",\n  \"address\": \"Москва, ул. Спортивная, 23\",\n  \"link\": \"https://example.com/tournament\",\n  \"rangId\": 1,\n  \"minimalAge\": 3,\n  \"archived\": false\n}",
@@ -586,8 +549,7 @@
                 "tournaments"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Обновление турнира",
@@ -604,7 +566,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id\": 6,\n  \"name\": \"Мисс грация\",\n  \"startDate\": \"2024-06-20T10:00:00\",\n  \"finishDate\": \"2024-06-22T18:00:00\",\n  \"address\": \"Москва, ул. Спортивная, 20\",\n  \"link\": \"https://example.com/tournament-updated\",\n  \"rangId\": 2,\n  \"minimalAge\": 18,\n  \"archived\": false\n}",
@@ -627,8 +588,7 @@
                 "6"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Удаление турнира",
@@ -645,7 +605,6 @@
               ]
             },
             "method": "DELETE",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id\": 6,\n  \"name\": \"Мисс грация\",\n  \"startDate\": \"2024-06-20T10:00:00\",\n  \"finishDate\": \"2024-06-22T18:00:00\",\n  \"address\": \"Москва, ул. Спортивная, 20\",\n  \"link\": \"https://example.com/tournament-updated\",\n  \"rangId\": 2,\n  \"minimalAge\": 18,\n  \"archived\": false\n}",
@@ -668,8 +627,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Запуск архивации турниров",
@@ -686,7 +644,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -709,8 +666,7 @@
                 "archive-old"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение всех рангов",
@@ -730,7 +686,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -752,8 +707,7 @@
                 "rangs"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Обновление ранга",
@@ -770,7 +724,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"id\": 8,\n  \"name\": \"Городской\",\n  \"description\": \"Соревнования городского уровня с обновленным описанием\"\n}",
@@ -793,8 +746,7 @@
                 "8"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Создание ранга",
@@ -811,7 +763,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Тестовый\",\n  \"description\": \"Соревнования тестового уровня\"\n}",
@@ -833,8 +784,7 @@
                 "rangs"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Удаление ранга",
@@ -851,7 +801,6 @@
               ]
             },
             "method": "DELETE",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -874,8 +823,7 @@
                 "8"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "05028073-e2c7-46d8-8939-b144e880b08d"
@@ -901,7 +849,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -923,8 +870,7 @@
                 "posts"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Просмотр конкретного поста",
@@ -944,7 +890,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -967,8 +912,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Создание комментария",
@@ -985,7 +929,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"userComment\": \"Это тестовый комментарий\",\n  \"postId\": 1,\n  \"accountId\": 2,\n  \"createdAt\": \"2025-11-30T17:55:24.097\"\n}",
@@ -1007,8 +950,7 @@
                 "comments"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Оценивание постов",
@@ -1025,7 +967,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -1049,8 +990,7 @@
                 "like"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Публикация постов",
@@ -1067,7 +1007,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Тестовый пост с ролью\",\n  \"text\": \"Этот пост создан пользователем с ролью публикации\",\n  \"ownerId\": 2\n}",
@@ -1089,8 +1028,7 @@
                 "posts"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Удаление постов",
@@ -1107,7 +1045,6 @@
               ]
             },
             "method": "DELETE",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Тестовый пост с ролью\",\n  \"text\": \"Этот пост создан пользователем с ролью публикации\",\n  \"ownerId\": 2\n}",
@@ -1130,8 +1067,7 @@
                 "4"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Удаление комментария",
@@ -1148,7 +1084,6 @@
               ]
             },
             "method": "DELETE",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -1171,8 +1106,7 @@
                 "4"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Обновление поста",
@@ -1189,7 +1123,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Обновленный пост\",\n  \"text\": \"Обновленный текст\",\n  \"ownerId\": 1\n}",
@@ -1212,8 +1145,7 @@
                 "3"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Добавление вложений",
@@ -1230,7 +1162,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
@@ -1252,8 +1183,7 @@
                 "attachments"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Фильтрация по тегам",
@@ -1273,7 +1203,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
@@ -1297,8 +1226,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "e87d7a25-39bf-40c6-820a-dcafec151a21"
@@ -1321,7 +1249,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"productId\": 1,\n  \"sizeName\": \"пара\",\n  \"countItems\": 20,\n  \"price\": 5000\n}",
@@ -1344,8 +1271,7 @@
                 "16"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение всех товаров",
@@ -1365,7 +1291,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
@@ -1387,8 +1312,7 @@
                 "products"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение информации о товарах",
@@ -1408,7 +1332,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
@@ -1431,8 +1354,7 @@
                 "5"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение детальной информации о товаре",
@@ -1452,7 +1374,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
@@ -1476,8 +1397,7 @@
                 "view"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение товаров с фильтрацией",
@@ -1497,7 +1417,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"postId\": 3,\n  \"name\": \"test-image.jpg\",\n  \"path\": \"/uploads/test-image.jpg\",\n  \"typeAttachmentId\": 1\n}",
@@ -1538,8 +1457,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Информация об отсутствии товара",
@@ -1559,7 +1477,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -1583,8 +1500,7 @@
                 "availability"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Детальная проверка наличия товара",
@@ -1604,7 +1520,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -1638,8 +1553,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Публикация товара",
@@ -1656,7 +1570,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Новые булавы Pro\",\n  \"description\": \"Улучшенная модель булав\",\n  \"category\": \"Снаряды\",\n  \"basePrice\": 6000,\n  \"popularity\": 0\n}",
@@ -1678,8 +1591,7 @@
                 "products"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Обновление товара",
@@ -1696,7 +1608,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Булавы Sasaki Pro Max\",\n  \"description\": \"Обновленное описание\",\n  \"category\": \"Снаряды\",\n  \"basePrice\": 5500,\n  \"popularity\": 10\n}",
@@ -1719,8 +1630,7 @@
                 "9"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Удаление товара",
@@ -1737,7 +1647,6 @@
               ]
             },
             "method": "DELETE",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -1760,8 +1669,7 @@
                 "9"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Добавление информации о товаре",
@@ -1778,7 +1686,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"productId\": 1,\n  \"sizeName\": \"XL\",\n  \"countItems\": 15,\n  \"price\": 5200\n}",
@@ -1800,8 +1707,7 @@
                 "product-infos"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Создание заказа",
@@ -1818,7 +1724,6 @@
               ]
             },
             "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"address\": \"Москва, ул. Ленина, 10\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"totalAmount\": 12500,\n  \"accountId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Купальник для выступлений\",\n      \"description\": \"Кристалл-купальник ручной работы\",\n      \"category\": \"Одежда\",\n      \"basePrice\": 8000,\n      \"popularity\": 0\n    }\n  ]\n}",
@@ -1840,8 +1745,7 @@
                 "orders"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение информации о товаре по размеру",
@@ -1861,7 +1765,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"productId\": 1,\n  \"sizeName\": \"пара\",\n  \"countItems\": 20,\n  \"price\": 5000\n}",
@@ -1885,8 +1788,7 @@
                 "пара"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение всех заказов пользователем",
@@ -1906,7 +1808,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"address\": \"Москва, ул. Ленина, 10\",\n  \"phone\": \"+7 (999) 123-45-67\",\n  \"totalAmount\": 12500,\n  \"accountId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    },\n    {\n      \"id\": 5,\n      \"name\": \"Купальник для выступлений\",\n      \"description\": \"Кристалл-купальник ручной работы\",\n      \"category\": \"Одежда\",\n      \"basePrice\": 8000,\n      \"popularity\": 0\n    }\n  ]\n}",
@@ -1930,8 +1831,7 @@
                 "2"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение заказа по ID",
@@ -1951,7 +1851,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -1974,8 +1873,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение заказа по ID Copy",
@@ -1992,7 +1890,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"address\": \"Москва, ул. Обновленная, 5\",\n  \"phone\": \"+7 (999) 987-65-43\",\n  \"totalAmount\": 13000,\n  \"accountId\": 2,\n  \"orderStatusId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    }\n  ]\n}",
@@ -2015,8 +1912,7 @@
                 "2"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Удаление заказа",
@@ -2033,7 +1929,6 @@
               ]
             },
             "method": "PUT",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"address\": \"Москва, ул. Обновленная, 5\",\n  \"phone\": \"+7 (999) 987-65-43\",\n  \"totalAmount\": 13000,\n  \"accountId\": 2,\n  \"orderStatusId\": 2,\n  \"products\": [\n    {\n      \"id\": 1,\n      \"name\": \"Булавы Sasaki Pro\",\n      \"description\": \"Профессиональные булавы для соревнований\",\n      \"category\": \"Снаряды\",\n      \"basePrice\": 5000,\n      \"popularity\": 0\n    }\n  ]\n}",
@@ -2056,8 +1951,7 @@
                 "2"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Просмотр остатков товара",
@@ -2077,7 +1971,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -2100,8 +1993,7 @@
                 "stock"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Поиск товара по названию",
@@ -2121,7 +2013,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -2150,8 +2041,7 @@
                 }
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение информации о товаре по ID",
@@ -2171,7 +2061,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -2194,8 +2083,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение информации о товарах по продукту",
@@ -2215,7 +2103,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -2239,8 +2126,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         },
         {
           "name": "Получение заказов по статусу",
@@ -2260,7 +2146,6 @@
               ]
             },
             "method": "GET",
-            "header": [],
             "body": {
               "mode": "raw",
               "raw": "",
@@ -2284,8 +2169,7 @@
                 "1"
               ]
             }
-          },
-          "response": []
+          }
         }
       ],
       "id": "c01e44a3-5b8b-4d66-b551-e3cbfd9002a3"
