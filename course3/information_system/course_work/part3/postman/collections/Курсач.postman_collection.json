@@ -24,6 +24,16 @@
                 ],
                 "type": "text/javascript"
               }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "a9800fc3-5b2e-498b-b40d-6c49f9150865",
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript"
+              }
             }
           ],
           "id": "18d156f0-854d-4ce5-b808-ea6df32dc294",
@@ -31,7 +41,7 @@
             "method": "POST",
             "body": {
               "mode": "raw",
-              "raw": "{\n\t\"name\": \"test2\",\n    \"email\": \"example2@example.com\",\n    \"password\": \"password\"\n}",
+              "raw": "{\n\t\"name\": \"test5\",\n    \"email\": \"example5@example.com\",\n    \"password\": \"password\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -60,7 +70,7 @@
           "request": {
             "method": "POST",
             "url": {
-              "raw": "http://localhost:8080/api/auth/verify?email=example2@example.com&code=985322",
+              "raw": "http://localhost:8080/api/auth/verify?email=admin@test.com&code=507645",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -74,11 +84,11 @@
               "query": [
                 {
                   "key": "email",
-                  "value": "example2@example.com"
+                  "value": "admin@test.com"
                 },
                 {
                   "key": "code",
-                  "value": "985322"
+                  "value": "507645"
                 }
               ]
             }
@@ -350,7 +360,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "http://localhost:8080/api/accounts/5/detail",
+              "raw": "http://localhost:8080/api/accounts/4/detail",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -359,7 +369,7 @@
               "path": [
                 "api",
                 "accounts",
-                "5",
+                "4",
                 "detail"
               ]
             }
@@ -398,6 +408,46 @@
               "port": "8080",
               "path": [
                 "api",
+                "roles"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Создать новую роль Copy",
+          "id": "645bd7fe-fed9-473d-993d-c7b03b69109e",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJleGFtcGxlMzNAZXhhbXBsZS5jb20iLCJpYXQiOjE3NjQ2Nzc3NjMsImV4cCI6MTc2NDc2NDE2M30.Z1o5moxVNPI5RpEKL50CIB0gCynRAYbHd91DQRwEqIOWYyi7_HXJf4650W0TNRudDogsAr6Unr3KsKP9HXO9LQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"roleId\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/accounts/2/roles",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "accounts",
+                "2",
                 "roles"
               ]
             }
@@ -900,7 +950,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/posts/1",
+              "raw": "http://localhost:8080/api/posts/5",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -909,7 +959,7 @@
               "path": [
                 "api",
                 "posts",
-                "1"
+                "5"
               ]
             }
           }
@@ -1055,7 +1105,7 @@
               }
             },
             "url": {
-              "raw": "http://localhost:8080/api/posts/4",
+              "raw": "http://localhost:8080/api/posts/3",
               "protocol": "http",
               "host": [
                 "localhost"
@@ -1064,7 +1114,7 @@
               "path": [
                 "api",
                 "posts",
-                "4"
+                "3"
               ]
             }
           }

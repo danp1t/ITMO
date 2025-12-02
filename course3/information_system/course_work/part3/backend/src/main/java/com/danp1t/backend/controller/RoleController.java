@@ -1,7 +1,11 @@
 package com.danp1t.backend.controller;
 
+import com.danp1t.backend.dto.AccountDTO;
 import com.danp1t.backend.dto.RoleDTO;
+import com.danp1t.backend.dto.RoleUserCountDTO;
 import com.danp1t.backend.model.Role;
+import com.danp1t.backend.repository.RoleRepository;
+import com.danp1t.backend.service.AccountService;
 import com.danp1t.backend.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +21,9 @@ public class RoleController {
 
     @Autowired
     private RoleService roleService;
+
+    @Autowired
+    private AccountService accountService;
 
     @GetMapping
     public List<RoleDTO> getAllRoles() {
@@ -58,5 +65,25 @@ public class RoleController {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{roleId}/users/count")
+    public ResponseEntity<RoleUserCountDTO> getUsersCountByRole(@PathVariable Integer roleId) {
+        if (!roleService.existsById(roleId)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        RoleUserCountDTO count = accountService.countUsersByRole(roleId);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/{roleId}/users")
+    public ResponseEntity<List<AccountDTO>> getUsersByRole(@PathVariable Integer roleId) {
+        if (!roleService.existsById(roleId)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<AccountDTO> users = accountService.getUsersByRole(roleId);
+        return ResponseEntity.ok(users);
     }
 }

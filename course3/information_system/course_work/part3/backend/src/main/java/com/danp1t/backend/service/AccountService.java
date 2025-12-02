@@ -169,7 +169,7 @@ public class AccountService {
         account.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1));
         accountRepository.save(account);
     }
-    
+
     // AU06 - сброс пароля
     public boolean resetPassword(String token, String newPassword) {
         Optional<Account> accountOpt = accountRepository.findByResetPasswordToken(token);
@@ -241,6 +241,18 @@ public class AccountService {
         }
 
         return Optional.empty();
+    }
+
+    public RoleUserCountDTO countUsersByRole(Integer roleId) {
+        Long count = accountRepository.countByRoleId(roleId);
+        return new RoleUserCountDTO(count != null ? count : 0L);
+    }
+
+    public List<AccountDTO> getUsersByRole(Integer roleId) {
+        List<Account> accounts = accountRepository.findByRoleId(roleId);
+        return accounts.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Account addRoleToAccount(Integer accountId, Integer roleId) {

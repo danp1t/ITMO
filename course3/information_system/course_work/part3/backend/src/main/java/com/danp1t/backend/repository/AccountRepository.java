@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,4 +25,11 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     @Query("SELECT a FROM Account a LEFT JOIN FETCH a.comments WHERE a.id = :id")
     Optional<Account> findByIdWithComments(@Param("id") Integer id);
+
+    // Новые методы для работы с ролями
+    @Query("SELECT COUNT(a) FROM Account a JOIN a.roles r WHERE r.id = :roleId")
+    Long countByRoleId(@Param("roleId") Integer roleId);
+
+    @Query("SELECT a FROM Account a JOIN a.roles r WHERE r.id = :roleId")
+    List<Account> findByRoleId(@Param("roleId") Integer roleId);
 }

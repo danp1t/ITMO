@@ -28,6 +28,9 @@
           <div class="role-header">
             <h3 class="has-text-light">{{ formatRoleName(role.name) }}</h3>
             <div class="role-actions">
+              <button class="button is-small is-info is-outlined" @click="manageRoleUsers(role)">
+                <i class="fas fa-users"></i>
+              </button>
               <button class="button is-small is-warning is-outlined" @click="editRole(role)">
                 <i class="fas fa-edit"></i>
               </button>
@@ -41,7 +44,7 @@
             <div class="role-users mt-3">
               <span class="tag is-light">
                 <i class="fas fa-users mr-1"></i>
-                {{ getRoleUsersCount(role.name) }} пользователей
+                {{ role.userCount || 0 }} пользователей
               </span>
             </div>
           </div>
@@ -81,6 +84,98 @@
         </footer>
       </div>
     </div>
+
+    <!-- Модальное окно управления пользователями роли -->
+    <div class="modal dark-modal" :class="{ 'is-active': showManageUsersModal }">
+      <div class="modal-background" @click="closeManageUsersModal"></div>
+      <div class="modal-card" style="width: 800px; max-width: 90vw;">
+        <header class="modal-card-head dark-modal-header">
+          <p class="modal-card-title has-text-light">
+            Управление пользователями роли: {{ formatRoleName(selectedRole?.name || '') }}
+          </p>
+          <button class="delete" @click="closeManageUsersModal"></button>
+        </header>
+
+        <section class="modal-card-body dark-modal-body">
+          <div v-if="manageLoading" class="has-text-centered py-6">
+            <i class="fas fa-spinner fa-spin fa-2x has-text-primary"></i>
+          </div>
+
+          <div v-else>
+            <!-- Поиск пользователей -->
+            <div class="field">
+              <label class="label has-text-light">Добавить пользователя</label>
+              <div class="field has-addons">
+                <div class="control is-expanded">
+                  <input
+                    v-model="searchEmail"
+                    class="input dark-input"
+                    placeholder="Введите email пользователя"
+                    @keyup.enter="searchUser"
+                  >
+                </div>
+                <div class="control">
+                  <button class="button is-primary" @click="searchUser" :disabled="!searchEmail.trim()">
+                    Найти
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Результат поиска -->
+            <div v-if="searchResult && !searchResult.hasRole" class="notification is-info is-light mt-3">
+              <div class="is-flex is-justify-content-space-between is-align-items-center">
+                <div>
+                  <strong>{{ searchResult.name }}</strong> ({{ searchResult.email }})
+                </div>
+                <button class="button is-small is-primary" @click="addRoleToUser(searchResult.id)">
+                  Добавить роль
+                </button>
+              </div>
+            </div>
+
+            <div v-if="searchResult && searchResult.hasRole" class="notification is-warning is-light mt-3">
+              <div class="is-flex is-justify-content-space-between is-align-items-center">
+                <div>
+                  <strong>{{ searchResult.name }}</strong> ({{ searchResult.email }}) - уже имеет эту роль
+                </div>
+                <button class="button is-small is-danger" @click="removeRoleFromUser(searchResult.id)">
+                  Удалить роль
+                </button>
+              </div>
+            </div>
+
+            <!-- Список пользователей с этой ролью -->
+            <div class="mt-5">
+              <h4 class="subtitle has-text-light mb-3">Пользователи с этой ролью ({{ roleUsers.length }})</h4>
+
+              <div v-if="roleUsers.length === 0" class="notification is-dark">
+                Нет пользователей с этой ролью
+              </div>
+
+              <div v-else class="users-list">
+                <div v-for="user in roleUsers" :key="user.id" class="user-item">
+                  <div class="is-flex is-justify-content-space-between is-align-items-center">
+                    <div>
+                      <strong class="has-text-light">{{ user.name }}</strong>
+                      <br>
+                      <small class="has-text-grey-light">{{ user.email }}</small>
+                    </div>
+                    <button class="button is-small is-danger is-outlined" @click="removeRoleFromUser(user.id)">
+                      Удалить
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="modal-card-foot dark-modal-footer">
+          <button class="button is-dark" @click="closeManageUsersModal">Закрыть</button>
+        </footer>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -89,10 +184,24 @@ import { ref, onMounted } from 'vue'
 import { adminAPI } from '@/api/admin'
 import type { Role } from '@/types/admin'
 
+interface User {
+  id: number
+  name: string
+  email: string
+  hasRole?: boolean
+}
+
 const roles = ref<Role[]>([])
 const loading = ref(false)
 const showCreateModal = ref(false)
 const isSaving = ref(false)
+const showManageUsersModal = ref(false)
+const manageLoading = ref(false)
+
+const selectedRole = ref<Role | null>(null)
+const roleUsers = ref<User[]>([])
+const searchEmail = ref('')
+const searchResult = ref<User | null>(null)
 
 const newRole = ref({
   name: '',
@@ -105,10 +214,128 @@ const loadRoles = async () => {
   try {
     const response = await adminAPI.getAllRoles()
     roles.value = response.data || []
+
+    // Загружаем количество пользователей для каждой роли
+    for (const role of roles.value) {
+      await loadRoleUsersCount(role)
+    }
   } catch (error) {
     console.error('Ошибка при загрузке ролей:', error)
   } finally {
     loading.value = false
+  }
+}
+
+// Загрузка пользователей для роли
+const loadRoleUsers = async (roleId: number) => {
+  manageLoading.value = true
+  try {
+    // Здесь нужно реализовать API для получения пользователей с определенной ролью
+    // Временная заглушка
+    const response = await adminAPI.getAccountsByRole(roleId)
+    roleUsers.value = response.data || []
+  } catch (error) {
+    console.error('Ошибка при загрузке пользователей роли:', error)
+    roleUsers.value = []
+  } finally {
+    manageLoading.value = false
+  }
+}
+
+// Загрузка количества пользователей для роли
+const loadRoleUsersCount = async (role: Role) => {
+  try {
+    const response = await adminAPI.getRoleUsersCount(role.id)
+    role.userCount = response.data?.count || 0
+  } catch (error) {
+    console.error('Ошибка при загрузке количества пользователей:', error)
+    role.userCount = 0
+  }
+}
+
+// Управление пользователями роли
+const manageRoleUsers = async (role: Role) => {
+  selectedRole.value = role
+  searchEmail.value = ''
+  searchResult.value = null
+  showManageUsersModal.value = true
+  await loadRoleUsers(role.id)
+}
+
+// Поиск пользователя
+const searchUser = async () => {
+  if (!searchEmail.value.trim() || !selectedRole.value) return
+
+  try {
+    const response = await adminAPI.getAccountByEmail(searchEmail.value.trim())
+    const user = response.data
+
+    if (user) {
+      // Проверяем, есть ли у пользователя эта роль
+      const hasRole = roleUsers.value.some(u => u.id === user.id)
+      searchResult.value = {
+        ...user,
+        hasRole
+      }
+    } else {
+      alert('Пользователь не найден')
+      searchResult.value = null
+    }
+  } catch (error) {
+    console.error('Ошибка при поиске пользователя:', error)
+    alert('Ошибка при поиске пользователя')
+  }
+}
+
+// Добавление роли пользователю
+const addRoleToUser = async (userId: number) => {
+  if (!selectedRole.value) return
+
+  try {
+    await adminAPI.addRoleToAccountByName(userId, selectedRole.value.name)
+
+    // Обновляем список пользователей
+    await loadRoleUsers(selectedRole.value.id)
+
+    // Обновляем количество пользователей в списке ролей
+    await loadRoleUsersCount(selectedRole.value)
+
+    // Обновляем результат поиска
+    if (searchResult.value) {
+      searchResult.value.hasRole = true
+    }
+
+    alert('Роль успешно добавлена')
+  } catch (error) {
+    console.error('Ошибка при добавлении роли:', error)
+    alert('Ошибка при добавлении роли')
+  }
+}
+
+// Удаление роли у пользователя
+const removeRoleFromUser = async (userId: number) => {
+  if (!selectedRole.value) return
+
+  if (!confirm('Удалить роль у пользователя?')) return
+
+  try {
+    await adminAPI.removeRoleFromAccountByName(userId, selectedRole.value.name)
+
+    // Обновляем список пользователей
+    await loadRoleUsers(selectedRole.value.id)
+
+    // Обновляем количество пользователей в списке ролей
+    await loadRoleUsersCount(selectedRole.value)
+
+    // Обновляем результат поиска
+    if (searchResult.value && searchResult.value.id === userId) {
+      searchResult.value.hasRole = false
+    }
+
+    alert('Роль успешно удалена')
+  } catch (error) {
+    console.error('Ошибка при удалении роли:', error)
+    alert('Ошибка при удалении роли')
   }
 }
 
@@ -148,13 +375,16 @@ const closeModal = () => {
   newRole.value = { name: '', description: '' }
 }
 
-const formatRoleName = (role: string) => {
-  return role.replace('OAPI:ROLE:', '')
+const closeManageUsersModal = () => {
+  showManageUsersModal.value = false
+  selectedRole.value = null
+  roleUsers.value = []
+  searchEmail.value = ''
+  searchResult.value = null
 }
 
-const getRoleUsersCount = (roleName: string) => {
-  // Здесь должна быть логика подсчета пользователей с этой ролью
-  return 0
+const formatRoleName = (role: string) => {
+  return role.replace('OAPI:ROLE:', '')
 }
 
 onMounted(() => {
@@ -241,6 +471,26 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
+/* Список пользователей */
+.users-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.user-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #333;
+  transition: background-color 0.2s;
+}
+
+.user-item:hover {
+  background-color: #2d2d2d;
+}
+
+.user-item:last-child {
+  border-bottom: none;
+}
+
 /* Модальное окно */
 .dark-modal .modal-card {
   background: #1e1e1e;
@@ -260,6 +510,20 @@ onMounted(() => {
 .dark-modal-footer {
   background: #2d2d2d;
   border-top: 1px solid #333;
+}
+
+/* Уведомления */
+.notification {
+  background-color: #2d2d2d;
+  border-left: 4px solid;
+}
+
+.notification.is-info {
+  border-left-color: #3298dc;
+}
+
+.notification.is-warning {
+  border-left-color: #ffdd57;
 }
 
 /* Адаптивность */

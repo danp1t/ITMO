@@ -33,4 +33,9 @@ public class RoleService {
     public Role findByName(String name) {
         return roleRepository.findByName(name);
     }
+
+    // Новый метод для проверки существования роли
+    public boolean existsById(Integer id) {
+        return roleRepository.existsById(id);
+    }
 }
