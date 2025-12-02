@@ -17,11 +17,15 @@
         <button
           v-if="authStore.canDeletePost(post.ownerId)"
           class="card-header-icon"
-          @click="confirmDelete"
+          @click="deletePost"
           title="Удалить пост"
+          :disabled="isDeleting"
         >
           <span class="icon">
             <i class="fas fa-trash"></i>
+          </span>
+                <span v-if="isDeleting" class="icon">
+            <i class="fas fa-spinner fa-spin ml-2"></i>
           </span>
         </button>
       </div>
@@ -74,6 +78,33 @@ import { ref, computed, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth.ts'
 import { postsAPI } from '@/api/posts.ts'
 import type { Post } from '@/types/posts.ts'
+
+const isDeleting = ref(false)
+const deletePost = async () => {
+  if (!authStore.isAuthenticated || !authStore.canDeletePost(props.post.ownerId)) {
+    return
+  }
+
+  if (isDeleting.value) return
+
+  isDeleting.value = true
+
+  try {
+    await postsAPI.deletePost(props.post.id)
+    // Эмитим событие удаления
+    emit('delete', props.post.id)
+  } catch (error: any) {
+    console.error('Ошибка при удалении поста:', error)
+
+    // Вместо alert можно использовать toast-уведомления или другой UI
+    const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
+    // Можно добавить логику для показа уведомлений, например:
+    // useToast().showError(errorMessage)
+  } finally {
+    isDeleting.value = false
+  }
+}
+
 
 const props = defineProps<{
   post: Post
@@ -199,6 +230,11 @@ checkIfLiked()
   margin: 0;
   font-weight: 600;
   flex-grow: 1;
+}
+
+.card-header-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .card-header-icons {

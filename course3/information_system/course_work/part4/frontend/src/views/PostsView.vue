@@ -337,20 +337,7 @@ const closeEditModal = () => {
 
 // Обработчик удаления поста
 const handleDelete = async (postId: number) => {
-  if (!confirm('Вы уверены, что хотите удалить этот пост? Это действие нельзя отменить.')) {
-    return
-  }
-
-  try {
-    await postsAPI.deletePost(postId)
-    // Удаляем пост из списка
-    posts.value = posts.value.filter(p => p.id !== postId)
-    alert('Пост успешно удален!')
-  } catch (error: any) {
-    console.error('Ошибка при удалении поста:', error)
-    const message = error.response?.data?.message || 'Не удалось удалить пост'
-    alert(message)
-  }
+  posts.value = posts.value.filter(p => p.id !== postId)
 }
 
 const handleLike = async (postId: number) => {
