@@ -91,6 +91,24 @@ const routes = [
     name: 'product-details',
     component: () => import('../views/ProductDetailView.vue'),
     meta: { requiresAuth: false } // Можно просматривать без авторизации
+  },
+  {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('@/views/AdminView.vue'),
+    meta: { requiresAdmin: true },
+    children: [
+      {
+        path: 'users',
+        name: 'AdminUsers',
+        component: () => import('@/components/admin/UserManagement.vue')
+      },
+      {
+        path: 'roles',
+        name: 'AdminRoles',
+        component: () => import('@/components/admin/RoleManagement.vue')
+      },
+    ]
   }
 ]
 

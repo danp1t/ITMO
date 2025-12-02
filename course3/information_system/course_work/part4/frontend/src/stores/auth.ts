@@ -259,12 +259,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const isAdmin = computed(() => {
+    return hasRole('OAPI:ROLE:BlockAccount') || hasRole('OAPI:ROLE:ManageUsers')
+  })
+
+// Проверка на право управления пользователями
+  const canManageUsers = computed(() => {
+    return hasRole('OAPI:ROLE:BlockAccount') || hasRole('OAPI:ROLE:ManageUsers')
+  })
+
+// Проверка на право управления ролями
+  const canManageRoles = computed(() => {
+    return hasRole('OAPI:ROLE:BlockAccount') || hasRole('OAPI:ROLE:ManageRoles')
+  })
+
   return {
     token,
     user,
     isAuthenticated,
     roles,
     userId,
+    isAdmin,
+    canManageUsers,
+    canManageRoles,
     hasRole,
     hasAnyRole,
     hasAllRoles,

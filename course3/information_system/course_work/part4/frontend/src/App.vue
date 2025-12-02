@@ -36,6 +36,14 @@
               <span class="nav-icon">🛍️</span>
               <span>Магазин</span>
             </router-link>
+            <router-link
+              v-if="authStore.isAdmin"
+              to="/admin/users"
+              class="navbar-item nav-item"
+            >
+              <span class="nav-icon">🛡️</span>
+              <span>Админка</span>
+            </router-link>
           </div>
 
           <div class="navbar-end">
