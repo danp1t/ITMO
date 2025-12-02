@@ -24,9 +24,9 @@
             @click="editPost"
             title="Редактировать пост"
           >
-          <span class="icon">
-            <i class="fas fa-edit"></i>
-          </span>
+            <span class="icon">
+              <i class="fas fa-edit"></i>
+            </span>
           </button>
         </header>
 
@@ -74,6 +74,7 @@
                 class="textarea"
                 placeholder="Напишите комментарий..."
                 rows="3"
+                :disabled="isAddingComment"
               ></textarea>
             </div>
           </div>
@@ -82,9 +83,12 @@
               <button
                 class="button is-primary"
                 @click="addComment"
-                :disabled="!newComment.trim()"
+                :disabled="!newComment.trim() || isAddingComment"
               >
-                Отправить комментарий
+                <span v-if="isAddingComment" class="icon">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                <span>{{ isAddingComment ? 'Отправка...' : 'Отправить комментарий' }}</span>
               </button>
             </div>
           </div>
@@ -109,11 +113,78 @@
             class="card comment-card mb-3"
           >
             <div class="card-content">
-              <div class="content">
+              <div class="content" v-if="editingCommentId !== comment.id">
                 <p>{{ comment.userComment }}</p>
                 <p class="is-size-7 has-text-grey">
                   {{ comment.accountName }} • {{ formatDate(comment.createdAt) }}
                 </p>
+              </div>
+
+              <!-- Форма редактирования комментария -->
+              <div v-else class="comment-edit-form">
+                <div class="field">
+                  <div class="control">
+                    <textarea
+                      v-model="editingCommentText"
+                      class="textarea"
+                      rows="3"
+                      :disabled="isEditingComment"
+                    ></textarea>
+                  </div>
+                </div>
+                <div class="buttons mt-2">
+                  <button
+                    class="button is-small is-primary"
+                    @click="saveEditedComment(comment.id)"
+                    :disabled="!editingCommentText.trim() || isEditingComment"
+                  >
+                    <span v-if="isEditingComment" class="icon">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                    <span>{{ isEditingComment ? 'Сохранение...' : 'Сохранить' }}</span>
+                  </button>
+                  <button
+                    class="button is-small is-light"
+                    @click="cancelEditComment"
+                    :disabled="isEditingComment"
+                  >
+                    Отмена
+                  </button>
+                </div>
+              </div>
+
+              <!-- Кнопки действий (только для автора комментария) -->
+              <div
+                v-if="authStore.isAuthenticated &&
+                      authStore.canEditComment(comment.accountId) &&
+                      editingCommentId !== comment.id"
+                class="comment-actions mt-2"
+              >
+                <button
+                  class="button is-small is-text"
+                  @click="startEditComment(comment)"
+                  title="Редактировать комментарий"
+                >
+                  <span class="icon is-small">
+                    <i class="fas fa-edit"></i>
+                  </span>
+                  <span>Редактировать</span>
+                </button>
+
+                <button
+                  class="button is-small is-text has-text-danger"
+                  @click="deleteComment(comment.id)"
+                  :disabled="isDeletingComment === comment.id"
+                  title="Удалить комментарий"
+                >
+                  <span class="icon is-small">
+                    <i class="fas fa-trash"></i>
+                  </span>
+                  <span v-if="isDeletingComment === comment.id">
+                    <i class="fas fa-spinner fa-spin ml-1"></i>
+                  </span>
+                  <span v-else>Удалить</span>
+                </button>
               </div>
             </div>
           </div>
@@ -139,6 +210,13 @@ const loading = ref(false)
 const isLiking = ref(false)
 const isLiked = ref(false)
 const newComment = ref('')
+const isAddingComment = ref(false)
+
+// Состояния для редактирования комментариев
+const editingCommentId = ref<number | null>(null)
+const editingCommentText = ref('')
+const isEditingComment = ref(false)
+const isDeletingComment = ref<number | null>(null)
 
 const loadPost = async () => {
   loading.value = true
@@ -181,7 +259,6 @@ const toggleLike = async () => {
     isLiked.value = !isLiked.value
     post.value.countLike += isLiked.value ? -1 : 1
     console.error('Ошибка при оценке поста:', error)
-    alert('Не удалось поставить лайк')
   } finally {
     isLiking.value = false
   }
@@ -189,6 +266,8 @@ const toggleLike = async () => {
 
 const addComment = async () => {
   if (!authStore.user || !post.value || !newComment.value.trim()) return
+
+  isAddingComment.value = true
 
   try {
     const commentData = {
@@ -202,12 +281,86 @@ const addComment = async () => {
     await loadComments()
   } catch (error) {
     console.error('Ошибка при добавлении комментария:', error)
-    alert('Не удалось добавить комментарий')
+  } finally {
+    isAddingComment.value = false
+  }
+}
+
+// Редактирование комментария
+const startEditComment = (comment: Comment) => {
+  editingCommentId.value = comment.id
+  editingCommentText.value = comment.userComment
+}
+
+const cancelEditComment = () => {
+  editingCommentId.value = null
+  editingCommentText.value = ''
+  isEditingComment.value = false
+}
+
+const saveEditedComment = async (commentId: number) => {
+  if (!editingCommentText.value.trim()) return
+
+  isEditingComment.value = true
+
+  try {
+    // Находим оригинальный комментарий
+    const originalComment = comments.value.find(c => c.id === commentId)
+    if (!originalComment) return
+
+    // Создаем обновленный DTO объекта комментария
+    const updatedComment: Comment = {
+      ...originalComment,
+      userComment: editingCommentText.value.trim()
+    }
+
+    await postsAPI.updateComment(commentId, updatedComment)
+
+    // Обновляем локально
+    const commentIndex = comments.value.findIndex(c => c.id === commentId)
+    if (commentIndex !== -1) {
+      comments.value[commentIndex] = updatedComment
+    }
+
+    cancelEditComment()
+
+    // Можно добавить уведомление об успехе
+    // useToast().success('Комментарий обновлен')
+  } catch (error) {
+    console.error('Ошибка при обновлении комментария:', error)
+    // Можно добавить уведомление об ошибке
+    // useToast().error('Не удалось обновить комментарий')
+  } finally {
+    isEditingComment.value = false
+  }
+}
+
+// Удаление комментария
+const deleteComment = async (commentId: number) => {
+  if (!authStore.user || !authStore.canDeleteComment(
+    comments.value.find(c => c.id === commentId)?.accountId || 0
+  )) {
+    return
+  }
+
+  isDeletingComment.value = commentId
+
+  try {
+    await postsAPI.deleteComment(commentId)
+    // Удаляем из списка
+    comments.value = comments.value.filter(c => c.id !== commentId)
+  } catch (error) {
+    console.error('Ошибка при удалении комментария:', error)
+  } finally {
+    isDeletingComment.value = null
   }
 }
 
 const editPost = () => {
+  // Реализуйте логику редактирования поста
   console.log('Редактировать пост:', post.value)
+  // Можно добавить роутинг на страницу редактирования
+  // или открыть модальное окно, как в PostsView.vue
 }
 
 const formatDate = (dateString: string) => {
@@ -225,3 +378,41 @@ onMounted(async () => {
   await loadComments()
 })
 </script>
+
+<style scoped>
+.comment-actions {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.comment-actions .button {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+.comment-edit-form .textarea {
+  font-size: 0.9rem;
+  min-height: 80px;
+}
+
+.comment-card {
+  border: 1px solid #f0f0f0;
+  box-shadow: none;
+  transition: border-color 0.2s ease;
+}
+
+.comment-card:hover {
+  border-color: #e0e0e0;
+}
+
+.button.is-text.has-text-danger:hover {
+  background-color: rgba(255, 56, 96, 0.1);
+}
+
+.fa-spinner {
+  font-size: 0.8em;
+}
+</style>

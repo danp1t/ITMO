@@ -17,6 +17,8 @@ export interface Comment {
   accountId: number
   accountName: string
   createdAt: string
+  canEdit?: boolean
+  canDelete?: boolean
 }
 
 export interface CreatePostData {

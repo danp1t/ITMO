@@ -67,6 +67,17 @@ export const postsAPI = {
     }
   },
 
+  async updateComment(id: number, comment: Comment) {
+    return await apiClient.put<Comment>(`/api/comments/${id}`, {
+      id: comment.id,
+      createdAt: comment.createdAt,
+      userComment: comment.userComment,
+      postId: comment.postId,
+      accountId: comment.accountId,
+      accountName: comment.accountName
+    })
+  },
+
   // Удалить комментарий
   deleteComment(id: number) {
     return apiClient.delete(`/api/comments/${id}`)

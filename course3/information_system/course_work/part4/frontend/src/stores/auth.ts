@@ -60,6 +60,18 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value.id === postOwnerId || hasRole('OAPI:ROLE:DeletePost')
   }
 
+  const canEditComment = (postOwnerId: number): boolean => {
+    if (!user.value) return false
+
+    return user.value.id === postOwnerId || hasRole('OAPI:ROLE:EditPost')
+  }
+
+  const canDeleteComment = (postOwnerId: number): boolean => {
+    if (!user.value) return false
+
+    return user.value.id === postOwnerId || hasRole('OAPI:ROLE:DeletePost')
+  }
+
   // Проверка для публикации турниров
   const canPublishTournaments = (): boolean => {
     return hasRole('OAPI:ROLE:PublishTournament')
@@ -265,6 +277,8 @@ export const useAuthStore = defineStore('auth', () => {
     canPublishProducts,
     canEditProducts,
     canDeleteProducts,
+    canEditComment,
+    canDeleteComment,
     setToken,
     setUser,
     setAuthData,

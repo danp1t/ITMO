@@ -1,503 +1,784 @@
 <template>
-  <div class="post-detail-view">
-    <div v-if="loading" class="has-text-centered">
-      <i class="fas fa-spinner fa-spin fa-2x"></i>
-      <p>Загрузка поста...</p>
-    </div>
-
-    <div v-else-if="!post" class="has-text-centered">
-      <p class="is-size-4">Пост не найден</p>
-      <router-link to="/posts" class="button is-primary mt-4">
-        Вернуться к ленте
+  <div class="product-detail-view">
+    <!-- Навигация назад -->
+    <div class="mb-4">
+      <router-link to="/shop" class="button is-light">
+        <span class="icon">
+          <i class="fas fa-arrow-left"></i>
+        </span>
+        <span>Назад в магазин</span>
       </router-link>
     </div>
 
-    <div v-else>
-      <article class="card post-detail-card">
-        <header class="card-header">
-          <p class="card-header-title">
-            {{ post.title }}
-          </p>
-          <div class="card-header-icons" v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)">
-            <button
-              class="card-header-icon mr-1"
-              @click="editPost"
-              title="Редактировать пост"
-            >
-              <span class="icon">
-                <i class="fas fa-edit"></i>
-              </span>
-            </button>
-            <button
-              v-if="authStore.canDeletePost(post.ownerId)"
-              class="card-header-icon"
-              @click="confirmDelete"
-              title="Удалить пост"
-            >
-              <span class="icon">
-                <i class="fas fa-trash"></i>
-              </span>
-            </button>
-          </div>
-        </header>
+    <!-- Загрузка -->
+    <div v-if="loading" class="has-text-centered py-6">
+      <i class="fas fa-spinner fa-spin fa-2x"></i>
+      <p class="mt-3">Загрузка товара...</p>
+    </div>
 
-        <div class="card-content">
-          <div class="content">
-            {{ post.text }}
-          </div>
+    <!-- Ошибка -->
+    <div v-else-if="error" class="notification is-danger">
+      {{ error }}
+      <router-link to="/shop" class="button is-light ml-2">
+        Вернуться в магазин
+      </router-link>
+    </div>
 
-          <div class="post-meta">
-            <small>
-              Автор: {{ post.ownerName }} |
-              {{ formatDate(post.createdAt) }} |
-              Лайки: {{ currentLikeCount }}
-            </small>
+    <!-- Информация о товаре -->
+    <div v-else-if="product" class="product-detail">
+      <div class="columns">
+        <!-- Изображение товара -->
+        <div class="column is-half">
+          <div class="product-images">
+            <div class="main-image">
+              <img
+                :src="mainImage"
+                :alt="product.name"
+                class="product-main-image"
+                @error="handleImageError"
+              >
+            </div>
+
+            <!-- Миниатюры -->
+            <div v-if="images.length > 1" class="image-thumbnails">
+              <div
+                v-for="(image, index) in images"
+                :key="index"
+                class="thumbnail"
+                :class="{ 'is-active': index === activeImageIndex }"
+                @click="activeImageIndex = index"
+              >
+                <img :src="image" :alt="`Изображение ${index + 1}`">
+              </div>
+            </div>
           </div>
         </div>
 
-        <footer class="card-footer">
-          <button
-            class="card-footer-item like-button"
-            @click="toggleLike"
-            :disabled="isLiking || !authStore.isAuthenticated"
-            :title="authStore.isAuthenticated ? 'Поставить лайк' : 'Войдите, чтобы поставить лайк'"
-          >
-            <span class="icon">
-              <i class="fas fa-heart" :class="{ 'has-text-danger': isLiked }"></i>
+        <!-- Информация о товаре -->
+        <div class="column is-half">
+          <!-- Категория -->
+          <div class="mb-3">
+            <span class="tag is-info is-medium">{{ product.category }}</span>
+            <span
+              v-if="popularityTag"
+              class="tag is-warning is-medium ml-2"
+            >
+              {{ popularityTag }}
             </span>
-            <span>{{ isLiked ? 'Убрать лайк' : 'Поставить лайк' }} ({{ currentLikeCount }})</span>
-            <span v-if="isLiking" class="icon">
-              <i class="fas fa-spinner fa-spin ml-2"></i>
-            </span>
-          </button>
-        </footer>
-      </article>
+          </div>
 
-      <!-- Комментарии -->
-      <div class="comments-section mt-6">
-        <h2 class="title is-4">Комментарии</h2>
+          <!-- Название -->
+          <h1 class="title is-2 mb-3">{{ product.name }}</h1>
 
-        <div v-if="authStore.isAuthenticated" class="comment-form mb-5">
-          <div class="field">
-            <div class="control">
-              <textarea
-                v-model="newComment"
-                class="textarea"
-                placeholder="Напишите комментарий..."
-                rows="3"
-              ></textarea>
+          <!-- Цена -->
+          <div class="price-section mb-4">
+            <div class="level is-mobile">
+              <div class="level-left">
+                <div>
+                  <p class="price has-text-weight-bold is-size-2">
+                    {{ selectedPrice }} ₽
+                  </p>
+                  <p v-if="hasMultiplePrices" class="has-text-grey">
+                    Цены от {{ minPrice }} ₽ до {{ maxPrice }} ₽
+                  </p>
+                </div>
+              </div>
+              <div class="level-right">
+                <div class="rating">
+                  <span class="icon has-text-warning">
+                    <i class="fas fa-star"></i>
+                  </span>
+                  <span class="ml-1">4.8</span>
+                  <span class="has-text-grey ml-1">(124 отзыва)</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="field">
-            <div class="control">
-              <button
-                class="button is-primary"
-                @click="addComment"
-                :disabled="!newComment.trim()"
+
+          <!-- Описание -->
+          <div class="description mb-5">
+            <h3 class="title is-5 mb-2">Описание</h3>
+            <p class="content">{{ product.description }}</p>
+          </div>
+
+          <!-- Размеры -->
+          <div v-if="availableSizes.length > 0" class="sizes-section mb-5">
+            <h3 class="title is-5 mb-3">Доступные размеры</h3>
+            <div class="size-options">
+              <div
+                v-for="size in availableSizes"
+                :key="size.id"
+                class="size-option"
+                :class="{ 'is-selected': selectedSize?.id === size.id }"
+                @click="selectSize(size)"
               >
-                Отправить комментарий
+                <div class="size-name">{{ size.sizeName }}</div>
+                <div class="size-price">{{ size.price }} ₽</div>
+                <div class="size-stock">
+                  <span
+                    class="tag"
+                    :class="size.countItems > 0 ? 'is-success' : 'is-danger'"
+                  >
+                    {{ size.countItems > 0 ? `${size.countItems} шт.` : 'Нет в наличии' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Количество -->
+          <div class="quantity-section mb-5">
+            <h3 class="title is-5 mb-2">Количество</h3>
+            <div class="field has-addons">
+              <div class="control">
+                <button
+                  class="button"
+                  :disabled="quantity <= 1"
+                  @click="decreaseQuantity"
+                >
+                  <span class="icon">
+                    <i class="fas fa-minus"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="control">
+                <input
+                  v-model.number="quantity"
+                  class="input"
+                  type="number"
+                  min="1"
+                  :max="maxQuantity"
+                  style="width: 80px; text-align: center"
+                >
+              </div>
+              <div class="control">
+                <button
+                  class="button"
+                  :disabled="quantity >= maxQuantity"
+                  @click="increaseQuantity"
+                >
+                  <span class="icon">
+                    <i class="fas fa-plus"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="control">
+                <span class="help">
+                  Макс. {{ maxQuantity }} шт.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Кнопки действий -->
+          <div class="action-buttons mb-6">
+            <div class="buttons">
+              <button
+                class="button is-primary is-large"
+                :disabled="!canAddToCart || addingToCart"
+                @click="addToCart"
+              >
+                <span class="icon" v-if="addingToCart">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                <span class="icon" v-else>
+                  <i class="fas fa-shopping-cart"></i>
+                </span>
+                <span>{{ addToCartText }}</span>
+              </button>
+
+              <button
+                class="button is-light is-large"
+                @click="toggleWishlist"
+              >
+                <span class="icon">
+                  <i :class="wishlistIcon"></i>
+                </span>
+                <span>{{ wishlistText }}</span>
               </button>
             </div>
           </div>
+
+          <!-- Информация о доставке -->
+          <div class="delivery-info mb-4">
+            <div class="message is-info">
+              <div class="message-body">
+                <div class="level is-mobile">
+                  <div class="level-left">
+                    <div>
+                      <p class="has-text-weight-semibold">Бесплатная доставка</p>
+                      <p class="is-size-7">При заказе от 5000 ₽</p>
+                    </div>
+                  </div>
+                  <div class="level-right">
+                    <span class="tag is-info">2-3 дня</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Дополнительная информация -->
+      <div class="additional-info mt-6">
+        <!-- Табы -->
+        <div class="tabs is-boxed">
+          <ul>
+            <li :class="{ 'is-active': activeTab === 'details' }">
+              <a @click="activeTab = 'details'">
+                <span class="icon is-small">
+                  <i class="fas fa-info-circle"></i>
+                </span>
+                <span>Характеристики</span>
+              </a>
+            </li>
+            <li :class="{ 'is-active': activeTab === 'reviews' }">
+              <a @click="activeTab = 'reviews'">
+                <span class="icon is-small">
+                  <i class="fas fa-star"></i>
+                </span>
+                <span>Отзывы (24)</span>
+              </a>
+            </li>
+            <li :class="{ 'is-active': activeTab === 'questions' }">
+              <a @click="activeTab = 'questions'">
+                <span class="icon is-small">
+                  <i class="fas fa-question-circle"></i>
+                </span>
+                <span>Вопросы и ответы</span>
+              </a>
+            </li>
+          </ul>
         </div>
 
-        <div v-if="!authStore.isAuthenticated" class="notification is-light">
-          <p>Войдите в систему, чтобы оставлять комментарии</p>
-        </div>
+        <!-- Содержимое табов -->
+        <div class="tab-content">
+          <!-- Характеристики -->
+          <div v-if="activeTab === 'details'" class="box">
+            <h3 class="title is-5 mb-3">Характеристики товара</h3>
+            <div class="content">
+              <table class="table is-fullwidth">
+                <tbody>
+                <tr>
+                  <th>Категория</th>
+                  <td>{{ product.category }}</td>
+                </tr>
+                <tr>
+                  <th>Материал</th>
+                  <td>Высококачественный эластан, кристаллы Swarovski</td>
+                </tr>
+                <tr>
+                  <th>Производство</th>
+                  <td>Россия</td>
+                </tr>
+                <tr>
+                  <th>Возрастная группа</th>
+                  <td>Дети и взрослые</td>
+                </tr>
+                <tr>
+                  <th>Уровень</th>
+                  <td>Профессиональный</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-        <div v-if="comments.length === 0 && authStore.isAuthenticated">
-          <p class="has-text-grey">Комментариев пока нет. Будьте первым!</p>
-        </div>
+          <!-- Отзывы -->
+          <div v-else-if="activeTab === 'reviews'" class="box">
+            <h3 class="title is-5 mb-3">Отзывы покупателей</h3>
+            <div class="reviews">
+              <div class="review">
+                <div class="review-header">
+                  <div class="review-author">
+                    <strong>Анна Иванова</strong>
+                  </div>
+                  <div class="review-rating">
+                    <span class="icon has-text-warning">
+                      <i class="fas fa-star"></i>
+                    </span>
+                    <span class="icon has-text-warning">
+                      <i class="fas fa-star"></i>
+                    </span>
+                    <span class="icon has-text-warning">
+                      <i class="fas fa-star"></i>
+                    </span>
+                    <span class="icon has-text-warning">
+                      <i class="fas fa-star"></i>
+                    </span>
+                    <span class="icon has-text-warning">
+                      <i class="fas fa-star"></i>
+                    </span>
+                  </div>
+                </div>
+                <div class="review-content">
+                  <p>Отличный товар! Качество на высшем уровне. Дочь занимается гимнастикой и очень довольна.</p>
+                </div>
+                <div class="review-date">
+                  <small class="has-text-grey">2 недели назад</small>
+                </div>
+              </div>
+            </div>
+          </div>
 
-        <div v-else-if="comments.length === 0">
-          <p class="has-text-grey">Комментариев пока нет.</p>
-        </div>
-
-        <div v-else>
-          <div
-            v-for="comment in comments"
-            :key="comment.id"
-            class="card comment-card mb-3"
-          >
-            <div class="card-content">
-              <div class="content">
-                <p>{{ comment.userComment }}</p>
-                <p class="is-size-7 has-text-grey">
-                  {{ comment.accountName }} • {{ formatDate(comment.createdAt) }}
-                </p>
+          <!-- Вопросы и ответы -->
+          <div v-else class="box">
+            <h3 class="title is-5 mb-3">Вопросы и ответы</h3>
+            <div class="content">
+              <div class="faq-item">
+                <p class="has-text-weight-semibold">Как узнать свой размер?</p>
+                <p>Вы можете воспользоваться нашей таблицей размеров или обратиться к консультанту.</p>
+              </div>
+              <div class="faq-item">
+                <p class="has-text-weight-semibold">Есть ли гарантия на товар?</p>
+                <p>Да, на все товары предоставляется гарантия 6 месяцев.</p>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Модальное окно редактирования поста -->
-    <div class="modal" :class="{ 'is-active': showEditModal }">
-      <div class="modal-background" @click="closeEditModal"></div>
-      <div class="modal-card">
-        <header class="modal-card-head">
-          <p class="modal-card-title">Редактировать пост</p>
-          <button class="delete" @click="closeEditModal"></button>
-        </header>
-
-        <section class="modal-card-body">
-          <div class="field">
-            <label class="label">Заголовок</label>
-            <div class="control">
-              <input
-                v-model="editingPost.title"
-                class="input"
-                type="text"
-                placeholder="Введите заголовок"
-                :disabled="isSaving"
-              >
-            </div>
-          </div>
-
-          <div class="field">
-            <label class="label">Текст</label>
-            <div class="control">
-              <textarea
-                v-model="editingPost.text"
-                class="textarea"
-                placeholder="Введите текст поста"
-                rows="8"
-                :disabled="isSaving"
-              ></textarea>
-            </div>
-          </div>
-        </section>
-
-        <footer class="modal-card-foot">
-          <button
-            class="button is-primary"
-            @click="savePost"
-            :disabled="isSaving"
-          >
-            <span v-if="isSaving" class="icon">
-              <i class="fas fa-spinner fa-spin"></i>
-            </span>
-            <span>{{ isSaving ? 'Сохранение...' : 'Сохранить' }}</span>
-          </button>
-          <button
-            class="button"
-            @click="closeEditModal"
-            :disabled="isSaving"
-          >
-            Отмена
-          </button>
-        </footer>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import { postsAPI } from '../api/posts'
-import type { Post, Comment } from '../types/posts'
+import { useCartStore } from '../stores/cart'
+import { shopAPI } from '../api/shop'
+import type { Product, ProductInfo } from '../types/shop'
 
 const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+const cartStore = useCartStore()
 
-const post = ref<Post | null>(null)
-const comments = ref<Comment[]>([])
+const product = ref<Product | null>(null)
+const productInfos = ref<ProductInfo[]>([])
 const loading = ref(false)
-const isLiking = ref(false)
-const isLiked = ref(false)
-const newComment = ref('')
-const showEditModal = ref(false)
-const isSaving = ref(false)
-const currentLikeCount = ref(0)
+const error = ref('')
 
-// Данные для редактирования
-const editingPost = reactive({
-  id: 0,
-  title: '',
-  text: '',
-  ownerId: 0
-})
+// Состояние UI
+const activeImageIndex = ref(0)
+const selectedSize = ref<ProductInfo | null>(null)
+const quantity = ref(1)
+const addingToCart = ref(false)
+const activeTab = ref('details')
+const inWishlist = ref(false)
 
-const loadPost = async () => {
+// Изображения товара (в реальном приложении брать из API)
+const images = [
+  'https://images.unsplash.com/photo-1595435934247-5d33b7f92c70?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop',
+  'https://images.unsplash.com/photo-1594736797933-d0e49d051b43?w=800&h=600&fit=crop'
+]
+
+// Загрузка данных о товаре
+const loadProduct = async () => {
   loading.value = true
-  try {
-    const postId = parseInt(route.params.id as string)
-    const response = await postsAPI.getPostById(postId)
-    post.value = response.data
+  error.value = ''
 
-    // Заполняем данные для редактирования
-    if (post.value) {
-      editingPost.id = post.value.id
-      editingPost.title = post.value.title
-      editingPost.text = post.value.text
-      editingPost.ownerId = post.value.ownerId
-      currentLikeCount.value = post.value.countLike || 0
+  const productId = parseInt(route.params.id as string)
+
+  try {
+    // Загружаем информацию о товаре
+    const productResponse = await shopAPI.getProductDetail(productId)
+    product.value = productResponse.data
+
+    // Загружаем информацию о размерах/вариантах
+    const infosResponse = await shopAPI.getProductInfoByProduct(productId)
+    productInfos.value = infosResponse.data
+
+    // Выбираем первый доступный размер по умолчанию
+    if (availableSizes.value.length > 0) {
+      selectedSize.value = availableSizes.value[0]
     }
-  } catch (error) {
-    console.error('Ошибка при загрузке поста:', error)
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Не удалось загрузить информацию о товаре'
+    console.error('Ошибка при загрузке товара:', err)
   } finally {
     loading.value = false
   }
 }
 
-const loadComments = async () => {
-  if (!post.value) return
+// Обработчик ошибки загрузки изображения
+const handleImageError = (e: Event) => {
+  const img = e.target as HTMLImageElement
+  img.src = 'https://via.placeholder.com/800x600?text=Изображение+товара'
+}
 
-  try {
-    const response = await postsAPI.getComments(post.value.id)
-    comments.value = response.data || []
-  } catch (error) {
-    console.error('Ошибка при загрузке комментариев:', error)
+// Основное изображение
+const mainImage = computed(() => {
+  return images[activeImageIndex.value]
+})
+
+// Доступные размеры
+const availableSizes = computed(() => {
+  return productInfos.value.filter(info => info.countItems > 0)
+})
+
+// Цены
+const minPrice = computed(() => {
+  if (availableSizes.value.length === 0) return product.value?.basePrice || 0
+  return Math.min(...availableSizes.value.map(info => info.price))
+})
+
+const maxPrice = computed(() => {
+  if (availableSizes.value.length === 0) return product.value?.basePrice || 0
+  return Math.max(...availableSizes.value.map(info => info.price))
+})
+
+const selectedPrice = computed(() => {
+  if (selectedSize.value) {
+    return selectedSize.value.price
+  }
+  return minPrice.value
+})
+
+const hasMultiplePrices = computed(() => {
+  if (availableSizes.value.length <= 1) return false
+  return minPrice.value !== maxPrice.value
+})
+
+// Максимальное количество для заказа
+const maxQuantity = computed(() => {
+  if (!selectedSize.value) return 0
+  return selectedSize.value.countItems
+})
+
+// Можно ли добавить в корзину
+const canAddToCart = computed(() => {
+  if (!product.value) return false
+  if (availableSizes.value.length > 0 && !selectedSize.value) return false
+  if (selectedSize.value && selectedSize.value.countItems === 0) return false
+  return quantity.value > 0 && quantity.value <= maxQuantity.value
+})
+
+// Текст для кнопки добавления в корзину
+const addToCartText = computed(() => {
+  if (!canAddToCart.value) return 'Недоступно'
+  return `Добавить в корзину — ${selectedPrice.value * quantity.value} ₽`
+})
+
+// Тег популярности
+const popularityTag = computed(() => {
+  if (!product.value) return ''
+  if (product.value.popularity > 50) return 'Популярный'
+  if (product.value.popularity > 20) return 'Хит продаж'
+  return ''
+})
+
+// Изменение количества
+const decreaseQuantity = () => {
+  if (quantity.value > 1) quantity.value--
+}
+
+const increaseQuantity = () => {
+  if (quantity.value < maxQuantity.value) quantity.value++
+}
+
+// Выбор размера
+const selectSize = (size: ProductInfo) => {
+  if (size.countItems > 0) {
+    selectedSize.value = size
+    quantity.value = Math.min(quantity.value, size.countItems)
   }
 }
 
-// Открытие модального окна редактирования
-const editPost = () => {
-  if (!post.value) return
+// Добавление в корзину
+const addToCart = async () => {
+  if (!product.value || !canAddToCart.value) return
 
-  showEditModal.value = true
-}
-
-// Сохранение изменений
-const savePost = async () => {
-  if (!editingPost.title.trim()) {
-    alert('Введите заголовок поста')
-    return
-  }
-
-  if (!editingPost.text.trim()) {
-    alert('Введите текст поста')
-    return
-  }
-
-  isSaving.value = true
+  addingToCart.value = true
 
   try {
-    const postData = {
-      title: editingPost.title,
-      text: editingPost.text,
-      ownerId: editingPost.ownerId,
+    if (selectedSize.value) {
+      cartStore.addItem(product.value, selectedSize.value, quantity.value)
+    } else {
+      // Если нет размеров, создаем фиктивную ProductInfo
+      const productInfo: ProductInfo = {
+        id: product.value.id,
+        productId: product.value.id,
+        sizeName: 'стандарт',
+        countItems: 1,
+        price: product.value.basePrice
+      }
+      cartStore.addItem(product.value, productInfo, quantity.value)
     }
 
-    await postsAPI.updatePost(editingPost.id, postData)
-
-    // Обновляем текущий пост
-    if (post.value) {
-      post.value.title = editingPost.title
-      post.value.text = editingPost.text
-    }
-
-    closeEditModal()
-    alert('Пост успешно обновлен!')
-  } catch (error: any) {
-    console.error('Ошибка при обновлении поста:', error)
-    const message = error.response?.data?.message || 'Не удалось обновить пост'
-    alert(message)
+    alert('Товар добавлен в корзину!')
+  } catch (err) {
+    console.error('Ошибка при добавлении в корзину:', err)
+    alert('Не удалось добавить товар в корзину')
   } finally {
-    isSaving.value = false
+    addingToCart.value = false
   }
 }
 
-// Закрытие модального окна
-const closeEditModal = () => {
-  showEditModal.value = false
-  // Восстанавливаем оригинальные значения
-  if (post.value) {
-    editingPost.title = post.value.title
-    editingPost.text = post.value.text
-  }
+// Избранное
+const wishlistIcon = computed(() => {
+  return inWishlist.value ? 'fas fa-heart has-text-danger' : 'far fa-heart'
+})
+
+const wishlistText = computed(() => {
+  return inWishlist.value ? 'В избранном' : 'В избранное'
+})
+
+const toggleWishlist = () => {
+  inWishlist.value = !inWishlist.value
+  alert(inWishlist.value ? 'Добавлено в избранное' : 'Удалено из избранного')
 }
 
-const toggleLike = async () => {
-  if (!authStore.isAuthenticated || !post.value) return
-
-  isLiking.value = true
-
-  try {
-    // Оптимистичное обновление
-    isLiked.value = !isLiked.value
-    currentLikeCount.value += isLiked.value ? 1 : -1
-
-    await postsAPI.likePost(post.value.id)
-
-  } catch (error) {
-    // Откатываем изменения в случае ошибки
-    isLiked.value = !isLiked.value
-    currentLikeCount.value += isLiked.value ? -1 : 1
-    console.error('Ошибка при оценке поста:', error)
-    alert('Не удалось поставить лайк')
-  } finally {
-    isLiking.value = false
-  }
-}
-
-const addComment = async () => {
-  if (!authStore.user || !post.value || !newComment.value.trim()) return
-
-  try {
-    const commentData = {
-      userComment: newComment.value.trim(),
-      postId: post.value.id,
-      accountId: authStore.user.id,
-    }
-
-    await postsAPI.createComment(commentData)
-    newComment.value = ''
-    await loadComments()
-  } catch (error) {
-    console.error('Ошибка при добавлении комментария:', error)
-    alert('Не удалось добавить комментарий')
-  }
-}
-
-const confirmDelete = async () => {
-  if (!post.value) return
-
-  if (!confirm(`Вы уверены, что хотите удалить пост "${post.value.title}"? Это действие нельзя отменить.`)) {
-    return
-  }
-
-  try {
-    await postsAPI.deletePost(post.value.id)
-    alert('Пост успешно удален!')
-    router.push('/posts')
-  } catch (error: any) {
-    console.error('Ошибка при удалении поста:', error)
-    const message = error.response?.data?.message || 'Не удалось удалить пост'
-    alert(message)
-  }
-}
-
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
-onMounted(async () => {
-  await loadPost()
-  await loadComments()
+onMounted(() => {
+  loadProduct()
 })
 </script>
 
 <style scoped>
-.post-detail-view {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+.product-detail-view {
+  padding: 2rem 1rem;
 }
 
-.post-detail-card {
-  margin-bottom: 30px;
+/* Изображения */
+.product-images {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
-.post-detail-card .card-header {
-  background-color: #405ca3;
-  color: white;
-  padding: 12px 20px;
+.main-image {
+  margin-bottom: 1rem;
+}
+
+.product-main-image {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.product-main-image:hover {
+  transform: scale(1.02);
+}
+
+.image-thumbnails {
   display: flex;
-  justify-content: space-between;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+
+.thumbnail:hover {
+  opacity: 0.9;
+}
+
+.thumbnail.is-active {
+  opacity: 1;
+  border: 2px solid #667eea;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Цена */
+.price-section {
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.price {
+  color: #2d3748;
+}
+
+.rating {
+  display: flex;
   align-items: center;
 }
 
-.post-detail-card .card-header-title {
-  color: white;
-  margin: 0;
+/* Размеры */
+.size-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.size-option {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.size-option:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+}
+
+.size-option.is-selected {
+  border-color: #667eea;
+  background-color: rgba(102, 126, 234, 0.05);
+}
+
+.size-name {
   font-weight: 600;
-  flex-grow: 1;
+  margin-bottom: 0.5rem;
 }
 
-.card-header-icons {
-  display: flex;
+.size-price {
+  font-weight: 500;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+}
+
+.size-stock .tag {
+  font-size: 0.75rem;
+}
+
+/* Количество */
+.quantity-section .field {
   align-items: center;
 }
 
-.card-header-icon {
-  background: none;
+/* Кнопки действий */
+.action-buttons .buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.button.is-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   color: white;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  flex: 2;
 }
 
-.card-header-icon:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.button.is-primary:hover {
+  opacity: 0.9;
 }
 
-.card-content {
-  padding: 20px;
-}
-
-.post-meta {
-  color: #d3a94b;
-  font-size: 0.9em;
-  margin-top: 10px;
-}
-
-.card-footer {
-  border-top: 1px solid #f5f5f5;
-  display: flex;
-}
-
-.card-footer-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  color: #666;
-  text-decoration: none;
-  border: none;
-  background: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.95em;
-}
-
-.card-footer-item:hover:not(:disabled) {
-  background-color: #e9ecef;
-  color: #333;
-}
-
-.card-footer-item:disabled {
+.button.is-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.like-button:hover:not(:disabled) {
-  color: #ff3860;
+.button.is-light {
+  border: 1px solid #e5e7eb;
+  flex: 1;
 }
 
-.like-button:hover:not(:disabled) .icon {
-  color: #ff3860;
-}
-
-.has-text-danger {
-  color: #ff3860 !important;
-}
-
-.comments-section {
-  margin-top: 30px;
-}
-
-.comment-form {
-  background-color: #f8f9fa;
-  padding: 20px;
+/* Информация о доставке */
+.message {
   border-radius: 8px;
 }
 
-.comment-card {
-  border-left: 4px solid #405ca3;
+/* Табы */
+.tabs {
+  margin-bottom: 1rem;
+}
+
+.tab-content {
+  animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.box {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+/* Таблица характеристик */
+.table th {
+  width: 200px;
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Отзывы */
+.review {
+  padding: 1rem 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.review:last-child {
+  border-bottom: none;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.review-rating {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.review-date {
+  margin-top: 0.5rem;
+}
+
+/* FAQ */
+.faq-item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .product-detail-view {
+    padding: 1rem;
+  }
+
+  .columns {
+    flex-direction: column;
+  }
+
+  .product-main-image {
+    height: 300px;
+  }
+
+  .size-options {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .action-buttons .buttons {
+    flex-direction: column;
+  }
+
+  .button.is-primary,
+  .button.is-light {
+    width: 100%;
+  }
 }
 </style>

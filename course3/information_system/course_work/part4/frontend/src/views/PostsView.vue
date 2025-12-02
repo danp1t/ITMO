@@ -313,7 +313,6 @@ const updatePost = async () => {
     }
 
     closeEditModal()
-    alert('Пост успешно обновлен!')
   } catch (error: any) {
     console.error('Ошибка при обновлении поста:', error)
     const message = error.response?.data?.message || 'Не удалось обновить пост'
