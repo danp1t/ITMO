@@ -2,7 +2,10 @@ package com.danp1t.backend.controller;
 
 import com.danp1t.backend.dto.AccountDTO;
 import com.danp1t.backend.dto.AccountDetailDTO;
+import com.danp1t.backend.dto.RoleAssignmentDTO;
+import com.danp1t.backend.model.Account;
 import com.danp1t.backend.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -70,5 +73,49 @@ public class AccountController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/{accountId}/roles/{roleId}")
+    public ResponseEntity<AccountDetailDTO> addRoleToAccountPath(
+            @PathVariable Integer accountId,
+            @PathVariable Integer roleId) {
+
+        Account account = accountService.addRoleToAccount(accountId, roleId);
+        return ResponseEntity.ok(convertToAccountDetailDTO(account));
+    }
+
+    @DeleteMapping("/{accountId}/roles/{roleId}")
+    public ResponseEntity<AccountDetailDTO> removeRoleFromAccount(
+            @PathVariable Integer accountId,
+            @PathVariable Integer roleId) {
+
+        Account account = accountService.removeRoleFromAccount(accountId, roleId);
+        return ResponseEntity.ok(convertToAccountDetailDTO(account));
+    }
+
+    @PostMapping("/{accountId}/roles/by-name/{roleName}")
+    public ResponseEntity<AccountDetailDTO> addRoleToAccountByName(
+            @PathVariable Integer accountId,
+            @PathVariable String roleName) {
+
+        Account account = accountService.addRoleToAccountByName(accountId, roleName);
+        return ResponseEntity.ok(convertToAccountDetailDTO(account));
+    }
+
+    @DeleteMapping("/{accountId}/roles/by-name/{roleName}")
+    public ResponseEntity<AccountDetailDTO> removeRoleFromAccountByName(
+            @PathVariable Integer accountId,
+            @PathVariable String roleName) {
+
+        Account account = accountService.removeRoleFromAccountByName(accountId, roleName);
+        return ResponseEntity.ok(convertToAccountDetailDTO(account));
+    }
+
+    private AccountDetailDTO convertToAccountDetailDTO(Account account) {
+        AccountDetailDTO dto = new AccountDetailDTO();
+        dto.setId(account.getId());
+        dto.setName(account.getName());
+        dto.setEmail(account.getEmail());
+        return dto;
     }
 }

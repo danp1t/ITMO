@@ -1,6 +1,7 @@
 package com.danp1t.backend.service;
 
 import com.danp1t.backend.dto.*;
+import com.danp1t.backend.exception.ResourceNotFoundException;
 import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Role;
 import com.danp1t.backend.repository.AccountRepository;
@@ -26,6 +27,9 @@ public class AccountService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private RoleService roleService;
 
     private AccountDTO toDTO(Account account) {
         return new AccountDTO(account.getId(), account.getName(), account.getEmail());
@@ -237,6 +241,65 @@ public class AccountService {
         }
 
         return Optional.empty();
+    }
+
+    public Account addRoleToAccount(Integer accountId, Integer roleId) {
+        Account account = accountRepository.findByIdWithRoles(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
+
+        Role role = roleService.findById(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
+
+        // Проверяем, нет ли уже такой роли у пользователя
+        boolean roleAlreadyExists = account.getRoles().stream()
+                .anyMatch(r -> r.getId().equals(roleId));
+
+        if (!roleAlreadyExists) {
+            account.getRoles().add(role);
+            return accountRepository.save(account);
+        }
+
+        return account; // Если роль уже есть, возвращаем аккаунт без изменений
+    }
+
+    public Account removeRoleFromAccount(Integer accountId, Integer roleId) {
+        Account account = accountRepository.findByIdWithRoles(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
+
+        // Удаляем роль по id
+        account.getRoles().removeIf(role -> role.getId().equals(roleId));
+
+        return accountRepository.save(account);
+    }
+
+    public Account addRoleToAccountByName(Integer accountId, String roleName) {
+        Account account = accountRepository.findByIdWithRoles(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
+
+        Role role = roleService.findByName(roleName);
+        if (role == null) {
+            throw new ResourceNotFoundException("Role not found with name: " + roleName);
+        }
+
+        boolean roleAlreadyExists = account.getRoles().stream()
+                .anyMatch(r -> r.getName().equals(roleName));
+
+        if (!roleAlreadyExists) {
+            account.getRoles().add(role);
+            return accountRepository.save(account);
+        }
+
+        return account;
+    }
+
+
+    public Account removeRoleFromAccountByName(Integer accountId, String roleName) {
+        Account account = accountRepository.findByIdWithRoles(accountId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
+
+        account.getRoles().removeIf(role -> role.getName().equals(roleName));
+
+        return accountRepository.save(account);
     }
 
 
