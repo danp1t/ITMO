@@ -219,7 +219,7 @@ import { useAuthStore } from '../stores/auth'
 import PostCard from '../components/posts/PostCard.vue'
 import RichTextEditor from '../components/posts/RichTextEditor.vue'
 import { postsAPI } from '../api/posts'
-import type { Post } from '../types/posts'
+import type { Post, UpdatePostRequest } from '../types/posts'
 
 const authStore = useAuthStore()
 const posts = ref<Post[]>([])
@@ -235,6 +235,7 @@ const newPost = ref({
   content: '',
 })
 
+// Данные для редактирования поста
 const editingPost = ref({
   id: 0,
   title: '',
@@ -275,7 +276,7 @@ const createPost = async () => {
   try {
     const postData = {
       title: newPost.value.title,
-      text: newPost.value.content,
+      text: newPost.value.content, // Здесь text - это HTML контент
       ownerId: authStore.user.id,
     }
 
@@ -295,7 +296,7 @@ const handleEdit = (post: Post) => {
   editingPost.value = {
     id: post.id,
     title: post.title || '',
-    text: post.text || '',
+    content: post.text || '', // Используем post.text, который содержит HTML
     ownerId: post.ownerId
   }
   showEditModal.value = true
@@ -319,9 +320,9 @@ const updatePost = async () => {
   isSaving.value = true
 
   try {
-    const postData = {
+    const postData: UpdatePostRequest = {
       title: editingPost.value.title,
-      text: editingPost.value.content,
+      text: editingPost.value.content, // Отправляем HTML контент
       ownerId: editingPost.value.ownerId,
     }
 
@@ -332,8 +333,9 @@ const updatePost = async () => {
     if (index !== -1) {
       posts.value[index] = {
         ...posts.value[index],
-        ...postData,
-        text: editingPost.value.content
+        title: editingPost.value.title,
+        text: editingPost.value.content,
+        updatedAt: new Date().toISOString() // Обновляем дату редактирования
       }
     }
 

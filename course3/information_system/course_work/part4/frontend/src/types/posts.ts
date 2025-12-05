@@ -38,3 +38,10 @@ export interface CreateCommentData {
   postId: number
   accountId: number
 }
+
+export interface UpdatePostRequest {
+  title: string
+  text: string
+  ownerId: number
+  tags?: number[]
+}

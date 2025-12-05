@@ -18,31 +18,123 @@
           <p class="card-header-title">
             {{ post.title }}
           </p>
-          <button
-            v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)"
-            class="card-header-icon"
-            @click="editPost"
-            title="Редактировать пост"
-          >
-            <span class="icon">
-              <i class="fas fa-edit"></i>
-            </span>
-          </button>
+          <div class="card-header-icons">
+            <button
+              v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)"
+              class="card-header-icon"
+              @click="startEdit"
+              title="Редактировать пост"
+            >
+              <span class="icon">
+                <i class="fas fa-edit"></i>
+              </span>
+            </button>
+            <button
+              v-if="authStore.isAuthenticated && authStore.canDeletePost(post.ownerId)"
+              class="card-header-icon"
+              @click="confirmDelete"
+              title="Удалить пост"
+              :disabled="isDeleting"
+            >
+              <span class="icon">
+                <i class="fas fa-trash"></i>
+              </span>
+              <span v-if="isDeleting" class="icon">
+                <i class="fas fa-spinner fa-spin ml-2"></i>
+              </span>
+            </button>
+          </div>
         </header>
 
-        <div class="card-content">
+        <!-- Режим просмотра -->
+        <div v-if="!isEditing" class="card-content">
           <div class="post-content" v-html="post.text"></div>
 
           <div class="post-meta">
             <small>
-              Автор: {{ post.ownerName }} |
-              {{ formatDate(post.createdAt) }} |
-              Лайки: {{ post.countLike }}
+              <span class="icon-text">
+                <span class="icon">
+                  <i class="fas fa-user"></i>
+                </span>
+                <span>{{ post.ownerName }}</span>
+              </span>
+              <span class="mx-2">•</span>
+              <span class="icon-text">
+                <span class="icon">
+                  <i class="fas fa-calendar"></i>
+                </span>
+                <span>{{ formatDate(post.createdAt) }}</span>
+              </span>
+              <span class="mx-2">•</span>
+              <span class="icon-text">
+                <span class="icon">
+                  <i class="fas fa-heart"></i>
+                </span>
+                <span>{{ post.countLike }}</span>
+              </span>
+              <span v-if="post.updatedAt !== post.createdAt" class="mx-2">•</span>
+              <span v-if="post.updatedAt !== post.createdAt" class="icon-text" title="Отредактировано">
+                <span class="icon">
+                  <i class="fas fa-edit"></i>
+                </span>
+                <span>{{ formatDate(post.updatedAt, true) }}</span>
+              </span>
             </small>
           </div>
         </div>
 
-        <footer class="card-footer">
+        <!-- Режим редактирования -->
+        <div v-else class="card-content">
+          <div class="field">
+            <label class="label">Заголовок</label>
+            <div class="control">
+              <input
+                v-model="editForm.title"
+                class="input"
+                type="text"
+                placeholder="Введите заголовок"
+                :disabled="isSaving"
+              >
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label">Содержание</label>
+            <div class="control">
+              <RichTextEditor
+                v-model="editForm.content"
+                :disabled="isSaving"
+                placeholder="Редактируйте содержимое поста..."
+              />
+            </div>
+          </div>
+
+          <div class="field is-grouped mt-4">
+            <div class="control">
+              <button
+                class="button is-primary"
+                @click="saveEdit"
+                :disabled="isSaving || !editForm.title.trim() || !editForm.content.trim()"
+              >
+                <span v-if="isSaving" class="icon">
+                  <i class="fas fa-spinner fa-spin"></i>
+                </span>
+                <span>{{ isSaving ? 'Сохранение...' : 'Сохранить' }}</span>
+              </button>
+            </div>
+            <div class="control">
+              <button
+                class="button is-light"
+                @click="cancelEdit"
+                :disabled="isSaving"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <footer v-if="!isEditing" class="card-footer">
           <button
             class="card-footer-item like-button"
             @click="toggleLike"
@@ -60,8 +152,8 @@
         </footer>
       </article>
 
-      <!-- Комментарии -->
-      <div class="comments-section mt-6">
+      <!-- Комментарии (только в режиме просмотра) -->
+      <div v-if="!isEditing" class="comments-section mt-6">
         <h2 class="title is-4">Комментарии</h2>
 
         <div v-if="authStore.isAuthenticated" class="comment-form mb-5">
@@ -196,8 +288,9 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import RichTextEditor from '../components/posts/RichTextEditor.vue'
 import { postsAPI } from '../api/posts'
-import type { Post, Comment } from '../types/posts'
+import type { Post, Comment, UpdatePostRequest } from '../types/posts'
 
 const route = useRoute()
 const router = useRouter()
@@ -210,12 +303,21 @@ const isLiking = ref(false)
 const isLiked = ref(false)
 const newComment = ref('')
 const isAddingComment = ref(false)
+const isEditing = ref(false)
+const isSaving = ref(false)
+const isDeleting = ref(false)
 
 // Состояния для редактирования комментариев
 const editingCommentId = ref<number | null>(null)
 const editingCommentText = ref('')
 const isEditingComment = ref(false)
 const isDeletingComment = ref<number | null>(null)
+
+// Форма редактирования поста
+const editForm = ref({
+  title: '',
+  content: '',
+})
 
 const loadPost = async () => {
   loading.value = true
@@ -303,11 +405,9 @@ const saveEditedComment = async (commentId: number) => {
   isEditingComment.value = true
 
   try {
-    // Находим оригинальный комментарий
     const originalComment = comments.value.find(c => c.id === commentId)
     if (!originalComment) return
 
-    // Создаем обновленный DTO объекта комментария
     const updatedComment: Comment = {
       ...originalComment,
       userComment: editingCommentText.value.trim()
@@ -315,14 +415,12 @@ const saveEditedComment = async (commentId: number) => {
 
     await postsAPI.updateComment(commentId, updatedComment)
 
-    // Обновляем локально
     const commentIndex = comments.value.findIndex(c => c.id === commentId)
     if (commentIndex !== -1) {
       comments.value[commentIndex] = updatedComment
     }
 
     cancelEditComment()
-
   } catch (error) {
     console.error('Ошибка при обновлении комментария:', error)
   } finally {
@@ -342,7 +440,6 @@ const deleteComment = async (commentId: number) => {
 
   try {
     await postsAPI.deleteComment(commentId)
-    // Удаляем из списка
     comments.value = comments.value.filter(c => c.id !== commentId)
   } catch (error) {
     console.error('Ошибка при удалении комментария:', error)
@@ -351,14 +448,100 @@ const deleteComment = async (commentId: number) => {
   }
 }
 
-const editPost = () => {
-  if (post.value) {
-    router.push(`/posts/${post.value.id}/edit`)
+// Редактирование поста
+const startEdit = () => {
+  if (!post.value) return
+
+  editForm.value = {
+    title: post.value.title,
+    content: post.value.text
+  }
+  isEditing.value = true
+}
+
+const cancelEdit = () => {
+  isEditing.value = false
+  editForm.value = {
+    title: '',
+    content: ''
   }
 }
 
-const formatDate = (dateString: string) => {
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+const saveEdit = async () => {
+  if (!post.value || !authStore.user) return
+
+  // Валидация
+  if (!editForm.value.title.trim()) {
+    alert('Введите заголовок поста')
+    return
+  }
+
+  if (!editForm.value.content.trim() || editForm.value.content === '<p></p>') {
+    alert('Введите содержание поста')
+    return
+  }
+
+  isSaving.value = true
+
+  try {
+    const postData: UpdatePostRequest = {
+      title: editForm.value.title,
+      text: editForm.value.content,
+      ownerId: post.value.ownerId,
+    }
+
+    await postsAPI.updatePost(post.value.id, postData)
+
+    // Обновляем данные поста
+    post.value.title = editForm.value.title
+    post.value.text = editForm.value.content
+    post.value.updatedAt = new Date().toISOString()
+
+    isEditing.value = false
+  } catch (error: any) {
+    console.error('Ошибка при обновлении поста:', error)
+    const message = error.response?.data?.message || 'Не удалось обновить пост'
+    alert(message)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// Удаление поста
+const confirmDelete = async () => {
+  if (!post.value || !authStore.canDeletePost(post.value.ownerId)) {
+    return
+  }
+
+  if (!confirm(`Вы уверены, что хотите удалить пост "${post.value.title}"?`)) {
+    return
+  }
+
+  isDeleting.value = true
+
+  try {
+    await postsAPI.deletePost(post.value.id)
+    router.push('/posts')
+  } catch (error: any) {
+    console.error('Ошибка при удалении поста:', error)
+    const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
+    alert(errorMessage)
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const formatDate = (dateString: string, timeOnly = false) => {
+  const date = new Date(dateString)
+
+  if (timeOnly) {
+    return date.toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }
+
+  return date.toLocaleDateString('ru-RU', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
@@ -403,18 +586,43 @@ onMounted(async () => {
 }
 
 .button.is-text.has-text-danger:hover {
-  background-color: rgba(236, 232, 232, 0.1);
+  background-color: rgba(255, 56, 96, 0.1);
 }
 
 .fa-spinner {
   font-size: 0.8em;
 }
 
+.card-header-icons {
+  display: flex;
+  align-items: center;
+}
+
+.card-header-icon {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  margin-left: 4px;
+}
+
+.card-header-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.card-header-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Стили для отображения HTML контента поста */
 .post-content {
   font-size: 1rem;
   line-height: 1.6;
-  color: #fbf8f8;
+  color: #363636;
   margin-bottom: 20px;
 }
 
@@ -422,21 +630,21 @@ onMounted(async () => {
   font-size: 1.8em;
   font-weight: 600;
   margin: 1.2em 0 0.8em;
-  color: #d6cfcf;
+  color: #111827;
 }
 
 .post-content h2 {
   font-size: 1.5em;
   font-weight: 600;
   margin: 1em 0 0.6em;
-  color: #ede9e9;
+  color: #111827;
 }
 
 .post-content h3 {
   font-size: 1.2em;
   font-weight: 600;
   margin: 0.8em 0 0.4em;
-  color: #dddddd;
+  color: #111827;
 }
 
 .post-content p {
@@ -471,14 +679,14 @@ onMounted(async () => {
   border-left: 3px solid #dbdbdb;
   padding-left: 1em;
   margin: 1em 0;
-  color: #e6e5e5;
+  color: #666;
   font-style: italic;
 }
 
 .post-content img {
   max-width: 100%;
   height: auto;
-  border-radius: 4px;
+  border-radius: 8px;
   margin: 1em 0;
 }
 
@@ -494,6 +702,19 @@ onMounted(async () => {
 }
 
 .post-content a:hover {
-  color: #d5d4d4;
+  color: #363636;
+}
+
+.post-meta {
+  color: #6b7280;
+  font-size: 0.9em;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.icon-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>
