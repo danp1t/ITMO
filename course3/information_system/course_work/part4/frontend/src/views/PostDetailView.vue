@@ -58,26 +58,17 @@
                 </span>
                 <span>{{ post.ownerName }}</span>
               </span>
-              <span class="mx-2">•</span>
               <span class="icon-text">
                 <span class="icon">
                   <i class="fas fa-calendar"></i>
                 </span>
                 <span>{{ formatDate(post.createdAt) }}</span>
               </span>
-              <span class="mx-2">•</span>
               <span class="icon-text">
                 <span class="icon">
                   <i class="fas fa-heart"></i>
                 </span>
                 <span>{{ post.countLike }}</span>
-              </span>
-              <span v-if="post.updatedAt !== post.createdAt" class="mx-2">•</span>
-              <span v-if="post.updatedAt !== post.createdAt" class="icon-text" title="Отредактировано">
-                <span class="icon">
-                  <i class="fas fa-edit"></i>
-                </span>
-                <span>{{ formatDate(post.updatedAt, true) }}</span>
               </span>
             </small>
           </div>
@@ -622,7 +613,7 @@ onMounted(async () => {
 .post-content {
   font-size: 1rem;
   line-height: 1.6;
-  color: #363636;
+  color: #d5d2d2;
   margin-bottom: 20px;
 }
 

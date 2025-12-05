@@ -569,21 +569,21 @@ onMounted(() => {
   font-size: 1.5rem;
   font-weight: 600;
   margin: 1rem 0 0.5rem;
-  color: #111827;
+  color: #c0c6cd;
 }
 
 .post-content-preview :deep(h2) {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0.875rem 0 0.5rem;
-  color: #111827;
+  color: #dedfe3;
 }
 
 .post-content-preview :deep(h3) {
   font-size: 1.125rem;
   font-weight: 600;
   margin: 0.75rem 0 0.5rem;
-  color: #111827;
+  color: #cdcfd5;
 }
 
 .post-content-preview :deep(p) {

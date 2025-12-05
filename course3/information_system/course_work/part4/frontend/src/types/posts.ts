@@ -5,6 +5,7 @@ export interface Post {
   ownerId: number
   ownerName: string
   createdAt: string
+  updatedAt: string
   countLike: number  // Изменено с likesCount на countLike
   commentsCount?: number  // Оставляем опциональным, так как в ответе его нет
   tags?: Tag[]     // Оставляем опциональным
@@ -23,6 +24,7 @@ export interface Comment {
   accountId: number
   accountName: string
   createdAt: string
+  updatedAt?: string
   canEdit?: boolean
   canDelete?: boolean
 }
