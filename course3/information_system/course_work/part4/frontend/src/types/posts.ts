@@ -7,7 +7,13 @@ export interface Post {
   createdAt: string
   countLike: number  // Изменено с likesCount на countLike
   commentsCount?: number  // Оставляем опциональным, так как в ответе его нет
-  tags?: string[]  // Оставляем опциональным
+  tags?: Tag[]     // Оставляем опциональным
+}
+
+export interface Tag {
+  id: number
+  name: string
+  color?: string
 }
 
 export interface Comment {

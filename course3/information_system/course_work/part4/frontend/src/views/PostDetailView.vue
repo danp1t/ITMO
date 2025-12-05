@@ -31,9 +31,7 @@
         </header>
 
         <div class="card-content">
-          <div class="content">
-            {{ post.text }}
-          </div>
+          <div class="post-content" v-html="post.text"></div>
 
           <div class="post-meta">
             <small>
@@ -196,12 +194,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { postsAPI } from '../api/posts'
 import type { Post, Comment } from '../types/posts'
 
 const route = useRoute()
+const router = useRouter()
 const authStore = useAuthStore()
 
 const post = ref<Post | null>(null)
@@ -324,12 +323,8 @@ const saveEditedComment = async (commentId: number) => {
 
     cancelEditComment()
 
-    // Можно добавить уведомление об успехе
-    // useToast().success('Комментарий обновлен')
   } catch (error) {
     console.error('Ошибка при обновлении комментария:', error)
-    // Можно добавить уведомление об ошибке
-    // useToast().error('Не удалось обновить комментарий')
   } finally {
     isEditingComment.value = false
   }
@@ -357,10 +352,9 @@ const deleteComment = async (commentId: number) => {
 }
 
 const editPost = () => {
-  // Реализуйте логику редактирования поста
-  console.log('Редактировать пост:', post.value)
-  // Можно добавить роутинг на страницу редактирования
-  // или открыть модальное окно, как в PostsView.vue
+  if (post.value) {
+    router.push(`/posts/${post.value.id}/edit`)
+  }
 }
 
 const formatDate = (dateString: string) => {
@@ -409,10 +403,97 @@ onMounted(async () => {
 }
 
 .button.is-text.has-text-danger:hover {
-  background-color: rgba(255, 56, 96, 0.1);
+  background-color: rgba(236, 232, 232, 0.1);
 }
 
 .fa-spinner {
   font-size: 0.8em;
+}
+
+/* Стили для отображения HTML контента поста */
+.post-content {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #fbf8f8;
+  margin-bottom: 20px;
+}
+
+.post-content h1 {
+  font-size: 1.8em;
+  font-weight: 600;
+  margin: 1.2em 0 0.8em;
+  color: #d6cfcf;
+}
+
+.post-content h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 1em 0 0.6em;
+  color: #ede9e9;
+}
+
+.post-content h3 {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 0.8em 0 0.4em;
+  color: #dddddd;
+}
+
+.post-content p {
+  margin: 0 0 1em;
+}
+
+.post-content strong {
+  font-weight: 700;
+}
+
+.post-content em {
+  font-style: italic;
+}
+
+.post-content ul,
+.post-content ol {
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.post-content ul li {
+  list-style-type: disc;
+  margin-bottom: 0.5em;
+}
+
+.post-content ol li {
+  list-style-type: decimal;
+  margin-bottom: 0.5em;
+}
+
+.post-content blockquote {
+  border-left: 3px solid #dbdbdb;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #e6e5e5;
+  font-style: italic;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 1em 0;
+}
+
+.post-content hr {
+  border: none;
+  border-top: 1px solid #dbdbdb;
+  margin: 2em 0;
+}
+
+.post-content a {
+  color: #3273dc;
+  text-decoration: underline;
+}
+
+.post-content a:hover {
+  color: #d5d4d4;
 }
 </style>

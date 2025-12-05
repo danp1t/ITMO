@@ -115,28 +115,39 @@
                 class="input"
                 type="text"
                 placeholder="Введите заголовок"
+                :disabled="isSaving"
               >
             </div>
           </div>
 
           <div class="field">
-            <label class="label">Текст</label>
+            <label class="label">Содержание</label>
             <div class="control">
-              <textarea
-                v-model="newPost.text"
-                class="textarea"
-                placeholder="Введите текст поста"
-                rows="6"
-              ></textarea>
+              <RichTextEditor
+                v-model="newPost.content"
+                :disabled="isSaving"
+                placeholder="Начните писать свой пост..."
+              />
             </div>
           </div>
         </section>
 
         <footer class="modal-card-foot">
-          <button class="button is-primary" @click="createPost">
-            Опубликовать
+          <button
+            class="button is-primary"
+            @click="createPost"
+            :disabled="isSaving || !newPost.title.trim() || !newPost.content.trim()"
+          >
+            <span v-if="isSaving" class="icon">
+              <i class="fas fa-spinner fa-spin"></i>
+            </span>
+            <span>{{ isSaving ? 'Публикация...' : 'Опубликовать' }}</span>
           </button>
-          <button class="button" @click="showCreateModal = false">
+          <button
+            class="button"
+            @click="showCreateModal = false"
+            :disabled="isSaving"
+          >
             Отмена
           </button>
         </footer>
@@ -167,15 +178,13 @@
           </div>
 
           <div class="field">
-            <label class="label">Текст</label>
+            <label class="label">Содержание</label>
             <div class="control">
-              <textarea
-                v-model="editingPost.text"
-                class="textarea"
-                placeholder="Введите текст поста"
-                rows="6"
+              <RichTextEditor
+                v-model="editingPost.content"
                 :disabled="isSaving"
-              ></textarea>
+                placeholder="Редактируйте содержимое поста..."
+              />
             </div>
           </div>
         </section>
@@ -184,7 +193,7 @@
           <button
             class="button is-primary"
             @click="updatePost"
-            :disabled="isSaving || !editingPost.title.trim()"
+            :disabled="isSaving || !editingPost.title.trim() || !editingPost.content.trim()"
           >
             <span v-if="isSaving" class="icon">
               <i class="fas fa-spinner fa-spin"></i>
@@ -208,6 +217,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import PostCard from '../components/posts/PostCard.vue'
+import RichTextEditor from '../components/posts/RichTextEditor.vue'
 import { postsAPI } from '../api/posts'
 import type { Post } from '../types/posts'
 
@@ -222,14 +232,13 @@ const isSaving = ref(false)
 
 const newPost = ref({
   title: '',
-  text: '',
+  content: '',
 })
 
-// Данные для редактирования поста - инициализируем с пустыми значениями
 const editingPost = ref({
   id: 0,
   title: '',
-  text: '',
+  content: '',
   ownerId: 0
 })
 
@@ -252,15 +261,27 @@ const loadPosts = async () => {
 const createPost = async () => {
   if (!authStore.user) return
 
+  // Валидация
+  if (!newPost.value.title.trim()) {
+    alert('Введите заголовок поста')
+    return
+  }
+
+  if (!newPost.value.content.trim() || newPost.value.content === '<p></p>') {
+    alert('Введите содержание поста')
+    return
+  }
+
   try {
     const postData = {
-      ...newPost.value,
+      title: newPost.value.title,
+      text: newPost.value.content,
       ownerId: authStore.user.id,
     }
 
     await postsAPI.createPost(postData)
     showCreateModal.value = false
-    newPost.value = { title: '', text: '' }
+    newPost.value = { title: '', content: '' }
     await loadPosts()
   } catch (error) {
     console.error('Ошибка при создании поста:', error)
@@ -290,7 +311,7 @@ const updatePost = async () => {
     return
   }
 
-  if (!editingPost.value.text.trim()) {
+  if (!editingPost.value.content.trim() || editingPost.value.content === '<p></p>') {
     alert('Введите текст поста')
     return
   }
@@ -300,7 +321,7 @@ const updatePost = async () => {
   try {
     const postData = {
       title: editingPost.value.title,
-      text: editingPost.value.text,
+      text: editingPost.value.content,
       ownerId: editingPost.value.ownerId,
     }
 
@@ -309,7 +330,11 @@ const updatePost = async () => {
     // Обновляем пост в списке
     const index = posts.value.findIndex(p => p.id === editingPost.value.id)
     if (index !== -1) {
-      posts.value[index] = { ...posts.value[index], ...postData }
+      posts.value[index] = {
+        ...posts.value[index],
+        ...postData,
+        text: editingPost.value.content
+      }
     }
 
     closeEditModal()
@@ -329,14 +354,21 @@ const closeEditModal = () => {
   editingPost.value = {
     id: 0,
     title: '',
-    text: '',
+    content: '',
     ownerId: 0
   }
 }
 
 // Обработчик удаления поста
 const handleDelete = async (postId: number) => {
-  posts.value = posts.value.filter(p => p.id !== postId)
+  try {
+    await postsAPI.deletePost(postId)
+    posts.value = posts.value.filter(p => p.id !== postId)
+  } catch (error: any) {
+    console.error('Ошибка при удалении поста:', error)
+    const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
+    alert(errorMessage)
+  }
 }
 
 const handleLike = async (postId: number) => {
