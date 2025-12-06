@@ -22,5 +22,7 @@
         <mapping resource="com/danp1t/model/Location.hbm.xml"/>
         <mapping resource="com/danp1t/model/Address.hbm.xml"/>
         <mapping resource="com/danp1t/model/Organization.hbm.xml"/>
+        <mapping resource="com/danp1t/model/User.hbm.xml"/>
+        <mapping resource="com/danp1t/model/ImportOperation.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

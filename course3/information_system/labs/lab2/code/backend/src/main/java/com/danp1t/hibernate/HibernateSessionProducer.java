@@ -32,7 +32,9 @@ public class HibernateSessionProducer {
                         "com/danp1t/model/Address.hbm.xml",
                         "com/danp1t/model/Coordinates.hbm.xml",
                         "com/danp1t/model/Location.hbm.xml",
-                        "com/danp1t/model/Organization.hbm.xml"
+                        "com/danp1t/model/Organization.hbm.xml",
+                        "com/danp1t/model/User.hbm.xml",
+                        "com/danp1t/model/ImportOperation.hbm.xml"
                 };
 
                 for (String mappingFile : mappingFiles) {
