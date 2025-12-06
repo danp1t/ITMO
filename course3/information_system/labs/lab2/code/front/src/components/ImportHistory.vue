@@ -8,6 +8,7 @@
             type="text"
             v-model="searchQuery"
             placeholder="Поиск по файлу или статусу..."
+            @input="filterHistory"
         />
         <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="#718096">
           <path d="M11 2c4.968 0 9 4.032 9 9s-4.032 9-9 9-9-4.032-9-9 4.032-9 9-9zm0 16c3.867 0 7-3.133 7-7 0-3.868-3.133-7-7-7-3.868 0-7 3.132-7 7 0 3.867 3.132 7 7 7zm8.485.071l2.829 2.828-1.415 1.415-2.828-2.829 1.414-1.414z"/>
@@ -16,10 +17,10 @@
 
       <div class="date-filter">
         <label>С:</label>
-        <input type="date" v-model="startDate" />
+        <input type="date" v-model="startDate" @change="filterHistory" />
 
         <label>По:</label>
-        <input type="date" v-model="endDate" />
+        <input type="date" v-model="endDate" @change="filterHistory" />
       </div>
     </div>
 
@@ -29,6 +30,7 @@
         <div class="header-cell">Файл</div>
         <div class="header-cell">Пользователь</div>
         <div class="header-cell">Статус</div>
+        <div class="header-cell">Записей</div>
         <div class="header-cell">Действия</div>
       </div>
 
@@ -43,7 +45,7 @@
 
         <div v-else class="history-items">
           <div v-for="item in filteredHistory" :key="item.id" class="history-item">
-            <div class="cell">{{ formatDate(item.date) }}</div>
+            <div class="cell">{{ formatDate(item.importDate) }}</div>
             <div class="cell file-cell">
               <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="#667eea">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -53,15 +55,16 @@
             </div>
             <div class="cell">{{ item.user }}</div>
             <div class="cell">
-              <span :class="`status-badge status-${item.status}`">
+              <span :class="`status-badge status-${item.status.toLowerCase()}`">
                 {{ getStatusText(item.status) }}
               </span>
             </div>
+            <div class="cell">{{ item.recordsAdded || 0 }}</div>
             <div class="cell actions-cell">
               <button @click="viewDetails(item)" class="view-btn">
                 Просмотр
               </button>
-              <button v-if="item.status === 'completed'" @click="downloadReport(item)" class="download-btn">
+              <button v-if="item.status === 'SUCCESS'" @click="downloadReport(item)" class="download-btn">
                 Отчет
               </button>
             </div>
@@ -84,7 +87,7 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Дата импорта:</span>
-            <span>{{ formatDate(selectedItem.date) }}</span>
+            <span>{{ formatDate(selectedItem.importDate) }}</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">Пользователь:</span>
@@ -92,30 +95,17 @@
           </div>
           <div class="detail-row">
             <span class="detail-label">Статус:</span>
-            <span :class="`status-badge status-${selectedItem.status}`">
+            <span :class="`status-badge status-${selectedItem.status.toLowerCase()}`">
               {{ getStatusText(selectedItem.status) }}
             </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Записей добавлено:</span>
+            <span>{{ selectedItem.recordsAdded || 0 }}</span>
           </div>
           <div v-if="selectedItem.errorMessage" class="detail-row">
             <span class="detail-label">Ошибка:</span>
             <span class="error-text">{{ selectedItem.errorMessage }}</span>
-          </div>
-          <div v-if="selectedItem.stats" class="stats">
-            <h4>Статистика:</h4>
-            <div class="stats-grid">
-              <div class="stat-item">
-                <span class="stat-value">{{ selectedItem.stats.total || 0 }}</span>
-                <span class="stat-label">Всего записей</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value success">{{ selectedItem.stats.success || 0 }}</span>
-                <span class="stat-label">Успешно</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-value error">{{ selectedItem.stats.failed || 0 }}</span>
-                <span class="stat-label">С ошибками</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -124,6 +114,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ImportHistory',
   data() {
@@ -133,44 +125,54 @@ export default {
       endDate: '',
       loading: false,
       selectedItem: null,
-      importHistory: []
+      importHistory: [],
+      originalHistory: [] // Сохраняем оригинальные данные
     }
   },
   computed: {
     filteredHistory() {
-      let filtered = this.importHistory
+      let filtered = this.importHistory;
 
       if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase()
+        const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(item =>
-            item.fileName.toLowerCase().includes(query) ||
+            (item.fileName && item.fileName.toLowerCase().includes(query)) ||
             (item.user && item.user.toLowerCase().includes(query)) ||
             this.getStatusText(item.status).toLowerCase().includes(query)
-        )
+        );
       }
 
       if (this.startDate) {
-        const start = new Date(this.startDate)
-        filtered = filtered.filter(item => new Date(item.importDate) >= start)
+        const start = new Date(this.startDate);
+        filtered = filtered.filter(item => {
+          const itemDate = new Date(item.importDate);
+          return itemDate >= start;
+        });
       }
 
       if (this.endDate) {
-        const end = new Date(this.endDate)
-        filtered = filtered.filter(item => new Date(item.importDate) <= end)
+        const end = new Date(this.endDate);
+        end.setHours(23, 59, 59, 999); // Устанавливаем конец дня
+        filtered = filtered.filter(item => {
+          const itemDate = new Date(item.importDate);
+          return itemDate <= end;
+        });
       }
 
-      return filtered.sort((a, b) => new Date(b.importDate) - new Date(a.importDate))
+      return filtered.sort((a, b) => new Date(b.importDate) - new Date(a.importDate));
     }
   },
   methods: {
     formatDate(date) {
-      return new Date(date).toLocaleDateString('ru-RU', {
+      if (!date) return 'Н/Д';
+      const d = new Date(date);
+      return d.toLocaleDateString('ru-RU', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
         hour: '2-digit',
         minute: '2-digit'
-      })
+      });
     },
 
     getStatusText(status) {
@@ -178,74 +180,94 @@ export default {
         'SUCCESS': 'Завершено',
         'PROCESSING': 'В обработке',
         'FAILED': 'Ошибка'
-      }
-      return statusMap[status] || status
+      };
+      return statusMap[status] || status;
     },
 
     viewDetails(item) {
-      this.selectedItem = { ...item }
+      this.selectedItem = { ...item };
     },
 
     closeModal() {
-      this.selectedItem = null
+      this.selectedItem = null;
     },
 
     downloadReport(item) {
-      // Заглушка для скачивания отчета
-      console.log('Скачивание отчета для:', item.fileName)
-      alert('Функция скачивания отчета будет реализована после подключения бэкенда')
+      console.log('Скачивание отчета для:', item.fileName);
+      // Временная заглушка
+      alert(`Функция скачивания отчета для файла "${item.fileName}" будет реализована позже`);
+    },
+
+    filterHistory() {
+      // Фильтрация уже выполняется в computed свойстве
+      console.log('Фильтрация обновлена');
     },
 
     async loadHistory() {
       const token = localStorage.getItem('authToken');
       if (!token) {
         console.error('Требуется авторизация');
+        this.$router.push('/login');
         return;
       }
 
       this.loading = true;
       try {
+        // Убедитесь, что URL правильный (совпадает с вашим API)
         const response = await axios.get('/api/import/history', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
+        console.log('Ответ от сервера:', response.data);
+
         if (response.data && response.data.history) {
-          // Преобразуем данные из бекенда в формат фронтенда
-          this.importHistory = response.data.history.map(item => ({
-            id: item.id,
-            date: item.importDate,
-            fileName: item.fileName,
-            user: item.user,
-            status: item.status,
-            recordsAdded: item.recordsAdded,
-            errorMessage: item.errorMessage,
-            stats: {
-              total: item.recordsAdded || 0,
-              success: item.recordsAdded || 0,
-              failed: item.status === 'FAILED' ? 1 : 0
-            }
-          }));
+          this.importHistory = response.data.history;
+          this.originalHistory = [...response.data.history]; // Сохраняем копию
+        } else {
+          this.importHistory = [];
+          this.originalHistory = [];
+          console.warn('История импорта пуста или не в ожидаемом формате');
         }
 
       } catch (error) {
         console.error('Ошибка загрузки истории:', error);
-        if (error.response && error.response.status === 401) {
-          this.$emit('unauthorized');
+
+        // Показываем подробную информацию об ошибке
+        if (error.response) {
+          console.error('Статус ошибки:', error.response.status);
+          console.error('Данные ошибки:', error.response.data);
+
+          if (error.response.status === 401) {
+            alert('Сессия истекла. Пожалуйста, войдите снова.');
+            this.$router.push('/login');
+          } else if (error.response.status === 403) {
+            alert('У вас нет прав для просмотра истории импорта.');
+          }
+        } else if (error.request) {
+          console.error('Запрос был сделан, но ответ не получен:', error.request);
+          alert('Ошибка сети. Проверьте соединение с сервером.');
         }
+
+        this.importHistory = [];
+        this.originalHistory = [];
       } finally {
         this.loading = false;
       }
-    },
+    }
   },
   mounted() {
-    this.loadHistory()
+    this.loadHistory();
+
+    // Для отладки: проверяем URL API
+    console.log('Текущий URL API:', window.location.origin + '/api/import/history');
   }
 }
 </script>
 
 <style scoped>
+/* Стили оставить без изменений, они уже хорошие */
 .import-history {
   padding: 20px;
 }
@@ -319,7 +341,7 @@ h2 {
 
 .table-header {
   display: grid;
-  grid-template-columns: 1fr 2fr 1.5fr 1fr 1.5fr;
+  grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr 1.5fr;
   background: #667eea;
   color: white;
   font-weight: 600;
@@ -340,11 +362,12 @@ h2 {
   justify-content: center;
   height: 200px;
   color: #718096;
+  font-style: italic;
 }
 
 .history-item {
   display: grid;
-  grid-template-columns: 1fr 2fr 1.5fr 1fr 1.5fr;
+  grid-template-columns: 1.5fr 2fr 1.5fr 1fr 1fr 1.5fr;
   border-bottom: 1px solid #e2e8f0;
   transition: background 0.2s ease;
 }
@@ -376,7 +399,7 @@ h2 {
   letter-spacing: 0.5px;
 }
 
-.status-completed {
+.status-success {
   background: #c6f6d5;
   color: #276749;
 }
@@ -522,55 +545,7 @@ h2 {
 .error-text {
   color: #c53030;
   font-weight: 500;
-}
-
-.stats {
-  margin-top: 20px;
-  padding: 20px;
-  background: #f7fafc;
-  border-radius: 8px;
-}
-
-.stats h4 {
-  margin: 0 0 15px 0;
-  color: #2d3748;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.stat-value {
-  display: block;
-  font-size: 24px;
-  font-weight: 700;
-  color: #667eea;
-  margin-bottom: 5px;
-}
-
-.stat-value.success {
-  color: #48bb78;
-}
-
-.stat-value.error {
-  color: #f56565;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #718096;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  flex: 1;
 }
 
 @media (max-width: 768px) {
@@ -596,10 +571,6 @@ h2 {
 
   .date-filter {
     flex-wrap: wrap;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>

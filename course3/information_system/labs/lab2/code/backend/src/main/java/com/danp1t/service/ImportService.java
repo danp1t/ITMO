@@ -6,7 +6,6 @@ import com.danp1t.repository.OrganizationRepository;
 import com.danp1t.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -31,7 +30,6 @@ public class ImportService {
     @Inject
     private UserRepository userRepository;
 
-    @Transactional
     public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName) {
         // 1. Получаем пользователя в текущем контексте транзакции
         User user = userRepository.findById(detachedUser.getId());
@@ -77,7 +75,7 @@ public class ImportService {
             operation.setRecordsAdded(savedOrganizations.size());
 
             // 7. Сохраняем обновленную операцию
-            importOperationRepository.save(operation);
+            importOperationRepository.merge(operation);
 
             return operation;
 
@@ -85,7 +83,7 @@ public class ImportService {
             operation.setStatus("FAILED");
             operation.setErrorMessage(e.getMessage());
             // Сохраняем операцию с информацией об ошибке
-            importOperationRepository.save(operation);
+            importOperationRepository.merge(operation);
             throw new RuntimeException("Ошибка импорта: " + e.getMessage(), e);
         }
     }
