@@ -8,16 +8,16 @@
 
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="form-group">
-          <label for="email">Email</label>
+          <label for="username">Username</label>
           <input
-              type="email"
-              id="email"
-              v-model="form.email"
+              type="username"
+              id="username"
+              v-model="form.username"
               required
-              placeholder="Введите ваш email"
-              :class="{ 'error': errors.email }"
+              placeholder="Введите ваш username"
+              :class="{ 'error': errors.username }"
           />
-          <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
+          <span v-if="errors.username" class="error-text">{{ errors.username }}</span>
         </div>
 
         <div class="form-group">
@@ -74,12 +74,14 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: 'Login',
   data() {
     return {
       form: {
-        email: '',
+        username: '',
         password: '',
         rememberMe: false
       },
@@ -93,10 +95,8 @@ export default {
     validateForm() {
       this.errors = {}
 
-      if (!this.form.email) {
-        this.errors.email = 'Email обязателен'
-      } else if (!this.isValidEmail(this.form.email)) {
-        this.errors.email = 'Введите корректный email'
+      if (!this.form.username) {
+        this.errors.username = 'Имя пользователя обязательно'
       }
 
       if (!this.form.password) {
@@ -108,11 +108,6 @@ export default {
       return Object.keys(this.errors).length === 0
     },
 
-    isValidEmail(email) {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      return re.test(email)
-    },
-
     async handleLogin() {
       if (!this.validateForm()) return
 
@@ -120,18 +115,35 @@ export default {
       this.errorMessage = ''
 
       try {
-        // Здесь будет вызов API для авторизации
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        const response = await axios.post('/api/auth/login', {
+          username: this.form.username,
+          password: this.form.password
+        });
 
-        // Имитация успешной авторизации
-        console.log('Данные для входа:', this.form)
-        this.$emit('loginSuccess', { email: this.form.email })
+        if (response.data && response.data.token) {
+          localStorage.setItem('authToken', response.data.token);
+          localStorage.setItem('user', JSON.stringify({
+            id: response.data.id,
+            username: response.data.username,
+            role: response.data.role
+          }));
+
+          // Уведомляем родительский компонент об успешном входе
+          this.$emit('loginSuccess', {
+            username: response.data.username,
+            role: response.data.role
+          });
+        }
 
       } catch (error) {
-        this.errorMessage = 'Ошибка авторизации. Проверьте email и пароль.'
-        console.error('Login error:', error)
+        if (error.response && error.response.data && error.response.data.error) {
+          this.errorMessage = error.response.data.error;
+        } else {
+          this.errorMessage = 'Ошибка авторизации. Проверьте имя пользователя и пароль.';
+        }
+        console.error('Login error:', error);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     }
   }

@@ -3,6 +3,7 @@ package com.danp1t.service;
 import com.danp1t.model.*;
 import com.danp1t.repository.ImportOperationRepository;
 import com.danp1t.repository.OrganizationRepository;
+import com.danp1t.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.InputStream;
@@ -26,24 +28,55 @@ public class ImportService {
     @Inject
     private ImportOperationRepository importOperationRepository;
 
+    @Inject
+    private UserRepository userRepository;
+
     @Transactional
-    public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User user, String fileName) {
-        ImportOperation operation = new ImportOperation(fileName, user);
+    public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName) {
+        // 1. Получаем пользователя в текущем контексте транзакции
+        User user = userRepository.findById(detachedUser.getId());
+        if (user == null) {
+            throw new RuntimeException("Пользователь не найден");
+        }
+
+        // 2. Создаем операцию импорта
+        ImportOperation operation = new ImportOperation();
+        operation.setFileName(fileName);
+        operation.setImportDate(java.time.LocalDateTime.now());
+        operation.setUser(user);
+        operation.setStatus("PROCESSING");
+
+        // 3. Сохраняем операцию через репозиторий
         importOperationRepository.save(operation);
 
         try {
+            // 4. Парсим XML
             List<Organization> organizations = parseXml(xmlStream);
             List<Organization> savedOrganizations = new ArrayList<>();
 
-            // Валидируем и сохраняем организации в транзакции
+            // 5. Сохраняем организации
             for (Organization organization : organizations) {
                 organization.validate();
-                Organization savedOrg = organizationRepository.save(organization);
-                savedOrganizations.add(savedOrg);
+                // Устанавливаем связи, если они не установлены
+                if (organization.getCoordinates() != null) {
+                    organization.setCoordinates(organization.getCoordinates());
+                }
+                if (organization.getOfficialAddress() != null) {
+                    organization.setOfficialAddress(organization.getOfficialAddress());
+                }
+                if (organization.getPostalAddress() != null) {
+                    organization.setPostalAddress(organization.getPostalAddress());
+                }
+
+                organizationRepository.save(organization);
+                savedOrganizations.add(organization);
             }
 
+            // 6. Обновляем операцию
             operation.setStatus("SUCCESS");
             operation.setRecordsAdded(savedOrganizations.size());
+
+            // 7. Сохраняем обновленную операцию
             importOperationRepository.save(operation);
 
             return operation;
@@ -51,9 +84,8 @@ public class ImportService {
         } catch (Exception e) {
             operation.setStatus("FAILED");
             operation.setErrorMessage(e.getMessage());
+            // Сохраняем операцию с информацией об ошибке
             importOperationRepository.save(operation);
-
-            // Откатываем транзакцию (благодаря @Transactional)
             throw new RuntimeException("Ошибка импорта: " + e.getMessage(), e);
         }
     }

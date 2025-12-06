@@ -73,6 +73,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: 'MassImport',
   data() {
@@ -102,14 +104,12 @@ export default {
 
       if (!file) return
 
-      // Проверяем расширение файла
       const fileName = file.name.toLowerCase()
       if (!fileName.endsWith('.xml')) {
         this.errorMessage = 'Ошибка: поддерживается только формат XML. Выберите файл с расширением .xml'
         return
       }
 
-      // Проверяем размер файла (10MB максимум)
       const maxSize = 10 * 1024 * 1024 // 10MB
       if (file.size > maxSize) {
         this.errorMessage = `Ошибка: размер файла превышает 10MB. Ваш файл: ${this.formatFileSize(file.size)}`
@@ -118,6 +118,7 @@ export default {
 
       this.selectedFile = file
     },
+
 
     removeFile() {
       this.selectedFile = null
@@ -136,34 +137,56 @@ export default {
         return
       }
 
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        this.errorMessage = 'Требуется авторизация. Пожалуйста, войдите в систему.'
+        return;
+      }
+
       this.uploading = true
       this.errorMessage = ''
       this.successMessage = ''
 
       try {
-        // Здесь будет вызов API для загрузки файла
-        const formData = new FormData()
-        formData.append('xmlFile', this.selectedFile)
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
 
-        // Временная заглушка - пока нет бэкенда
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          this.errorMessage = 'Требуется авторизация. Пожалуйста, войдите в систему.';
+          return;
+        }
 
-        // Имитация успешной загрузки
-        this.successMessage = 'Файл успешно загружен! Обработка данных...'
-        console.log('Файл для загрузки:', this.selectedFile)
+        const response = await axios.post('/api/import/xml', formData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }}
+        )
 
-        // Очищаем через 3 секунды
-        setTimeout(() => {
-          this.selectedFile = null
-          this.successMessage = ''
-          this.$refs.fileInput.value = ''
-        }, 3000)
+        if (response.data) {
+          this.successMessage = `Импорт успешно завершен! Добавлено записей: ${response.data.recordsAdded}`;
+
+          // Если нужно, можно эмитировать событие для обновления истории
+          this.$emit('importCompleted', response.data.operationId);
+
+          // Очищаем через 5 секунд
+          setTimeout(() => {
+            this.selectedFile = null;
+            this.successMessage = '';
+            this.$refs.fileInput.value = '';
+          }, 5000);
+        }
 
       } catch (error) {
-        this.errorMessage = 'Ошибка при загрузке файла. Пожалуйста, попробуйте снова.'
-        console.error('Upload error:', error)
+        if (error.response && error.response.data && error.response.data.error) {
+          this.errorMessage = error.response.data.error;
+        } else {
+          this.errorMessage = 'Ошибка при импорте файла. Пожалуйста, попробуйте снова.';
+        }
+        console.error('Upload error:', error);
       } finally {
-        this.uploading = false
+        this.uploading = false;
       }
     },
 

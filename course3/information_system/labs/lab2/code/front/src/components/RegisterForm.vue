@@ -9,43 +9,17 @@
       <form @submit.prevent="handleRegister" class="auth-form">
         <div class="form-row">
           <div class="form-group">
-            <label for="firstName">Имя</label>
+            <label for="username">Username</label>
             <input
                 type="text"
-                id="firstName"
-                v-model="form.firstName"
+                id="username"
+                v-model="form.username"
                 required
-                placeholder="Введите имя"
-                :class="{ 'error': errors.firstName }"
+                placeholder="Введите username"
+                :class="{ 'error': errors.username }"
             />
-            <span v-if="errors.firstName" class="error-text">{{ errors.firstName }}</span>
+            <span v-if="errors.username" class="error-text">{{ errors.username }}</span>
           </div>
-
-          <div class="form-group">
-            <label for="lastName">Фамилия</label>
-            <input
-                type="text"
-                id="lastName"
-                v-model="form.lastName"
-                required
-                placeholder="Введите фамилию"
-                :class="{ 'error': errors.lastName }"
-            />
-            <span v-if="errors.lastName" class="error-text">{{ errors.lastName }}</span>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input
-              type="email"
-              id="email"
-              v-model="form.email"
-              required
-              placeholder="Введите ваш email"
-              :class="{ 'error': errors.email }"
-          />
-          <span v-if="errors.email" class="error-text">{{ errors.email }}</span>
         </div>
 
         <div class="form-group">
@@ -129,14 +103,14 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: 'Register',
   data() {
     return {
       form: {
-        firstName: '',
-        lastName: '',
-        email: '',
+        username: '',
         password: '',
         confirmPassword: '',
         acceptTerms: false
@@ -153,18 +127,8 @@ export default {
     validateForm() {
       this.errors = {}
 
-      if (!this.form.firstName.trim()) {
-        this.errors.firstName = 'Имя обязательно'
-      }
-
-      if (!this.form.lastName.trim()) {
-        this.errors.lastName = 'Фамилия обязательна'
-      }
-
-      if (!this.form.email) {
-        this.errors.email = 'Email обязателен'
-      } else if (!this.isValidEmail(this.form.email)) {
-        this.errors.email = 'Введите корректный email'
+      if (!this.form.username.trim()) {
+        this.errors.username = 'Имя пользователя обязательно'
       }
 
       if (!this.form.password) {
@@ -181,16 +145,7 @@ export default {
         this.errors.confirmPassword = 'Пароли не совпадают'
       }
 
-      if (!this.form.acceptTerms) {
-        this.errors.acceptTerms = 'Необходимо принять условия'
-      }
-
       return Object.keys(this.errors).length === 0
-    },
-
-    isValidEmail(email) {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      return re.test(email)
     },
 
     isStrongPassword(password) {
@@ -207,24 +162,35 @@ export default {
       this.successMessage = ''
 
       try {
-        // Здесь будет вызов API для регистрации
-        await new Promise(resolve => setTimeout(resolve, 1500))
+        const response = await axios.post('/api/auth/register', {
+          username: this.form.username,
+          password: this.form.password
+        });
 
-        // Имитация успешной регистрации
-        console.log('Данные регистрации:', this.form)
-        this.successMessage = 'Регистрация успешно завершена! Проверьте вашу почту для подтверждения.'
+        if (response.data) {
+          this.successMessage = 'Регистрация успешно завершена! Теперь вы можете войти в систему.'
 
-        // Очистка формы через 3 секунды
-        setTimeout(() => {
-          this.successMessage = ''
-          this.$emit('switchToLogin')
-        }, 3000)
+          // Очистка формы
+          this.form.username = '';
+          this.form.password = '';
+          this.form.confirmPassword = '';
+
+          // Переключение на форму входа через 3 секунды
+          setTimeout(() => {
+            this.successMessage = '';
+            this.$emit('switchToLogin');
+          }, 3000);
+        }
 
       } catch (error) {
-        this.errorMessage = 'Ошибка регистрации. Пожалуйста, попробуйте снова.'
-        console.error('Registration error:', error)
+        if (error.response && error.response.data && error.response.data.error) {
+          this.errorMessage = error.response.data.error;
+        } else {
+          this.errorMessage = 'Ошибка регистрации. Пожалуйста, попробуйте снова.';
+        }
+        console.error('Registration error:', error);
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     }
   }

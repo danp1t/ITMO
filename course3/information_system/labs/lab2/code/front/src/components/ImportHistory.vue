@@ -133,70 +133,33 @@ export default {
       endDate: '',
       loading: false,
       selectedItem: null,
-      // Временные данные для демонстрации
-      importHistory: [
-        {
-          id: 1,
-          date: new Date('2024-01-15'),
-          fileName: 'organizations_01.xml',
-          user: 'Иванов И.И.',
-          status: 'completed',
-          stats: { total: 150, success: 145, failed: 5 }
-        },
-        {
-          id: 2,
-          date: new Date('2024-01-14'),
-          fileName: 'data_import.xml',
-          user: 'Петров П.П.',
-          status: 'failed',
-          errorMessage: 'Неверный формат XML',
-          stats: { total: 0, success: 0, failed: 0 }
-        },
-        {
-          id: 3,
-          date: new Date('2024-01-13'),
-          fileName: 'companies.xml',
-          user: 'Сидорова С.С.',
-          status: 'processing',
-          stats: { total: 80, success: 0, failed: 0 }
-        },
-        {
-          id: 4,
-          date: new Date('2024-01-12'),
-          fileName: 'departments.xml',
-          user: 'Алексеев А.А.',
-          status: 'completed',
-          stats: { total: 45, success: 45, failed: 0 }
-        }
-      ]
+      importHistory: []
     }
   },
   computed: {
     filteredHistory() {
       let filtered = this.importHistory
 
-      // Фильтр по поисковому запросу
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase()
         filtered = filtered.filter(item =>
             item.fileName.toLowerCase().includes(query) ||
-            item.user.toLowerCase().includes(query) ||
+            (item.user && item.user.toLowerCase().includes(query)) ||
             this.getStatusText(item.status).toLowerCase().includes(query)
         )
       }
 
-      // Фильтр по дате
       if (this.startDate) {
         const start = new Date(this.startDate)
-        filtered = filtered.filter(item => new Date(item.date) >= start)
+        filtered = filtered.filter(item => new Date(item.importDate) >= start)
       }
 
       if (this.endDate) {
         const end = new Date(this.endDate)
-        filtered = filtered.filter(item => new Date(item.date) <= end)
+        filtered = filtered.filter(item => new Date(item.importDate) <= end)
       }
 
-      return filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
+      return filtered.sort((a, b) => new Date(b.importDate) - new Date(a.importDate))
     }
   },
   methods: {
@@ -212,10 +175,9 @@ export default {
 
     getStatusText(status) {
       const statusMap = {
-        'completed': 'Завершено',
-        'processing': 'В обработке',
-        'failed': 'Ошибка',
-        'pending': 'Ожидает'
+        'SUCCESS': 'Завершено',
+        'PROCESSING': 'В обработке',
+        'FAILED': 'Ошибка'
       }
       return statusMap[status] || status
     },
@@ -235,16 +197,47 @@ export default {
     },
 
     async loadHistory() {
-      this.loading = true
-      try {
-        // Здесь будет вызов API для получения истории
-        await new Promise(resolve => setTimeout(resolve, 500))
-      } catch (error) {
-        console.error('Ошибка загрузки истории:', error)
-      } finally {
-        this.loading = false
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('Требуется авторизация');
+        return;
       }
-    }
+
+      this.loading = true;
+      try {
+        const response = await axios.get('/api/import/history', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.data && response.data.history) {
+          // Преобразуем данные из бекенда в формат фронтенда
+          this.importHistory = response.data.history.map(item => ({
+            id: item.id,
+            date: item.importDate,
+            fileName: item.fileName,
+            user: item.user,
+            status: item.status,
+            recordsAdded: item.recordsAdded,
+            errorMessage: item.errorMessage,
+            stats: {
+              total: item.recordsAdded || 0,
+              success: item.recordsAdded || 0,
+              failed: item.status === 'FAILED' ? 1 : 0
+            }
+          }));
+        }
+
+      } catch (error) {
+        console.error('Ошибка загрузки истории:', error);
+        if (error.response && error.response.status === 401) {
+          this.$emit('unauthorized');
+        }
+      } finally {
+        this.loading = false;
+      }
+    },
   },
   mounted() {
     this.loadHistory()

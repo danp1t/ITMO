@@ -65,13 +65,23 @@ public class AuthService {
                 return null;
             }
 
-            String userIdStr = token.substring(5);
+            String[] parts = token.split("_");
+
+            if (parts.length < 2) {
+                return null;
+            }
+
+            // Вторая часть должна быть ID
+            String userIdStr = parts[1];
             Integer userId = Integer.parseInt(userIdStr);
+
             return userRepository.findById(userId);
         } catch (Exception e) {
+            System.err.println("Error parsing token: " + token + ", error: " + e.getMessage());
             return null;
         }
     }
+
 
     private String generateToken(Integer userId) {
         return "user_" + userId + "_" + UUID.randomUUID().toString();

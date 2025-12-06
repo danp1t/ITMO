@@ -8,8 +8,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -29,14 +30,14 @@ public class ImportController {
     @Path("/xml")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response importXml(
-            @FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("file") FormDataContentDisposition fileDetail,
+            MultipartFormDataInput input,
             @HeaderParam("Authorization") String authHeader) {
 
         try {
+            // Проверка авторизации
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("{\"error\": \"Требуется авторизация\"}")
+                        .entity(Map.of("error", "Требуется авторизация"))
                         .build();
             }
 
@@ -44,18 +45,33 @@ public class ImportController {
             User user = authService.getUserFromToken(token);
             if (user == null) {
                 return Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("{\"error\": \"Недействительный токен\"}")
+                        .entity(Map.of("error", "Недействительный токен " + token))
                         .build();
             }
 
-            String fileName = fileDetail.getFileName();
-            if (fileName == null || !fileName.toLowerCase().endsWith(".xml")) {
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error", "Поддерживаются только файлы формата XML");
+            // Получаем файл из multipart запроса
+            Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+            List<InputPart> inputParts = uploadForm.get("file");
+
+            if (inputParts == null || inputParts.isEmpty()) {
                 return Response.status(Response.Status.BAD_REQUEST)
-                        .entity(errorResponse)
+                        .entity(Map.of("error", "Файл не предоставлен"))
                         .build();
             }
+
+            InputPart inputPart = inputParts.get(0);
+
+            // Получаем имя файла из заголовков
+            String fileName = getFileName(inputPart);
+
+            if (fileName == null || !fileName.toLowerCase().endsWith(".xml")) {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity(Map.of("error", "Поддерживаются только файлы формата XML"))
+                        .build();
+            }
+
+            // Получаем InputStream
+            InputStream fileInputStream = inputPart.getBody(InputStream.class, null);
 
             ImportOperation operation = importService.importOrganizationsFromXml(
                     fileInputStream, user, fileName);
@@ -81,6 +97,26 @@ public class ImportController {
                     .entity(errorResponse)
                     .build();
         }
+    }
+
+    private String getFileName(InputPart inputPart) {
+        try {
+            String[] contentDisposition = inputPart.getHeaders()
+                    .getFirst("Content-Disposition")
+                    .split(";");
+
+            for (String filename : contentDisposition) {
+                if (filename.trim().startsWith("filename")) {
+                    String[] name = filename.split("=");
+                    if (name.length > 1) {
+                        return name[1].trim().replaceAll("\"", "");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // ignore
+        }
+        return "unknown.xml";
     }
 
     @GET
