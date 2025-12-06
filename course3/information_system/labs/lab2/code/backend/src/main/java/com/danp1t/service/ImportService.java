@@ -6,6 +6,9 @@ import com.danp1t.repository.OrganizationRepository;
 import com.danp1t.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -30,32 +33,41 @@ public class ImportService {
     @Inject
     private UserRepository userRepository;
 
+    @Inject
+    private SessionFactory sessionFactory;
+
     public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName) {
-        // 1. Получаем пользователя в текущем контексте транзакции
-        User user = userRepository.findById(detachedUser.getId());
-        if (user == null) {
-            throw new RuntimeException("Пользователь не найден");
-        }
-
-        // 2. Создаем операцию импорта
-        ImportOperation operation = new ImportOperation();
-        operation.setFileName(fileName);
-        operation.setImportDate(java.time.LocalDateTime.now());
-        operation.setUser(user);
-        operation.setStatus("PROCESSING");
-
-        // 3. Сохраняем операцию через репозиторий
-        importOperationRepository.save(operation);
+        Session mainSession = null;
+        Transaction mainTransaction = null;
 
         try {
-            // 4. Парсим XML
-            List<Organization> organizations = parseXml(xmlStream);
-            List<Organization> savedOrganizations = new ArrayList<>();
+            // 1. Открываем основную сессию и начинаем транзакцию
+            mainSession = sessionFactory.openSession();
+            mainTransaction = mainSession.beginTransaction();
 
-            // 5. Сохраняем организации
+            // 2. Получаем пользователя в текущем контексте
+            User user = mainSession.get(User.class, detachedUser.getId());
+            if (user == null) {
+                throw new RuntimeException("Пользователь не найден");
+            }
+
+            // 3. Создаем операцию импорта
+            ImportOperation operation = new ImportOperation();
+            operation.setFileName(fileName);
+            operation.setImportDate(java.time.LocalDateTime.now());
+            operation.setUser(user);
+            operation.setStatus("PROCESSING");
+
+            // 4. Сохраняем операцию в текущей сессии
+            importOperationRepository.saveWithSession(operation, mainSession);
+            mainSession.flush(); // Синхронизируем с БД
+
+            // 5. Парсим XML и валидируем все данные ПЕРЕД сохранением
+            List<Organization> organizations = parseAndValidateXml(xmlStream);
+
+            // 6. Сохраняем ВСЕ организации в ОДНОЙ транзакции
             for (Organization organization : organizations) {
-                organization.validate();
-                // Устанавливаем связи, если они не установлены
+                // Устанавливаем связи
                 if (organization.getCoordinates() != null) {
                     organization.setCoordinates(organization.getCoordinates());
                 }
@@ -66,32 +78,93 @@ public class ImportService {
                     organization.setPostalAddress(organization.getPostalAddress());
                 }
 
-                organizationRepository.save(organization);
-                savedOrganizations.add(organization);
+                // Сохраняем организацию
+                mainSession.persist(organization);
+
+                // Периодически сбрасываем кэш для предотвращения утечек памяти
+                if (organizations.indexOf(organization) % 20 == 0) {
+                    mainSession.flush();
+                    mainSession.clear();
+                }
             }
 
-            // 6. Обновляем операцию
+            // 7. Обновляем операцию
             operation.setStatus("SUCCESS");
-            operation.setRecordsAdded(savedOrganizations.size());
+            operation.setRecordsAdded(organizations.size());
+            importOperationRepository.mergeWithSession(operation, mainSession);
 
-            // 7. Сохраняем обновленную операцию
-            importOperationRepository.merge(operation);
-
+            // 8. Коммитим основную транзакцию
+            mainTransaction.commit();
             return operation;
 
         } catch (Exception e) {
-            operation.setStatus("FAILED");
-            operation.setErrorMessage(e.getMessage());
-            // Сохраняем операцию с информацией об ошибке
-            importOperationRepository.merge(operation);
+            // 9. Откатываем основную транзакцию при ошибке
+            if (mainTransaction != null) {
+                try {
+                    mainTransaction.rollback();
+                } catch (Exception rollbackEx) {
+                    System.err.println("Ошибка при откате транзакции: " + rollbackEx.getMessage());
+                }
+            }
+
+            // 10. Создаем запись об ошибке в ОТДЕЛЬНОЙ транзакции
+            createFailedImportOperation(detachedUser, fileName, e.getMessage());
+
             throw new RuntimeException("Ошибка импорта: " + e.getMessage(), e);
+        } finally {
+            // 11. Всегда закрываем сессию
+            if (mainSession != null && mainSession.isOpen()) {
+                mainSession.close();
+            }
         }
     }
 
-    private List<Organization> parseXml(InputStream xmlStream) throws Exception {
+    private void createFailedImportOperation(User user, String fileName, String errorMessage) {
+        Session errorSession = null;
+        Transaction errorTransaction = null;
+
+        try {
+            errorSession = sessionFactory.openSession();
+            errorTransaction = errorSession.beginTransaction();
+
+            // Получаем пользователя в новой сессии
+            User managedUser = errorSession.get(User.class, user.getId());
+
+            ImportOperation failedOperation = new ImportOperation();
+            failedOperation.setFileName(fileName);
+            failedOperation.setImportDate(java.time.LocalDateTime.now());
+            failedOperation.setUser(managedUser);
+            failedOperation.setStatus("FAILED");
+            failedOperation.setErrorMessage(errorMessage);
+
+            errorSession.persist(failedOperation);
+            errorTransaction.commit();
+
+        } catch (Exception e) {
+            if (errorTransaction != null) {
+                try {
+                    errorTransaction.rollback();
+                } catch (Exception rollbackEx) {
+                    System.err.println("Ошибка при откате транзакции ошибки: " + rollbackEx.getMessage());
+                }
+            }
+            System.err.println("Не удалось сохранить информацию об ошибке импорта: " + e.getMessage());
+        } finally {
+            if (errorSession != null && errorSession.isOpen()) {
+                errorSession.close();
+            }
+        }
+    }
+
+    private List<Organization> parseAndValidateXml(InputStream xmlStream) throws Exception {
         List<Organization> organizations = new ArrayList<>();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        // Защита от XXE атак
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(xmlStream);
         document.getDocumentElement().normalize();
@@ -103,11 +176,57 @@ public class ImportService {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 Organization organization = parseOrganizationElement(element);
+
+                // Валидация согласно ограничениям предметной области
+                validateOrganization(organization);
+
                 organizations.add(organization);
             }
         }
 
         return organizations;
+    }
+
+    private void validateOrganization(Organization organization) {
+        // Проверка обязательных полей
+        if (organization.getName() == null || organization.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Имя организации обязательно");
+        }
+
+        if (organization.getName().length() > 255) {
+            throw new IllegalArgumentException("Имя организации не должно превышать 255 символов");
+        }
+
+        if (organization.getAnnualTurnover() <= 0) {
+            throw new IllegalArgumentException("Годовой оборот должен быть положительным числом");
+        }
+
+        if (organization.getEmployeesCount() <= 0) {
+            throw new IllegalArgumentException("Количество сотрудников должно быть положительным числом");
+        }
+
+        // Проверка координат
+        if (organization.getCoordinates() == null) {
+            throw new IllegalArgumentException("Координаты обязательны");
+        }
+
+        if (organization.getCoordinates().getX() == null) {
+            throw new IllegalArgumentException("Координата X обязательна");
+        }
+
+        // Проверка типа организации
+        if (organization.getType() == null) {
+            throw new IllegalArgumentException("Тип организации обязателен");
+        }
+
+        // Дополнительные проверки из ЛР1
+        if (organization.getAnnualTurnover() > 1000000000) {
+            throw new IllegalArgumentException("Годовой оборот не может превышать 1,000,000,000");
+        }
+
+        if (organization.getEmployeesCount() > 10000) {
+            throw new IllegalArgumentException("Количество сотрудников не может превышать 10,000");
+        }
     }
 
     private Organization parseOrganizationElement(Element element) {
@@ -125,26 +244,32 @@ public class ImportService {
 
         // Coordinates
         Element coordinatesElement = (Element) element.getElementsByTagName("coordinates").item(0);
-        Coordinates coordinates = new Coordinates();
-        coordinates.setX(Float.parseFloat(getElementText(coordinatesElement, "x")));
-        coordinates.setY(Double.parseDouble(getElementText(coordinatesElement, "y")));
-        organization.setCoordinates(coordinates);
+        if (coordinatesElement != null) {
+            Coordinates coordinates = new Coordinates();
+            coordinates.setX(Float.parseFloat(getElementText(coordinatesElement, "x")));
+            coordinates.setY(Double.parseDouble(getElementText(coordinatesElement, "y")));
+            organization.setCoordinates(coordinates);
+        }
 
         // Official Address (Location)
         Element officialAddressElement = (Element) element.getElementsByTagName("officialAddress").item(0);
-        Location officialAddress = new Location();
-        officialAddress.setX(Double.parseDouble(getElementText(officialAddressElement, "x")));
-        officialAddress.setY(Float.parseFloat(getElementText(officialAddressElement, "y")));
-        officialAddress.setZ(Double.parseDouble(getElementText(officialAddressElement, "z")));
-        officialAddress.setName(getElementText(officialAddressElement, "name"));
-        organization.setOfficialAddress(officialAddress);
+        if (officialAddressElement != null) {
+            Location officialAddress = new Location();
+            officialAddress.setX(Double.parseDouble(getElementText(officialAddressElement, "x")));
+            officialAddress.setY(Float.parseFloat(getElementText(officialAddressElement, "y")));
+            officialAddress.setZ(Double.parseDouble(getElementText(officialAddressElement, "z")));
+            officialAddress.setName(getElementText(officialAddressElement, "name"));
+            organization.setOfficialAddress(officialAddress);
+        }
 
         // Postal Address (Address)
         Element postalAddressElement = (Element) element.getElementsByTagName("postalAddress").item(0);
-        Address postalAddress = new Address();
-        postalAddress.setStreet(getElementText(postalAddressElement, "street"));
-        postalAddress.setZipCode(getElementText(postalAddressElement, "zipCode"));
-        organization.setPostalAddress(postalAddress);
+        if (postalAddressElement != null) {
+            Address postalAddress = new Address();
+            postalAddress.setStreet(getElementText(postalAddressElement, "street"));
+            postalAddress.setZipCode(getElementText(postalAddressElement, "zipCode"));
+            organization.setPostalAddress(postalAddress);
+        }
 
         return organization;
     }
