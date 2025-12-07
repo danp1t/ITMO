@@ -11,17 +11,17 @@
       <div class="search-section">
         <div class="search-input-wrapper">
           <input
-            v-model="filters.search"
-            type="text"
-            placeholder="Поиск по названию..."
-            class="search-input"
-            @input="applyFilters"
+              v-model="filters.search"
+              type="text"
+              placeholder="Поиск по названию..."
+              class="search-input"
+              @input="onFilterChange"
           >
         </div>
       </div>
 
       <div class="filter-controls">
-        <select v-model="filters.sortBy" class="filter-select" @change="applySorting">
+        <select v-model="filters.sortBy" class="filter-select" @change="onSortChange">
           <option value="">Сортировка по...</option>
           <option value="name">Названию</option>
           <option value="creationDate">Дате создания</option>
@@ -31,12 +31,12 @@
           <option value="type">Типу</option>
         </select>
 
-        <select v-model="filters.sortOrder" class="filter-select" @change="applySorting">
+        <select v-model="filters.sortOrder" class="filter-select" @change="onSortChange">
           <option value="asc">По возрастанию</option>
           <option value="desc">По убыванию</option>
         </select>
 
-        <select v-model="filters.type" class="filter-select" @change="applyFilters">
+        <select v-model="filters.type" class="filter-select" @change="onFilterChange">
           <option value="">Все типы</option>
           <option value="COMMERCIAL">COMMERCIAL</option>
           <option value="GOVERNMENT">GOVERNMENT</option>
@@ -52,7 +52,7 @@
     </div>
 
     <div v-if="isFiltered" class="filter-info">
-      <span>Найдено организаций: {{ filteredOrganizations.length }}</span>
+      <span>Найдено организаций: {{ totalItems }}</span>
       <button class="clear-filters-small" @click="clearFilters">
         × Сбросить
       </button>
@@ -61,68 +61,68 @@
     <div class="table-container">
       <table class="organizations-table">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>
-              <div class="sortable-header" @click="toggleSort('name')">
-                Название
-                <span v-if="filters.sortBy === 'name'" class="sort-indicator">
+        <tr>
+          <th>ID</th>
+          <th>
+            <div class="sortable-header" @click="toggleSort('name')">
+              Название
+              <span v-if="filters.sortBy === 'name'" class="sort-indicator">
                   {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
                 </span>
-              </div>
-            </th>
-            <th>
-              <div class="sortable-header" @click="toggleSort('annualTurnover')">
-                Годовой оборот
-                <span v-if="filters.sortBy === 'annualTurnover'" class="sort-indicator">
+            </div>
+          </th>
+          <th>
+            <div class="sortable-header" @click="toggleSort('annualTurnover')">
+              Годовой оборот
+              <span v-if="filters.sortBy === 'annualTurnover'" class="sort-indicator">
                   {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
                 </span>
-              </div>
-            </th>
-            <th>
-              <div class="sortable-header" @click="toggleSort('employeesCount')">
-                Количество сотрудников
-                <span v-if="filters.sortBy === 'employeesCount'" class="sort-indicator">
+            </div>
+          </th>
+          <th>
+            <div class="sortable-header" @click="toggleSort('employeesCount')">
+              Количество сотрудников
+              <span v-if="filters.sortBy === 'employeesCount'" class="sort-indicator">
                   {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
                 </span>
-              </div>
-            </th>
-            <th>
-              <div class="sortable-header" @click="toggleSort('rating')">
-                Рейтинг
-                <span v-if="filters.sortBy === 'rating'" class="sort-indicator">
+            </div>
+          </th>
+          <th>
+            <div class="sortable-header" @click="toggleSort('rating')">
+              Рейтинг
+              <span v-if="filters.sortBy === 'rating'" class="sort-indicator">
                   {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
                 </span>
-              </div>
-            </th>
-            <th>
-              <div class="sortable-header" @click="toggleSort('creationDate')">
-                Дата создания
-                <span v-if="filters.sortBy === 'creationDate'" class="sort-indicator">
+            </div>
+          </th>
+          <th>
+            <div class="sortable-header" @click="toggleSort('creationDate')">
+              Дата создания
+              <span v-if="filters.sortBy === 'creationDate'" class="sort-indicator">
                   {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
                 </span>
-              </div>
-            </th>
-            <th>Координаты</th>
-            <th>Официальный адрес</th>
-            <th>Почтовый адрес</th>
-            <th>
-              <div class="sortable-header" @click="toggleSort('type')">
-                Тип
-                <span v-if="filters.sortBy === 'type'" class="sort-indicator">
+            </div>
+          </th>
+          <th>Координаты</th>
+          <th>Официальный адрес</th>
+          <th>Почтовый адрес</th>
+          <th>
+            <div class="sortable-header" @click="toggleSort('type')">
+              Тип
+              <span v-if="filters.sortBy === 'type'" class="sort-indicator">
                   {{ filters.sortOrder === 'asc' ? '↑' : '↓' }}
                 </span>
-              </div>
-            </th>
-            <th>Действия</th>
-          </tr>
+            </div>
+          </th>
+          <th>Действия</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-for="org in paginatedOrganizations" :key="org.id">
-            <td>{{ org.id }}</td>
-            <td>
-              <span v-if="!org.editing">{{ org.name }}</span>
-              <input
+        <tr v-for="org in organizations" :key="org.id">
+          <td>{{ org.id }}</td>
+          <td>
+            <span v-if="!org.editing">{{ org.name }}</span>
+            <input
                 v-else
                 v-model="org.editingData.name"
                 class="inline-input"
@@ -130,14 +130,14 @@
                 :class="{ 'error-input': org.editingErrors.name }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
-              >
-              <div v-if="org.editing && org.editingErrors.name" class="field-error">
-                {{ org.editingErrors.name }}
-              </div>
-            </td>
-            <td>
-              <span v-if="!org.editing">{{ formatCurrency(org.annualTurnover) }}</span>
-              <input
+            >
+            <div v-if="org.editing && org.editingErrors.name" class="field-error">
+              {{ org.editingErrors.name }}
+            </div>
+          </td>
+          <td>
+            <span v-if="!org.editing">{{ formatCurrency(org.annualTurnover) }}</span>
+            <input
                 v-else
                 v-model.number="org.editingData.annualTurnover"
                 type="number"
@@ -146,110 +146,108 @@
                 :class="{ 'error-input': org.editingErrors.annualTurnover }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
-              >
-              <div v-if="org.editing && org.editingErrors.annualTurnover" class="field-error">
-                {{ org.editingErrors.annualTurnover }}
-              </div>
-            </td>
-            <td>
-              <span v-if="!org.editing">{{ org.employeesCount }}</span>
-              <input
+            >
+            <div v-if="org.editing && org.editingErrors.annualTurnover" class="field-error">
+              {{ org.editingErrors.annualTurnover }}
+            </div>
+          </td>
+          <td>
+            <span v-if="!org.editing">{{ org.employeesCount }}</span>
+            <input
                 v-else
                 v-model.number="org.editingData.employeesCount"
                 type="text"
-                pattern= "^\d+$"
+                pattern="^\d+$"
                 maxlength="40"
                 min="0"
                 class="inline-input"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
-              >
-              <div v-if="org.editing && org.editingErrors.employeesCount" class="field-error">
-                {{ org.editingErrors.employeesCount }}
-              </div>
-            </td>
-            <td>
+            >
+            <div v-if="org.editing && org.editingErrors.employeesCount" class="field-error">
+              {{ org.editingErrors.employeesCount }}
+            </div>
+          </td>
+          <td>
               <span v-if="!org.editing" class="rating" :class="getRatingClass(org.rating)">
                 {{ org.rating }}
               </span>
-              <input
+            <input
                 v-else
                 v-model.number="org.editingData.rating"
                 maxlength="40"
                 type="text"
                 class="inline-input"
-                :class="{ 'error-input': org.editingErrors.employeesCount }"
+                :class="{ 'error-input': org.editingErrors.rating }"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
-              >
-              <div v-if="org.editing && org.editingErrors.rating" class="field-error">
-                {{ org.editingErrors.rating }}
-              </div>
-            </td>
-            <td>
-              {{ org.creationDate }}
-            </td>
-            <td
+            >
+            <div v-if="org.editing && org.editingErrors.rating" class="field-error">
+              {{ org.editingErrors.rating }}
+            </div>
+          </td>
+          <td>{{ formatDate(org.creationDate) }}</td>
+          <td
               class="clickable-cell"
               @click="viewChildEntity(org.coordinates, 'coordinates')"
-            >
-              {{ org.coordinates ? `ID: ${org.coordinates}` : 'Не указано' }}
-            </td>
-            <td
+          >
+            {{ org.coordinates ? `ID: ${org.coordinates}` : 'Не указано' }}
+          </td>
+          <td
               class="clickable-cell"
               @click="viewChildEntity(org.officialAddress, 'location')"
-            >
-              {{ org.officialAddress ? `ID: ${org.officialAddress}` : 'Не указано' }}
-            </td>
-            <td
+          >
+            {{ org.officialAddress ? `ID: ${org.officialAddress}` : 'Не указано' }}
+          </td>
+          <td
               class="clickable-cell"
               @click="viewChildEntity(org.postalAddress, 'address')"
-            >
-              {{ org.postalAddress ? `ID: ${org.postalAddress}` : 'Не указано' }}
-            </td>
-            <td>
+          >
+            {{ org.postalAddress ? `ID: ${org.postalAddress}` : 'Не указано' }}
+          </td>
+          <td>
               <span v-if="!org.editing" class="type-badge" :class="getTypeClass(org.type)">
                 {{ org.type }}
               </span>
-              <select
+            <select
                 v-else
                 v-model="org.editingData.type"
                 class="inline-input"
                 @keyup.enter="saveOrganization(org)"
                 @keyup.esc="cancelEditing(org)"
-              >
-                <option value="COMMERCIAL">COMMERCIAL</option>
-                <option value="GOVERNMENT">GOVERNMENT</option>
-                <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
-                <option value="PUBLIC">PUBLIC</option>
-                <option value="TRUST">TRUST</option>
-              </select>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <template v-if="!org.editing">
-                  <button class="edit-btn" @click="startEditing(org)">
-                    Редактировать
-                  </button>
-                  <button class="delete-btn" @click="deleteOrganization(org.id)">
-                    Удалить
-                  </button>
-                </template>
-                <template v-else>
-                  <button class="save-btn" @click="saveOrganization(org)">
-                    Сохранить
-                  </button>
-                  <button class="cancel-btn" @click="cancelEditing(org)">
-                    Отмена
-                  </button>
-                </template>
-              </div>
-            </td>
-          </tr>
+            >
+              <option value="COMMERCIAL">COMMERCIAL</option>
+              <option value="GOVERNMENT">GOVERNMENT</option>
+              <option value="PRIVATE_LIMITED_COMPANY">PRIVATE_LIMITED_COMPANY</option>
+              <option value="PUBLIC">PUBLIC</option>
+              <option value="TRUST">TRUST</option>
+            </select>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <template v-if="!org.editing">
+                <button class="edit-btn" @click="startEditing(org)">
+                  Редактировать
+                </button>
+                <button class="delete-btn" @click="deleteOrganization(org.id)">
+                  Удалить
+                </button>
+              </template>
+              <template v-else>
+                <button class="save-btn" @click="saveOrganization(org)">
+                  Сохранить
+                </button>
+                <button class="cancel-btn" @click="cancelEditing(org)">
+                  Отмена
+                </button>
+              </template>
+            </div>
+          </td>
+        </tr>
         </tbody>
       </table>
 
-      <div v-if="filteredOrganizations.length === 0" class="no-results">
+      <div v-if="organizations.length === 0" class="no-results">
         <p>Организации не найдены</p>
         <button v-if="isFiltered" class="clear-filters-btn" @click="clearFilters">
           Сбросить фильтры
@@ -258,38 +256,39 @@
 
       <div v-if="showPagination" class="pagination">
         <div class="pagination-info">
-        Показано {{ startItem }}-{{ endItem }} из {{ filteredOrganizations.length }}
+          Показано {{ startItem }}-{{ endItem }} из {{ totalItems }}
         </div>
         <div class="pagination-controls">
           <button
-            class="pagination-btn"
-            :disabled="currentPage === 1"
-            @click="changePage(currentPage - 1)"
-            >
+              class="pagination-btn"
+              :disabled="currentPage === 1"
+              @click="changePage(currentPage - 1)"
+          >
             ‹
           </button>
 
           <button
-            v-for="page in visiblePages"
-            :key="page"
-            class="pagination-btn"
-            :class="{ active: page === currentPage }"
-            @click="changePage(page)"
+              v-for="page in visiblePages"
+              :key="page"
+              class="pagination-btn"
+              :class="{ active: page === currentPage }"
+              @click="changePage(page)"
           >
-          {{ page }}
+            {{ page }}
           </button>
 
           <button
-            class="pagination-btn"
-            :disabled="currentPage === totalPages"
-            @click="changePage(currentPage + 1)"
+              class="pagination-btn"
+              :disabled="currentPage === totalPages"
+              @click="changePage(currentPage + 1)"
           >
-          ›
+            ›
           </button>
+        </div>
       </div>
     </div>
-    </div>
 
+    <!-- Модальные окна остаются без изменений -->
     <div v-if="showCreateForm" class="modal-overlay" @click="showCreateForm = false">
       <div class="modal-content large-modal" @click.stop>
         <div class="modal-header">
@@ -298,8 +297,8 @@
         </div>
         <div class="modal-body">
           <OrganizationForm
-            @submitted="onOrganizationCreated"
-            @cancel="showCreateForm = false"
+              @submitted="onOrganizationCreated"
+              @cancel="showCreateForm = false"
           />
         </div>
       </div>
@@ -311,9 +310,9 @@
           <h3>{{ isEditMode ? 'Редактирование' : 'Просмотр' }} {{ getChildEntityTitle }}</h3>
           <div class="modal-actions">
             <button
-              v-if="!isEditMode && currentChildEntity"
-              class="edit-mode-btn"
-              @click="enableEditMode"
+                v-if="!isEditMode && currentChildEntity"
+                class="edit-mode-btn"
+                @click="enableEditMode"
             >
               Редактировать
             </button>
@@ -325,12 +324,12 @@
             Загрузка данных...
           </div>
           <component
-            v-else
-            :is="currentChildEntityForm"
-            :entity="currentChildEntity"
-            :readonly="!isEditMode"
-            @submitted="onChildEntityUpdated"
-            @cancel="closeChildEntityModal"
+              v-else
+              :is="currentChildEntityForm"
+              :entity="currentChildEntity"
+              :readonly="!isEditMode"
+              @submitted="onChildEntityUpdated"
+              @cancel="closeChildEntityModal"
           />
         </div>
       </div>
@@ -354,8 +353,7 @@ export default {
   components: { OrganizationForm },
   data() {
     return {
-      organizations: [],
-      filteredOrganizations: [],
+      organizations: [], // Только текущая страница организаций
       showCreateForm: false,
       showChildEntityModal: false,
       currentChildEntity: null,
@@ -377,8 +375,11 @@ export default {
       addressForm: markRaw(AddressForm),
       coordinatesForm: markRaw(CoordinatesForm),
       locationForm: markRaw(LocationForm),
+      // Данные пагинации с бэкенда
       currentPage: 1,
-      itemsPerPage: 10
+      itemsPerPage: 10,
+      totalItems: 0,
+      totalPages: 0
     }
   },
   computed: {
@@ -389,9 +390,6 @@ export default {
         case 'location': return this.locationForm
         default: return null
       }
-    },
-    showPagination() {
-      return this.filteredOrganizations.length > this.itemsPerPage
     },
     getChildEntityTitle() {
       switch (this.currentChildEntityType) {
@@ -404,20 +402,15 @@ export default {
     isFiltered() {
       return this.filters.search || this.filters.type || this.filters.sortBy
     },
-    totalPages() {
-      return Math.ceil(this.filteredOrganizations.length / this.itemsPerPage)
+    showPagination() {
+      return this.totalPages > 1
     },
     startItem() {
       return (this.currentPage - 1) * this.itemsPerPage + 1
     },
     endItem() {
       const end = this.currentPage * this.itemsPerPage
-      return end > this.filteredOrganizations.length ? this.filteredOrganizations.length : end
-    },
-    paginatedOrganizations() {
-      const startIndex = (this.currentPage - 1) * this.itemsPerPage
-      const endIndex = startIndex + this.itemsPerPage
-      return this.filteredOrganizations.slice(startIndex, endIndex)
+      return end > this.totalItems ? this.totalItems : end
     },
     visiblePages() {
       const pages = []
@@ -469,66 +462,55 @@ export default {
         this.websocket.close();
       }
     },
-    async loadOrganizations() {
+
+    async loadOrganizations(page = 1) {
       try {
         this.showNotification('Загрузка организаций...', 'info')
-        const response = await this.$axios.get('/api/organization')
-        this.organizations = response.data.map(org => ({
+
+        // Формируем параметры запроса для бэкенда
+        const params = {
+          page: page,
+          size: this.itemsPerPage,
+          ...(this.filters.search && { search: this.filters.search }),
+          ...(this.filters.type && { type: this.filters.type }),
+          ...(this.filters.sortBy && { sortBy: this.filters.sortBy }),
+          ...(this.filters.sortOrder && { sortOrder: this.filters.sortOrder })
+        }
+
+        const response = await this.$axios.get('/api/organization', { params })
+
+        // Сохраняем данные с бэкенда
+        this.organizations = response.data.organizations.map(org => ({
           ...org,
           editing: false,
           editingData: {}
         }))
-        this.filteredOrganizations = [...this.organizations]
+
+        // Обновляем информацию о пагинации
+        this.totalItems = response.data.totalItems
+        this.totalPages = response.data.totalPages
+        this.currentPage = response.data.currentPage
+
         this.showNotification('Организации успешно загружены', 'success')
       } catch (error) {
+        console.error('Error loading organizations:', error)
         this.organizations = []
-        this.filteredOrganizations = []
+        this.totalItems = 0
+        this.totalPages = 0
         this.showNotification('Ошибка загрузки организаций', 'error')
       }
     },
 
-    applyFilters() {
-      let filtered = [...this.organizations]
-
-      if (this.filters.search) {
-        const searchLower = this.filters.search.toLowerCase()
-        filtered = filtered.filter(org =>
-          org.name.toLowerCase().includes(searchLower)
-        )
-      }
-
-      if (this.filters.type) {
-        filtered = filtered.filter(org => org.type === this.filters.type)
-      }
-
-      this.filteredOrganizations = filtered
-      this.applySorting()
+    onFilterChange() {
+      // При изменении фильтров сбрасываем на первую страницу
+      this.currentPage = 1
+      this.loadOrganizations(this.currentPage)
     },
 
-    applySorting() {
-      if (!this.filters.sortBy) {
-        return
-      }
-
-      this.filteredOrganizations.sort((a, b) => {
-        let aValue = a[this.filters.sortBy]
-        let bValue = b[this.filters.sortBy]
-
-        if (typeof aValue === 'string') {
-          aValue = aValue.toLowerCase()
-          bValue = bValue.toLowerCase()
-        }
-
-        let result = 0
-        if (aValue < bValue) result = -1
-        if (aValue > bValue) result = 1
-
-        if (this.filters.sortOrder === 'desc') {
-          result = -result
-        }
-
-        return result
-      })
+    onSortChange() {
+      // При изменении сортировки сбрасываем на первую страницу
+      this.currentPage = 1
+      this.loadOrganizations(this.currentPage)
     },
 
     toggleSort(field) {
@@ -538,7 +520,7 @@ export default {
         this.filters.sortBy = field
         this.filters.sortOrder = 'asc'
       }
-      this.applySorting()
+      this.onSortChange()
     },
 
     clearFilters() {
@@ -548,16 +530,19 @@ export default {
         sortBy: '',
         sortOrder: 'asc'
       }
-      this.filteredOrganizations = [...this.organizations]
+      this.currentPage = 1
+      this.loadOrganizations(this.currentPage)
     },
 
     changePage(page) {
       if (page >= 1 && page <= this.totalPages) {
         this.currentPage = page
+        this.loadOrganizations(page)
       }
     },
 
     startEditing(org) {
+      // Отключаем редактирование у других организаций
       this.organizations.forEach(o => {
         if (o.id !== org.id) {
           o.editing = false
@@ -586,10 +571,11 @@ export default {
       try {
         const validationErrors = this.validateOrganizationData(org.editingData)
         if (Object.keys(validationErrors).length > 0) {
-            org.editingErrors = validationErrors
-            this.showNotification('Исправьте ошибки в форме', 'error')
-            return
-         }
+          org.editingErrors = validationErrors
+          this.showNotification('Исправьте ошибки в форме', 'error')
+          return
+        }
+
         const updateData = {
           name: org.editingData.name,
           annualTurnover: parseFloat(org.editingData.annualTurnover),
@@ -600,24 +586,18 @@ export default {
 
         await this.$axios.put(`/api/organization/${org.id}`, updateData)
 
-        org.editingErrors = {}
-
-        const originalOrg = this.organizations.find(o => o.id === org.id)
-        if (originalOrg) {
-          originalOrg.name = org.editingData.name
-          originalOrg.annualTurnover = org.editingData.annualTurnover
-          originalOrg.employeesCount = org.editingData.employeesCount
-          originalOrg.rating = org.editingData.rating
-          originalOrg.type = org.editingData.type
-        }
-
+        // Обновляем локальные данные
+        Object.assign(org, updateData)
         org.editing = false
         org.editingData = {}
+        org.editingErrors = {}
 
-        this.applyFilters()
+        // Перезагружаем текущую страницу (обновляем данные с бэкенда)
+        this.loadOrganizations(this.currentPage)
 
         this.showNotification('Данные организации успешно обновлены', 'success')
       } catch (error) {
+        console.error('Error saving organization:', error)
         this.showNotification('Ошибка при обновлении данных организации', 'error')
       }
     },
@@ -633,10 +613,10 @@ export default {
 
       const annualTurnover = parseFloat(data.annualTurnover)
       if (isNaN(annualTurnover) || annualTurnover <= 0) {
-          errors.annualTurnover = 'Годовой оборот должен быть положительным числом'
+        errors.annualTurnover = 'Годовой оборот должен быть положительным числом'
       }
       else if (data.annualTurnover && annualTurnover > 1000000000000000) {
-            errors.annualTurnover = 'Введенный годовой оборот слишком большой'
+        errors.annualTurnover = 'Введенный годовой оборот слишком большой'
       }
 
       const employeesCount = parseInt(data.employeesCount)
@@ -644,10 +624,10 @@ export default {
         errors.employeesCount = 'Количество сотрудников должно быть целым положительным числом'
       }
       else if (data.employeesCount && employeesCount > 100000000000) {
-        errors.employeesCount = 'Введенное количество соотрудников слишком большое'
+        errors.employeesCount = 'Введенное количество сотрудников слишком большое'
       }
       else if (!/^\d+$/.test(data.employeesCount.toString())) {
-          errors.employeesCount = 'Количество сотрудников должно быть целым числом'
+        errors.employeesCount = 'Количество сотрудников должно быть целым числом'
       }
 
       const rating = parseInt(data.rating)
@@ -696,8 +676,8 @@ export default {
         this.currentChildEntityType = type
         this.isEditMode = editMode
 
-
       } catch (error) {
+        console.error('Error loading child entity:', error)
         this.showNotification(`Ошибка загрузки ${this.getChildEntityTitle}`, 'error')
         this.closeChildEntityModal()
       } finally {
@@ -718,21 +698,30 @@ export default {
     },
 
     async deleteOrganization(id) {
-          await this.$axios.delete(`/api/organization/${id}`)
-          this.showNotification('Организация успешно удалена', 'success')
-          await this.loadOrganizations()
+      try {
+        await this.$axios.delete(`/api/organization/${id}`)
+        this.showNotification('Организация успешно удалена', 'success')
+        // Перезагружаем текущую страницу (может потребоваться загрузка предыдущей страницы)
+        this.loadOrganizations(this.currentPage)
+      } catch (error) {
+        console.error('Error deleting organization:', error)
+        this.showNotification('Ошибка при удалении организации', 'error')
+      }
     },
 
     onOrganizationCreated() {
       this.showCreateForm = false
       this.showNotification('Организация успешно создана', 'success')
-      this.loadOrganizations()
+      // При создании новой организации загружаем первую страницу
+      this.currentPage = 1
+      this.loadOrganizations(this.currentPage)
     },
 
     onChildEntityUpdated() {
       this.closeChildEntityModal()
       this.showNotification(`${this.getChildEntityTitle} успешно обновлены`, 'success')
-      this.loadOrganizations()
+      // Перезагружаем текущую страницу
+      this.loadOrganizations(this.currentPage)
     },
 
     formatCurrency(value) {
@@ -742,6 +731,11 @@ export default {
         currency: 'RUB',
         minimumFractionDigits: 0
       }).format(value)
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return ''
+      return new Date(dateString).toLocaleDateString('ru-RU')
     },
 
     getRatingClass(rating) {
@@ -757,7 +751,6 @@ export default {
         'PRIVATE_LIMITED_COMPANY': 'type-private',
         'PUBLIC': 'type-public',
         'TRUST': 'type-trust',
-
       }
       return typeMap[type] || 'type-default'
     },

@@ -2,11 +2,14 @@ package com.danp1t.repository;
 
 import com.danp1t.model.Address;
 import com.danp1t.model.Organization;
+import com.danp1t.model.OrganizationType;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.hibernate.query.Query;
+
 import java.util.List;
 
 @ApplicationScoped
@@ -264,6 +267,80 @@ public class OrganizationRepository {
             throw new RuntimeException("Ошибка поглощения организаций: " + e.getMessage(), e);
         } finally {
             session.close();
+        }
+    }
+
+    public List<Organization> findAllWithFilters(
+            int offset, int limit, String search, String type, String sortBy, String sortOrder) {
+
+        try (Session session = sessionFactory.openSession()) {
+            StringBuilder hql = new StringBuilder(
+                    "SELECT o FROM Organization o " +
+                            "LEFT JOIN FETCH o.coordinates " +
+                            "LEFT JOIN FETCH o.officialAddress " +
+                            "LEFT JOIN FETCH o.postalAddress " +
+                            "WHERE 1=1");
+
+            if (search != null && !search.trim().isEmpty()) {
+                hql.append(" AND LOWER(o.name) LIKE LOWER(:search)");
+            }
+
+            if (type != null && !type.trim().isEmpty()) {
+                hql.append(" AND o.type = :type");
+            }
+
+            // Добавляем сортировку
+            if (sortBy != null && !sortBy.trim().isEmpty()) {
+                String order = "asc".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
+                hql.append(" ORDER BY o.").append(sortBy).append(" ").append(order);
+            } else {
+                hql.append(" ORDER BY o.id ASC");
+            }
+
+            Query<Organization> query = session.createQuery(hql.toString(), Organization.class);
+
+            if (search != null && !search.trim().isEmpty()) {
+                query.setParameter("search", "%" + search + "%");
+            }
+
+            if (type != null && !type.trim().isEmpty()) {
+                query.setParameter("type", OrganizationType.valueOf(type));
+            }
+
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
+
+            return query.list();
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка поиска организаций с фильтрами: " + e.getMessage(), e);
+        }
+    }
+
+    public long countWithFilters(String search, String type) {
+        try (Session session = sessionFactory.openSession()) {
+            StringBuilder hql = new StringBuilder("SELECT COUNT(o) FROM Organization o WHERE 1=1");
+
+            if (search != null && !search.trim().isEmpty()) {
+                hql.append(" AND LOWER(o.name) LIKE LOWER(:search)");
+            }
+
+            if (type != null && !type.trim().isEmpty()) {
+                hql.append(" AND o.type = :type");
+            }
+
+            Query<Long> query = session.createQuery(hql.toString(), Long.class);
+
+            if (search != null && !search.trim().isEmpty()) {
+                query.setParameter("search", "%" + search + "%");
+            }
+
+            if (type != null && !type.trim().isEmpty()) {
+                query.setParameter("type", OrganizationType.valueOf(type));
+            }
+
+            return query.uniqueResult();
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка подсчета организаций: " + e.getMessage(), e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.danp1t.service;
 
+import com.danp1t.dto.PaginatedResponse;
 import com.danp1t.model.Organization;
 import com.danp1t.dto.OrganizationDTO;
 import com.danp1t.repository.OrganizationRepository;
@@ -156,6 +157,37 @@ public class OrganizationService {
             return organizationRepository.absorbOrganization(absorbingOrgId, absorbedOrgId);
         } catch (Exception e) {
             throw e;
+        }
+    }
+
+    public PaginatedResponse<Organization> getAllOrganizationsWithPagination(
+            int page, int size, String search, String type, String sortBy, String sortOrder) {
+
+        try {
+            // Вычисляем offset для запроса
+            int offset = (page - 1) * size;
+
+            // Получаем организации с фильтрами и пагинацией
+            List<Organization> organizations = organizationRepository
+                    .findAllWithFilters(offset, size, search, type, sortBy, sortOrder);
+
+            // Получаем общее количество для фильтров
+            long totalCount = organizationRepository
+                    .countWithFilters(search, type);
+
+            // Вычисляем общее количество страниц
+            int totalPages = (int) Math.ceil((double) totalCount / size);
+
+            return new PaginatedResponse<>(
+                    organizations,
+                    page,
+                    totalPages,
+                    totalCount,
+                    size
+            );
+
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка получения организаций с пагинацией: " + e.getMessage(), e);
         }
     }
 }

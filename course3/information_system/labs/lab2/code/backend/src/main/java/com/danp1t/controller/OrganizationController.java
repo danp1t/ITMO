@@ -1,6 +1,7 @@
 package com.danp1t.controller;
 
 import com.danp1t.dto.OrganizationDTO;
+import com.danp1t.dto.PaginatedResponse;
 import com.danp1t.model.Organization;
 import com.danp1t.service.OrganizationService;
 import com.danp1t.websocket.OrganizationsWebSocket;
@@ -25,12 +26,20 @@ public class OrganizationController {
     private OrganizationService organizationService;
 
     @GET
-    public Response getAllOrganizations() {
+    public Response getAllOrganizations(
+            @QueryParam("page") @DefaultValue("1") int page,
+            @QueryParam("size") @DefaultValue("10") int size,
+            @QueryParam("search") String search,
+            @QueryParam("type") String type,
+            @QueryParam("sortBy") String sortBy,
+            @QueryParam("sortOrder") @DefaultValue("asc") String sortOrder) {
+
         try {
-            List<Organization> organizations = organizationService.getAllOrganizations();
+            PaginatedResponse<Organization> paginatedResponse = organizationService
+                    .getAllOrganizationsWithPagination(page, size, search, type, sortBy, sortOrder);
 
             JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-            for (Organization org : organizations) {
+            for (Organization org : paginatedResponse.getData()) {
                 arrayBuilder.add(Json.createObjectBuilder()
                         .add("id", org.getId())
                         .add("name", org.getName())
@@ -40,12 +49,20 @@ public class OrganizationController {
                         .add("annualTurnover", org.getAnnualTurnover())
                         .add("employeesCount", org.getEmployeesCount())
                         .add("rating", org.getRating())
-                        .add("type", org.getType().toString())
-                        .add("creationDate", org.getCreationDate().toString())
+                        .add("type", org.getType() != null ? org.getType().toString() : "")
+                        .add("creationDate", org.getCreationDate() != null ? org.getCreationDate().toString() : "")
                         .build());
             }
 
-            return Response.ok(arrayBuilder.build()).build();
+            JsonObject response = Json.createObjectBuilder()
+                    .add("organizations", arrayBuilder.build())
+                    .add("currentPage", paginatedResponse.getCurrentPage())
+                    .add("totalPages", paginatedResponse.getTotalPages())
+                    .add("totalItems", paginatedResponse.getTotalItems())
+                    .add("pageSize", paginatedResponse.getPageSize())
+                    .build();
+
+            return Response.ok(response).build();
 
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
