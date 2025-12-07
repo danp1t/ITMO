@@ -41,33 +41,26 @@ public class ImportService {
         Transaction mainTransaction = null;
 
         try {
-            // 1. Открываем основную сессию и начинаем транзакцию
             mainSession = sessionFactory.openSession();
             mainTransaction = mainSession.beginTransaction();
 
-            // 2. Получаем пользователя в текущем контексте
             User user = mainSession.get(User.class, detachedUser.getId());
             if (user == null) {
                 throw new RuntimeException("Пользователь не найден");
             }
 
-            // 3. Создаем операцию импорта
             ImportOperation operation = new ImportOperation();
             operation.setFileName(fileName);
             operation.setImportDate(java.time.LocalDateTime.now());
             operation.setUser(user);
             operation.setStatus("PROCESSING");
 
-            // 4. Сохраняем операцию в текущей сессии
             importOperationRepository.saveWithSession(operation, mainSession);
-            mainSession.flush(); // Синхронизируем с БД
+            mainSession.flush();
 
-            // 5. Парсим XML и валидируем все данные ПЕРЕД сохранением
             List<Organization> organizations = parseAndValidateXml(xmlStream);
 
-            // 6. Сохраняем ВСЕ организации в ОДНОЙ транзакции
             for (Organization organization : organizations) {
-                // Устанавливаем связи
                 if (organization.getCoordinates() != null) {
                     organization.setCoordinates(organization.getCoordinates());
                 }
@@ -78,27 +71,22 @@ public class ImportService {
                     organization.setPostalAddress(organization.getPostalAddress());
                 }
 
-                // Сохраняем организацию
                 mainSession.persist(organization);
 
-                // Периодически сбрасываем кэш для предотвращения утечек памяти
                 if (organizations.indexOf(organization) % 20 == 0) {
                     mainSession.flush();
                     mainSession.clear();
                 }
             }
 
-            // 7. Обновляем операцию
             operation.setStatus("SUCCESS");
             operation.setRecordsAdded(organizations.size());
             importOperationRepository.mergeWithSession(operation, mainSession);
 
-            // 8. Коммитим основную транзакцию
             mainTransaction.commit();
             return operation;
 
         } catch (Exception e) {
-            // 9. Откатываем основную транзакцию при ошибке
             if (mainTransaction != null) {
                 try {
                     mainTransaction.rollback();
@@ -107,12 +95,10 @@ public class ImportService {
                 }
             }
 
-            // 10. Создаем запись об ошибке в ОТДЕЛЬНОЙ транзакции
             createFailedImportOperation(detachedUser, fileName, e.getMessage());
 
             throw new RuntimeException("Ошибка импорта: " + e.getMessage(), e);
         } finally {
-            // 11. Всегда закрываем сессию
             if (mainSession != null && mainSession.isOpen()) {
                 mainSession.close();
             }
@@ -127,7 +113,6 @@ public class ImportService {
             errorSession = sessionFactory.openSession();
             errorTransaction = errorSession.beginTransaction();
 
-            // Получаем пользователя в новой сессии
             User managedUser = errorSession.get(User.class, user.getId());
 
             ImportOperation failedOperation = new ImportOperation();
@@ -160,10 +145,6 @@ public class ImportService {
         List<Organization> organizations = new ArrayList<>();
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        // Защита от XXE атак
-        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-        factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-        factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
 
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document document = builder.parse(xmlStream);
@@ -176,8 +157,6 @@ public class ImportService {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 Organization organization = parseOrganizationElement(element);
-
-                // Валидация согласно ограничениям предметной области
                 validateOrganization(organization);
 
                 organizations.add(organization);
@@ -188,7 +167,6 @@ public class ImportService {
     }
 
     private void validateOrganization(Organization organization) {
-        // Проверка обязательных полей
         if (organization.getName() == null || organization.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Имя организации обязательно");
         }
@@ -205,7 +183,6 @@ public class ImportService {
             throw new IllegalArgumentException("Количество сотрудников должно быть положительным числом");
         }
 
-        // Проверка координат
         if (organization.getCoordinates() == null) {
             throw new IllegalArgumentException("Координаты обязательны");
         }
@@ -214,25 +191,22 @@ public class ImportService {
             throw new IllegalArgumentException("Координата X обязательна");
         }
 
-        // Проверка типа организации
         if (organization.getType() == null) {
             throw new IllegalArgumentException("Тип организации обязателен");
         }
 
-        // Дополнительные проверки из ЛР1
         if (organization.getAnnualTurnover() > 1000000000) {
             throw new IllegalArgumentException("Годовой оборот не может превышать 1,000,000,000");
         }
 
-        if (organization.getEmployeesCount() > 10000) {
-            throw new IllegalArgumentException("Количество сотрудников не может превышать 10,000");
+        if (organization.getEmployeesCount() > 10_000_000) {
+            throw new IllegalArgumentException("Количество сотрудников не может превышать 10,000,000");
         }
     }
 
     private Organization parseOrganizationElement(Element element) {
         Organization organization = new Organization();
 
-        // Основные поля
         organization.setName(getElementText(element, "name"));
         organization.setAnnualTurnover(Float.parseFloat(getElementText(element, "annualTurnover")));
         organization.setEmployeesCount(Long.parseLong(Objects.requireNonNull(getElementText(element, "employeesCount"))));
@@ -242,7 +216,6 @@ public class ImportService {
         assert typeStr != null;
         organization.setType(OrganizationType.valueOf(typeStr.toUpperCase()));
 
-        // Coordinates
         Element coordinatesElement = (Element) element.getElementsByTagName("coordinates").item(0);
         if (coordinatesElement != null) {
             Coordinates coordinates = new Coordinates();
@@ -251,7 +224,6 @@ public class ImportService {
             organization.setCoordinates(coordinates);
         }
 
-        // Official Address (Location)
         Element officialAddressElement = (Element) element.getElementsByTagName("officialAddress").item(0);
         if (officialAddressElement != null) {
             Location officialAddress = new Location();
@@ -262,7 +234,6 @@ public class ImportService {
             organization.setOfficialAddress(officialAddress);
         }
 
-        // Postal Address (Address)
         Element postalAddressElement = (Element) element.getElementsByTagName("postalAddress").item(0);
         if (postalAddressElement != null) {
             Address postalAddress = new Address();

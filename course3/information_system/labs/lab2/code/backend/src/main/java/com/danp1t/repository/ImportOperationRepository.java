@@ -16,18 +16,14 @@ public class ImportOperationRepository {
     @Inject
     private SessionFactory sessionFactory;
 
-    // Метод для сохранения в существующей сессии
-    public ImportOperation saveWithSession(ImportOperation operation, Session session) {
+    public void saveWithSession(ImportOperation operation, Session session) {
         session.persist(operation);
-        return operation;
     }
 
-    // Метод для слияния в существующей сессии
     public void mergeWithSession(ImportOperation operation, Session session) {
         session.merge(operation);
     }
 
-    // Старый метод для отдельных операций
     public ImportOperation save(ImportOperation operation) {
         Transaction transaction = null;
         Session session = null;
@@ -42,27 +38,6 @@ public class ImportOperationRepository {
                 transaction.rollback();
             }
             throw new RuntimeException("Ошибка сохранения операции импорта: " + e.getMessage(), e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-    }
-
-    // Старый метод для отдельных операций
-    public void merge(ImportOperation operation) {
-        Transaction transaction = null;
-        Session session = null;
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-            operation = session.merge(operation);
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw new RuntimeException("Ошибка слияния операции импорта: " + e.getMessage(), e);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();

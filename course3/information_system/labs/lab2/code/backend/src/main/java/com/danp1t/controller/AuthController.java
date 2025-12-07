@@ -96,8 +96,6 @@ public class AuthController {
                         .build();
             }
 
-            String token = authHeader.substring(7);
-
             Map<String, String> response = new HashMap<>();
             response.put("message", "Токен валиден");
             return Response.ok(response).build();

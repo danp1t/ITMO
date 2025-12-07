@@ -18,7 +18,7 @@ public class ImportOperation {
     private LocalDateTime importDate;
 
     @Column(nullable = false)
-    private String status; // SUCCESS, FAILED, PROCESSING
+    private String status;
 
     @Column
     private Integer recordsAdded;
@@ -41,7 +41,6 @@ public class ImportOperation {
         this.status = "PROCESSING";
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

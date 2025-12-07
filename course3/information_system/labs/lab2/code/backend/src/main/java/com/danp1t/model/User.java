@@ -19,7 +19,7 @@ public class User implements NeedValidate {
     private String password;
 
     @Column(nullable = false)
-    private String role = "USER"; // USER или ADMIN
+    private String role = "USER";
 
     @Column(name = "created_at", nullable = false)
     private java.time.LocalDateTime createdAt;

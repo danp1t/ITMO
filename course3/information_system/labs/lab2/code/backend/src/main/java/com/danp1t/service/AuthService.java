@@ -27,7 +27,6 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Генерируем токен (в реальном приложении используйте JWT)
         String token = generateToken(savedUser.getId());
 
         return new AuthResponseDTO(
@@ -48,7 +47,6 @@ public class AuthService {
             throw new RuntimeException("Неверное имя пользователя или пароль");
         }
 
-        // Генерируем токен
         String token = generateToken(user.getId());
 
         return new AuthResponseDTO(
@@ -71,7 +69,6 @@ public class AuthService {
                 return null;
             }
 
-            // Вторая часть должна быть ID
             String userIdStr = parts[1];
             Integer userId = Integer.parseInt(userIdStr);
 
