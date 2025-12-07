@@ -62,13 +62,13 @@ public class ImportService {
 
             for (Organization organization : organizations) {
                 if (organization.getCoordinates() != null) {
-                    organization.setCoordinates(organization.getCoordinates());
+                    mainSession.persist(organization.getCoordinates());
                 }
                 if (organization.getOfficialAddress() != null) {
-                    organization.setOfficialAddress(organization.getOfficialAddress());
+                    mainSession.persist(organization.getOfficialAddress());
                 }
                 if (organization.getPostalAddress() != null) {
-                    organization.setPostalAddress(organization.getPostalAddress());
+                    mainSession.persist(organization.getPostalAddress());
                 }
 
                 mainSession.persist(organization);
@@ -78,7 +78,6 @@ public class ImportService {
                     mainSession.clear();
                 }
             }
-
             operation.setStatus("SUCCESS");
             operation.setRecordsAdded(organizations.size());
             importOperationRepository.mergeWithSession(operation, mainSession);
@@ -97,7 +96,7 @@ public class ImportService {
 
             createFailedImportOperation(detachedUser, fileName, e.getMessage());
 
-            throw new RuntimeException("Ошибка импорта: " + e.getMessage(), e);
+            throw new RuntimeException("Невалидный XML. Проверьте, чтобы все поля были заполнены");
         } finally {
             if (mainSession != null && mainSession.isOpen()) {
                 mainSession.close();
@@ -113,6 +112,7 @@ public class ImportService {
             errorSession = sessionFactory.openSession();
             errorTransaction = errorSession.beginTransaction();
 
+            // Получаем пользователя в новой сессии
             User managedUser = errorSession.get(User.class, user.getId());
 
             ImportOperation failedOperation = new ImportOperation();
@@ -157,6 +157,7 @@ public class ImportService {
             if (node.getNodeType() == Node.ELEMENT_NODE) {
                 Element element = (Element) node;
                 Organization organization = parseOrganizationElement(element);
+
                 validateOrganization(organization);
 
                 organizations.add(organization);
@@ -183,6 +184,7 @@ public class ImportService {
             throw new IllegalArgumentException("Количество сотрудников должно быть положительным числом");
         }
 
+        // Проверка координат
         if (organization.getCoordinates() == null) {
             throw new IllegalArgumentException("Координаты обязательны");
         }
@@ -199,7 +201,7 @@ public class ImportService {
             throw new IllegalArgumentException("Годовой оборот не может превышать 1,000,000,000");
         }
 
-        if (organization.getEmployeesCount() > 10_000_000) {
+        if (organization.getEmployeesCount() > 10000000) {
             throw new IllegalArgumentException("Количество сотрудников не может превышать 10,000,000");
         }
     }

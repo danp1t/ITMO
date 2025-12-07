@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <organizations>
     <organization>
-        <name>Компания ABC</name>
+        <name>Ошибочный XML ABC</name>
         <annualTurnover>1500000.50</annualTurnover>
         <employeesCount>250</employeesCount>
         <rating>8</rating>
@@ -22,7 +22,7 @@
         </postalAddress>
     </organization>
     <organization>
-        <name>Организация22 Б</name>
+        <name>Ошибочный XML Б</name>
         <annualTurnover>750000.25</annualTurnover>
         <employeesCount>120</employeesCount>
         <rating>6</rating>
@@ -37,9 +37,5 @@
             <z>0.0</z>
             <name>Санкт-Петербург, Дворцовая площадь</name>
         </officialAddress>
-        <postalAddress>
-            <street>Невский проспект</street>
-            <zipCode>190000</zipCode>
-        </postalAddress>
     </organization>
 </organizations>
