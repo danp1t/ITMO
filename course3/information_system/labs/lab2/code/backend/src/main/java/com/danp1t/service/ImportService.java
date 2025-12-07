@@ -2,8 +2,6 @@ package com.danp1t.service;
 
 import com.danp1t.model.*;
 import com.danp1t.repository.ImportOperationRepository;
-import com.danp1t.repository.OrganizationRepository;
-import com.danp1t.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.hibernate.Session;
@@ -25,13 +23,7 @@ import java.util.Objects;
 public class ImportService {
 
     @Inject
-    private OrganizationRepository organizationRepository;
-
-    @Inject
     private ImportOperationRepository importOperationRepository;
-
-    @Inject
-    private UserRepository userRepository;
 
     @Inject
     private SessionFactory sessionFactory;
@@ -112,7 +104,6 @@ public class ImportService {
             errorSession = sessionFactory.openSession();
             errorTransaction = errorSession.beginTransaction();
 
-            // Получаем пользователя в новой сессии
             User managedUser = errorSession.get(User.class, user.getId());
 
             ImportOperation failedOperation = new ImportOperation();
@@ -168,42 +159,10 @@ public class ImportService {
     }
 
     private void validateOrganization(Organization organization) {
-        if (organization.getName() == null || organization.getName().trim().isEmpty()) {
-            throw new IllegalArgumentException("Имя организации обязательно");
-        }
-
-        if (organization.getName().length() > 255) {
-            throw new IllegalArgumentException("Имя организации не должно превышать 255 символов");
-        }
-
-        if (organization.getAnnualTurnover() <= 0) {
-            throw new IllegalArgumentException("Годовой оборот должен быть положительным числом");
-        }
-
-        if (organization.getEmployeesCount() <= 0) {
-            throw new IllegalArgumentException("Количество сотрудников должно быть положительным числом");
-        }
-
-        // Проверка координат
-        if (organization.getCoordinates() == null) {
-            throw new IllegalArgumentException("Координаты обязательны");
-        }
-
-        if (organization.getCoordinates().getX() == null) {
-            throw new IllegalArgumentException("Координата X обязательна");
-        }
-
-        if (organization.getType() == null) {
-            throw new IllegalArgumentException("Тип организации обязателен");
-        }
-
-        if (organization.getAnnualTurnover() > 1000000000) {
-            throw new IllegalArgumentException("Годовой оборот не может превышать 1,000,000,000");
-        }
-
-        if (organization.getEmployeesCount() > 10000000) {
-            throw new IllegalArgumentException("Количество сотрудников не может превышать 10,000,000");
-        }
+        organization.getCoordinates().validate();
+        organization.getOfficialAddress().validate();
+        organization.getPostalAddress().validate();
+        organization.validate();
     }
 
     private Organization parseOrganizationElement(Element element) {

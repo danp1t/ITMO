@@ -34,7 +34,6 @@ public class ImportController {
             @HeaderParam("Authorization") String authHeader) {
 
         try {
-            // Проверка авторизации
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return Response.status(Response.Status.UNAUTHORIZED)
                         .entity(Map.of("error", "Требуется авторизация"))
@@ -49,7 +48,6 @@ public class ImportController {
                         .build();
             }
 
-            // Получаем файл из multipart запроса
             Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
             List<InputPart> inputParts = uploadForm.get("file");
 
@@ -61,7 +59,6 @@ public class ImportController {
 
             InputPart inputPart = inputParts.get(0);
 
-            // Получаем имя файла из заголовков
             String fileName = getFileName(inputPart);
 
             if (fileName == null || !fileName.toLowerCase().endsWith(".xml")) {
@@ -70,7 +67,6 @@ public class ImportController {
                         .build();
             }
 
-            // Получаем InputStream
             InputStream fileInputStream = inputPart.getBody(InputStream.class, null);
 
             ImportOperation operation = importService.importOrganizationsFromXml(
@@ -100,21 +96,18 @@ public class ImportController {
     }
 
     private String getFileName(InputPart inputPart) {
-        try {
-            String[] contentDisposition = inputPart.getHeaders()
-                    .getFirst("Content-Disposition")
-                    .split(";");
 
-            for (String filename : contentDisposition) {
-                if (filename.trim().startsWith("filename")) {
-                    String[] name = filename.split("=");
-                    if (name.length > 1) {
-                        return name[1].trim().replaceAll("\"", "");
-                    }
+        String[] contentDisposition = inputPart.getHeaders()
+                .getFirst("Content-Disposition")
+                .split(";");
+
+        for (String filename : contentDisposition) {
+            if (filename.trim().startsWith("filename")) {
+                String[] name = filename.split("=");
+                if (name.length > 1) {
+                    return name[1].trim().replaceAll("\"", "");
                 }
             }
-        } catch (Exception e) {
-            // ignore
         }
         return "unknown.xml";
     }
