@@ -69,13 +69,6 @@
           <span v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</span>
         </div>
 
-        <div class="form-options">
-          <label class="terms">
-            <input type="checkbox" v-model="form.acceptTerms" required />
-            <span>Я принимаю <a href="#">условия использования</a> и <a href="#">политику конфиденциальности</a></span>
-          </label>
-        </div>
-
         <button type="submit" :disabled="loading" class="submit-btn">
           <span v-if="loading">Регистрация...</span>
           <span v-else>Зарегистрироваться</span>
@@ -149,7 +142,6 @@ export default {
     },
 
     isStrongPassword(password) {
-      // Минимум 8 символов, хотя бы одна буква и одна цифра
       const re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/
       return re.test(password)
     },
@@ -203,7 +195,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, rgba(118, 75, 162, 0) 0%);
   padding: 20px;
 }
 
@@ -310,19 +302,6 @@ export default {
 
 .toggle-password:hover {
   color: #4a5568;
-}
-
-.form-options {
-  font-size: 14px;
-}
-
-.terms {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  cursor: pointer;
-  color: #4a5568;
-  line-height: 1.4;
 }
 
 .terms input {

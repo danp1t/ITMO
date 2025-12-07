@@ -26,12 +26,12 @@
 
     <div class="history-table">
       <div class="table-header">
+        <div class="header-cell">ID</div>
         <div class="header-cell">Дата</div>
         <div class="header-cell">Файл</div>
         <div class="header-cell">Пользователь</div>
         <div class="header-cell">Статус</div>
         <div class="header-cell">Записей</div>
-        <div class="header-cell">Действия</div>
       </div>
 
       <div class="table-body">
@@ -45,6 +45,7 @@
 
         <div v-else class="history-items">
           <div v-for="item in filteredHistory" :key="item.id" class="history-item">
+            <div class="cell">{{item.id}}</div>
             <div class="cell">{{ formatDate(item.importDate) }}</div>
             <div class="cell file-cell">
               <svg class="file-icon" width="16" height="16" viewBox="0 0 24 24" fill="#667eea">
@@ -60,14 +61,6 @@
               </span>
             </div>
             <div class="cell">{{ item.recordsAdded || 0 }}</div>
-            <div class="cell actions-cell">
-              <button @click="viewDetails(item)" class="view-btn">
-                Просмотр
-              </button>
-              <button v-if="item.status === 'SUCCESS'" @click="downloadReport(item)" class="download-btn">
-                Отчет
-              </button>
-            </div>
           </div>
         </div>
       </div>

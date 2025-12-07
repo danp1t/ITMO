@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 const my_name = "Путинцев Данил Денисович";
 const my_group = "P3307";
-const my_variant = "1733723";
+const my_variant = "123237";
 
 const props = defineProps({
   isAuthenticated: {

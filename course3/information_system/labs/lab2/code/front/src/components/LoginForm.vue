@@ -43,14 +43,6 @@
           <span v-if="errors.password" class="error-text">{{ errors.password }}</span>
         </div>
 
-        <div class="form-options">
-          <label class="remember-me">
-            <input type="checkbox" v-model="form.rememberMe" />
-            <span>Запомнить меня</span>
-          </label>
-          <a href="#" class="forgot-password">Забыли пароль?</a>
-        </div>
-
         <button type="submit" :disabled="loading" class="submit-btn">
           <span v-if="loading">Вход...</span>
           <span v-else>Войти</span>
@@ -156,7 +148,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, rgba(118, 75, 162, 0) 0%);
   padding: 20px;
 }
 
