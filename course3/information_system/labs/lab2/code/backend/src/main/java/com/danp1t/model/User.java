@@ -1,27 +1,14 @@
 package com.danp1t.model;
 
-import jakarta.persistence.*;
 import com.danp1t.error.*;
 import com.danp1t.interfaces.NeedValidate;
 
-@Entity
-@Table(name = "users")
 public class User implements NeedValidate {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(unique = true, nullable = false)
     private String username;
-
-    @Column(nullable = false)
     private String password;
-
-    @Column(nullable = false)
     private String role = "USER";
-
-    @Column(name = "created_at", nullable = false)
     private java.time.LocalDateTime createdAt;
 
     public User() {

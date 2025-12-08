@@ -55,7 +55,7 @@ public class Location implements NeedValidate {
         if (this.x == null) {
             throw new NotNullError("x");
         }
-        else if (this.x < Double.MIN_VALUE) {
+        else if (this.x < -Double.MAX_VALUE) {
             throw new ValueTooSmallError("x", (int) -Double.MAX_VALUE);
         }
         else if (this.x > Double.MAX_VALUE) {
@@ -63,7 +63,7 @@ public class Location implements NeedValidate {
         }
 
         if (this.y == null) {}
-        else if (this.y < Float.MIN_VALUE) {
+        else if (this.y < -Float.MAX_VALUE) {
             throw new ValueTooSmallError("y", (int) -Float.MAX_VALUE);
         }
         else if (this.y > Float.MAX_VALUE) {
@@ -73,7 +73,7 @@ public class Location implements NeedValidate {
         if (this.z == null) {
             throw new NotNullError("z");
         }
-        else if (this.z < Double.MIN_VALUE) {
+        else if (this.z < -Double.MAX_VALUE) {
             throw new ValueTooSmallError("z", (int) -Double.MAX_VALUE);
         }
         else if (this.z > Double.MAX_VALUE) {

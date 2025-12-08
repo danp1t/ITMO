@@ -1,33 +1,15 @@
 package com.danp1t.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "import_operations")
 public class ImportOperation {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String fileName;
-
-    @Column(nullable = false)
     private LocalDateTime importDate;
-
-    @Column(nullable = false)
     private String status;
-
-    @Column
     private Integer recordsAdded;
-
-    @Column
     private String errorMessage;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     public ImportOperation() {

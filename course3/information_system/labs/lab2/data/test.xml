@@ -13,7 +13,7 @@
         <officialAddress>
             <x>55.7558</x>
             <y>37.6173</y>
-            <z>0.0</z>
+            <z>-6</z>
             <name>Москва, Кремль</name>
         </officialAddress>
         <postalAddress>
@@ -34,7 +34,7 @@
         <officialAddress>
             <x>59.9343</x>
             <y>30.3351</y>
-            <z>0.0</z>
+            <z>-6</z>
             <name>Санкт-Петербург, Дворцовая площадь</name>
         </officialAddress>
         <postalAddress>
