@@ -227,6 +227,9 @@ export default {
           return null
         },
         annualTurnover: (value) => {
+          if (isNaN(value) || !isFinite(value)) {
+            return 'Введенное значение слишком большое'
+          }
           const num = parseFloat(value)
           if (value && num <= 0) {
             return 'Годовой оборот должен быть больше 0'
@@ -237,6 +240,9 @@ export default {
           return null
         },
         employeesCount: (value) => {
+          if (isNaN(value) || !isFinite(value)) {
+            return 'Введенное значение слишком большое'
+          }
           const num = parseInt(value)
           if (value && num <= 0) {
             return 'Количество сотрудников должно быть больше 0'
@@ -250,7 +256,10 @@ export default {
           return null
         },
         rating: (value) => {
-          const num = parseInt(value)
+          if (isNaN(value) || !isFinite(value)) {
+            return 'Введенное значение слишком большое'
+          }
+          const num = parseFloat(value)
           if (value && num <= 0) {
             return 'Рейтинг должен быть больше 0'
           }
@@ -463,11 +472,11 @@ export default {
 </script>
 
 <style scoped>
-.organization-form-wrapper {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-}
+ .organization-form-wrapper {
+   max-width: 900px;
+   margin: 0 auto;
+   padding: 20px;
+ }
 
 .form-section-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -561,7 +570,7 @@ export default {
 .type-select.error-input {
   border-color: #e53e3e;
   box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
- }
+}
 
 .select-arrow {
   position: absolute;

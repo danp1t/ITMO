@@ -10,7 +10,7 @@
         </id>
 
         <property name="username" type="string">
-            <column name="username" not-null="true" unique="true" length="50"/>
+            <column name="username" not-null="true" length="50"/>
         </property>
 
         <property name="password" type="string">

@@ -1,7 +1,10 @@
 package com.danp1t.service;
 
+import com.danp1t.error.InvalidXmlException;
+import com.danp1t.error.UserNotFoundException;
 import com.danp1t.model.*;
 import com.danp1t.repository.ImportOperationRepository;
+import com.danp1t.error.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.hibernate.Session;
@@ -14,10 +17,12 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @ApplicationScoped
 public class ImportService {
@@ -28,7 +33,8 @@ public class ImportService {
     @Inject
     private SessionFactory sessionFactory;
 
-    public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName) {
+    public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName)
+            throws UserNotFoundException, InvalidXmlException {
         Session mainSession = null;
         Transaction mainTransaction = null;
 
@@ -38,7 +44,7 @@ public class ImportService {
 
             User user = mainSession.get(User.class, detachedUser.getId());
             if (user == null) {
-                throw new RuntimeException("Пользователь не найден");
+                throw new UserNotFoundException(String.valueOf(detachedUser.getId()));
             }
 
             ImportOperation operation = new ImportOperation();
@@ -70,6 +76,7 @@ public class ImportService {
                     mainSession.clear();
                 }
             }
+
             operation.setStatus("SUCCESS");
             operation.setRecordsAdded(organizations.size());
             importOperationRepository.mergeWithSession(operation, mainSession);
@@ -77,21 +84,42 @@ public class ImportService {
             mainTransaction.commit();
             return operation;
 
-        } catch (Exception e) {
-            if (mainTransaction != null) {
-                try {
-                    mainTransaction.rollback();
-                } catch (Exception rollbackEx) {
-                    System.err.println("Ошибка при откате транзакции: " + rollbackEx.getMessage());
-                }
-            }
+        } catch (UserNotFoundException e) {
+            rollbackTransaction(mainTransaction);
+            throw e;
 
+        } catch (InvalidXmlException e) {
+            rollbackTransaction(mainTransaction);
             createFailedImportOperation(detachedUser, fileName, e.getMessage());
+            throw e;
 
-            throw new RuntimeException("Невалидный XML. Проверьте, чтобы все поля были заполнены");
+        } catch (Exception e) {
+            rollbackTransaction(mainTransaction);
+            String errorMessage = "Неожиданная ошибка при импорте: " + e.getMessage();
+            createFailedImportOperation(detachedUser, fileName, errorMessage);
+            throw new ImportException(errorMessage, e);
+
         } finally {
-            if (mainSession != null && mainSession.isOpen()) {
-                mainSession.close();
+            closeSession(mainSession);
+        }
+    }
+
+    private void rollbackTransaction(Transaction transaction) {
+        if (transaction != null) {
+            try {
+                transaction.rollback();
+            } catch (Exception rollbackEx) {
+                System.err.println("Ошибка при откате транзакции: " + rollbackEx.getMessage());
+            }
+        }
+    }
+
+    private void closeSession(Session session) {
+        if (session != null && session.isOpen()) {
+            try {
+                session.close();
+            } catch (Exception e) {
+                System.err.println("Ошибка при закрытии сессии: " + e.getMessage());
             }
         }
     }
@@ -126,92 +154,166 @@ public class ImportService {
             }
             System.err.println("Не удалось сохранить информацию об ошибке импорта: " + e.getMessage());
         } finally {
-            if (errorSession != null && errorSession.isOpen()) {
-                errorSession.close();
+            closeSession(errorSession);
+        }
+    }
+
+    private List<Organization> parseAndValidateXml(InputStream xmlStream) throws InvalidXmlException {
+        try {
+            List<Organization> organizations = new ArrayList<>();
+
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document document = builder.parse(xmlStream);
+            document.getDocumentElement().normalize();
+
+            NodeList organizationNodes = document.getElementsByTagName("organization");
+
+            if (organizationNodes.getLength() == 0) {
+                throw new InvalidXmlException("XML не содержит элементов organization");
             }
-        }
-    }
 
-    private List<Organization> parseAndValidateXml(InputStream xmlStream) throws Exception {
-        List<Organization> organizations = new ArrayList<>();
+            for (int i = 0; i < organizationNodes.getLength(); i++) {
+                Node node = organizationNodes.item(i);
+                if (node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element element = (Element) node;
+                    Organization organization = parseOrganizationElement(element);
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    validateOrganization(organization);
 
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(xmlStream);
-        document.getDocumentElement().normalize();
-
-        NodeList organizationNodes = document.getElementsByTagName("organization");
-
-        for (int i = 0; i < organizationNodes.getLength(); i++) {
-            Node node = organizationNodes.item(i);
-            if (node.getNodeType() == Node.ELEMENT_NODE) {
-                Element element = (Element) node;
-                Organization organization = parseOrganizationElement(element);
-
-                validateOrganization(organization);
-
-                organizations.add(organization);
+                    organizations.add(organization);
+                }
             }
-        }
 
-        return organizations;
+            return organizations;
+
+        } catch (ParserConfigurationException e) {
+            throw new InvalidXmlException("Ошибка конфигурации парсера XML", e);
+        } catch (SAXException e) {
+            throw new InvalidXmlException("Некорректный формат XML", e);
+        } catch (IOException e) {
+            throw new InvalidXmlException("Ошибка чтения XML потока", e);
+        } catch (NumberFormatException e) {
+            throw new InvalidXmlException("Некорректный числовой формат в XML", e);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidXmlException("Некорректное значение в XML", e);
+        } catch (Exception e) {
+            throw new InvalidXmlException("Ошибка при обработке XML: " + e.getMessage(), e);
+        }
     }
 
-    private void validateOrganization(Organization organization) {
-        organization.getCoordinates().validate();
-        organization.getOfficialAddress().validate();
-        organization.getPostalAddress().validate();
-        organization.validate();
+    private void validateOrganization(Organization organization) throws InvalidXmlException {
+        try {
+            if (organization.getCoordinates() != null) {
+                organization.getCoordinates().validate();
+            }
+            if (organization.getOfficialAddress() != null) {
+                organization.getOfficialAddress().validate();
+            }
+            if (organization.getPostalAddress() != null) {
+                organization.getPostalAddress().validate();
+            }
+            organization.validate();
+        } catch (Exception e) {
+            throw new InvalidXmlException("Ошибка валидации организации: " + e.getMessage(), e);
+        }
     }
 
-    private Organization parseOrganizationElement(Element element) {
-        Organization organization = new Organization();
+    private Organization parseOrganizationElement(Element element) throws InvalidXmlException {
+        try {
+            Organization organization = new Organization();
 
-        organization.setName(getElementText(element, "name"));
-        organization.setAnnualTurnover(Float.parseFloat(getElementText(element, "annualTurnover")));
-        organization.setEmployeesCount(Long.parseLong(Objects.requireNonNull(getElementText(element, "employeesCount"))));
-        organization.setRating(Integer.parseInt(Objects.requireNonNull(getElementText(element, "rating"))));
+            organization.setName(getRequiredElementText(element, "name"));
+            organization.setAnnualTurnover(parseFloat(getRequiredElementText(element, "annualTurnover")));
+            organization.setEmployeesCount(parseLong(getRequiredElementText(element, "employeesCount")));
+            organization.setRating(parseInt(getRequiredElementText(element, "rating")));
 
-        String typeStr = getElementText(element, "type");
-        assert typeStr != null;
-        organization.setType(OrganizationType.valueOf(typeStr.toUpperCase()));
+            String typeStr = getRequiredElementText(element, "type");
+            organization.setType(OrganizationType.valueOf(typeStr.toUpperCase()));
 
-        Element coordinatesElement = (Element) element.getElementsByTagName("coordinates").item(0);
-        if (coordinatesElement != null) {
-            Coordinates coordinates = new Coordinates();
-            coordinates.setX(Float.parseFloat(getElementText(coordinatesElement, "x")));
-            coordinates.setY(Double.parseDouble(getElementText(coordinatesElement, "y")));
-            organization.setCoordinates(coordinates);
+            Element coordinatesElement = (Element) element.getElementsByTagName("coordinates").item(0);
+            if (coordinatesElement != null) {
+                Coordinates coordinates = new Coordinates();
+                coordinates.setX(parseFloat(getRequiredElementText(coordinatesElement, "x")));
+                coordinates.setY(parseDouble(getRequiredElementText(coordinatesElement, "y")));
+                organization.setCoordinates(coordinates);
+            }
+
+            Element officialAddressElement = (Element) element.getElementsByTagName("officialAddress").item(0);
+            if (officialAddressElement != null) {
+                Location officialAddress = new Location();
+                officialAddress.setX(parseDouble(getRequiredElementText(officialAddressElement, "x")));
+                officialAddress.setY(parseFloat(getRequiredElementText(officialAddressElement, "y")));
+                officialAddress.setZ(parseDouble(getRequiredElementText(officialAddressElement, "z")));
+                officialAddress.setName(getRequiredElementText(officialAddressElement, "name"));
+                organization.setOfficialAddress(officialAddress);
+            }
+
+            Element postalAddressElement = (Element) element.getElementsByTagName("postalAddress").item(0);
+            if (postalAddressElement != null) {
+                Address postalAddress = new Address();
+                postalAddress.setStreet(getRequiredElementText(postalAddressElement, "street"));
+                postalAddress.setZipCode(getElementText(postalAddressElement, "zipCode")); // zipCode может быть null
+                organization.setPostalAddress(postalAddress);
+            }
+
+            return organization;
+
+        } catch (NullPointerException e) {
+            throw new InvalidXmlException("Отсутствует обязательный элемент в XML", e);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidXmlException("Некорректное значение типа организации", e);
         }
-
-        Element officialAddressElement = (Element) element.getElementsByTagName("officialAddress").item(0);
-        if (officialAddressElement != null) {
-            Location officialAddress = new Location();
-            officialAddress.setX(Double.parseDouble(getElementText(officialAddressElement, "x")));
-            officialAddress.setY(Float.parseFloat(getElementText(officialAddressElement, "y")));
-            officialAddress.setZ(Double.parseDouble(getElementText(officialAddressElement, "z")));
-            officialAddress.setName(getElementText(officialAddressElement, "name"));
-            organization.setOfficialAddress(officialAddress);
-        }
-
-        Element postalAddressElement = (Element) element.getElementsByTagName("postalAddress").item(0);
-        if (postalAddressElement != null) {
-            Address postalAddress = new Address();
-            postalAddress.setStreet(getElementText(postalAddressElement, "street"));
-            postalAddress.setZipCode(getElementText(postalAddressElement, "zipCode"));
-            organization.setPostalAddress(postalAddress);
-        }
-
-        return organization;
     }
 
     private String getElementText(Element parent, String tagName) {
         NodeList nodeList = parent.getElementsByTagName(tagName);
         if (nodeList.getLength() > 0) {
-            return nodeList.item(0).getTextContent().trim();
+            String text = nodeList.item(0).getTextContent();
+            return text != null ? text.trim() : null;
         }
         return null;
+    }
+
+    private String getRequiredElementText(Element parent, String tagName) throws InvalidXmlException {
+        String text = getElementText(parent, tagName);
+        if (text == null || text.isEmpty()) {
+            throw new InvalidXmlException("Обязательный элемент '" + tagName + "' отсутствует или пуст");
+        }
+        return text;
+    }
+
+    private float parseFloat(String value) throws InvalidXmlException {
+        try {
+            return Float.parseFloat(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidXmlException("Некорректное числовое значение: " + value, e);
+        }
+    }
+
+    private double parseDouble(String value) throws InvalidXmlException {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidXmlException("Некорректное числовое значение: " + value, e);
+        }
+    }
+
+    private long parseLong(String value) throws InvalidXmlException {
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidXmlException("Некорректное числовое значение: " + value, e);
+        }
+    }
+
+    private int parseInt(String value) throws InvalidXmlException {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new InvalidXmlException("Некорректное числовое значение: " + value, e);
+        }
     }
 
     public List<ImportOperation> getImportHistory(User user) {

@@ -4,7 +4,6 @@
         <name>Ошибочный XML ABC</name>
         <annualTurnover>1500000.50</annualTurnover>
         <employeesCount>250</employeesCount>
-        <rating>8</rating>
         <type>COMMERCIAL</type>
         <coordinates>
             <x>10.5</x>
