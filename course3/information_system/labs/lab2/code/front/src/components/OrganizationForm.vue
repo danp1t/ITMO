@@ -247,7 +247,7 @@ export default {
           if (value && num <= 0) {
             return 'Количество сотрудников должно быть больше 0'
           }
-          else if (value && num > 100000000000) {
+          else if (value && num > 10000000000) {
             return 'Введенное количество соотрудников слишком большое'
           }
           else if (!/^\d+$/.test(value.toString())) {
@@ -263,7 +263,7 @@ export default {
           if (value && num <= 0) {
             return 'Рейтинг должен быть больше 0'
           }
-          else if (value && num > 100000000000) {
+          else if (value && num > 1000000000) {
             return 'Введенный рейтинг слишком большой'
           }
           else if (!/^\d+$/.test(value.toString())) {
