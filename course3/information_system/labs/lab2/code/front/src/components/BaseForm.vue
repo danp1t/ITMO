@@ -16,7 +16,6 @@
           {{ field.label }}{{ field.required ? '*' : '' }}
         </label>
 
-        <!-- Текстовые, email, password поля -->
         <input
             v-if="field.type === 'text' || field.type === 'email' || field.type === 'password'"
             :id="field.name"
@@ -29,9 +28,8 @@
             class="form-input"
         >
 
-        <!-- Числовые поля (теперь как text с inputmode="decimal") -->
         <input
-            v-else-if="field.type === 'number'"
+            v-if="field.type === 'number'"
             :id="field.name"
             v-model="formData[field.name]"
             type="text"
@@ -40,11 +38,9 @@
             :maxlength="15"
             :class="{ 'error-input': errors[field.name] }"
             @blur="validateField(field.name)"
-            @input="formatNumberInput(field.name)"
             class="form-input"
         >
 
-        <!-- Текстовые области -->
         <textarea
             v-else-if="field.type === 'textarea'"
             :id="field.name"
@@ -57,7 +53,6 @@
             class="form-textarea"
         ></textarea>
 
-        <!-- Выпадающие списки -->
         <select
             v-else-if="field.type === 'select'"
             :id="field.name"
@@ -150,33 +145,6 @@ export default {
     }
   },
   methods: {
-    formatNumberInput(fieldName) {
-      // Удаляем все символы, кроме цифр, точки и минуса
-      let value = this.formData[fieldName]
-      if (value) {
-        // Удаляем лишние символы
-        value = value.replace(/[^\d.-]/g, '')
-
-        // Убираем лишние минусы (оставляем только первый)
-        if (value.includes('-')) {
-          const parts = value.split('-')
-          if (parts.length > 2) {
-            value = '-' + parts.slice(1).join('')
-          }
-        }
-
-        // Убираем лишние точки (оставляем только первую)
-        if (value.includes('.')) {
-          const parts = value.split('.')
-          if (parts.length > 2) {
-            value = parts[0] + '.' + parts.slice(1).join('')
-          }
-        }
-
-        this.formData[fieldName] = value
-      }
-    },
-
     validateField(fieldName) {
       const fieldConfig = this.fieldsConfig.find(f => f.name === fieldName)
       if (!fieldConfig) return
@@ -194,24 +162,6 @@ export default {
             `Максимальная длина: ${fieldConfig.maxLength} символов`
       } else if (fieldConfig.pattern && !fieldConfig.pattern.test(value)) {
         error = fieldConfig.errorMessages?.pattern || 'Неверный формат'
-      }
-
-      // Для числовых полей проверяем, что это корректное число
-      if (fieldConfig.type === 'number' && value) {
-        // Проверяем, что это число (разрешены целые и дробные числа)
-        if (!/^-?\d*\.?\d+$/.test(value)) {
-          error = fieldConfig.errorMessages?.numberFormat || 'Введите корректное число'
-        }
-
-        // Проверяем минимальное значение
-        if (!error && fieldConfig.min !== undefined && parseFloat(value) < fieldConfig.min) {
-          error = fieldConfig.errorMessages?.min || `Минимальное значение: ${fieldConfig.min}`
-        }
-
-        // Проверяем максимальное значение
-        if (!error && fieldConfig.max !== undefined && parseFloat(value) > fieldConfig.max) {
-          error = fieldConfig.errorMessages?.max || `Максимальное значение: ${fieldConfig.max}`
-        }
       }
 
       if (this.customValidators[fieldName]) {
