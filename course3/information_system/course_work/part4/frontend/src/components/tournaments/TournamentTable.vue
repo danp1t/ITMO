@@ -132,7 +132,7 @@
               </span>
           </td>
           <td>
-              <span class="tag is-light">
+              <span class="tag is-dark">
                 {{ tournament.minimalAge }} лет
               </span>
           </td>
@@ -342,7 +342,7 @@ onMounted(() => {
 }
 
 .table {
-  min-width: 1000px;
+  min-width: 900px;
 }
 
 .table th {
