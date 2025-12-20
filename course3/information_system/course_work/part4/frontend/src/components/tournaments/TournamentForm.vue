@@ -180,7 +180,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
-import type { Tournament, Rang } from '../../types/tournaments'
+import type { Tournament, Rang } from '@/types/tournaments.ts'
 
 interface Props {
   tournament?: Tournament
@@ -243,18 +243,15 @@ const formatDateTimeLocal = (dateString: string) => {
 const validateForm = () => {
   let isValid = true
 
-  // Сброс ошибок
   Object.keys(errors).forEach(key => {
     errors[key as keyof typeof errors] = ''
   })
 
-  // Проверка названия
   if (!form.name.trim()) {
     errors.name = 'Название обязательно'
     isValid = false
   }
 
-  // Проверка дат
   if (!form.startDate) {
     errors.startDate = 'Дата начала обязательна'
     isValid = false
@@ -275,26 +272,22 @@ const validateForm = () => {
     }
   }
 
-  // Проверка адреса
   if (!form.address.trim()) {
     errors.address = 'Адрес обязателен'
     isValid = false
   }
 
-  // Проверка ранга
   if (!form.rangId) {
     errors.rangId = 'Ранг обязателен'
     isValid = false
   }
 
-  // Проверка возраста
   const age = parseInt(form.minimalAge)
   if (isNaN(age) || age < 0 || age > 100) {
     errors.minimalAge = 'Возраст должен быть от 0 до 100 лет'
     isValid = false
   }
 
-  // Проверка ссылки
   if (form.link && !isValidUrl(form.link)) {
     errors.link = 'Неверный формат URL'
     isValid = false
@@ -343,7 +336,7 @@ const handleSubmit = async () => {
 
 <style scoped>
 .tournament-form {
-  background: white;
+  background: #333131;
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
@@ -351,12 +344,12 @@ const handleSubmit = async () => {
 
 .label {
   font-weight: 600;
-  color: #333;
+  color: #eddddd;
   margin-bottom: 0.5rem;
 }
 
 .input, .textarea, .select select {
-  border: 2px solid #e1e5e9;
+  border: 2px solid #010c7a;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   font-size: 1rem;

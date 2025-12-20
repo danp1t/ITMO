@@ -103,7 +103,7 @@
     <!-- Модальное окно создания/редактирования -->
     <div class="modal" :class="{ 'is-active': showFormModal }">
       <div class="modal-background" @click="closeFormModal"></div>
-      <div class="modal-card">
+      <div class="modal-card is-fullwidth">
         <header class="modal-card-head">
           <p class="modal-card-title">
             {{ editingTournament ? 'Редактирование турнира' : 'Создание нового турнира' }}
@@ -386,9 +386,11 @@ onMounted(() => {
 }
 
 .modal-card {
-  max-width: 800px;
+  width: 90%;
+  max-width: 1200px;
   border-radius: 12px;
   overflow: hidden;
+  margin: 0 auto;
 }
 
 .modal-card-head {
@@ -410,6 +412,12 @@ onMounted(() => {
 
   .column.is-three-quarters {
     width: 100%;
+  }
+
+  /* Для мобильных устройств - уменьшаем ширину */
+  .modal-card {
+    width: 95%;
+    max-width: 95%;
   }
 }
 </style>

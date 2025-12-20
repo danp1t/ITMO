@@ -210,8 +210,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '../../stores/auth'
-import type { Tournament, Rang } from '../../types/tournaments'
+import { useAuthStore } from '@/stores/auth.ts'
+import type { Tournament, Rang } from '@/types/tournaments.ts'
 
 interface Props {
   tournaments: Tournament[]
