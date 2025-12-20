@@ -221,6 +221,12 @@ const isLoading = ref(false)
 
 const isEditMode = computed(() => !!props.tournament)
 
+
+const formatDateTimeLocal = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toISOString().slice(0, 16)
+}
+
 // Заполняем форму при редактировании
 watch(() => props.tournament, (tournament) => {
   if (tournament) {
@@ -234,11 +240,6 @@ watch(() => props.tournament, (tournament) => {
     form.archived = tournament.archived
   }
 }, { immediate: true })
-
-const formatDateTimeLocal = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toISOString().slice(0, 16)
-}
 
 const validateForm = () => {
   let isValid = true

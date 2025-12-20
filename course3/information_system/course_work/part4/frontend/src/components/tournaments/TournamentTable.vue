@@ -149,7 +149,7 @@
               <button
                 v-if="hasPermission('EditTournament')"
                 class="button is-info is-light"
-                @click.stop="$emit('edit', tournament)"
+                @click.stop="onEditClick(tournament)"
               >
                   <span class="icon">
                     <i class="fas fa-edit"></i>
@@ -319,6 +319,10 @@ const changePage = (page: number) => {
 
 const confirmDelete = (tournament: Tournament) => {
   emit('delete', tournament)
+}
+
+const onEditClick = (tournament: Tournament) => {
+  emit('edit', tournament)
 }
 
 // Сброс при смене данных
