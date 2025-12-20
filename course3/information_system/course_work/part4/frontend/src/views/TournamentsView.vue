@@ -315,7 +315,6 @@ const handleFormSubmit = async (tournamentData: any) => {
     if (editingTournament.value) {
       // Редактирование существующего турнира
       await tournamentsAPI.updateTournament(editingTournament.value.id, tournamentData)
-      alert('Турнир успешно обновлен!')
     } else {
       // Создание нового турнира
       await tournamentsAPI.createTournament(tournamentData)

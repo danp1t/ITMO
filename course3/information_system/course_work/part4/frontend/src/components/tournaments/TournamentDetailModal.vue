@@ -70,19 +70,21 @@
       </section>
 
       <footer class="modal-card-foot">
-        <button class="button" @click="$emit('close')">
-          Закрыть
-        </button>
-        <button
-          v-if="showEditButton"
-          class="button is-primary"
-          @click="$emit('edit', tournament)"
-        >
-          <span class="icon">
-            <i class="fas fa-edit"></i>
-          </span>
-          <span>Редактировать</span>
-        </button>
+        <div class="buttons are-medium">
+          <button class="button" @click="$emit('close')">
+            Закрыть
+          </button>
+          <button
+            v-if="showEditButton"
+            class="button is-primary"
+            @click="$emit('edit', tournament)"
+          >
+            <span class="icon">
+              <i class="fas fa-edit"></i>
+            </span>
+            <span>Редактировать</span>
+          </button>
+        </div>
       </footer>
     </div>
   </div>
@@ -138,3 +140,81 @@ const showEditButton = computed(() => {
   return authStore.user.roles.includes('OAPI:ROLE:EditTournament')
 })
 </script>
+
+<style scoped>
+/* Улучшаем отступы между кнопками в футере модального окна */
+.modal-card-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #dbdbdb;
+}
+
+.buttons {
+  gap: 1rem; /* Добавляем расстояние между кнопками */
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.buttons .button {
+  min-width: 120px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+/* Делаем кнопки более выразительными */
+.modal-card-foot .button {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.modal-card-foot .button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Улучшаем внешний вид кнопки закрыть */
+.modal-card-foot .button:first-child {
+  background-color: #f5f5f5;
+  border-color: #dbdbdb;
+  color: #363636;
+}
+
+.modal-card-foot .button:first-child:hover {
+  background-color: #e8e8e8;
+  border-color: #c5c5c5;
+}
+
+/* Улучшаем внешний вид кнопки редактировать */
+.modal-card-foot .button.is-primary {
+  background-color: #3273dc;
+  border-color: #3273dc;
+  color: white;
+}
+
+.modal-card-foot .button.is-primary:hover {
+  background-color: #276cda;
+  border-color: #276cda;
+}
+
+/* Для мобильных устройств делаем кнопки более доступными */
+@media (max-width: 768px) {
+  .modal-card-foot {
+    padding: 1rem;
+    flex-direction: column;
+  }
+
+  .buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+  }
+
+  .buttons .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>

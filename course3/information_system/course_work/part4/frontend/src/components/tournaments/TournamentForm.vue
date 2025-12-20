@@ -343,6 +343,12 @@ const handleSubmit = async () => {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
+.select {
+  height: 3.5rem; /* Увеличиваем высоту */
+  font-size: 1.1rem; /* Увеличиваем размер шрифта */
+  line-height: 1.5; /* Увеличиваем межстрочный интервал */
+}
+
 .label {
   font-weight: 600;
   color: #eddddd;
