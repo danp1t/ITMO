@@ -331,13 +331,8 @@ const handleFormSubmit = async (tournamentData: any) => {
 }
 
 const deleteTournament = async (tournament: Tournament) => {
-  if (!confirm(`Вы уверены, что хотите удалить турнир "${tournament.name}"?`)) {
-    return
-  }
-
   try {
     await tournamentsAPI.deleteTournament(tournament.id)
-    alert('Турнир успешно удален!')
     loadTournaments()
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при удалении турнира'

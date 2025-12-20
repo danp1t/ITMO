@@ -318,9 +318,7 @@ const changePage = (page: number) => {
 }
 
 const confirmDelete = (tournament: Tournament) => {
-  if (confirm(`Вы уверены, что хотите удалить турнир "${tournament.name}"?`)) {
-    emit('delete', tournament)
-  }
+  emit('delete', tournament)
 }
 
 // Сброс при смене данных
