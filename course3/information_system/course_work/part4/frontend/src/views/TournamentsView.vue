@@ -103,7 +103,7 @@
     <!-- Модальное окно создания/редактирования -->
     <div class="modal" :class="{ 'is-active': showFormModal }">
       <div class="modal-background" @click="closeFormModal"></div>
-      <div class="modal-card is-fullwidth">
+      <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">
             {{ editingTournament ? 'Редактирование турнира' : 'Создание нового турнира' }}

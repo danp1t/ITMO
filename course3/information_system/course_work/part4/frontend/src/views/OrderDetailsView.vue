@@ -339,7 +339,6 @@ const cancelOrder = async () => {
   try {
     await shopAPI.updateOrder(order.value.id, { orderStatusId: 5 })
     await loadOrder() // Перезагружаем данные
-    alert('Заказ успешно отменен')
   } catch (err: any) {
     const message = err.response?.data?.message || 'Не удалось отменить заказ'
     alert(message)
