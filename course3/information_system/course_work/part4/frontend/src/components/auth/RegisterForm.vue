@@ -91,9 +91,12 @@
           <!-- Успешная регистрация -->
           <div v-if="successMessage" class="notification is-success is-light">
             {{ successMessage }}
+            <p v-if="showVerificationPrompt" class="mt-2">
+              <strong>Пожалуйста, перейдите на страницу подтверждения email:</strong>
+            </p>
           </div>
 
-          <!-- Кнопки -->
+          <!-- Кнопка регистрации -->
           <div class="field">
             <div class="control">
               <button
@@ -107,11 +110,16 @@
             </div>
           </div>
 
-          <!-- Ссылка на вход -->
-          <div class="field has-text-centered">
-            <router-link to="/login" class="is-size-7">
-              Уже есть аккаунт? Войти
-            </router-link>
+          <!-- Ссылки -->
+          <div class="field">
+            <div class="is-flex is-justify-content-space-between">
+              <router-link to="/login" class="is-size-7">
+                Уже есть аккаунт? Войти
+              </router-link>
+              <router-link v-if="showVerificationPrompt" to="/verify-email" class="is-size-7">
+                Подтвердить email
+              </router-link>
+            </div>
           </div>
         </form>
       </div>
@@ -144,6 +152,7 @@ const errors = reactive({
 const serverError = ref('')
 const successMessage = ref('')
 const isLoading = ref(false)
+const showVerificationPrompt = ref(false)
 
 const validateForm = () => {
   let isValid = true
@@ -201,26 +210,20 @@ const handleSubmit = async () => {
   isLoading.value = true
   serverError.value = ''
   successMessage.value = ''
+  showVerificationPrompt.value = false
 
   try {
     const result = await authStore.register(form.name, form.email, form.password)
 
     if (result.success) {
-      successMessage.value = 'Регистрация успешна! Проверьте ваш email для подтверждения.'
+      successMessage.value = 'Регистрация успешна! Код подтверждения отправлен на ваш email.'
+      showVerificationPrompt.value = true
 
       // Очищаем форму
       form.name = ''
       form.email = ''
       form.password = ''
       form.confirmPassword = ''
-
-      // Автоматический вход после регистрации
-      setTimeout(async () => {
-        const loginResult = await authStore.login(form.email, form.password)
-        if (loginResult.success) {
-          router.push('/')
-        }
-      }, 2000)
     } else {
       serverError.value = result.error || 'Ошибка регистрации'
     }
@@ -231,24 +234,3 @@ const handleSubmit = async () => {
   }
 }
 </script>
-
-<style scoped>
-.register-form {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.card {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  background-color: #f5f5f5;
-  padding: 1rem 1.5rem;
-}
-
-.card-header-title {
-  font-size: 1.5rem;
-  color: #333;
-}
-</style>
