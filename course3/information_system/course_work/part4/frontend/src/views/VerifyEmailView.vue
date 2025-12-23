@@ -1,7 +1,7 @@
 <template>
   <div class="verify-email-view">
     <div class="columns is-centered">
-      <div class="column is-half-tablet is-one-third-desktop">
+      <div :class="columnClass">
         <div class="card">
           <div class="card-header">
             <h2 class="card-header-title">Подтверждение Email</h2>
@@ -61,21 +61,6 @@
                             required
                           >
                         </div>
-                        <div class="control">
-                          <button
-                            type="button"
-                            class="button"
-                            :class="{ 'is-loading': resending }"
-                            :disabled="resending || !canResend"
-                            @click="resendCode"
-                          >
-                            <span class="icon">
-                              <i class="fas fa-redo"></i>
-                            </span>
-                            <span v-if="canResend">Отправить снова</span>
-                            <span v-else>Повторно через {{ countdown }}</span>
-                          </button>
-                        </div>
                       </div>
                     </div>
                     <p v-if="errors.code" class="help is-danger">{{ errors.code }}</p>
@@ -106,21 +91,29 @@
 
             <!-- Успешное подтверждение -->
             <div v-else class="has-text-centered">
-              <div class="notification is-success is-light">
-                <div class="mb-3">
-                  <i class="fas fa-check-circle fa-2x has-text-success"></i>
+              <div class="notification is-success is-light p-5">
+                <div class="mb-4">
+                  <i class="fas fa-check-circle fa-3x has-text-success"></i>
                 </div>
-                <p class="is-size-5 mb-2">Email успешно подтвержден!</p>
-                <p>Ваш аккаунт активирован. Теперь вы можете войти в систему.</p>
-              </div>
+                <h3 class="title is-4 mb-3">Email успешно подтвержден!</h3>
+                <p class="subtitle is-5 mb-4">Ваш аккаунт активирован. Теперь вы можете войти в систему.</p>
 
-              <div class="buttons is-centered mt-4">
-                <router-link to="/login" class="button is-primary">
-                  Войти в систему
-                </router-link>
-                <router-link to="/" class="button is-light">
-                  На главную
-                </router-link>
+                <div class="buttons is-centered is-flex is-justify-content-center">
+                  <div class="buttons-group">
+                    <router-link to="/login" class="button is-primary is-medium">
+                      <span class="icon is-small">
+                        <i class="fas fa-sign-in-alt"></i>
+                      </span>
+                      <span>Войти в систему</span>
+                    </router-link>
+                    <router-link to="/" class="button is-light is-medium ml-3">
+                      <span class="icon is-small">
+                        <i class="fas fa-home"></i>
+                      </span>
+                      <span>На главную</span>
+                    </router-link>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -166,6 +159,14 @@ const countdown = ref(60)
 
 const routeEmail = computed(() => route.query.email as string)
 const routeCode = computed(() => route.query.code as string)
+
+// Динамические классы для колонки
+const columnClass = computed(() => {
+  if (verificationComplete.value) {
+    return 'column is-10-tablet is-8-desktop is-6-widescreen' // Шире для успешного сообщения
+  }
+  return 'column is-half-tablet is-one-third-desktop' // Оригинальная ширина для формы
+})
 
 onMounted(() => {
   // Если email и код есть в URL, автоматически подтверждаем
@@ -311,7 +312,7 @@ onUnmounted(() => {
 }
 
 .card-header {
-  background-color: #f5f5f5;
+  background-color: #201f1f;
   padding: 1rem 1.5rem;
 }
 
@@ -321,5 +322,43 @@ onUnmounted(() => {
 
 .notification {
   border: 1px solid #e6e6e6;
+  border-radius: 8px;
+}
+
+.buttons-group {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+  .buttons-group {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .buttons-group .button {
+    width: 100%;
+    max-width: 250px;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.title {
+  color: #333;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #666;
+}
+
+.fa-check-circle {
+  color: #23d160;
+}
+
+.card-content {
+  padding: 2rem;
 }
 </style>

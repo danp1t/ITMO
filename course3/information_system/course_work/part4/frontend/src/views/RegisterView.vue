@@ -9,16 +9,6 @@
           </div>
 
           <RegisterForm />
-
-          <!-- Условия использования -->
-          <div class="has-text-centered mt-6">
-            <p class="is-size-7 has-text-grey">
-              Нажимая "Зарегистрироваться", вы соглашаетесь с
-              <a href="/terms" class="has-text-primary">Условиями использования</a>
-              и
-              <a href="/privacy" class="has-text-primary">Политикой конфиденциальности</a>
-            </p>
-          </div>
         </div>
       </div>
     </div>
