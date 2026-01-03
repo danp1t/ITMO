@@ -413,6 +413,7 @@ export default {
         this.resetForm()
       } catch (error) {
         console.error('Ошибка при создании организации:', error)
+        this.handleServerError(error)
         this.$emit('error', error)
       } finally {
         this.isSubmitting = false
@@ -423,7 +424,9 @@ export default {
       if (error.response?.data?.error) {
         const errorMessage = error.response.data.error
 
-        if (errorMessage.includes('Длина строки name не должна быть больше 256')) {
+        if (errorMessage.includes('Нарушение уникальности')) {
+          this.serverError = errorMessage
+        } else if (errorMessage.includes('Длина строки name не должна быть больше 256')) {
           this.serverError = 'Название организации слишком длинное. Максимальная длина - 256 символов.'
         } else if (errorMessage.includes('annualTurnover') || errorMessage.includes('годовой оборот')) {
           this.serverError = 'Ошибка в данных годового оборота. Проверьте введенное значение.'
