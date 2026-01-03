@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <organizations>
     <organization>
-        <name>Компания А</name>
+        <name>Компания АФЫ</name>
         <annualTurnover>1500000.50</annualTurnover>
         <employeesCount>250</employeesCount>
         <rating>8</rating>
@@ -22,7 +22,7 @@
         </postalAddress>
     </organization>
     <organization>
-        <name>Организация Б</name>
+        <name>Организация БФЫ</name>
         <annualTurnover>750000.25</annualTurnover>
         <employeesCount>120</employeesCount>
         <rating>6</rating>
