@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.hibernate.query.Query;
 
+import java.sql.Connection;
 import java.util.List;
 
 @ApplicationScoped
@@ -24,6 +25,9 @@ public class OrganizationRepository {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            });
             transaction = session.beginTransaction();
             if (organization.getCoordinates().getId() == null) {
                 session.persist(organization.getCoordinates());
@@ -94,6 +98,9 @@ public class OrganizationRepository {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            });
             transaction = session.beginTransaction();
             Organization mergedOrganization = session.merge(organization);
             transaction.commit();
@@ -180,6 +187,9 @@ public class OrganizationRepository {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            });
             transaction = session.beginTransaction();
 
             Organization firstOrg = session.createQuery(
@@ -234,6 +244,9 @@ public class OrganizationRepository {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            });
             transaction = session.beginTransaction();
 
             Organization absorbingOrg = session.createQuery(
@@ -345,12 +358,15 @@ public class OrganizationRepository {
         }
     }
 
-    // Добавить в OrganizationRepository.java
     public Organization saveWithTransaction(Organization organization) {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            });
             transaction = session.beginTransaction();
+
 
             // Проверка уникальности
             checkUniqueness(organization, session, null);
@@ -392,7 +408,11 @@ public class OrganizationRepository {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            });
             transaction = session.beginTransaction();
+
 
             Organization existingOrganization = session.createQuery(
                             "SELECT o FROM Organization o " +
@@ -466,6 +486,9 @@ public class OrganizationRepository {
         Transaction transaction = null;
 
         try {
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            });
             transaction = session.beginTransaction();
 
             Organization organization = session.createQuery(

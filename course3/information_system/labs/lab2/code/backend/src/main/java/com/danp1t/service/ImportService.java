@@ -22,6 +22,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +44,9 @@ public class ImportService {
 
         try {
             mainSession = sessionFactory.openSession();
+            mainSession.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            });
             mainTransaction = mainSession.beginTransaction();
 
             User user = mainSession.get(User.class, detachedUser.getId());

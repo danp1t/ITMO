@@ -11,6 +11,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,9 @@ public class OrganizationService {
 
         try {
             session = sessionFactory.openSession();
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            });
             transaction = session.beginTransaction();
 
             // Проверка уникальности на программном уровне
@@ -155,6 +159,9 @@ public class OrganizationService {
 
         try {
             session = sessionFactory.openSession();
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+            });
             transaction = session.beginTransaction();
 
             // Получаем существующую организацию
