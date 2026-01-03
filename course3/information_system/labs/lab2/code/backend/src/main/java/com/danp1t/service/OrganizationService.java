@@ -208,9 +208,9 @@ public class OrganizationService {
             }
         }
     }
-
+    
     /**
-     * Проверяет уникальность организации по трем парам полей
+     * Проверяет уникальность организации по тройке полей
      * @param excludeId ID организации для исключения (при обновлении)
      */
     private void checkOrganizationUniqueness(Organization organization, Session session, Integer excludeId) {
@@ -218,84 +218,50 @@ public class OrganizationService {
         Coordinates coords = organization.getCoordinates();
         Address address = organization.getPostalAddress();
 
-        // Проверка 1: (name, coordinates)
-        if (name != null && coords != null) {
-            StringBuilder hql1 = new StringBuilder(
-                    "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                            "AND o.coordinates.x = :x AND o.coordinates.y = :y");
-
-            if (excludeId != null) {
-                hql1.append(" AND o.id != :excludeId");
-            }
-
-            var query1 = session.createQuery(hql1.toString(), Boolean.class)
-                    .setParameter("name", name)
-                    .setParameter("x", coords.getX())
-                    .setParameter("y", coords.getY());
-
-            if (excludeId != null) {
-                query1.setParameter("excludeId", excludeId);
-            }
-
-            Boolean exists1 = query1.uniqueResult();
-            if (Boolean.TRUE.equals(exists1)) {
-                throw new IllegalArgumentException("Нарушение уникальности: организация с названием '" + name +
-                        "' и координатами (" + coords.getX() + ", " + coords.getY() +
-                        ") уже существует");
-            }
+        // Проверяем, что все три поля заполнены
+        if (name == null || coords == null || address == null) {
+            throw new IllegalArgumentException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        // Проверка 2: (name, address)
-        if (name != null && address != null && address.getId() != null) {
-            StringBuilder hql2 = new StringBuilder(
-                    "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                            "AND o.postalAddress.id = :addressId");
-
-            if (excludeId != null) {
-                hql2.append(" AND o.id != :excludeId");
-            }
-
-            var query2 = session.createQuery(hql2.toString(), Boolean.class)
-                    .setParameter("name", name)
-                    .setParameter("addressId", address.getId());
-
-            if (excludeId != null) {
-                query2.setParameter("excludeId", excludeId);
-            }
-
-            Boolean exists2 = query2.uniqueResult();
-            if (Boolean.TRUE.equals(exists2)) {
-                throw new IllegalArgumentException("Нарушение уникальности: организация с названием '" + name +
-                        "' и адресом ID=" + address.getId() + " уже существует");
-            }
+        StringBuilder hql = new StringBuilder();
+        if (address.getId() != null) {
+            hql.append("SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.id = :addressId");
+        } else {
+            hql.append("SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.street = :street " +
+                    "AND (o.postalAddress.zipCode = :zipCode OR (o.postalAddress.zipCode IS NULL AND :zipCode IS NULL))");
         }
 
-        // Проверка 3: (coordinates, address)
-        if (coords != null && address != null && address.getId() != null) {
-            StringBuilder hql3 = new StringBuilder(
-                    "SELECT COUNT(o) > 0 FROM Organization o WHERE " +
-                            "o.coordinates.x = :x AND o.coordinates.y = :y " +
-                            "AND o.postalAddress.id = :addressId");
+        if (excludeId != null) {
+            hql.append(" AND o.id != :excludeId");
+        }
 
-            if (excludeId != null) {
-                hql3.append(" AND o.id != :excludeId");
-            }
+        var query = session.createQuery(hql.toString(), Boolean.class)
+                .setParameter("name", name)
+                .setParameter("x", coords.getX())
+                .setParameter("y", coords.getY());
 
-            var query3 = session.createQuery(hql3.toString(), Boolean.class)
-                    .setParameter("x", coords.getX())
-                    .setParameter("y", coords.getY())
-                    .setParameter("addressId", address.getId());
+        if (address.getId() != null) {
+            query.setParameter("addressId", address.getId());
+        } else {
+            query.setParameter("street", address.getStreet())
+                    .setParameter("zipCode", address.getZipCode());
+        }
 
-            if (excludeId != null) {
-                query3.setParameter("excludeId", excludeId);
-            }
+        if (excludeId != null) {
+            query.setParameter("excludeId", excludeId);
+        }
 
-            Boolean exists3 = query3.uniqueResult();
-            if (Boolean.TRUE.equals(exists3)) {
-                throw new IllegalArgumentException("Нарушение уникальности: организация с координатами (" +
-                        coords.getX() + ", " + coords.getY() +
-                        ") и адресом ID=" + address.getId() + " уже существует");
-            }
+        Boolean exists = query.uniqueResult();
+        if (Boolean.TRUE.equals(exists)) {
+            throw new IllegalArgumentException("Нарушение уникальности: организация с названием '" + name +
+                    "', координатами (" + coords.getX() + ", " + coords.getY() +
+                    ") и адресом (улица: " + address.getStreet() +
+                    (address.getZipCode() != null ? ", индекс: " + address.getZipCode() : "") +
+                    ") уже существует");
         }
     }
 

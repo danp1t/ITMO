@@ -66,34 +66,11 @@ public class ImportService {
             List<Organization> organizations = parseAndValidateXml(xmlStream);
 
             // Множества для отслеживания уникальности в рамках текущего импорта
-            Set<String> nameCoordinatesPairs = new HashSet<>();
-            Set<String> nameAddressPairs = new HashSet<>();
-            Set<String> coordinatesAddressPairs = new HashSet<>();
+            Set<String> uniqueTriplets = new HashSet<>();
 
             for (Organization organization : organizations) {
                 // Проверка уникальности для текущей организации
-                checkOrganizationUniqueness(organization, mainSession, nameCoordinatesPairs,
-                        nameAddressPairs, coordinatesAddressPairs);
-
-                // Сохраняем пары для проверки дубликатов в рамках текущего импорта
-                String name = organization.getName();
-                Coordinates coords = organization.getCoordinates();
-                Address address = organization.getPostalAddress();
-
-                if (name != null && coords != null) {
-                    String nameCoordsKey = name + ":" + coords.getX() + ":" + coords.getY();
-                    nameCoordinatesPairs.add(nameCoordsKey);
-                }
-
-                if (name != null && address != null && address.getId() != null) {
-                    String nameAddressKey = name + ":" + address.getId();
-                    nameAddressPairs.add(nameAddressKey);
-                }
-
-                if (coords != null && address != null && address.getId() != null) {
-                    String coordsAddressKey = coords.getX() + ":" + coords.getY() + ":" + address.getId();
-                    coordinatesAddressPairs.add(coordsAddressKey);
-                }
+                checkOrganizationUniqueness(organization, mainSession, uniqueTriplets);
 
                 if (organization.getCoordinates() != null) {
                     mainSession.persist(organization.getCoordinates());
@@ -143,94 +120,73 @@ public class ImportService {
     /**
      * Проверяет уникальность организации по трем парам полей
      */
+    /**
+     * Проверяет уникальность организации по тройке полей
+     */
     private void checkOrganizationUniqueness(Organization organization, Session session,
-                                             Set<String> nameCoordinatesPairs,
-                                             Set<String> nameAddressPairs,
-                                             Set<String> coordinatesAddressPairs) throws InvalidXmlException {
+                                             Set<String> uniqueTriplets) throws InvalidXmlException {
 
         String name = organization.getName();
         Coordinates coords = organization.getCoordinates();
         Address address = organization.getPostalAddress();
 
-        // Проверка 1: (name, coordinates)
-        if (name != null && coords != null) {
-            // Проверка в рамках текущего импорта
-            String nameCoordsKey = name + ":" + coords.getX() + ":" + coords.getY();
-            if (nameCoordinatesPairs.contains(nameCoordsKey)) {
-                throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
-                        "' и координатами (" + coords.getX() + ", " + coords.getY() +
-                        ") уже присутствует в импортируемом файле");
-            }
-
-            // Проверка в базе данных
-            String hql1 = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                    "AND o.coordinates.x = :x AND o.coordinates.y = :y";
-            boolean existsInDb1 = session.createQuery(hql1, Boolean.class)
-                    .setParameter("name", name)
-                    .setParameter("x", coords.getX())
-                    .setParameter("y", coords.getY())
-                    .uniqueResult();
-
-            if (existsInDb1) {
-                throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
-                        "' и координатами (" + coords.getX() + ", " + coords.getY() +
-                        ") уже существует в базе данных");
-            }
+        // Проверяем, что все три поля заполнены
+        if (name == null || coords == null || address == null) {
+            throw new InvalidXmlException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        // Проверка 2: (name, address)
-        if (name != null && address != null && address.getId() != null) {
-            // Проверка в рамках текущего импорта
-            String nameAddressKey = name + ":" + address.getId();
-            if (nameAddressPairs.contains(nameAddressKey)) {
-                throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
-                        "' и адресом ID=" + address.getId() +
-                        " уже присутствует в импортируемом файле");
-            }
+        // Создаем уникальный ключ для тройки полей
+        // Для адреса используем street + zipCode, так как id еще не назначен
+        String addressKey = address.getStreet() + ":" + (address.getZipCode() != null ? address.getZipCode() : "");
+        String uniqueKey = name + ":" + coords.getX() + ":" + coords.getY() + ":" + addressKey;
 
-            // Проверка в базе данных
-            String hql2 = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+        // Проверка в рамках текущего импорта
+        if (uniqueTriplets.contains(uniqueKey)) {
+            throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
+                    "', координатами (" + coords.getX() + ", " + coords.getY() +
+                    ") и адресом (улица: " + address.getStreet() +
+                    (address.getZipCode() != null ? ", индекс: " + address.getZipCode() : "") +
+                    ") уже присутствует в импортируемом файле");
+        }
+
+        // Проверка в базе данных
+        // Для новых адресов сравниваем по street и zipCode
+        String hql;
+        if (address.getId() != null) {
+            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
                     "AND o.postalAddress.id = :addressId";
-            boolean existsInDb2 = session.createQuery(hql2, Boolean.class)
-                    .setParameter("name", name)
-                    .setParameter("addressId", address.getId())
-                    .uniqueResult();
-
-            if (existsInDb2) {
-                throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
-                        "' и адресом ID=" + address.getId() +
-                        " уже существует в базе данных");
-            }
+        } else {
+            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.street = :street " +
+                    "AND (o.postalAddress.zipCode = :zipCode OR (o.postalAddress.zipCode IS NULL AND :zipCode IS NULL))";
         }
 
-        // Проверка 3: (coordinates, address)
-        if (coords != null && address != null && address.getId() != null) {
-            // Проверка в рамках текущего импорта
-            String coordsAddressKey = coords.getX() + ":" + coords.getY() + ":" + address.getId();
-            if (coordinatesAddressPairs.contains(coordsAddressKey)) {
-                throw new InvalidXmlException("Нарушение уникальности: организация с координатами (" +
-                        coords.getX() + ", " + coords.getY() +
-                        ") и адресом ID=" + address.getId() +
-                        " уже присутствует в импортируемом файле");
-            }
+        var query = session.createQuery(hql, Boolean.class)
+                .setParameter("name", name)
+                .setParameter("x", coords.getX())
+                .setParameter("y", coords.getY());
 
-            // Проверка в базе данных
-            String hql3 = "SELECT COUNT(o) > 0 FROM Organization o WHERE " +
-                    "o.coordinates.x = :x AND o.coordinates.y = :y " +
-                    "AND o.postalAddress.id = :addressId";
-            boolean existsInDb3 = session.createQuery(hql3, Boolean.class)
-                    .setParameter("x", coords.getX())
-                    .setParameter("y", coords.getY())
-                    .setParameter("addressId", address.getId())
-                    .uniqueResult();
-
-            if (existsInDb3) {
-                throw new InvalidXmlException("Нарушение уникальности: организация с координатами (" +
-                        coords.getX() + ", " + coords.getY() +
-                        ") и адресом ID=" + address.getId() +
-                        " уже существует в базе данных");
-            }
+        if (address.getId() != null) {
+            query.setParameter("addressId", address.getId());
+        } else {
+            query.setParameter("street", address.getStreet())
+                    .setParameter("zipCode", address.getZipCode());
         }
+
+        boolean existsInDb = query.uniqueResult();
+
+        if (existsInDb) {
+            throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
+                    "', координатами (" + coords.getX() + ", " + coords.getY() +
+                    ") и адресом (улица: " + address.getStreet() +
+                    (address.getZipCode() != null ? ", индекс: " + address.getZipCode() : "") +
+                    ") уже существует в базе данных");
+        }
+
+        // Добавляем ключ в множество для проверки дубликатов в рамках текущего импорта
+        uniqueTriplets.add(uniqueKey);
     }
 
     private void rollbackTransaction(Transaction transaction) {
