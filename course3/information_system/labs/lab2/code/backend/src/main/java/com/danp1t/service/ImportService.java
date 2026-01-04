@@ -41,6 +41,7 @@ public class ImportService {
             throws UserNotFoundException, InvalidXmlException {
         Session mainSession = null;
         Transaction mainTransaction = null;
+        List<Organization> organizations = parseAndValidateXml(xmlStream);
 
         try {
             mainSession = sessionFactory.openSession();
@@ -63,13 +64,9 @@ public class ImportService {
             importOperationRepository.saveWithSession(operation, mainSession);
             mainSession.flush();
 
-            List<Organization> organizations = parseAndValidateXml(xmlStream);
-
-            // Множества для отслеживания уникальности в рамках текущего импорта
             Set<String> uniqueTriplets = new HashSet<>();
 
             for (Organization organization : organizations) {
-                // Проверка уникальности для текущей организации
                 checkOrganizationUniqueness(organization, mainSession, uniqueTriplets);
 
                 if (organization.getCoordinates() != null) {
@@ -117,12 +114,6 @@ public class ImportService {
         }
     }
 
-    /**
-     * Проверяет уникальность организации по трем парам полей
-     */
-    /**
-     * Проверяет уникальность организации по тройке полей
-     */
     private void checkOrganizationUniqueness(Organization organization, Session session,
                                              Set<String> uniqueTriplets) throws InvalidXmlException {
 
@@ -130,17 +121,13 @@ public class ImportService {
         Coordinates coords = organization.getCoordinates();
         Address address = organization.getPostalAddress();
 
-        // Проверяем, что все три поля заполнены
         if (name == null || coords == null || address == null) {
             throw new InvalidXmlException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        // Создаем уникальный ключ для тройки полей
-        // Для адреса используем street + zipCode, так как id еще не назначен
         String addressKey = address.getStreet() + ":" + (address.getZipCode() != null ? address.getZipCode() : "");
         String uniqueKey = name + ":" + coords.getX() + ":" + coords.getY() + ":" + addressKey;
 
-        // Проверка в рамках текущего импорта
         if (uniqueTriplets.contains(uniqueKey)) {
             throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
                     "', координатами (" + coords.getX() + ", " + coords.getY() +
@@ -149,8 +136,6 @@ public class ImportService {
                     ") уже присутствует в импортируемом файле");
         }
 
-        // Проверка в базе данных
-        // Для новых адресов сравниваем по street и zipCode
         String hql;
         if (address.getId() != null) {
             hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
@@ -185,7 +170,6 @@ public class ImportService {
                     ") уже существует в базе данных");
         }
 
-        // Добавляем ключ в множество для проверки дубликатов в рамках текущего импорта
         uniqueTriplets.add(uniqueKey);
     }
 

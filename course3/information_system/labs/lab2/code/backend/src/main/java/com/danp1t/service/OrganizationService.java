@@ -35,28 +35,20 @@ public class OrganizationService {
             });
             transaction = session.beginTransaction();
 
-            // Проверка уникальности на программном уровне
             checkOrganizationUniqueness(organization, session, null);
 
             organization.validate();
-
-            // Обрабатываем связанные объекты
-            // Если объект имеет ID, то он существует - используем merge
-            // Если не имеет ID, то он новый - используем persist
 
             if (organization.getCoordinates() != null) {
                 if (organization.getCoordinates().getId() == null) {
                     session.persist(organization.getCoordinates());
                 } else {
-                    // Загружаем существующие координаты
                     Coordinates existingCoords = session.find(Coordinates.class, organization.getCoordinates().getId());
                     if (existingCoords != null) {
-                        // Обновляем значения
                         existingCoords.setX(organization.getCoordinates().getX());
                         existingCoords.setY(organization.getCoordinates().getY());
                         organization.setCoordinates(existingCoords);
                     } else {
-                        // Если не найден, создаем новые
                         session.persist(organization.getCoordinates());
                     }
                 }
@@ -68,7 +60,6 @@ public class OrganizationService {
                 } else {
                     Location existingAddress = session.find(Location.class, organization.getOfficialAddress().getId());
                     if (existingAddress != null) {
-                        // Обновляем значения
                         existingAddress.setX(organization.getOfficialAddress().getX());
                         existingAddress.setY(organization.getOfficialAddress().getY());
                         existingAddress.setZ(organization.getOfficialAddress().getZ());
@@ -86,7 +77,6 @@ public class OrganizationService {
                 } else {
                     Address existingAddress = session.find(Address.class, organization.getPostalAddress().getId());
                     if (existingAddress != null) {
-                        // Обновляем значения
                         existingAddress.setStreet(organization.getPostalAddress().getStreet());
                         existingAddress.setZipCode(organization.getPostalAddress().getZipCode());
                         organization.setPostalAddress(existingAddress);
@@ -109,14 +99,6 @@ public class OrganizationService {
             if (session != null && session.isOpen()) {
                 session.close();
             }
-        }
-    }
-
-    public List<Organization> getAllOrganizations() {
-        try {
-            return organizationRepository.findAll();
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка получения организаций: " + e.getMessage(), e);
         }
     }
 
@@ -164,35 +146,31 @@ public class OrganizationService {
             });
             transaction = session.beginTransaction();
 
-            // Получаем существующую организацию
             Organization existingOrganization = session.get(Organization.class, id);
             if (existingOrganization == null) {
                 throw new IllegalArgumentException("Организация с ID " + id + " не найдена");
             }
 
-            // Обновляем поля
             if (updateDto.getName() != null) {
                 existingOrganization.setName(updateDto.getName());
             }
             if (updateDto.getAnnualTurnover() != null) {
-                existingOrganization.setAnnualTurnover(updateDto.getAnnualTurnover().floatValue());
+                existingOrganization.setAnnualTurnover(updateDto.getAnnualTurnover());
             }
             if (updateDto.getEmployeesCount() != null) {
-                existingOrganization.setEmployeesCount(updateDto.getEmployeesCount().longValue());
+                existingOrganization.setEmployeesCount(updateDto.getEmployeesCount());
             }
             if (updateDto.getRating() != null) {
-                existingOrganization.setRating(updateDto.getRating().intValue());
+                existingOrganization.setRating(updateDto.getRating());
             }
             if (updateDto.getType() != null) {
                 existingOrganization.setType(updateDto.getType());
             }
 
-            // Проверка уникальности на программном уровне (исключая текущую организацию)
             checkOrganizationUniqueness(existingOrganization, session, id);
 
             existingOrganization.validate();
 
-            // Сохраняем изменения
             Organization mergedOrganization = session.merge(existingOrganization);
             transaction.commit();
 
@@ -209,16 +187,11 @@ public class OrganizationService {
         }
     }
 
-    /**
-     * Проверяет уникальность организации по тройке полей
-     * @param excludeId ID организации для исключения (при обновлении)
-     */
     private void checkOrganizationUniqueness(Organization organization, Session session, Integer excludeId) {
         String name = organization.getName();
         Coordinates coords = organization.getCoordinates();
         Address address = organization.getPostalAddress();
 
-        // Проверяем, что все три поля заполнены
         if (name == null || coords == null || address == null) {
             throw new IllegalArgumentException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
@@ -290,15 +263,15 @@ public class OrganizationService {
         dto.setName(organization.getName());
 
         if (organization.getAnnualTurnover() != null) {
-            dto.setAnnualTurnover(organization.getAnnualTurnover().floatValue());
+            dto.setAnnualTurnover(organization.getAnnualTurnover());
         }
 
         if (organization.getEmployeesCount() != null) {
-            dto.setEmployeesCount(organization.getEmployeesCount().longValue());
+            dto.setEmployeesCount(organization.getEmployeesCount());
         }
 
         if (organization.getRating() != null) {
-            dto.setRating(organization.getRating().intValue());
+            dto.setRating(organization.getRating());
         }
 
         dto.setType(organization.getType());
@@ -350,18 +323,14 @@ public class OrganizationService {
             int page, int size, String search, String type, String sortBy, String sortOrder) {
 
         try {
-            // Вычисляем offset для запроса
             int offset = (page - 1) * size;
 
-            // Получаем организации с фильтрами и пагинацией
             List<Organization> organizations = organizationRepository
                     .findAllWithFilters(offset, size, search, type, sortBy, sortOrder);
 
-            // Получаем общее количество для фильтров
             long totalCount = organizationRepository
                     .countWithFilters(search, type);
 
-            // Вычисляем общее количество страниц
             int totalPages = (int) Math.ceil((double) totalCount / size);
 
             return new PaginatedResponse<>(

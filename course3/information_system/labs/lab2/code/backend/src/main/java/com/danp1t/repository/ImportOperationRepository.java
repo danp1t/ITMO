@@ -24,27 +24,6 @@ public class ImportOperationRepository {
         session.merge(operation);
     }
 
-    public ImportOperation save(ImportOperation operation) {
-        Transaction transaction = null;
-        Session session = null;
-        try {
-            session = sessionFactory.openSession();
-            transaction = session.beginTransaction();
-            session.persist(operation);
-            transaction.commit();
-            return operation;
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw new RuntimeException("Ошибка сохранения операции импорта: " + e.getMessage(), e);
-        } finally {
-            if (session != null && session.isOpen()) {
-                session.close();
-            }
-        }
-    }
-
     public List<ImportOperation> findAll() {
         try (Session session = sessionFactory.openSession()) {
             Query<ImportOperation> query = session.createQuery(
@@ -65,14 +44,6 @@ public class ImportOperationRepository {
             return query.list();
         } catch (Exception e) {
             throw new RuntimeException("Ошибка получения операций импорта пользователя: " + e.getMessage(), e);
-        }
-    }
-
-    public ImportOperation findById(Long id) {
-        try (Session session = sessionFactory.openSession()) {
-            return session.get(ImportOperation.class, id);
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка поиска операции импорта: " + e.getMessage(), e);
         }
     }
 }
