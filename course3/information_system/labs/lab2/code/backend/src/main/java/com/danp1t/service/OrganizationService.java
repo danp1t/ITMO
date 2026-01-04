@@ -206,7 +206,7 @@ public class OrganizationService {
         if (excludeId == null) {
             exists = organizationRepository.existsByNameAndCoordinatesAndAddress(name, coords, address, session);
         } else {
-            exists = organizationRepository.checkUniquenessForUpdate(name, coords, address, excludeId, session);
+            exists = organizationRepository.checkUniqueness(name, coords, address, excludeId, session);
         }
 
         if (exists) {
@@ -227,7 +227,7 @@ public class OrganizationService {
             throw new IllegalArgumentException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        boolean exists = organizationRepository.checkUniquenessForUpdate(name, coords, address, excludeId, session);
+        boolean exists = organizationRepository.checkUniqueness(name, coords, address, excludeId, session);
 
         if (exists) {
             throw new IllegalArgumentException("Нарушение уникальности: организация с названием '" + name +

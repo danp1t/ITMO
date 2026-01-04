@@ -91,7 +91,7 @@ public class OrganizationRepository {
         return query.uniqueResult();
     }
 
-    public boolean checkUniquenessForUpdate(String name, Coordinates coordinates, Address address, Long excludeId, Session session) {
+    public boolean checkUniqueness(String name, Coordinates coordinates, Address address, Long excludeId, Session session) {
         String hql;
         if (address.getId() != null) {
             hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
