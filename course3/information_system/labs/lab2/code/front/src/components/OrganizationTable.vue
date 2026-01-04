@@ -598,7 +598,33 @@ export default {
         this.showNotification('Данные организации успешно обновлены', 'success')
       } catch (error) {
         console.error('Error saving organization:', error)
-        this.showNotification('Ошибка при обновлении данных организации', 'error')
+
+        let errorMessage = 'Ошибка при обновлении данных организации'
+
+        // Проверяем, содержит ли ответ сервера сообщение о нарушении уникальности
+        if (error.response && error.response.data) {
+          const serverError = error.response.data.error || error.response.data.message || ''
+
+          if (serverError.includes('Нарушение уникальности')) {
+            // Извлекаем основную часть сообщения после "Нарушение уникальности: "
+            const match = serverError.match(/Нарушение уникальности: (.+)/)
+            if (match && match[1]) {
+              errorMessage = `Нарушено условие уникальности: ${match[1]}`
+            } else {
+              errorMessage = 'Нарушено условие уникальности организации'
+            }
+          } else if (typeof error.response.data === 'string' && error.response.data.includes('Нарушение уникальности')) {
+            // Если сервер возвращает простую строку
+            const match = error.response.data.match(/Нарушение уникальности: (.+)/)
+            if (match && match[1]) {
+              errorMessage = `Нарушено условие уникальности: ${match[1]}`
+            } else {
+              errorMessage = 'Нарушено условие уникальности организации'
+            }
+          }
+        }
+
+        this.showNotification(errorMessage, 'error')
       }
     },
 
