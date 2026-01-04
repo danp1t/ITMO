@@ -4,10 +4,10 @@ import com.danp1t.model.ImportOperation;
 import com.danp1t.model.User;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
@@ -44,6 +44,31 @@ public class ImportOperationRepository {
             return query.list();
         } catch (Exception e) {
             throw new RuntimeException("Ошибка получения операций импорта пользователя: " + e.getMessage(), e);
+        }
+    }
+
+    public User findUserById(Integer userId, Session session) {
+        try {
+            return session.get(User.class, userId);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка получения пользователя по ID: " + e.getMessage(), e);
+        }
+    }
+
+    public void createFailedImportOperation(User user, String fileName, String errorMessage, Session session) {
+        try {
+            User managedUser = session.get(User.class, user.getId());
+
+            ImportOperation failedOperation = new ImportOperation();
+            failedOperation.setFileName(fileName);
+            failedOperation.setImportDate(LocalDateTime.now());
+            failedOperation.setUser(managedUser);
+            failedOperation.setStatus("FAILED");
+            failedOperation.setErrorMessage(errorMessage);
+
+            session.persist(failedOperation);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка создания записи об ошибке импорта: " + e.getMessage(), e);
         }
     }
 }

@@ -101,7 +101,7 @@ public class OrganizationController {
 
     @PUT
     @Path("/{id}")
-    public Response updateOrganization(@PathParam("id") Integer id, @Valid OrganizationDTO organizationUpdateDto) {
+    public Response updateOrganization(@PathParam("id") Long id, @Valid OrganizationDTO organizationUpdateDto) {
         try {
             Organization updatedOrganization = organizationService.updateOrganization(id, organizationUpdateDto);
 
@@ -128,7 +128,7 @@ public class OrganizationController {
 
     @DELETE
     @Path("/{id}")
-    public Response deleteOrganization(@PathParam("id") Integer id) {
+    public Response deleteOrganization(@PathParam("id") Long id) {
         try {
             boolean deleted = organizationService.deleteOrganization(id);
 

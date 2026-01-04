@@ -4,13 +4,13 @@ import com.danp1t.error.InvalidXmlException;
 import com.danp1t.error.UserNotFoundException;
 import com.danp1t.model.*;
 import com.danp1t.repository.ImportOperationRepository;
+import com.danp1t.repository.OrganizationRepository;
 import com.danp1t.error.*;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,88 +36,99 @@ public class ImportService {
     private ImportOperationRepository importOperationRepository;
 
     @Inject
+    private OrganizationRepository organizationRepository;
+
+    @Inject
     private SessionFactory sessionFactory;
 
     public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName)
             throws UserNotFoundException, InvalidXmlException {
-        Session mainSession = null;
-        Transaction mainTransaction = null;
+
         List<Organization> organizations = parseAndValidateXml(xmlStream);
+        Set<String> uniqueTriplets = new HashSet<>();
+
+        for (Organization organization : organizations) {
+            checkUniquenessInFile(organization, uniqueTriplets);
+        }
+
+        Session session = null;
+        Transaction transaction = null;
 
         try {
-            mainSession = sessionFactory.openSession();
-            mainSession.doWork(connection -> {
+            session = sessionFactory.openSession();
+            session.doWork(connection -> {
                 connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             });
-            mainTransaction = mainSession.beginTransaction();
+            transaction = session.beginTransaction();
 
-            User user = mainSession.get(User.class, detachedUser.getId());
+            User user = importOperationRepository.findUserById(detachedUser.getId(), session);
             if (user == null) {
                 throw new UserNotFoundException(String.valueOf(detachedUser.getId()));
             }
 
             ImportOperation operation = new ImportOperation();
             operation.setFileName(fileName);
-            operation.setImportDate(java.time.LocalDateTime.now());
+            operation.setImportDate(LocalDateTime.now());
             operation.setUser(user);
             operation.setStatus("PROCESSING");
+            operation.setRecordsAdded(organizations.size());
 
-            importOperationRepository.saveWithSession(operation, mainSession);
-            mainSession.flush();
-
-            Set<String> uniqueTriplets = new HashSet<>();
+            importOperationRepository.saveWithSession(operation, session);
+            session.flush();
 
             for (Organization organization : organizations) {
-                checkOrganizationUniqueness(organization, mainSession, uniqueTriplets);
+                checkUniquenessInDatabase(organization, session);
 
-                if (organization.getCoordinates() != null) {
-                    mainSession.persist(organization.getCoordinates());
-                }
-                if (organization.getOfficialAddress() != null) {
-                    mainSession.persist(organization.getOfficialAddress());
-                }
-                if (organization.getPostalAddress() != null) {
-                    mainSession.persist(organization.getPostalAddress());
-                }
+                saveRelatedEntities(organization, session);
 
-                mainSession.persist(organization);
+                organizationRepository.save(organization, session);
 
                 if (organizations.indexOf(organization) % 20 == 0) {
-                    mainSession.flush();
-                    mainSession.clear();
+                    session.flush();
+                    session.clear();
                 }
             }
 
             operation.setStatus("SUCCESS");
-            operation.setRecordsAdded(organizations.size());
-            importOperationRepository.mergeWithSession(operation, mainSession);
+            importOperationRepository.mergeWithSession(operation, session);
 
-            mainTransaction.commit();
+            transaction.commit();
             return operation;
 
-        } catch (UserNotFoundException e) {
-            rollbackTransaction(mainTransaction);
+        } catch (UserNotFoundException | InvalidXmlException e) {
+            if (transaction != null) {
+                transaction.rollback();
+            }
             throw e;
-
-        } catch (InvalidXmlException e) {
-            rollbackTransaction(mainTransaction);
-            createFailedImportOperation(detachedUser, fileName, e.getMessage());
-            throw e;
-
         } catch (Exception e) {
-            rollbackTransaction(mainTransaction);
+            if (transaction != null) {
+                transaction.rollback();
+            }
             String errorMessage = "Неожиданная ошибка при импорте: " + e.getMessage();
-            createFailedImportOperation(detachedUser, fileName, errorMessage);
-            throw new ImportException(errorMessage, e);
 
+            Session errorSession = sessionFactory.openSession();
+            Transaction errorTransaction = errorSession.beginTransaction();
+            try {
+                importOperationRepository.createFailedImportOperation(detachedUser, fileName, errorMessage, errorSession);
+                errorTransaction.commit();
+            } catch (Exception ex) {
+                if (errorTransaction != null) {
+                    errorTransaction.rollback();
+                }
+                throw ex;
+            } finally {
+                errorSession.close();
+            }
+
+            throw new ImportException(errorMessage, e);
         } finally {
-            closeSession(mainSession);
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 
-    private void checkOrganizationUniqueness(Organization organization, Session session,
-                                             Set<String> uniqueTriplets) throws InvalidXmlException {
-
+    private void checkUniquenessInFile(Organization organization, Set<String> uniqueTriplets) throws InvalidXmlException {
         String name = organization.getName();
         Coordinates coords = organization.getCoordinates();
         Address address = organization.getPostalAddress();
@@ -129,38 +141,27 @@ public class ImportService {
         String uniqueKey = name + ":" + coords.getX() + ":" + coords.getY() + ":" + addressKey;
 
         if (uniqueTriplets.contains(uniqueKey)) {
-            throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
+            throw new InvalidXmlException("Нарушение уникальности в файле: организация с названием '" + name +
                     "', координатами (" + coords.getX() + ", " + coords.getY() +
                     ") и адресом (улица: " + address.getStreet() +
                     (address.getZipCode() != null ? ", индекс: " + address.getZipCode() : "") +
                     ") уже присутствует в импортируемом файле");
         }
 
-        String hql;
-        if (address.getId() != null) {
-            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
-                    "AND o.postalAddress.id = :addressId";
-        } else {
-            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
-                    "AND o.postalAddress.street = :street " +
-                    "AND (o.postalAddress.zipCode = :zipCode OR (o.postalAddress.zipCode IS NULL AND :zipCode IS NULL))";
+        uniqueTriplets.add(uniqueKey);
+    }
+
+    private void checkUniquenessInDatabase(Organization organization, Session session) throws InvalidXmlException {
+        String name = organization.getName();
+        Coordinates coords = organization.getCoordinates();
+        Address address = organization.getPostalAddress();
+
+        if (name == null || coords == null || address == null) {
+            throw new InvalidXmlException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        var query = session.createQuery(hql, Boolean.class)
-                .setParameter("name", name)
-                .setParameter("x", coords.getX())
-                .setParameter("y", coords.getY());
-
-        if (address.getId() != null) {
-            query.setParameter("addressId", address.getId());
-        } else {
-            query.setParameter("street", address.getStreet())
-                    .setParameter("zipCode", address.getZipCode());
-        }
-
-        boolean existsInDb = query.uniqueResult();
+        boolean existsInDb = organizationRepository.existsByNameAndCoordinatesAndAddress(
+                name, coords, address, session);
 
         if (existsInDb) {
             throw new InvalidXmlException("Нарушение уникальности: организация с названием '" + name +
@@ -169,61 +170,17 @@ public class ImportService {
                     (address.getZipCode() != null ? ", индекс: " + address.getZipCode() : "") +
                     ") уже существует в базе данных");
         }
-
-        uniqueTriplets.add(uniqueKey);
     }
 
-    private void rollbackTransaction(Transaction transaction) {
-        if (transaction != null) {
-            try {
-                transaction.rollback();
-            } catch (Exception rollbackEx) {
-                System.err.println("Ошибка при откате транзакции: " + rollbackEx.getMessage());
-            }
+    private void saveRelatedEntities(Organization organization, Session session) {
+        if (organization.getCoordinates() != null && organization.getCoordinates().getId() == null) {
+            organizationRepository.saveCoordinates(organization.getCoordinates(), session);
         }
-    }
-
-    private void closeSession(Session session) {
-        if (session != null && session.isOpen()) {
-            try {
-                session.close();
-            } catch (Exception e) {
-                System.err.println("Ошибка при закрытии сессии: " + e.getMessage());
-            }
+        if (organization.getOfficialAddress() != null && organization.getOfficialAddress().getId() == null) {
+            organizationRepository.saveLocation(organization.getOfficialAddress(), session);
         }
-    }
-
-    private void createFailedImportOperation(User user, String fileName, String errorMessage) {
-        Session errorSession = null;
-        Transaction errorTransaction = null;
-
-        try {
-            errorSession = sessionFactory.openSession();
-            errorTransaction = errorSession.beginTransaction();
-
-            User managedUser = errorSession.get(User.class, user.getId());
-
-            ImportOperation failedOperation = new ImportOperation();
-            failedOperation.setFileName(fileName);
-            failedOperation.setImportDate(java.time.LocalDateTime.now());
-            failedOperation.setUser(managedUser);
-            failedOperation.setStatus("FAILED");
-            failedOperation.setErrorMessage(errorMessage);
-
-            errorSession.persist(failedOperation);
-            errorTransaction.commit();
-
-        } catch (Exception e) {
-            if (errorTransaction != null) {
-                try {
-                    errorTransaction.rollback();
-                } catch (Exception rollbackEx) {
-                    System.err.println("Ошибка при откате транзакции ошибки: " + rollbackEx.getMessage());
-                }
-            }
-            System.err.println("Не удалось сохранить информацию об ошибке импорта: " + e.getMessage());
-        } finally {
-            closeSession(errorSession);
+        if (organization.getPostalAddress() != null && organization.getPostalAddress().getId() == null) {
+            organizationRepository.saveAddress(organization.getPostalAddress(), session);
         }
     }
 
@@ -323,7 +280,7 @@ public class ImportService {
             if (postalAddressElement != null) {
                 Address postalAddress = new Address();
                 postalAddress.setStreet(getRequiredElementText(postalAddressElement, "street"));
-                postalAddress.setZipCode(getElementText(postalAddressElement, "zipCode")); // zipCode может быть null
+                postalAddress.setZipCode(getElementText(postalAddressElement, "zipCode"));
                 organization.setPostalAddress(postalAddress);
             }
 

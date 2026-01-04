@@ -19,7 +19,6 @@ public class PaginatedResponse<T> {
         this.pageSize = pageSize;
     }
 
-    // Геттеры и сеттеры
     public List<T> getData() { return data; }
     public void setData(List<T> data) { this.data = data; }
 

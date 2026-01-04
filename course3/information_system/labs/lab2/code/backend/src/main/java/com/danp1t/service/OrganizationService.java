@@ -25,6 +25,8 @@ public class OrganizationService {
     private SessionFactory sessionFactory;
 
     public Organization createOrganization(Organization organization) {
+        organization.validate();
+
         Session session = null;
         Transaction transaction = null;
 
@@ -35,60 +37,13 @@ public class OrganizationService {
             });
             transaction = session.beginTransaction();
 
-            checkOrganizationUniqueness(organization, session, null);
+            checkOrganizationUniqueness(organization, null, session);
 
-            organization.validate();
+            saveRelatedEntities(organization, session);
 
-            if (organization.getCoordinates() != null) {
-                if (organization.getCoordinates().getId() == null) {
-                    session.persist(organization.getCoordinates());
-                } else {
-                    Coordinates existingCoords = session.find(Coordinates.class, organization.getCoordinates().getId());
-                    if (existingCoords != null) {
-                        existingCoords.setX(organization.getCoordinates().getX());
-                        existingCoords.setY(organization.getCoordinates().getY());
-                        organization.setCoordinates(existingCoords);
-                    } else {
-                        session.persist(organization.getCoordinates());
-                    }
-                }
-            }
+            organizationRepository.save(organization, session);
 
-            if (organization.getOfficialAddress() != null) {
-                if (organization.getOfficialAddress().getId() == null) {
-                    session.persist(organization.getOfficialAddress());
-                } else {
-                    Location existingAddress = session.find(Location.class, organization.getOfficialAddress().getId());
-                    if (existingAddress != null) {
-                        existingAddress.setX(organization.getOfficialAddress().getX());
-                        existingAddress.setY(organization.getOfficialAddress().getY());
-                        existingAddress.setZ(organization.getOfficialAddress().getZ());
-                        existingAddress.setName(organization.getOfficialAddress().getName());
-                        organization.setOfficialAddress(existingAddress);
-                    } else {
-                        session.persist(organization.getOfficialAddress());
-                    }
-                }
-            }
-
-            if (organization.getPostalAddress() != null) {
-                if (organization.getPostalAddress().getId() == null) {
-                    session.persist(organization.getPostalAddress());
-                } else {
-                    Address existingAddress = session.find(Address.class, organization.getPostalAddress().getId());
-                    if (existingAddress != null) {
-                        existingAddress.setStreet(organization.getPostalAddress().getStreet());
-                        existingAddress.setZipCode(organization.getPostalAddress().getZipCode());
-                        organization.setPostalAddress(existingAddress);
-                    } else {
-                        session.persist(organization.getPostalAddress());
-                    }
-                }
-            }
-
-            session.persist(organization);
             transaction.commit();
-
             return organization;
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
@@ -102,7 +57,59 @@ public class OrganizationService {
         }
     }
 
-    public boolean deleteOrganization(Integer id) {
+    private void saveRelatedEntities(Organization organization, Session session) {
+        if (organization.getCoordinates() != null) {
+            if (organization.getCoordinates().getId() == null) {
+                organizationRepository.saveCoordinates(organization.getCoordinates(), session);
+            } else {
+                Coordinates existingCoords = organizationRepository.findCoordinatesById(
+                        organization.getCoordinates().getId(), session);
+                if (existingCoords != null) {
+                    existingCoords.setX(organization.getCoordinates().getX());
+                    existingCoords.setY(organization.getCoordinates().getY());
+                    organization.setCoordinates(existingCoords);
+                } else {
+                    organizationRepository.saveCoordinates(organization.getCoordinates(), session);
+                }
+            }
+        }
+
+        if (organization.getOfficialAddress() != null) {
+            if (organization.getOfficialAddress().getId() == null) {
+                organizationRepository.saveLocation(organization.getOfficialAddress(), session);
+            } else {
+                Location existingLocation = organizationRepository.findLocationById(
+                        organization.getOfficialAddress().getId(), session);
+                if (existingLocation != null) {
+                    existingLocation.setX(organization.getOfficialAddress().getX());
+                    existingLocation.setY(organization.getOfficialAddress().getY());
+                    existingLocation.setZ(organization.getOfficialAddress().getZ());
+                    existingLocation.setName(organization.getOfficialAddress().getName());
+                    organization.setOfficialAddress(existingLocation);
+                } else {
+                    organizationRepository.saveLocation(organization.getOfficialAddress(), session);
+                }
+            }
+        }
+
+        if (organization.getPostalAddress() != null) {
+            if (organization.getPostalAddress().getId() == null) {
+                organizationRepository.saveAddress(organization.getPostalAddress(), session);
+            } else {
+                Address existingAddress = organizationRepository.findAddressById(
+                        organization.getPostalAddress().getId(), session);
+                if (existingAddress != null) {
+                    existingAddress.setStreet(organization.getPostalAddress().getStreet());
+                    existingAddress.setZipCode(organization.getPostalAddress().getZipCode());
+                    organization.setPostalAddress(existingAddress);
+                } else {
+                    organizationRepository.saveAddress(organization.getPostalAddress(), session);
+                }
+            }
+        }
+    }
+
+    public boolean deleteOrganization(Long id) {
         if (id == null) {
             throw new IllegalArgumentException("ID не может быть null");
         }
@@ -114,15 +121,10 @@ public class OrganizationService {
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
-            Organization organization = session.get(Organization.class, id);
-            if (organization != null) {
-                session.remove(organization);
-                transaction.commit();
-                return true;
-            } else {
-                transaction.rollback();
-                return false;
-            }
+            boolean deleted = organizationRepository.delete(id, session);
+
+            transaction.commit();
+            return deleted;
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
@@ -135,7 +137,7 @@ public class OrganizationService {
         }
     }
 
-    public Organization updateOrganization(Integer id, OrganizationDTO updateDto) {
+    public Organization updateOrganization(Long id, OrganizationDTO updateDto) {
         Session session = null;
         Transaction transaction = null;
 
@@ -146,35 +148,21 @@ public class OrganizationService {
             });
             transaction = session.beginTransaction();
 
-            Organization existingOrganization = session.get(Organization.class, id);
+            Organization existingOrganization = organizationRepository.findById(id, session);
             if (existingOrganization == null) {
                 throw new IllegalArgumentException("Организация с ID " + id + " не найдена");
             }
 
-            if (updateDto.getName() != null) {
-                existingOrganization.setName(updateDto.getName());
-            }
-            if (updateDto.getAnnualTurnover() != null) {
-                existingOrganization.setAnnualTurnover(updateDto.getAnnualTurnover());
-            }
-            if (updateDto.getEmployeesCount() != null) {
-                existingOrganization.setEmployeesCount(updateDto.getEmployeesCount());
-            }
-            if (updateDto.getRating() != null) {
-                existingOrganization.setRating(updateDto.getRating());
-            }
-            if (updateDto.getType() != null) {
-                existingOrganization.setType(updateDto.getType());
-            }
+            updateOrganizationFields(existingOrganization, updateDto);
 
-            checkOrganizationUniqueness(existingOrganization, session, id);
+            checkOrganizationUniquenessForUpdate(existingOrganization, id, session);
 
             existingOrganization.validate();
 
-            Organization mergedOrganization = session.merge(existingOrganization);
-            transaction.commit();
+            Organization updated = organizationRepository.update(existingOrganization, session);
 
-            return mergedOrganization;
+            transaction.commit();
+            return updated;
         } catch (Exception e) {
             if (transaction != null && transaction.isActive()) {
                 transaction.rollback();
@@ -187,7 +175,25 @@ public class OrganizationService {
         }
     }
 
-    private void checkOrganizationUniqueness(Organization organization, Session session, Integer excludeId) {
+    private void updateOrganizationFields(Organization organization, OrganizationDTO dto) {
+        if (dto.getName() != null) {
+            organization.setName(dto.getName());
+        }
+        if (dto.getAnnualTurnover() != null) {
+            organization.setAnnualTurnover(dto.getAnnualTurnover());
+        }
+        if (dto.getEmployeesCount() != null) {
+            organization.setEmployeesCount(dto.getEmployeesCount());
+        }
+        if (dto.getRating() != null) {
+            organization.setRating(dto.getRating());
+        }
+        if (dto.getType() != null) {
+            organization.setType(dto.getType());
+        }
+    }
+
+    private void checkOrganizationUniqueness(Organization organization, Long excludeId, Session session) {
         String name = organization.getName();
         Coordinates coords = organization.getCoordinates();
         Address address = organization.getPostalAddress();
@@ -196,40 +202,34 @@ public class OrganizationService {
             throw new IllegalArgumentException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        StringBuilder hql = new StringBuilder();
-        if (address.getId() != null) {
-            hql.append("SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
-                    "AND o.postalAddress.id = :addressId");
+        boolean exists;
+        if (excludeId == null) {
+            exists = organizationRepository.existsByNameAndCoordinatesAndAddress(name, coords, address, session);
         } else {
-            hql.append("SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
-                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
-                    "AND o.postalAddress.street = :street " +
-                    "AND (o.postalAddress.zipCode = :zipCode OR (o.postalAddress.zipCode IS NULL AND :zipCode IS NULL))");
+            exists = organizationRepository.checkUniquenessForUpdate(name, coords, address, excludeId, session);
         }
 
-        if (excludeId != null) {
-            hql.append(" AND o.id != :excludeId");
+        if (exists) {
+            throw new IllegalArgumentException("Нарушение уникальности: организация с названием '" + name +
+                    "', координатами (" + coords.getX() + ", " + coords.getY() +
+                    ") и адресом (улица: " + address.getStreet() +
+                    (address.getZipCode() != null ? ", индекс: " + address.getZipCode() : "") +
+                    ") уже существует");
+        }
+    }
+
+    private void checkOrganizationUniquenessForUpdate(Organization organization, Long excludeId, Session session) {
+        String name = organization.getName();
+        Coordinates coords = organization.getCoordinates();
+        Address address = organization.getPostalAddress();
+
+        if (name == null || coords == null || address == null) {
+            throw new IllegalArgumentException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        var query = session.createQuery(hql.toString(), Boolean.class)
-                .setParameter("name", name)
-                .setParameter("x", coords.getX())
-                .setParameter("y", coords.getY());
+        boolean exists = organizationRepository.checkUniquenessForUpdate(name, coords, address, excludeId, session);
 
-        if (address.getId() != null) {
-            query.setParameter("addressId", address.getId());
-        } else {
-            query.setParameter("street", address.getStreet())
-                    .setParameter("zipCode", address.getZipCode());
-        }
-
-        if (excludeId != null) {
-            query.setParameter("excludeId", excludeId);
-        }
-
-        Boolean exists = query.uniqueResult();
-        if (Boolean.TRUE.equals(exists)) {
+        if (exists) {
             throw new IllegalArgumentException("Нарушение уникальности: организация с названием '" + name +
                     "', координатами (" + coords.getX() + ", " + coords.getY() +
                     ") и адресом (улица: " + address.getStreet() +
@@ -239,22 +239,14 @@ public class OrganizationService {
     }
 
     public Double calculateAverageRating() {
-        try {
-            return organizationRepository.calculateAverageRating();
-        } catch (Exception e) {
-            throw e;
-        }
+        return organizationRepository.calculateAverageRating();
     }
 
     public List<OrganizationDTO> findOrganizationsByNameStartingWith(String substring) {
-        try {
-            List<Organization> organizations = organizationRepository.findOrganizationsByNameStartingWith(substring);
-            return organizations.stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw e;
-        }
+        List<Organization> organizations = organizationRepository.findOrganizationsByNameStartingWith(substring);
+        return organizations.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     private OrganizationDTO convertToDTO(Organization organization) {
@@ -292,57 +284,39 @@ public class OrganizationService {
     }
 
     public List<OrganizationDTO> findOrganizationsByPostalAddressGreaterThan(Long minAddressId) {
-        try {
-            List<Organization> organizations =  organizationRepository.findOrganizationsByPostalAddressGreaterThan(minAddressId);
-            return organizations.stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-
-        } catch (Exception e) {
-            throw e;
-        }
+        List<Organization> organizations = organizationRepository.findOrganizationsByPostalAddressGreaterThan(minAddressId);
+        return organizations.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     public Organization mergeOrganizations(Long firstOrgId, Long secondOrgId, String newName, Long newAddressId) {
-        try {
-            return organizationRepository.mergeOrganizations(firstOrgId, secondOrgId, newName, newAddressId);
-        } catch (Exception e) {
-            throw e;
-        }
+        return organizationRepository.mergeOrganizations(firstOrgId, secondOrgId, newName, newAddressId);
     }
 
     public Organization absorbOrganization(Long absorbingOrgId, Long absorbedOrgId) {
-        try {
-            return organizationRepository.absorbOrganization(absorbingOrgId, absorbedOrgId);
-        } catch (Exception e) {
-            throw e;
-        }
+        return organizationRepository.absorbOrganization(absorbingOrgId, absorbedOrgId);
     }
 
     public PaginatedResponse<Organization> getAllOrganizationsWithPagination(
             int page, int size, String search, String type, String sortBy, String sortOrder) {
 
-        try {
-            int offset = (page - 1) * size;
+        int offset = (page - 1) * size;
 
-            List<Organization> organizations = organizationRepository
-                    .findAllWithFilters(offset, size, search, type, sortBy, sortOrder);
+        List<Organization> organizations = organizationRepository
+                .findAllWithFilters(offset, size, search, type, sortBy, sortOrder);
 
-            long totalCount = organizationRepository
-                    .countWithFilters(search, type);
+        long totalCount = organizationRepository
+                .countWithFilters(search, type);
 
-            int totalPages = (int) Math.ceil((double) totalCount / size);
+        int totalPages = (int) Math.ceil((double) totalCount / size);
 
-            return new PaginatedResponse<>(
-                    organizations,
-                    page,
-                    totalPages,
-                    totalCount,
-                    size
-            );
-
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка получения организаций с пагинацией: " + e.getMessage(), e);
-        }
+        return new PaginatedResponse<>(
+                organizations,
+                page,
+                totalPages,
+                totalCount,
+                size
+        );
     }
 }

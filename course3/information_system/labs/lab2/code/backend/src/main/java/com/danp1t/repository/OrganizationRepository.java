@@ -1,9 +1,6 @@
 package com.danp1t.repository;
 
-import com.danp1t.model.Address;
-import com.danp1t.model.Coordinates;
-import com.danp1t.model.Organization;
-import com.danp1t.model.OrganizationType;
+import com.danp1t.model.*;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -19,6 +16,111 @@ public class OrganizationRepository {
 
     @Inject
     private SessionFactory sessionFactory;
+
+    public Organization save(Organization organization, Session session) {
+        session.persist(organization);
+        return organization;
+    }
+
+    public Organization findById(Long id, Session session) {
+        return session.get(Organization.class, id);
+    }
+
+    public Organization update(Organization organization, Session session) {
+        return session.merge(organization);
+    }
+
+    public boolean delete(Long id, Session session) {
+        Organization organization = session.get(Organization.class, id);
+        if (organization != null) {
+            session.remove(organization);
+            return true;
+        }
+        return false;
+    }
+
+    public void saveCoordinates(Coordinates coordinates, Session session) {
+        if (coordinates.getId() == null) {
+            session.persist(coordinates);
+        } else {
+            session.merge(coordinates);
+        }
+    }
+
+    public void saveLocation(Location location, Session session) {
+        if (location.getId() == null) {
+            session.persist(location);
+        } else {
+            session.merge(location);
+        }
+    }
+
+    public void saveAddress(Address address, Session session) {
+        if (address.getId() == null) {
+            session.persist(address);
+        } else {
+            session.merge(address);
+        }
+    }
+
+    public boolean existsByNameAndCoordinatesAndAddress(String name, Coordinates coordinates, Address address, Session session) {
+        String hql;
+        if (address.getId() != null) {
+            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.id = :addressId";
+        } else {
+            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.street = :street " +
+                    "AND (o.postalAddress.zipCode = :zipCode OR (o.postalAddress.zipCode IS NULL AND :zipCode IS NULL))";
+        }
+
+        var query = session.createQuery(hql, Boolean.class)
+                .setParameter("name", name)
+                .setParameter("x", coordinates.getX())
+                .setParameter("y", coordinates.getY());
+
+        if (address.getId() != null) {
+            query.setParameter("addressId", address.getId());
+        } else {
+            query.setParameter("street", address.getStreet())
+                    .setParameter("zipCode", address.getZipCode());
+        }
+
+        return query.uniqueResult();
+    }
+
+    public boolean checkUniquenessForUpdate(String name, Coordinates coordinates, Address address, Long excludeId, Session session) {
+        String hql;
+        if (address.getId() != null) {
+            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.id = :addressId " +
+                    "AND o.id != :excludeId";
+        } else {
+            hql = "SELECT COUNT(o) > 0 FROM Organization o WHERE o.name = :name " +
+                    "AND o.coordinates.x = :x AND o.coordinates.y = :y " +
+                    "AND o.postalAddress.street = :street " +
+                    "AND (o.postalAddress.zipCode = :zipCode OR (o.postalAddress.zipCode IS NULL AND :zipCode IS NULL)) " +
+                    "AND o.id != :excludeId";
+        }
+
+        var query = session.createQuery(hql, Boolean.class)
+                .setParameter("name", name)
+                .setParameter("x", coordinates.getX())
+                .setParameter("y", coordinates.getY())
+                .setParameter("excludeId", excludeId);
+
+        if (address.getId() != null) {
+            query.setParameter("addressId", address.getId());
+        } else {
+            query.setParameter("street", address.getStreet())
+                    .setParameter("zipCode", address.getZipCode());
+        }
+
+        return query.uniqueResult();
+    }
 
     public Double calculateAverageRating() {
         try (Session session = sessionFactory.openSession()) {
@@ -227,5 +329,17 @@ public class OrganizationRepository {
         } catch (Exception e) {
             throw new RuntimeException("Ошибка подсчета организаций: " + e.getMessage(), e);
         }
+    }
+
+    public Address findAddressById(Long addressId, Session session) {
+        return session.get(Address.class, addressId);
+    }
+
+    public Coordinates findCoordinatesById(Long coordinatesId, Session session) {
+        return session.get(Coordinates.class, coordinatesId);
+    }
+
+    public Location findLocationById(Long locationId, Session session) {
+        return session.get(Location.class, locationId);
     }
 }

@@ -38,7 +38,6 @@ public class AuthService {
                 throw new RuntimeException("Пользователь с таким именем уже существует");
             }
 
-            // Создаем нового пользователя
             User user = new User();
             user.setUsername(request.getUsername());
             user.setPassword(request.getPassword());
