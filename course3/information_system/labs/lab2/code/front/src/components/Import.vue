@@ -110,7 +110,7 @@ export default {
         return
       }
 
-      const maxSize = 10 * 1024 * 1024 // 10MB
+      const maxSize = 10 * 1024 * 1024
       if (file.size > maxSize) {
         this.errorMessage = `Ошибка: размер файла превышает 10MB. Ваш файл: ${this.formatFileSize(file.size)}`
         return
@@ -167,10 +167,8 @@ export default {
         if (response.data) {
           this.successMessage = `Импорт успешно завершен! Добавлено записей: ${response.data.recordsAdded}`;
 
-          // Если нужно, можно эмитировать событие для обновления истории
           this.$emit('importCompleted', response.data.operationId);
 
-          // Очищаем через 5 секунд
           setTimeout(() => {
             this.selectedFile = null;
             this.successMessage = '';

@@ -23,7 +23,7 @@ export default {
       isAuthenticated: false,
       user: null,
       showAuth: false,
-      authMode: 'login' // 'login' или 'register'
+      authMode: 'login'
     }
   },
   methods: {

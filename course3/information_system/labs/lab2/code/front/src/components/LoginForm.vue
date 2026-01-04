@@ -120,7 +120,6 @@ export default {
             role: response.data.role
           }));
 
-          // Уведомляем родительский компонент об успешном входе
           this.$emit('loginSuccess', {
             username: response.data.username,
             role: response.data.role

@@ -353,7 +353,7 @@ export default {
   components: { OrganizationForm },
   data() {
     return {
-      organizations: [], // Только текущая страница организаций
+      organizations: [],
       showCreateForm: false,
       showChildEntityModal: false,
       currentChildEntity: null,
@@ -375,7 +375,6 @@ export default {
       addressForm: markRaw(AddressForm),
       coordinatesForm: markRaw(CoordinatesForm),
       locationForm: markRaw(LocationForm),
-      // Данные пагинации с бэкенда
       currentPage: 1,
       itemsPerPage: 10,
       totalItems: 0,
@@ -467,7 +466,6 @@ export default {
       try {
         this.showNotification('Загрузка организаций...', 'info')
 
-        // Формируем параметры запроса для бэкенда
         const params = {
           page: page,
           size: this.itemsPerPage,
@@ -479,14 +477,12 @@ export default {
 
         const response = await this.$axios.get('/api/organization', { params })
 
-        // Сохраняем данные с бэкенда
         this.organizations = response.data.organizations.map(org => ({
           ...org,
           editing: false,
           editingData: {}
         }))
 
-        // Обновляем информацию о пагинации
         this.totalItems = response.data.totalItems
         this.totalPages = response.data.totalPages
         this.currentPage = response.data.currentPage
@@ -502,13 +498,11 @@ export default {
     },
 
     onFilterChange() {
-      // При изменении фильтров сбрасываем на первую страницу
       this.currentPage = 1
       this.loadOrganizations(this.currentPage)
     },
 
     onSortChange() {
-      // При изменении сортировки сбрасываем на первую страницу
       this.currentPage = 1
       this.loadOrganizations(this.currentPage)
     },
@@ -542,7 +536,6 @@ export default {
     },
 
     startEditing(org) {
-      // Отключаем редактирование у других организаций
       this.organizations.forEach(o => {
         if (o.id !== org.id) {
           o.editing = false
@@ -586,13 +579,11 @@ export default {
 
         await this.$axios.put(`/api/organization/${org.id}`, updateData)
 
-        // Обновляем локальные данные
         Object.assign(org, updateData)
         org.editing = false
         org.editingData = {}
         org.editingErrors = {}
 
-        // Перезагружаем текущую страницу (обновляем данные с бэкенда)
         this.loadOrganizations(this.currentPage)
 
         this.showNotification('Данные организации успешно обновлены', 'success')
@@ -601,12 +592,10 @@ export default {
 
         let errorMessage = 'Ошибка при обновлении данных организации'
 
-        // Проверяем, содержит ли ответ сервера сообщение о нарушении уникальности
         if (error.response && error.response.data) {
           const serverError = error.response.data.error || error.response.data.message || ''
 
           if (serverError.includes('Нарушение уникальности')) {
-            // Извлекаем основную часть сообщения после "Нарушение уникальности: "
             const match = serverError.match(/Нарушение уникальности: (.+)/)
             if (match && match[1]) {
               errorMessage = `Нарушено условие уникальности: ${match[1]}`
@@ -614,7 +603,6 @@ export default {
               errorMessage = 'Нарушено условие уникальности организации'
             }
           } else if (typeof error.response.data === 'string' && error.response.data.includes('Нарушение уникальности')) {
-            // Если сервер возвращает простую строку
             const match = error.response.data.match(/Нарушение уникальности: (.+)/)
             if (match && match[1]) {
               errorMessage = `Нарушено условие уникальности: ${match[1]}`
@@ -727,7 +715,6 @@ export default {
       try {
         await this.$axios.delete(`/api/organization/${id}`)
         this.showNotification('Организация успешно удалена', 'success')
-        // Перезагружаем текущую страницу (может потребоваться загрузка предыдущей страницы)
         this.loadOrganizations(this.currentPage)
       } catch (error) {
         console.error('Error deleting organization:', error)
@@ -738,7 +725,6 @@ export default {
     onOrganizationCreated() {
       this.showCreateForm = false
       this.showNotification('Организация успешно создана', 'success')
-      // При создании новой организации загружаем первую страницу
       this.currentPage = 1
       this.loadOrganizations(this.currentPage)
     },
@@ -746,7 +732,6 @@ export default {
     onChildEntityUpdated() {
       this.closeChildEntityModal()
       this.showNotification(`${this.getChildEntityTitle} успешно обновлены`, 'success')
-      // Перезагружаем текущую страницу
       this.loadOrganizations(this.currentPage)
     },
 

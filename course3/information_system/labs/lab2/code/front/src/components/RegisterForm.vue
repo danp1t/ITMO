@@ -162,12 +162,10 @@ export default {
         if (response.data) {
           this.successMessage = 'Регистрация успешно завершена! Теперь вы можете войти в систему.'
 
-          // Очистка формы
           this.form.username = '';
           this.form.password = '';
           this.form.confirmPassword = '';
 
-          // Переключение на форму входа через 3 секунды
           setTimeout(() => {
             this.successMessage = '';
             this.$emit('switchToLogin');

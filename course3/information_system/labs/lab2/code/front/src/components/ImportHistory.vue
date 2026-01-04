@@ -119,7 +119,7 @@ export default {
       loading: false,
       selectedItem: null,
       importHistory: [],
-      originalHistory: [] // Сохраняем оригинальные данные
+      originalHistory: []
     }
   },
   computed: {
@@ -145,7 +145,7 @@ export default {
 
       if (this.endDate) {
         const end = new Date(this.endDate);
-        end.setHours(23, 59, 59, 999); // Устанавливаем конец дня
+        end.setHours(23, 59, 59, 999);
         filtered = filtered.filter(item => {
           const itemDate = new Date(item.importDate);
           return itemDate <= end;
@@ -187,12 +187,10 @@ export default {
 
     downloadReport(item) {
       console.log('Скачивание отчета для:', item.fileName);
-      // Временная заглушка
       alert(`Функция скачивания отчета для файла "${item.fileName}" будет реализована позже`);
     },
 
     filterHistory() {
-      // Фильтрация уже выполняется в computed свойстве
       console.log('Фильтрация обновлена');
     },
 
@@ -206,7 +204,6 @@ export default {
 
       this.loading = true;
       try {
-        // Убедитесь, что URL правильный (совпадает с вашим API)
         const response = await axios.get('/api/import/history', {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -217,7 +214,7 @@ export default {
 
         if (response.data && response.data.history) {
           this.importHistory = response.data.history;
-          this.originalHistory = [...response.data.history]; // Сохраняем копию
+          this.originalHistory = [...response.data.history];
         } else {
           this.importHistory = [];
           this.originalHistory = [];
@@ -227,7 +224,6 @@ export default {
       } catch (error) {
         console.error('Ошибка загрузки истории:', error);
 
-        // Показываем подробную информацию об ошибке
         if (error.response) {
           console.error('Статус ошибки:', error.response.status);
           console.error('Данные ошибки:', error.response.data);
@@ -253,14 +249,12 @@ export default {
   mounted() {
     this.loadHistory();
 
-    // Для отладки: проверяем URL API
     console.log('Текущий URL API:', window.location.origin + '/api/import/history');
   }
 }
 </script>
 
 <style scoped>
-/* Стили оставить без изменений, они уже хорошие */
 .import-history {
   padding: 20px;
 }
@@ -445,7 +439,6 @@ h2 {
   background: #38a169;
 }
 
-/* Модальное окно */
 .modal-overlay {
   position: fixed;
   top: 0;

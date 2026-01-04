@@ -528,7 +528,6 @@ export default {
   }
 }
 
-/* Адаптивность */
 @media (max-width: 1200px) {
   .operations-grid {
     grid-template-columns: 1fr;

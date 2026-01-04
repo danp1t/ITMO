@@ -151,13 +151,10 @@ export default {
   },
   methods: {
     formatNumberInput(fieldName) {
-      // Удаляем все символы, кроме цифр, точки и минуса
       let value = this.formData[fieldName]
       if (value) {
-        // Удаляем лишние символы
         value = value.replace(/[^\d.-]/g, '')
 
-        // Убираем лишние минусы (оставляем только первый)
         if (value.includes('-')) {
           const parts = value.split('-')
           if (parts.length > 2) {
@@ -165,7 +162,6 @@ export default {
           }
         }
 
-        // Убираем лишние точки (оставляем только первую)
         if (value.includes('.')) {
           const parts = value.split('.')
           if (parts.length > 2) {
@@ -196,19 +192,15 @@ export default {
         error = fieldConfig.errorMessages?.pattern || 'Неверный формат'
       }
 
-      // Для числовых полей проверяем, что это корректное число
       if (fieldConfig.type === 'number' && value) {
-        // Проверяем, что это число (разрешены целые и дробные числа)
         if (!/^-?\d*\.?\d+$/.test(value)) {
           error = fieldConfig.errorMessages?.numberFormat || 'Введите корректное число'
         }
 
-        // Проверяем минимальное значение
         if (!error && fieldConfig.min !== undefined && parseFloat(value) < fieldConfig.min) {
           error = fieldConfig.errorMessages?.min || `Минимальное значение: ${fieldConfig.min}`
         }
 
-        // Проверяем максимальное значение
         if (!error && fieldConfig.max !== undefined && parseFloat(value) > fieldConfig.max) {
           error = fieldConfig.errorMessages?.max || `Максимальное значение: ${fieldConfig.max}`
         }
