@@ -33,7 +33,7 @@ public class OrganizationService {
         try {
             session = sessionFactory.openSession();
             session.doWork(connection -> {
-                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             });
             transaction = session.beginTransaction();
 

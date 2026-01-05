@@ -5,8 +5,6 @@
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
         <collectionProp name="Arguments.arguments"/>
       </elementProp>
-      <boolProp name="TestPlan.functional_mode">false</boolProp>
-      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
     </TestPlan>
     <hashTree>
       <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Пункт 1">
@@ -20,7 +18,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization</stringProp>
@@ -32,21 +30,48 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;name&quot;:&quot;NT_TESTING_FINAL&quot;,&quot;annualTurnover&quot;:31,&quot;employeesCount&quot;:21,&quot;rating&quot;:21,&quot;coordinates&quot;:{&quot;id&quot;:6,&quot;x&quot;:744,&quot;y&quot;:455,&quot;displayName&quot;:&quot;X: 744.0, Y: 455.0&quot;},&quot;officialAddress&quot;:{&quot;id&quot;:7,&quot;x&quot;:2,&quot;y&quot;:0,&quot;z&quot;:32,&quot;name&quot;:&quot;KIJ&quot;,&quot;displayName&quot;:&quot;KIJ&quot;},&quot;postalAddress&quot;:{&quot;id&quot;:1,&quot;street&quot;:&quot;Kronva&quot;,&quot;zipCode&quot;:&quot;432921&quot;,&quot;displayName&quot;:&quot;Kronva, 432921&quot;},&quot;type&quot;:&quot;COMMERCIAL&quot;}</stringProp>
+                <stringProp name="Argument.value">{&#xd;
+  &quot;name&quot;: &quot;ORG_${__RandomString(10,abcdefghijklmnopqrstuvwxyz0123456789,)}&quot;,&#xd;
+  &quot;annualTurnover&quot;: 31,&#xd;
+  &quot;employeesCount&quot;: 21,&#xd;
+  &quot;rating&quot;: 21,&#xd;
+  &quot;coordinates&quot;: {&#xd;
+    &quot;id&quot;: 6,&#xd;
+    &quot;x&quot;: 744,&#xd;
+    &quot;y&quot;: 455,&#xd;
+    &quot;displayName&quot;: &quot;X: 744.0, Y: 455.0&quot;&#xd;
+  },&#xd;
+  &quot;officialAddress&quot;: {&#xd;
+    &quot;id&quot;: 7,&#xd;
+    &quot;x&quot;: 2,&#xd;
+    &quot;y&quot;: 0,&#xd;
+    &quot;z&quot;: 32,&#xd;
+    &quot;name&quot;: &quot;KIJ&quot;,&#xd;
+    &quot;displayName&quot;: &quot;KIJ&quot;&#xd;
+  },&#xd;
+  &quot;postalAddress&quot;: {&#xd;
+    &quot;id&quot;: 1,&#xd;
+    &quot;street&quot;: &quot;Kronva&quot;,&#xd;
+    &quot;zipCode&quot;: &quot;432921&quot;,&#xd;
+    &quot;displayName&quot;: &quot;Kronva, 432921&quot;&#xd;
+  },&#xd;
+  &quot;type&quot;: &quot;COMMERCIAL&quot;&#xd;
+}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
-        <hashTree/>
-        <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor" enabled="true">
-          <stringProp name="JSONPostProcessor.referenceNames">organizationId</stringProp>
-          <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
-          <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
-          <stringProp name="JSONPostProcessor.defaultValues">NOT_FOUND</stringProp>
-        </JSONPostProcessor>
-        <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Обновление организации" enabled="true">
+        <hashTree>
+          <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor">
+            <stringProp name="JSONPostProcessor.referenceNames">organizationId</stringProp>
+            <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
+            <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
+            <stringProp name="Sample.scope">all</stringProp>
+          </JSONPostProcessor>
+          <hashTree/>
+        </hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Обновление организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization/${organizationId}</stringProp>
@@ -58,14 +83,14 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;name&quot;:&quot;2&quot;,&quot;annualTurnover&quot;:2.22000122070312,&quot;employeesCount&quot;:2122121221,&quot;rating&quot;:122112121,&quot;type&quot;:&quot;PRIVATE_LIMITED_COMPANY&quot;}</stringProp>
+                <stringProp name="Argument.value">{&quot;name&quot;:&quot;ORG_${__RandomString(10,abcdefghijklmnopqrstuvwxyz0123456789,)}&quot;,&quot;annualTurnover&quot;:2.22000122070312,&quot;employeesCount&quot;:2122121221,&quot;rating&quot;:122112121,&quot;type&quot;:&quot;PRIVATE_LIMITED_COMPANY&quot;}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Удаление организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Удаление организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization/${organizationId}</stringProp>
@@ -78,19 +103,143 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Импорт XML" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import groovy.xml.MarkupBuilder
+import java.util.Random
+import org.apache.jmeter.services.FileServer
+
+def random = new Random()
+def writer = new StringWriter()
+def xml = new MarkupBuilder(writer)
+
+xml.organizations {
+    organization {
+        name &quot;Компания_${System.currentTimeMillis()}_${random.nextInt(1000)}&quot;
+        annualTurnover &quot;1500000.50&quot;
+        employeesCount &quot;250&quot;
+        rating &quot;8&quot;
+        type &quot;COMMERCIAL&quot;
+        coordinates {
+            x &quot;10.5&quot;
+            y &quot;20.75&quot;
+        }
+        officialAddress {
+            x &quot;55.7558&quot;
+            y &quot;37.6173&quot;
+            z &quot;-6&quot;
+            name &quot;Москва, Кремль&quot;
+        }
+        postalAddress {
+            street &quot;ул. Тверская&quot;
+            zipCode &quot;101000&quot;
+        }
+    }
+}
+
+def tempDir = System.getProperty(&quot;java.io.tmpdir&quot;)
+def fileName = &quot;temp_import_${System.currentTimeMillis()}.xml&quot;
+def tempFile = new File(tempDir, fileName)
+tempFile.write(writer.toString(), &quot;UTF-8&quot;)
+
+vars.put(&quot;tempFilePath&quot;, tempFile.getAbsolutePath())
+
+log.info(&quot;Временный файл создан: &quot; + tempFile.getAbsolutePath())
+
+import org.apache.jmeter.protocol.http.control.Header
+import groovy.json.JsonSlurper
+
+def threadNum = ctx.getThreadNum()
+def threadId = ctx.getThreadGroup().getName() + &quot;_&quot; + threadNum
+
+def username = &quot;jmeter_thread_&quot; + threadNum
+def password = &quot;password123&quot;
+
+def loginBody = &apos;{&quot;username&quot;:&quot;&apos; + username + &apos;&quot;,&quot;password&quot;:&quot;&apos; + password + &apos;&quot;}&apos;
+
+try {
+    def loginSampler = new org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy()
+    loginSampler.setDomain(&quot;localhost&quot;)
+    loginSampler.setPort(20041)
+    loginSampler.setProtocol(&quot;http&quot;)
+    loginSampler.setMethod(&quot;POST&quot;)
+    loginSampler.setPath(&quot;/lab1/api/auth/login&quot;)
+    loginSampler.addNonEncodedArgument(&quot;&quot;, loginBody, &quot;&quot;)
+    loginSampler.setPostBodyRaw(true)
+    
+    def headers = new org.apache.jmeter.protocol.http.control.HeaderManager()
+    headers.add(new Header(&quot;Content-Type&quot;, &quot;application/json&quot;))
+    loginSampler.setHeaderManager(headers)
+    
+    def result = loginSampler.sample(null, null)
+    
+    if (result.getResponseCode() == &quot;200&quot;) {
+        def json = new JsonSlurper().parseText(result.getResponseDataAsString())
+        def token = json.token
+        log.info(&quot;Поток ${threadNum}: получен токен &quot; + token.substring(0, 30) + &quot;...&quot;)
+        vars.put(&quot;auth_token_&quot; + threadNum, token)
+    } else {
+        log.info(&quot;Поток ${threadNum}: пользователь не найден, регистрируем...&quot;)
+        def registerBody = &apos;{&quot;username&quot;:&quot;&apos; + username + &apos;&quot;,&quot;password&quot;:&quot;&apos; + password + &apos;&quot;}&apos;
+        
+        def registerSampler = new org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy()
+        registerSampler.setDomain(&quot;localhost&quot;)
+        registerSampler.setPort(20041)
+        registerSampler.setProtocol(&quot;http&quot;)
+        registerSampler.setMethod(&quot;POST&quot;)
+        registerSampler.setPath(&quot;/lab1/api/auth/register&quot;)
+        registerSampler.addNonEncodedArgument(&quot;&quot;, registerBody, &quot;&quot;)
+        registerSampler.setPostBodyRaw(true)
+        registerSampler.setHeaderManager(headers)
+        
+        def registerResult = registerSampler.sample(null, null)
+        
+        if (registerResult.getResponseCode() == &quot;200&quot;) {
+            def json = new JsonSlurper().parseText(registerResult.getResponseDataAsString())
+            def token = json.token
+            log.info(&quot;Поток ${threadNum}: зарегистрирован, токен &quot; + token.substring(0, 30) + &quot;...&quot;)
+            vars.put(&quot;auth_token_&quot; + threadNum, token)
+        } else {
+            log.error(&quot;Поток ${threadNum}: ошибка регистрации: &quot; + registerResult.getResponseDataAsString())
+        }
+    }
+} catch (Exception e) {
+    log.error(&quot;Поток ${threadNum}: ошибка: &quot; + e.getMessage())
+}
+def token = vars.get(&quot;auth_token_&quot; + threadNum)
+
+if (token) {
+    def headerManager = sampler.getHeaderManager()
+    if (headerManager == null) {
+        headerManager = new org.apache.jmeter.protocol.http.control.HeaderManager()
+        sampler.setHeaderManager(headerManager)
+    }
+    
+    headerManager.getHeaders().removeIf { it.getName().equalsIgnoreCase(&quot;Authorization&quot;) }
+    
+    headerManager.add(new Header(&quot;Authorization&quot;, &quot;Bearer &quot; + token))
+    log.info(&quot;Поток ${threadNum}: установлен заголовок Authorization&quot;)
+} else {
+    log.error(&quot;Поток ${threadNum}: не удалось получить токен&quot;)
+}</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Импорт XML">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/import/xml</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-          <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
+          <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">true</boolProp>
           <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
             <collectionProp name="HTTPFileArgs.files">
-              <elementProp name="/home/danil/github_repos/ITMO/course3/information_system/labs/lab2/data/test.xml" elementType="HTTPFileArg">
+              <elementProp name="${tempFilePath}" elementType="HTTPFileArg">
                 <stringProp name="File.mimetype">application/xml</stringProp>
-                <stringProp name="File.path">/home/danil/github_repos/ITMO/course3/information_system/labs/lab2/data/test.xml</stringProp>
+                <stringProp name="File.path">${tempFilePath}</stringProp>
                 <stringProp name="File.paramname">file</stringProp>
               </elementProp>
             </collectionProp>
@@ -101,17 +250,17 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
-                <stringProp name="Header.value">Bearer user_1_161667b2-a3a2-4fa2-8ded-f980de9ca3a2</stringProp>
+                <stringProp name="Header.value">Bearer user_4_b6f565e0-3d1d-4b18-b79f-c83c8406f935</stringProp>
               </elementProp>
             </collectionProp>
           </HeaderManager>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -148,7 +297,7 @@
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -161,7 +310,7 @@
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -198,7 +347,7 @@
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
+        <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -247,7 +396,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization</stringProp>
@@ -259,14 +408,40 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;name&quot;:&quot;NT_TESTING_FINAL&quot;,&quot;annualTurnover&quot;:31,&quot;employeesCount&quot;:21,&quot;rating&quot;:21,&quot;coordinates&quot;:{&quot;id&quot;:6,&quot;x&quot;:744,&quot;y&quot;:455,&quot;displayName&quot;:&quot;X: 744.0, Y: 455.0&quot;},&quot;officialAddress&quot;:{&quot;id&quot;:7,&quot;x&quot;:2,&quot;y&quot;:0,&quot;z&quot;:32,&quot;name&quot;:&quot;KIJ&quot;,&quot;displayName&quot;:&quot;KIJ&quot;},&quot;postalAddress&quot;:{&quot;id&quot;:1,&quot;street&quot;:&quot;Kronva&quot;,&quot;zipCode&quot;:&quot;432921&quot;,&quot;displayName&quot;:&quot;Kronva, 432921&quot;},&quot;type&quot;:&quot;COMMERCIAL&quot;}</stringProp>
+                <stringProp name="Argument.value">{&#xd;
+  &quot;name&quot;: &quot;ORG_${__RandomString(10,abcdefghijklmnopqrstuvwxyz0123456789,)}&quot;,&#xd;
+  &quot;annualTurnover&quot;: 31,&#xd;
+  &quot;employeesCount&quot;: 21,&#xd;
+  &quot;rating&quot;: 21,&#xd;
+  &quot;coordinates&quot;: {&#xd;
+    &quot;id&quot;: 6,&#xd;
+    &quot;x&quot;: 744,&#xd;
+    &quot;y&quot;: 455,&#xd;
+    &quot;displayName&quot;: &quot;X: 744.0, Y: 455.0&quot;&#xd;
+  },&#xd;
+  &quot;officialAddress&quot;: {&#xd;
+    &quot;id&quot;: 7,&#xd;
+    &quot;x&quot;: 2,&#xd;
+    &quot;y&quot;: 0,&#xd;
+    &quot;z&quot;: 32,&#xd;
+    &quot;name&quot;: &quot;KIJ&quot;,&#xd;
+    &quot;displayName&quot;: &quot;KIJ&quot;&#xd;
+  },&#xd;
+  &quot;postalAddress&quot;: {&#xd;
+    &quot;id&quot;: 1,&#xd;
+    &quot;street&quot;: &quot;Kronva&quot;,&#xd;
+    &quot;zipCode&quot;: &quot;432921&quot;,&#xd;
+    &quot;displayName&quot;: &quot;Kronva, 432921&quot;&#xd;
+  },&#xd;
+  &quot;type&quot;: &quot;COMMERCIAL&quot;&#xd;
+}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor" enabled="true">
+        <JSONPostProcessor guiclass="JSONPostProcessorGui" testclass="JSONPostProcessor" testname="JSON Extractor">
           <stringProp name="JSONPostProcessor.referenceNames">organizationId</stringProp>
           <stringProp name="JSONPostProcessor.jsonPathExprs">$.id</stringProp>
           <stringProp name="JSONPostProcessor.match_numbers"></stringProp>
@@ -275,7 +450,7 @@
           <stringProp name="Scope.variable"></stringProp>
         </JSONPostProcessor>
         <hashTree/>
-        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor" enabled="true">
+        <JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="JSR223 PostProcessor">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -289,7 +464,7 @@ if (objectId != null &amp;&amp; objectId != &quot;NOT_FOUND&quot;) {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PostProcessor>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -302,7 +477,7 @@ if (objectId != null &amp;&amp; objectId != &quot;NOT_FOUND&quot;) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -339,7 +514,7 @@ if (objectId != null &amp;&amp; objectId != &quot;NOT_FOUND&quot;) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -377,7 +552,7 @@ if (objectId != null &amp;&amp; objectId != &quot;NOT_FOUND&quot;) {
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Одновременное обновление" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Одновременное обновление">
         <intProp name="ThreadGroup.num_threads">5</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -388,7 +563,7 @@ if (objectId != null &amp;&amp; objectId != &quot;NOT_FOUND&quot;) {
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -402,7 +577,7 @@ if (objectId != null) {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Обновление организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Обновление организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization/${organizationId}</stringProp>
@@ -414,14 +589,14 @@ if (objectId != null) {
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;name&quot;:&quot;2&quot;,&quot;annualTurnover&quot;:2.22000122070312,&quot;employeesCount&quot;:2122121221,&quot;rating&quot;:122112121,&quot;type&quot;:&quot;PRIVATE_LIMITED_COMPANY&quot;}</stringProp>
+                <stringProp name="Argument.value">{&quot;name&quot;:&quot;ORG_${__RandomString(10,abcdefghijklmnopqrstuvwxyz0123456789,)}&quot;,&quot;annualTurnover&quot;:2.22000122070312,&quot;employeesCount&quot;:2122121221,&quot;rating&quot;:122112121,&quot;type&quot;:&quot;PRIVATE_LIMITED_COMPANY&quot;}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -434,7 +609,7 @@ if (objectId != null) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -471,7 +646,7 @@ if (objectId != null) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -509,7 +684,7 @@ if (objectId != null) {
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Одновременное удаление" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Одновременное удаление">
         <intProp name="ThreadGroup.num_threads">2</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -520,11 +695,11 @@ if (objectId != null) {
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer">
           <stringProp name="ConstantTimer.delay">2000</stringProp>
         </ConstantTimer>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
           <stringProp name="cacheKey">true</stringProp>
           <stringProp name="filename"></stringProp>
           <stringProp name="parameters"></stringProp>
@@ -538,7 +713,7 @@ if (objectId != null) {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Удаление организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Удаление организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization/${organizationId}</stringProp>
@@ -551,7 +726,7 @@ if (objectId != null) {
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -564,7 +739,7 @@ if (objectId != null) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -601,7 +776,7 @@ if (objectId != null) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -650,10 +825,10 @@ if (objectId != null) {
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Регистрация пользователя" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
-          <stringProp name="HTTPSampler.path">/lab1/api/api/auth/register</stringProp>
+          <stringProp name="HTTPSampler.path">/lab1/api/api/organization</stringProp>
           <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
           <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
@@ -662,14 +837,123 @@ if (objectId != null) {
             <collectionProp name="Arguments.arguments">
               <elementProp name="" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                <stringProp name="Argument.value">{&quot;username&quot;:&quot;NT_TEST_REG32322&quot;,&quot;password&quot;:&quot;NTTESTREG123&quot;}</stringProp>
+                <stringProp name="Argument.value">{&#xd;
+  &quot;name&quot;: &quot;dk22893433&quot;,&#xd;
+  &quot;annualTurnover&quot;: 31,&#xd;
+  &quot;employeesCount&quot;: 21,&#xd;
+  &quot;rating&quot;: 21,&#xd;
+  &quot;coordinates&quot;: {&#xd;
+    &quot;id&quot;: 6,&#xd;
+    &quot;x&quot;: 744,&#xd;
+    &quot;y&quot;: 455,&#xd;
+    &quot;displayName&quot;: &quot;X: 744.0, Y: 455.0&quot;&#xd;
+  },&#xd;
+  &quot;officialAddress&quot;: {&#xd;
+    &quot;id&quot;: 7,&#xd;
+    &quot;x&quot;: 2,&#xd;
+    &quot;y&quot;: 0,&#xd;
+    &quot;z&quot;: 32,&#xd;
+    &quot;name&quot;: &quot;KIJ&quot;,&#xd;
+    &quot;displayName&quot;: &quot;KIJ&quot;&#xd;
+  },&#xd;
+  &quot;postalAddress&quot;: {&#xd;
+    &quot;id&quot;: 1,&#xd;
+    &quot;street&quot;: &quot;Kronva&quot;,&#xd;
+    &quot;zipCode&quot;: &quot;432921&quot;,&#xd;
+    &quot;displayName&quot;: &quot;Kronva, 432921&quot;&#xd;
+  },&#xd;
+  &quot;type&quot;: &quot;COMMERCIAL&quot;&#xd;
+}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">true</stringProp>
+          <stringProp name="script">import org.apache.jmeter.protocol.http.control.Header
+import groovy.json.JsonSlurper
+
+def threadNum = ctx.getThreadNum()
+def threadId = ctx.getThreadGroup().getName() + &quot;_&quot; + threadNum
+
+def username = &quot;jmeter_thread&quot; + threadNum
+def password = &quot;password123&quot;
+
+def loginBody = &apos;{&quot;username&quot;:&quot;&apos; + username + &apos;&quot;,&quot;password&quot;:&quot;&apos; + password + &apos;&quot;}&apos;
+
+try {
+    def loginSampler = new org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy()
+    loginSampler.setDomain(&quot;localhost&quot;)
+    loginSampler.setPort(20041)
+    loginSampler.setProtocol(&quot;http&quot;)
+    loginSampler.setMethod(&quot;POST&quot;)
+    loginSampler.setPath(&quot;/lab1/api/auth/login&quot;)
+    loginSampler.addNonEncodedArgument(&quot;&quot;, loginBody, &quot;&quot;)
+    loginSampler.setPostBodyRaw(true)
+    
+    def headers = new org.apache.jmeter.protocol.http.control.HeaderManager()
+    headers.add(new Header(&quot;Content-Type&quot;, &quot;application/json&quot;))
+    loginSampler.setHeaderManager(headers)
+    
+    def result = loginSampler.sample(null, null)
+    
+    if (result.getResponseCode() == &quot;200&quot;) {
+        def json = new JsonSlurper().parseText(result.getResponseDataAsString())
+        def token = json.token
+        log.info(&quot;Поток ${threadNum}: получен токен &quot; + token.substring(0, 30) + &quot;...&quot;)
+        vars.put(&quot;auth_token_&quot; + threadNum, token)
+    } else {
+        log.info(&quot;Поток ${threadNum}: пользователь не найден, регистрируем...&quot;)
+        def registerBody = &apos;{&quot;username&quot;:&quot;&apos; + username + &apos;&quot;,&quot;password&quot;:&quot;&apos; + password + &apos;&quot;}&apos;
+        
+        def registerSampler = new org.apache.jmeter.protocol.http.sampler.HTTPSamplerProxy()
+        registerSampler.setDomain(&quot;localhost&quot;)
+        registerSampler.setPort(20041)
+        registerSampler.setProtocol(&quot;http&quot;)
+        registerSampler.setMethod(&quot;POST&quot;)
+        registerSampler.setPath(&quot;/lab1/api/auth/register&quot;)
+        registerSampler.addNonEncodedArgument(&quot;&quot;, registerBody, &quot;&quot;)
+        registerSampler.setPostBodyRaw(true)
+        registerSampler.setHeaderManager(headers)
+        
+        def registerResult = registerSampler.sample(null, null)
+        
+        if (registerResult.getResponseCode() == &quot;200&quot;) {
+            def json = new JsonSlurper().parseText(registerResult.getResponseDataAsString())
+            def token = json.token
+            log.info(&quot;Поток ${threadNum}: зарегистрирован, токен &quot; + token.substring(0, 30) + &quot;...&quot;)
+            vars.put(&quot;auth_token_&quot; + threadNum, token)
+        } else {
+            log.error(&quot;Поток ${threadNum}: ошибка регистрации: &quot; + registerResult.getResponseDataAsString())
+        }
+    }
+} catch (Exception e) {
+    log.error(&quot;Поток ${threadNum}: ошибка: &quot; + e.getMessage())
+}
+def token = vars.get(&quot;auth_token_&quot; + threadNum)
+
+if (token) {
+    def headerManager = sampler.getHeaderManager()
+    if (headerManager == null) {
+        headerManager = new org.apache.jmeter.protocol.http.control.HeaderManager()
+        sampler.setHeaderManager(headerManager)
+    }
+    
+    headerManager.getHeaders().removeIf { it.getName().equalsIgnoreCase(&quot;Authorization&quot;) }
+    
+    headerManager.add(new Header(&quot;Authorization&quot;, &quot;Bearer &quot; + token))
+    log.info(&quot;Поток ${threadNum}: установлен заголовок Authorization&quot;)
+} else {
+    log.error(&quot;Поток ${threadNum}: не удалось получить токен&quot;)
+}</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -682,7 +966,41 @@ if (objectId != null) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Импорт XML">
+          <stringProp name="HTTPSampler.domain">localhost</stringProp>
+          <stringProp name="HTTPSampler.port">20041</stringProp>
+          <stringProp name="HTTPSampler.path">/lab1/api/api/import/xml</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">true</boolProp>
+          <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">true</boolProp>
+          <elementProp name="HTTPsampler.Files" elementType="HTTPFileArgs">
+            <collectionProp name="HTTPFileArgs.files">
+              <elementProp name="D:\github_repos\ITMO\course3\information_system\labs\lab2\data\test.xml" elementType="HTTPFileArg">
+                <stringProp name="File.mimetype">application/xml</stringProp>
+                <stringProp name="File.path">D:\github_repos\ITMO\course3\information_system\labs\lab2\data\test.xml</stringProp>
+                <stringProp name="File.paramname">file</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <boolProp name="HTTPSampler.postBodyRaw">false</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+            <collectionProp name="Arguments.arguments"/>
+          </elementProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Authorization</stringProp>
+                <stringProp name="Header.value">Bearer user_4_b6f565e0-3d1d-4b18-b79f-c83c8406f935</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -719,7 +1037,7 @@ if (objectId != null) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>

@@ -45,11 +45,6 @@ public class ImportService {
             throws UserNotFoundException, InvalidXmlException {
 
         List<Organization> organizations = parseAndValidateXml(xmlStream);
-        Set<String> uniqueTriplets = new HashSet<>();
-
-        for (Organization organization : organizations) {
-            checkUniquenessInFile(organization, uniqueTriplets);
-        }
 
         Session session = null;
         Transaction transaction = null;
@@ -64,6 +59,12 @@ public class ImportService {
             User user = importOperationRepository.findUserById(detachedUser.getId(), session);
             if (user == null) {
                 throw new UserNotFoundException(String.valueOf(detachedUser.getId()));
+            }
+
+            Set<String> uniqueTriplets = new HashSet<>();
+
+            for (Organization organization : organizations) {
+                checkUniquenessInFile(organization, uniqueTriplets);
             }
 
             ImportOperation operation = new ImportOperation();
