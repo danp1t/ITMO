@@ -65,6 +65,7 @@ public class ImportOperationRepository {
             failedOperation.setUser(managedUser);
             failedOperation.setStatus("FAILED");
             failedOperation.setErrorMessage(errorMessage);
+            failedOperation.setRecordsAdded(0);
 
             session.persist(failedOperation);
         } catch (Exception e) {

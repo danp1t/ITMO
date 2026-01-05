@@ -44,8 +44,6 @@ public class ImportService {
     public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName)
             throws UserNotFoundException, InvalidXmlException {
 
-        List<Organization> organizations = parseAndValidateXml(xmlStream);
-
         Session session = null;
         Transaction transaction = null;
 
@@ -61,6 +59,7 @@ public class ImportService {
                 throw new UserNotFoundException(String.valueOf(detachedUser.getId()));
             }
 
+            List<Organization> organizations = parseAndValidateXml(xmlStream);
             Set<String> uniqueTriplets = new HashSet<>();
 
             for (Organization organization : organizations) {
@@ -96,16 +95,12 @@ public class ImportService {
             transaction.commit();
             return operation;
 
-        } catch (UserNotFoundException | InvalidXmlException e) {
-            if (transaction != null) {
-                transaction.rollback();
-            }
-            throw e;
         } catch (Exception e) {
             if (transaction != null) {
                 transaction.rollback();
             }
-            String errorMessage = "Неожиданная ошибка при импорте: " + e.getMessage();
+
+            String errorMessage = "Ошибка при импорте: " + e.getMessage();
 
             Session errorSession = sessionFactory.openSession();
             Transaction errorTransaction = errorSession.beginTransaction();
@@ -116,12 +111,24 @@ public class ImportService {
                 if (errorTransaction != null) {
                     errorTransaction.rollback();
                 }
-                throw ex;
+                if (e instanceof UserNotFoundException) {
+                    throw (UserNotFoundException) e;
+                } else if (e instanceof InvalidXmlException) {
+                    throw (InvalidXmlException) e;
+                } else {
+                    throw new ImportException(errorMessage, e);
+                }
             } finally {
                 errorSession.close();
             }
 
-            throw new ImportException(errorMessage, e);
+            if (e instanceof UserNotFoundException) {
+                throw (UserNotFoundException) e;
+            } else if (e instanceof InvalidXmlException) {
+                throw (InvalidXmlException) e;
+            } else {
+                throw new ImportException(errorMessage, e);
+            }
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
