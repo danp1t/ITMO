@@ -31,18 +31,12 @@
               <button class="button is-small is-info is-outlined" @click="manageRoleUsers(role)">
                 <i class="fas fa-users"></i>
               </button>
-              <button class="button is-small is-warning is-outlined" @click="editRole(role)">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="button is-small is-danger is-outlined" @click="deleteRole(role.id)">
-                <i class="fas fa-trash"></i>
-              </button>
             </div>
           </div>
           <div class="role-body">
             <p class="has-text-grey-light">{{ role.description }}</p>
             <div class="role-users mt-3">
-              <span class="tag is-light">
+              <span class="tag is-dark">
                 <i class="fas fa-users mr-1"></i>
                 {{ role.userCount || 0 }} пользователей
               </span>
