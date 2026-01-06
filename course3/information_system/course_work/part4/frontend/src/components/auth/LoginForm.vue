@@ -54,7 +54,8 @@
           <div class="field">
             <div class="control">
               <button
-                type="submit"
+                type="button"
+                @click="handleSubmit"
                 class="button is-primary is-fullwidth"
                 :class="{ 'is-loading': isLoading }"
                 :disabled="isLoading"
@@ -84,7 +85,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '@/stores/auth.ts'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -118,7 +119,6 @@ const validateForm = () => {
     isValid = false
   }
 
-  // Валидация пароля
   if (!form.password) {
     errors.password = 'Пароль обязателен'
     isValid = false
@@ -148,7 +148,7 @@ const handleSubmit = async () => {
       serverError.value = result.error || 'Ошибка входа'
     }
   } catch (error: any) {
-    serverError.value = error.response?.data?.message || 'Произошла ошибка при входе'
+    serverError.value = error.response?.data || 'Произошла ошибка при входе'
   } finally {
     isLoading.value = false
   }

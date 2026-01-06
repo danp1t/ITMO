@@ -148,7 +148,7 @@ export const useAuthStore = defineStore('auth', () => {
       return { success: true }
     } catch (error: any) {
       console.error('Ошибка входа:', error)
-      const message = error.response?.data?.message || 'Ошибка входа'
+      const message = error.response?.data || 'Ошибка входа'
       return { success: false, error: message }
     }
   }
