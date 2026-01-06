@@ -105,7 +105,7 @@ public class AccountService {
 
     public AccountDTO register(RegisterRequest request) {
         if (existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email is already taken!");
+            throw new RuntimeException("Пользователь с такой почтой уже существует");
         }
 
         Account account = new Account();

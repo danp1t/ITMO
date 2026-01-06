@@ -123,7 +123,7 @@
             </div>
 
             <!-- Результат поиска -->
-            <div v-if="searchResult && !searchResult.hasRole" class="notification is-info is-light mt-3">
+            <div v-if="searchResult && !searchResult.hasRole" class="notification is-info is-dark mt-3">
               <div class="is-flex is-justify-content-space-between is-align-items-center">
                 <div>
                   <strong>{{ searchResult.name }}</strong> ({{ searchResult.email }})
@@ -519,7 +519,7 @@ onMounted(() => {
 }
 
 .notification.is-info {
-  border-left-color: #3298dc;
+  border-left-color: #2d89e1;
 }
 
 .notification.is-warning {
