@@ -117,9 +117,7 @@
           <thead>
           <tr>
             <th>Пользователь</th>
-            <th>Роли</th>
             <th>Статус</th>
-            <th>Дата регистрации</th>
             <th>Действия</th>
           </tr>
           </thead>
@@ -137,27 +135,12 @@
               </div>
             </td>
             <td>
-              <div class="tags">
-                <span
-                  v-for="role in getUserRoles(user)"
-                  :key="role.name"
-                  class="tag"
-                  :class="getRoleTagClass(role.name)"
-                >
-                  {{ formatRoleName(role.name) }}
-                </span>
-              </div>
-            </td>
-            <td>
                 <span
                   class="status-tag"
                   :class="user.isActive ? 'active' : 'blocked'"
                 >
                   {{ user.isActive ? 'Активен' : 'Заблокирован' }}
                 </span>
-            </td>
-            <td class="has-text-grey-light">
-              {{ formatDate(user.createdAt) }}
             </td>
             <td>
               <div class="action-buttons">
@@ -167,14 +150,6 @@
                   title="Подробнее"
                 >
                   <i class="fas fa-eye"></i>
-                </button>
-                <button
-                  v-if="authStore.canManageUsers && user.id !== authStore.user?.id"
-                  class="button is-small is-warning is-outlined"
-                  @click="openEditUserModal(user)"
-                  title="Редактировать"
-                >
-                  <i class="fas fa-edit"></i>
                 </button>
                 <button
                   v-if="authStore.canManageUsers && user.id !== authStore.user?.id"
@@ -271,18 +246,6 @@
                     >
                       {{ selectedUser.isActive ? 'Активен' : 'Заблокирован' }}
                     </span>
-                  </div>
-                </div>
-                <div class="column is-6">
-                  <div class="detail-field">
-                    <label class="label has-text-light">Дата регистрации</label>
-                    <p class="has-text-grey-light">{{ formatDateTime(selectedUser.createdAt) }}</p>
-                  </div>
-                </div>
-                <div class="column is-6">
-                  <div class="detail-field">
-                    <label class="label has-text-light">Последнее обновление</label>
-                    <p class="has-text-grey-light">{{ formatDateTime(selectedUser.updatedAt || selectedUser.createdAt) }}</p>
                   </div>
                 </div>
               </div>
@@ -422,14 +385,6 @@
 
         <footer class="modal-card-foot dark-modal-footer">
           <div class="buttons">
-            <button
-              v-if="authStore.canManageUsers && selectedUser && selectedUser.id !== authStore.user?.id"
-              class="button is-warning"
-              @click="openEditUserModal(selectedUser)"
-            >
-              <i class="fas fa-edit mr-2"></i>
-              Редактировать профиль
-            </button>
             <button
               v-if="authStore.canManageUsers && selectedUser && selectedUser.id !== authStore.user?.id"
               class="button"
