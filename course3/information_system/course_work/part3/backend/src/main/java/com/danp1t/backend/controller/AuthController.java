@@ -94,7 +94,7 @@ public class AuthController {
             return ResponseEntity.ok(new JwtResponse(jwt, account.getId(),
                     account.getEmail(), account.getName(), roles));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
