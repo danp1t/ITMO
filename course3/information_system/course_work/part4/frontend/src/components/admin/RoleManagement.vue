@@ -134,7 +134,7 @@
               </div>
             </div>
 
-            <div v-if="searchResult && searchResult.hasRole" class="notification is-warning is-light mt-3">
+            <div v-if="searchResult && searchResult.hasRole" class="notification is-warning is-dark mt-3">
               <div class="is-flex is-justify-content-space-between is-align-items-center">
                 <div>
                   <strong>{{ searchResult.name }}</strong> ({{ searchResult.email }}) - уже имеет эту роль
@@ -305,7 +305,6 @@ const addRoleToUser = async (userId: number) => {
       searchResult.value.hasRole = true
     }
 
-    alert('Роль успешно добавлена')
   } catch (error) {
     console.error('Ошибка при добавлении роли:', error)
     alert('Ошибка при добавлении роли')
@@ -315,8 +314,6 @@ const addRoleToUser = async (userId: number) => {
 // Удаление роли у пользователя
 const removeRoleFromUser = async (userId: number) => {
   if (!selectedRole.value) return
-
-  if (!confirm('Удалить роль у пользователя?')) return
 
   try {
     await adminAPI.removeRoleFromAccountByName(userId, selectedRole.value.name)
@@ -332,7 +329,6 @@ const removeRoleFromUser = async (userId: number) => {
       searchResult.value.hasRole = false
     }
 
-    alert('Роль успешно удалена')
   } catch (error) {
     console.error('Ошибка при удалении роли:', error)
     alert('Ошибка при удалении роли')

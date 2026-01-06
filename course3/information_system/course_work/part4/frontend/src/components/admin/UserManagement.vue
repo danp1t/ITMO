@@ -723,7 +723,6 @@ const removeRole = async (roleToRemove: Role) => {
       users.value[userIndex].roles = updatedRoles
     }
 
-    alert('Роль успешно удалена')
   } catch (error) {
     console.error('Ошибка при удалении роли:', error)
     alert('Не удалось удалить роль')
