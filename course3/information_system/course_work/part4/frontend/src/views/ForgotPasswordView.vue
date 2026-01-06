@@ -103,17 +103,22 @@ const handleSubmit = async () => {
 <style scoped>
 .forgot-password-view {
   padding: 4rem 1rem;
-  min-height: calc(100vh - 60px);
-  display: flex;
+  max-width: 800px;
+  margin: 0 auto;
   align-items: center;
 }
+
 
 .card {
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-header {
-  background-color: #f5f5f5;
+  background-color: #d1cece;
   padding: 1rem 1.5rem;
+}
+
+.card-header-title {
+  color: #333;
 }
 </style>

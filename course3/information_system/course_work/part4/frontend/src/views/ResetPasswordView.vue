@@ -172,8 +172,8 @@ const handleSubmit = async () => {
 <style scoped>
 .reset-password-view {
   padding: 4rem 1rem;
-  min-height: calc(100vh - 60px);
-  display: flex;
+  max-width: 800px;
+  margin: 0 auto;
   align-items: center;
 }
 
@@ -184,5 +184,9 @@ const handleSubmit = async () => {
 .card-header {
   background-color: #f5f5f5;
   padding: 1rem 1.5rem;
+}
+
+.card-header-title {
+  color: #333;
 }
 </style>
