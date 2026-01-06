@@ -29,6 +29,11 @@
       </div>
     </div>
 
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <!-- Панель фильтров (сворачиваемая) -->
     <div class="filters-panel mb-4" v-if="showFilters">
       <div class="columns is-multiline">
@@ -454,8 +459,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { adminAPI } from '@/api/admin'
-import type { UserWithDetails, Role, UserDetail } from '@/types/admin'
+import type { UserWithDetails, Role } from '@/types/admin'
 import { debounce } from 'lodash-es'
+import AppNotification from "@/components/AppNotification.vue";
 
 const authStore = useAuthStore()
 
@@ -479,6 +485,30 @@ const addingRole = ref(false)
 const availableRoles = ref<Role[]>([])
 const newRoleToAdd = ref<string>('')
 const activeTab = ref<'general' | 'roles' | 'activity'>('general')
+const notification = ref({
+  visible: false,
+  message: '',
+  type: 'info' as 'info' | 'success' | 'warning' | 'error'
+})
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration: number = 5000) => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  if (duration > 0) {
+    setTimeout(() => {
+      hideNotification()
+    }, duration)
+  }
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
+}
+
 
 // Получение уникальных ролей для фильтра
 const uniqueRoles = computed(() => {
@@ -669,32 +699,54 @@ const addRoleToUser = async () => {
 
   addingRole.value = true
   try {
-    const roleToAdd = availableRoles.value.find(role => role.id.toString() === newRoleToAdd.value)
+    const roleId = parseInt(newRoleToAdd.value) || newRoleToAdd.value
+    const roleToAdd = availableRoles.value.find(role =>
+      role.id === roleId ||
+      role.id.toString() === newRoleToAdd.value ||
+      role.id === newRoleToAdd.value
+    )
+
     if (!roleToAdd) {
-      throw new Error('Роль не найдена')
+      showNotification('Выбранная роль не найдена. Попробуйте обновить страницу.', 'warning')
+      return
     }
 
-    // Обновляем локально
-    if (!userDetails.value.roles) {
-      userDetails.value.roles = []
+    if (userDetails.value.roles?.some(r => r.id === roleToAdd.id || r.name === roleToAdd.name)) {
+      showNotification('Эта роль уже назначена пользователю', 'warning')
+      addingRole.value = false
+      return
     }
-    userDetails.value.roles.push(roleToAdd)
 
-    // Отправляем на сервер
-    const updatedRoles = userDetails.value.roles.map(role => role.name)
-    await adminAPI.updateUserRoles(selectedUser.value.id, updatedRoles)
+    await adminAPI.addRoleToAccountByName(selectedUser.value.id, [roleToAdd.name])
+    const currentRoles = userDetails.value.roles ? [...userDetails.value.roles] : []
+    userDetails.value.roles = [...currentRoles, roleToAdd]
 
-    // Обновляем основной список
     const userIndex = users.value.findIndex(u => u.id === selectedUser.value!.id)
     if (userIndex !== -1) {
-      users.value[userIndex].roles = updatedRoles
+      const userRoles = users.value[userIndex].roles
+      if (Array.isArray(userRoles)) {
+        if (typeof userRoles[0] === 'object') {
+          users.value[userIndex].roles = [...userRoles, roleToAdd]
+        } else {
+          users.value[userIndex].roles = [...userRoles, roleToAdd.name]
+        }
+      }
     }
 
     newRoleToAdd.value = ''
-    alert('Роль успешно добавлена')
-  } catch (error) {
+    showNotification(`Роль "${formatRoleName(roleToAdd.name)}" успешно добавлена`, 'success')
+
+  } catch (error: any) {
     console.error('Ошибка при добавлении роли:', error)
-    alert('Не удалось добавить роль')
+
+    let errorMessage = 'Не удалось добавить роль'
+    if (error.response?.data) {
+      errorMessage = `Ошибка: ${error.response.data}`
+    } else if (error.response?.status === 400) {
+      errorMessage = 'Некорректный запрос. Возможно, роль уже назначена'
+    }
+
+    showNotification(errorMessage, 'error')
   } finally {
     addingRole.value = false
   }
@@ -702,10 +754,6 @@ const addRoleToUser = async () => {
 
 const removeRole = async (roleToRemove: Role) => {
   if (!selectedUser.value || !userDetails.value) return
-
-  if (!confirm(`Удалить роль ${formatRoleName(roleToRemove.name)} у пользователя ${selectedUser.value.name}?`)) {
-    return
-  }
 
   try {
     // Обновляем локально
@@ -715,7 +763,7 @@ const removeRole = async (roleToRemove: Role) => {
 
     // Отправляем на сервер
     const updatedRoles = userDetails.value.roles ? userDetails.value.roles.map(role => role.name) : []
-    await adminAPI.updateUserRoles(selectedUser.value.id, updatedRoles)
+    await adminAPI.removeRoleFromAccountByName(selectedUser.value.id, roleToRemove.name)
 
     // Обновляем основной список
     const userIndex = users.value.findIndex(u => u.id === selectedUser.value!.id)
