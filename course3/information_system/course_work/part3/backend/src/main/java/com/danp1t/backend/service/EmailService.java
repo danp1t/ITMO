@@ -29,7 +29,7 @@ public class EmailService {
         message.setFrom(fromEmail);
         message.setTo(to);
         message.setSubject("Password Reset");
-        message.setText("Your password reset token is: " + resetToken +
+        message.setText("http://localhost:5173/" + "reset-password?token=" + resetToken +
                 "\nThis token will expire in 1 hour.");
         mailSender.send(message);
     }
