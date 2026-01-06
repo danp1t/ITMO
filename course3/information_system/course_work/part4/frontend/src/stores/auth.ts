@@ -218,7 +218,7 @@ export const useAuthStore = defineStore('auth', () => {
         message: 'Регистрация успешна! Проверьте email для подтверждения.'
       }
     } catch (error: any) {
-      const message = error.response?.data?.message || 'Ошибка регистрации'
+      const message = error.response?.data || 'Ошибка регистрации'
       return { success: false, error: message }
     }
   }

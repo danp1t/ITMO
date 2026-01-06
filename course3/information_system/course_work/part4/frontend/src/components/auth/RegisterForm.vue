@@ -228,7 +228,10 @@ const handleSubmit = async () => {
       serverError.value = result.error || 'Ошибка регистрации'
     }
   } catch (error: any) {
-    serverError.value = error.response?.data?.message || 'Произошла ошибка при регистрации'
+    serverError.value = error.response?.data ||
+      error.response?.data?.message ||
+      error.message ||
+      'Произошла ошибка при регистрации'
   } finally {
     isLoading.value = false
   }
