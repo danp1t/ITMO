@@ -3,9 +3,17 @@ package com.danp1t.backend.controller;
 import com.danp1t.backend.dto.AttachmentDTO;
 import com.danp1t.backend.service.AttachmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -57,10 +65,47 @@ public class AttachmentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAttachment(@PathVariable Integer id) {
         try {
-            attachmentService.deleteById(id);
+            attachmentService.deleteAttachmentFile(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AttachmentDTO> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("postId") Integer postId,
+            @RequestParam("typeAttachmentId") Integer typeAttachmentId) {
+        try {
+            AttachmentDTO attachmentDTO = attachmentService.uploadFile(file, postId, typeAttachmentId);
+            return ResponseEntity.status(HttpStatus.CREATED).body(attachmentDTO);
+        } catch (RuntimeException e) {
+            System.out.printf("Error: %s\n", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Integer id) {
+        AttachmentDTO attachment = attachmentService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Attachment not found"));
+
+        try {
+            Path filePath = Paths.get("uploads", attachment.getPath()).toAbsolutePath().normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists() && resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + attachment.getName() + "\"")
+                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

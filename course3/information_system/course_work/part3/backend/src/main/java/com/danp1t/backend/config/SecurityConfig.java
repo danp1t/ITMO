@@ -60,6 +60,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/posts").hasAuthority("OAPI:ROLE:PublishPost")
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasAuthority("OAPI:ROLE:EditPost")
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasAuthority("OAPI:ROLE:DeletePost")
+                        .requestMatchers(HttpMethod.POST, "/api/attachments/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/attachments/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // IS01, IS02
                         .requestMatchers(HttpMethod.GET, "/api/products/filtered").permitAll() // IS03, IS04

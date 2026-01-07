@@ -9,6 +9,9 @@ import com.danp1t.backend.repository.PostRepository;
 import com.danp1t.backend.repository.TypeAttachmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,6 +27,9 @@ public class AttachmentService {
 
     @Autowired
     private TypeAttachmentRepository typeAttachmentRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
 
     private AttachmentDTO toDTO(Attachment attachment) {
         return new AttachmentDTO(
@@ -106,5 +112,49 @@ public class AttachmentService {
             throw new RuntimeException("Attachment not found with id: " + id);
         }
         attachmentRepository.deleteById(id);
+    }
+
+    public AttachmentDTO uploadFile(MultipartFile file, Integer postId, Integer typeAttachmentId) {
+        // Проверяем существование поста
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
+        System.out.printf("Uploading file: %s\n", file.getOriginalFilename());
+
+        // Получаем тип вложения
+        TypeAttachment typeAttachment = typeAttachmentRepository.findById(typeAttachmentId)
+                .orElseThrow(() -> new RuntimeException("TypeAttachment not found with id: " + typeAttachmentId));
+        System.out.printf("Uploading file: %s\n", typeAttachment.getName());
+        // Сохраняем файл на диск
+        String filePath;
+        try {
+            String subDirectory = "post_" + postId;
+            filePath = fileStorageService.storeFile(file, subDirectory);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file: " + e.getMessage());
+        }
+
+        // Создаем запись в базе
+        Attachment attachment = new Attachment();
+        attachment.setName(file.getOriginalFilename());
+        attachment.setPath(filePath);
+        attachment.setPost(post);
+        attachment.setTypeAttachment(typeAttachment);
+
+        Attachment saved = attachmentRepository.save(attachment);
+        return toDTO(saved);
+    }
+
+    public void deleteAttachmentFile(Integer attachmentId) {
+        Attachment attachment = attachmentRepository.findById(attachmentId)
+                .orElseThrow(() -> new RuntimeException("Attachment not found with id: " + attachmentId));
+
+        // Удаляем файл с диска
+        boolean deleted = fileStorageService.deleteFile(attachment.getPath());
+        if (!deleted) {
+            System.err.println("Warning: Could not delete file at path: " + attachment.getPath());
+        }
+
+        // Удаляем запись из базы
+        attachmentRepository.delete(attachment);
     }
 }
