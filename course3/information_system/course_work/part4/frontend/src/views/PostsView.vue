@@ -58,7 +58,6 @@
             v-for="post in posts"
             :key="post.id"
             :post="post"
-            @like="handleLike"
             @edit="handleEdit"
             @delete="handleDelete"
           />
