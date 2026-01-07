@@ -69,4 +69,10 @@ public class TagController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // Получить теги поста
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<TagDTO>> getTagsByPost(@PathVariable Integer postId) {
+        return ResponseEntity.ok(tagService.findByPostId(postId));
+    }
 }

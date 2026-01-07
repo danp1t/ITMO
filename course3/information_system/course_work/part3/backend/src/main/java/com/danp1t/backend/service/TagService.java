@@ -88,4 +88,11 @@ public class TagService {
     public boolean existsByName(String name) {
         return tagRepository.existsByName(name);
     }
+
+    // Получить теги поста
+    public List<TagDTO> findByPostId(Integer postId) {
+        return tagRepository.findByPostId(postId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
 }

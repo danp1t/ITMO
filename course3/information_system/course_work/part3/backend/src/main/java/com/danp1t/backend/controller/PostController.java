@@ -2,6 +2,7 @@ package com.danp1t.backend.controller;
 
 import com.danp1t.backend.dto.PostDTO;
 import com.danp1t.backend.dto.PostDetailDTO;
+import com.danp1t.backend.dto.TagDTO;
 import com.danp1t.backend.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -104,12 +105,48 @@ public class PostController {
     }
 
     @GetMapping("/tag/{tagId}")
-    public ResponseEntity<List<PostDTO>> getPostsByTagId(@PathVariable Integer tagId) {
+    public ResponseEntity<List<PostDTO>> getPostsByTag(@PathVariable Integer tagId) {
         return ResponseEntity.ok(postService.findByTagId(tagId));
+    }
+
+    @PostMapping("/{postId}/tags/{tagId}")
+    public ResponseEntity<Void> addTagToPost(@PathVariable Integer postId,
+                                             @PathVariable Integer tagId,
+                                             @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            postService.addTagToPost(postId, tagId, userDetails.getUsername());
+            return ResponseEntity.ok().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping("/tag/name/{tagName}")
     public ResponseEntity<List<PostDTO>> getPostsByTagName(@PathVariable String tagName) {
         return ResponseEntity.ok(postService.findByTagName(tagName));
     }
+
+    @DeleteMapping("/{postId}/tags/{tagId}")
+    public ResponseEntity<Void> removeTagFromPost(@PathVariable Integer postId,
+                                                  @PathVariable Integer tagId,
+                                                  @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            postService.removeTagFromPost(postId, tagId, userDetails.getUsername());
+            return ResponseEntity.noContent().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Получить теги поста
+    @GetMapping("/{postId}/tags")
+    public ResponseEntity<List<TagDTO>> getPostTags(@PathVariable Integer postId) {
+        return ResponseEntity.ok(postService.getPostTags(postId));
+    }
+
+
 }

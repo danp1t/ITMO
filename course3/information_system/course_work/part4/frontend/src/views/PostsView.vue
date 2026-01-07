@@ -92,6 +92,41 @@
               </div>
             </div>
           </div>
+
+          <!-- Блок фильтрации по тегам -->
+          <div class="box mb-4">
+            <h2 class="subtitle">Теги</h2>
+            <div class="field">
+              <div class="control">
+                <div class="tags">
+                    <span
+                      v-for="tag in allTags"
+                      :key="tag.id"
+                      class="tag is-clickable mr-1 mb-1"
+                      :class="{ 'is-primary is-light': selectedTagIds.includes(tag.id) }"
+                      @click="toggleTagFilter(tag.id)"
+                      :style="getTagStyle(tag)"
+                      :title="tag.description"
+                    >
+                      {{ tag.name }}
+                      <span v-if="tagPostCounts[tag.id]" class="tag-count ml-1">
+                        ({{ tagPostCounts[tag.id] }})
+                      </span>
+                    </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div v-if="selectedTagIds.length > 0" class="mt-3">
+                          <button class="button is-small is-fullwidth" @click="clearTagFilters">
+                  <span class="icon">
+                    <i class="fas fa-times"></i>
+                  </span>
+                <span>Сбросить фильтры</span>
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -225,7 +260,8 @@ import { useAuthStore } from '../stores/auth'
 import PostCard from '../components/posts/PostCard.vue'
 import RichTextEditor from '../components/posts/RichTextEditor.vue'
 import { postsAPI } from '../api/posts'
-import type { Post, UpdatePostRequest } from '../types/posts'
+import type { Post, UpdatePostRequest, Tag } from '../types/posts'
+import { tagsAPI } from '../api/tags'
 
 const authStore = useAuthStore()
 const posts = ref<Post[]>([])
@@ -235,6 +271,10 @@ const showEditModal = ref(false)
 const sortBy = ref('createdAt')
 const sortDirection = ref('desc')
 const isSaving = ref(false)
+
+const allTags = ref<Tag[]>([])
+const selectedTagIds = ref<number[]>([])
+const tagPostCounts = ref<Record<number, number>>({})
 
 // Реф для редактора
 const editorRef = ref<InstanceType<typeof RichTextEditor>>()
@@ -259,17 +299,129 @@ const editingPost = ref({
 const loadPosts = async () => {
   loading.value = true
   try {
-    const params = {
-      sortBy: sortBy.value,
-      sortDirection: sortDirection.value,
+    // Если выбраны теги, фильтруем по ним
+    if (selectedTagIds.value.length > 0) {
+      // Для нескольких тегов можно делать по-разному
+      // Вариант 1: Использовать intersection (посты, содержащие все выбранные теги)
+      // Вариант 2: Использовать union (посты, содержащие любой из выбранных тегов)
+
+      // Здесь используем union (любой из тегов)
+      const allPosts: Post[] = []
+      const uniquePostIds = new Set<number>()
+
+      for (const tagId of selectedTagIds.value) {
+        const response = await postsAPI.getPostsByTag(tagId)
+        const taggedPosts = response.data || []
+
+        for (const post of taggedPosts) {
+          if (!uniquePostIds.has(post.id)) {
+            uniquePostIds.add(post.id)
+            allPosts.push(post)
+          }
+        }
+      }
+
+      // Применяем сортировку
+      posts.value = sortPosts(allPosts)
+    } else {
+      // Загружаем все посты
+      const params = {
+        sortBy: sortBy.value,
+        sortDirection: sortDirection.value,
+      }
+      const response = await postsAPI.getPosts(params)
+      posts.value = response.data
     }
-    const response = await postsAPI.getPosts(params)
-    posts.value = response.data
   } catch (error) {
     console.error('Ошибка при загрузке постов:', error)
   } finally {
     loading.value = false
   }
+}
+
+const sortPosts = (postsToSort: Post[]) => {
+  const sorted = [...postsToSort]
+
+  switch (sortBy.value) {
+    case 'createdAt':
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime()
+        const dateB = new Date(b.createdAt).getTime()
+        return sortDirection.value === 'asc' ? dateA - dateB : dateB - dateA
+      })
+      break
+
+    case 'likesCount':
+      sorted.sort((a, b) => {
+        const likesA = a.countLike || 0
+        const likesB = b.countLike || 0
+        return sortDirection.value === 'asc' ? likesA - likesB : likesB - likesA
+      })
+      break
+
+    default:
+      // По умолчанию сортируем по дате создания (новые сверху)
+      sorted.sort((a, b) => {
+        const dateA = new Date(a.createdAt).getTime()
+        const dateB = new Date(b.createdAt).getTime()
+        return dateB - dateA
+      })
+  }
+
+  return sorted
+}
+
+const getTagStyle = (tag: Tag) => {
+  const hue = (tag.id * 137) % 360
+  return {
+    backgroundColor: `hsl(${hue}, 70%, 95%)`,
+    color: `hsl(${hue}, 50%, 30%)`,
+    border: `1px solid hsl(${hue}, 60%, 85%)`
+  }
+}
+
+const loadAllTags = async () => {
+  try {
+    const response = await tagsAPI.getAllTags()
+    allTags.value = response.data || []
+
+    // Загружаем количество постов для каждого тега
+    await loadTagPostCounts()
+  } catch (error) {
+    console.error('Ошибка при загрузке тегов:', error)
+  }
+}
+
+const loadTagPostCounts = async () => {
+  try {
+    const counts: Record<number, number> = {}
+
+    // Для каждого тега получаем посты
+    for (const tag of allTags.value) {
+      const response = await postsAPI.getPostsByTag(tag.id)
+      counts[tag.id] = response.data?.length || 0
+    }
+
+    tagPostCounts.value = counts
+  } catch (error) {
+    console.error('Ошибка при загрузке статистики тегов:', error)
+  }
+}
+
+const toggleTagFilter = (tagId: number) => {
+  const index = selectedTagIds.value.indexOf(tagId)
+  if (index > -1) {
+    selectedTagIds.value.splice(index, 1)
+  } else {
+    selectedTagIds.value.push(tagId)
+  }
+  loadPosts()
+}
+
+// Очистка фильтров тегов
+const clearTagFilters = () => {
+  selectedTagIds.value = []
+  loadPosts()
 }
 
 // Обработчик ошибок загрузки файлов
@@ -311,11 +463,21 @@ const createPostWithAttachments = async () => {
   isSaving.value = true
 
   try {
-    // 1. Создаем пост без вложений
+    // 1. Создаем пост с тегами
+    const selectedTagIds = editorRef.value?.getSelectedTags() || []
+
+    // Получаем объекты тегов по их ID
+    const tagObjects = selectedTagIds.map(id => ({
+      id: id,
+      name: '', // Имя будет заполнено на бэкенде
+      description: ''
+    }))
+
     const postData = {
       title: newPost.value.title,
       text: newPost.value.content,
       ownerId: authStore.user.id,
+      tags: tagObjects  // Добавляем теги
     }
 
     const createResponse = await postsAPI.createPost(postData)
@@ -338,6 +500,7 @@ const createPostWithAttachments = async () => {
           title: newPost.value.title,
           text: updatedContent,
           ownerId: authStore.user.id,
+          tags: tagObjects  // Также передаем теги при обновлении
         }
 
         await postsAPI.updatePost(newPostId, updateData)
@@ -463,7 +626,10 @@ const handleDelete = async (postId: number) => {
   }
 }
 
-onMounted(loadPosts)
+onMounted(() => {
+  loadPosts()
+  loadAllTags()
+})
 
 watch([sortBy, sortDirection], loadPosts)
 </script>

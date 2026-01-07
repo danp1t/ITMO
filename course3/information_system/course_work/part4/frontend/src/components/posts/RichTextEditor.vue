@@ -176,6 +176,16 @@
       :class="{ 'is-disabled': disabled }"
     />
 
+    <!-- Блок тегов -->
+    <div v-if="showTagSelector" class="tag-selector-wrapper mt-3">
+      <label class="label is-size-6">Теги поста:</label>
+      <TagSelector
+        v-model="selectedTagIds"
+        :postId="postId"
+        @change="onTagsChange"
+      />
+    </div>
+
     <!-- Модальное окно для вставки видео -->
     <div v-if="showVideoModal" class="modal-overlay" @click="closeVideoModal">
       <div class="modal-content" @click.stop>
@@ -256,6 +266,8 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
 import { computed, onBeforeUnmount, watch, ref } from 'vue'
 import { Node } from '@tiptap/core'
+import TagSelector from "@/components/posts/TagSelector.vue";
+import type {Tag} from "@/types/posts.ts";
 
 const props = withDefaults(
   defineProps<{
@@ -265,6 +277,8 @@ const props = withDefaults(
     showCounter?: boolean
     postId?: number
     isCreating?: boolean
+    showTagSelector?: boolean
+    initialTags?: number[]
   }>(),
   {
     modelValue: '',
@@ -272,7 +286,9 @@ const props = withDefaults(
     disabled: false,
     showCounter: true,
     postId: undefined,
-    isCreating: false
+    isCreating: false,
+    showTagSelector: true,
+    initialTags: () => []
   }
 )
 
@@ -280,12 +296,20 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
   'file-upload-error': [error: string]
   'files-uploaded': [files: Array<{file: File, type: 'image' | 'file' | 'audio'}>]
+  'tags-change': [tagIds: number[]]
 }>()
 
 // Состояние для модального окна видео
 const showVideoModal = ref(false)
 const videoUrl = ref('')
 const videoSource = ref<'youtube' | 'rutube'>('youtube')
+
+const selectedTagIds = ref<number[]>(props.initialTags)
+
+const onTagsChange = (tags: Tag[]) => {
+  selectedTagIds.value = tags.map(t => t.id)
+  emit('tags-change', selectedTagIds.value)
+}
 
 // Состояния для загрузки
 const uploadingImage = ref(false)
@@ -943,7 +967,9 @@ defineExpose({
   clearPendingFiles,
   replacePlaceholdersInContent,
   hasPendingFiles: computed(() => pendingFiles.value.length > 0),
-  getPendingFiles: () => pendingFiles.value
+  getPendingFiles: () => pendingFiles.value,
+  getSelectedTags: () => selectedTagIds.value,
+  clearTags: () => { selectedTagIds.value = [] }
 })
 </script>
 

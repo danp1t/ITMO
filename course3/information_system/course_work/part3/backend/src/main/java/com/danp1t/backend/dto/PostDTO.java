@@ -5,6 +5,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,4 +19,18 @@ public class PostDTO {
     private Integer countLike;
     private Integer ownerId;
     private String ownerName;
+    private List<TagDTO> tags; // Добавляем теги
+    private Integer commentsCount; // Количество комментариев
+
+    // Конструктор без тегов для обратной совместимости
+    public PostDTO(Integer id, String title, String text, LocalDateTime createdAt,
+                   Integer countLike, Integer ownerId, String ownerName) {
+        this.id = id;
+        this.title = title;
+        this.text = text;
+        this.createdAt = createdAt;
+        this.countLike = countLike;
+        this.ownerId = ownerId;
+        this.ownerName = ownerName;
+    }
 }

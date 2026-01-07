@@ -1,17 +1,15 @@
 package com.danp1t.backend.service;
 
-import com.danp1t.backend.dto.PostDTO;
-import com.danp1t.backend.dto.PostDetailDTO;
-import com.danp1t.backend.dto.AttachmentSimpleDTO;
-import com.danp1t.backend.dto.TagDTO;
-import com.danp1t.backend.dto.CommentSimpleDTO;
-import com.danp1t.backend.dto.AccountSimpleDTO;
+import com.danp1t.backend.dto.*;
 import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Post;
+import com.danp1t.backend.model.Tag;
 import com.danp1t.backend.repository.AccountRepository;
 import com.danp1t.backend.repository.PostRepository;
+import com.danp1t.backend.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,7 +25,19 @@ public class PostService {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private TagRepository tagRepository;
+
     private PostDTO toDTO(Post post) {
+        List<TagDTO> tagDTOs = null;
+        if (post.getTags() != null && !post.getTags().isEmpty()) {
+            tagDTOs = post.getTags().stream()
+                    .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getDescription()))
+                    .collect(Collectors.toList());
+        }
+
+        Integer commentsCount = post.getComments() != null ? post.getComments().size() : 0;
+
         return new PostDTO(
                 post.getId(),
                 post.getTitle(),
@@ -35,7 +45,9 @@ public class PostService {
                 post.getCreatedAt(),
                 post.getCountLike(),
                 post.getOwner().getId(),
-                post.getOwner().getName()
+                post.getOwner().getName(),
+                tagDTOs,
+                commentsCount
         );
     }
 
@@ -99,7 +111,9 @@ public class PostService {
     }
 
     public List<PostDTO> findAll() {
-        return postRepository.findAllWithOwner().stream().map(this::toDTO).collect(Collectors.toList());
+        return postRepository.findAllWithOwnerAndTags().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     public Optional<PostDTO> findById(Integer id) {
@@ -122,8 +136,8 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public PostDTO save(PostDTO postDTO, String currentUserEmail) {
-        // Проверяем, имеет ли пользователь роль публикации
         Account currentUser = accountRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -135,10 +149,23 @@ public class PostService {
         }
 
         Post post = toEntity(postDTO);
+        post.setOwner(currentUser);
+
+        // Сохраняем теги если есть
+        if (postDTO.getTags() != null && !postDTO.getTags().isEmpty()) {
+            List<Tag> tags = tagRepository.findAllById(
+                    postDTO.getTags().stream()
+                            .map(TagDTO::getId)
+                            .collect(Collectors.toList())
+            );
+            post.setTags(tags);
+        }
+
         Post saved = postRepository.save(post);
         return toDTO(saved);
     }
 
+    @Transactional
     public PostDTO update(Integer id, PostDTO postDTO, String currentUserEmail) {
         Post existingPost = postRepository.findByIdWithOwner(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
@@ -158,14 +185,22 @@ public class PostService {
         // Обновляем пост
         existingPost.setTitle(postDTO.getTitle());
         existingPost.setText(postDTO.getText());
-        if (postDTO.getCreatedAt() != null) {
-            existingPost.setCreatedAt(postDTO.getCreatedAt());
+
+        // Обновляем теги если есть
+        if (postDTO.getTags() != null) {
+            List<Tag> tags = tagRepository.findAllById(
+                    postDTO.getTags().stream()
+                            .map(TagDTO::getId)
+                            .collect(Collectors.toList())
+            );
+            existingPost.setTags(tags);
         }
 
         Post updated = postRepository.save(existingPost);
         return toDTO(updated);
     }
 
+    @Transactional
     public void deleteById(Integer id, String currentUserEmail) {
         Post existingPost = postRepository.findByIdWithOwner(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
@@ -185,6 +220,7 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
+    @Transactional
     public void likePost(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -192,6 +228,7 @@ public class PostService {
         postRepository.save(post);
     }
 
+    @Transactional
     public void unlikePost(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -210,6 +247,65 @@ public class PostService {
     public List<PostDTO> findByTagName(String tagName) {
         return postRepository.findByTagName(tagName).stream()
                 .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void addTagToPost(Integer postId, Integer tagId, String currentUserEmail) {
+        Post post = postRepository.findByIdWithOwner(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Проверка прав
+        boolean isOwner = post.getOwner().getEmail().equals(currentUserEmail);
+        boolean canEdit = currentUser.getRoles().stream()
+                .anyMatch(role -> "OAPI:ROLE:EditPost".equals(role.getName()));
+
+        if (!isOwner && !canEdit) {
+            throw new SecurityException("Not authorized to edit this post");
+        }
+
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag not found"));
+
+        if (!post.getTags().contains(tag)) {
+            post.getTags().add(tag);
+            postRepository.save(post);
+        }
+    }
+
+    @Transactional
+    public void removeTagFromPost(Integer postId, Integer tagId, String currentUserEmail) {
+        Post post = postRepository.findByIdWithOwner(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Проверка прав
+        boolean isOwner = post.getOwner().getEmail().equals(currentUserEmail);
+        boolean canEdit = currentUser.getRoles().stream()
+                .anyMatch(role -> "OAPI:ROLE:EditPost".equals(role.getName()));
+
+        if (!isOwner && !canEdit) {
+            throw new SecurityException("Not authorized to edit this post");
+        }
+
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new RuntimeException("Tag not found"));
+
+        post.getTags().remove(tag);
+        postRepository.save(post);
+    }
+
+    public List<TagDTO> getPostTags(Integer postId) {
+        Post post = postRepository.findByIdWithTags(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        return post.getTags().stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getDescription()))
                 .collect(Collectors.toList());
     }
 }
