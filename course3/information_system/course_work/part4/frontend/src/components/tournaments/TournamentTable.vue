@@ -122,7 +122,7 @@
           @click="$emit('view', tournament)"
         >
           <td>
-            <strong>{{ tournament.name }}</strong>
+            <strong :title="tournament.name">{{ truncateText(tournament.name, 20) }}</strong>
             <a
               v-if="tournament.link"
               :href="tournament.link"
@@ -135,7 +135,7 @@
           </td>
           <td>{{ formatDate(tournament.startDate) }}</td>
           <td>{{ formatDate(tournament.finishDate) }}</td>
-          <td>{{ tournament.address }}</td>
+          <td :title="tournament.address">{{ truncateText(tournament.address, 30) }}</td>
           <td>
               <span class="tag" :class="getRangColor(tournament.rangId)">
                 {{ getRangName(tournament.rangId) }}
@@ -294,6 +294,13 @@ const getRangColor = (rangId: number) => {
   return colors[rangId % colors.length]
 }
 
+// Функция для обрезки текста
+const truncateText = (text: string, maxLength: number): string => {
+  if (!text) return ''
+  if (text.length <= maxLength) return text
+  return text.substring(0, maxLength) + '...'
+}
+
 const onSearch = () => {
   currentPage.value = 1
   emit('search', searchQuery.value)
@@ -349,7 +356,6 @@ const confirmDelete = (tournament: Tournament) => {
 const onEditClick = (tournament: Tournament) => {
   emit('edit', tournament)
 }
-
 
 // Сброс при смене данных
 onMounted(() => {
@@ -423,6 +429,30 @@ onMounted(() => {
   color: #667eea;
 }
 
+/* Tooltip для полного текста */
+td strong:hover,
+td:hover {
+  position: relative;
+}
+
+td strong[title]:hover::after,
+td[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  white-space: normal;
+  max-width: 400px;
+  z-index: 1000;
+  font-size: 14px;
+  font-weight: normal;
+  pointer-events: none;
+}
+
 @media (max-width: 768px) {
   .tournament-table {
     padding: 1rem;
@@ -436,6 +466,11 @@ onMounted(() => {
   .level-left,
   .level-right {
     margin-bottom: 1rem;
+  }
+
+  .table td:nth-child(1),
+  .table td:nth-child(4) {
+    max-width: 150px;
   }
 }
 </style>

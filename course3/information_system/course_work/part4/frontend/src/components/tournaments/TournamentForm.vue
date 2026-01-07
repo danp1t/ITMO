@@ -32,7 +32,8 @@
                     type="datetime-local"
                     class="input"
                     :class="{ 'is-danger': errors.startDate }"
-                    :max="form.finishDate || maxDate"
+                    :min="`${MIN_YEAR}-01-01T00:00`"
+                    :max="`${MAX_YEAR}-12-31T23:59`"
                     required
                   >
                 </div>
@@ -49,7 +50,8 @@
                     type="datetime-local"
                     class="input"
                     :class="{ 'is-danger': errors.finishDate }"
-                    :min="form.startDate || minDate"
+                    :min="`${MIN_YEAR}-01-01T00:00`"
+                    :max="`${MAX_YEAR}-12-31T23:59`"
                     required
                   >
                 </div>
@@ -205,10 +207,9 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-// Ограничения по датам
-const currentDate = new Date()
-const maxDate = new Date(currentDate.getFullYear() + 5, 11, 31).toISOString().slice(0, 16)
-const minDate = new Date(2000, 0, 1).toISOString().slice(0, 16)
+// Ограничения по годам
+const MIN_YEAR = 1900
+const MAX_YEAR = new Date().getFullYear() + 100
 
 const form = reactive({
   name: '',
@@ -260,8 +261,27 @@ const hideNotification = () => {
 }
 
 const formatDateTimeLocal = (dateString: string) => {
-  const date = new Date(dateString)
-  return date.toISOString().slice(0, 16)
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) {
+      return ''
+    }
+
+    const year = date.getFullYear()
+    // Проверяем, что год в допустимом диапазоне
+    if (year < MIN_YEAR || year > MAX_YEAR) {
+      return ''
+    }
+
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  } catch {
+    return ''
+  }
 }
 
 // Заполняем форму при редактировании
@@ -275,8 +295,68 @@ watch(() => props.tournament, (tournament) => {
     form.rangId = tournament.rangId.toString()
     form.minimalAge = tournament.minimalAge.toString()
     form.archived = tournament.archived
+  } else {
+    // Сброс формы при создании нового турнира
+    Object.assign(form, {
+      name: '',
+      startDate: '',
+      finishDate: '',
+      address: '',
+      link: '',
+      rangId: '',
+      minimalAge: '',
+      archived: false
+    })
   }
 }, { immediate: true })
+
+const parseDateTimeLocal = (dateTimeString: string): Date | null => {
+  if (!dateTimeString) return null
+
+  try {
+    // Формат datetime-local: YYYY-MM-DDTHH:mm
+    const [datePart, timePart] = dateTimeString.split('T')
+    const [yearStr, monthStr, dayStr] = datePart.split('-').map(Number)
+    const [hoursStr, minutesStr] = (timePart || '').split(':').map(Number)
+
+    const year = yearStr
+    const month = monthStr - 1 // JS месяцы 0-11
+    const day = dayStr
+    const hours = hoursStr || 0
+    const minutes = minutesStr || 0
+
+    // Проверка года
+    if (year < MIN_YEAR || year > MAX_YEAR) {
+      return null
+    }
+
+    // Проверка месяцев и дней
+    if (month < 0 || month > 11) return null
+    if (day < 1 || day > 31) return null
+    if (hours < 0 || hours > 23) return null
+    if (minutes < 0 || minutes > 59) return null
+
+    const date = new Date(year, month, day, hours, minutes)
+
+    // Проверяем, что дата корректна
+    if (isNaN(date.getTime())) {
+      return null
+    }
+
+    // Проверяем, что компоненты совпадают (на случай вроде 31 февраля)
+    if (date.getFullYear() !== year ||
+      date.getMonth() !== month ||
+      date.getDate() !== day ||
+      date.getHours() !== hours ||
+      date.getMinutes() !== minutes) {
+      return null
+    }
+
+    return date
+  } catch {
+    return null
+  }
+}
 
 const validateForm = () => {
   let isValid = true
@@ -297,12 +377,9 @@ const validateForm = () => {
     errors.startDate = 'Дата начала обязательна'
     isValid = false
   } else {
-    const start = new Date(form.startDate)
-    const now = new Date()
-
-    // Проверка на будущую дату (можно редактировать архивные)
-    if (!form.archived && start < now) {
-      errors.startDate = 'Дата начала не может быть в прошлом для активного турнира'
+    const startDate = parseDateTimeLocal(form.startDate)
+    if (!startDate) {
+      errors.startDate = `Некорректная дата начала. Год должен быть между ${MIN_YEAR} и ${MAX_YEAR}`
       isValid = false
     }
   }
@@ -310,13 +387,27 @@ const validateForm = () => {
   if (!form.finishDate) {
     errors.finishDate = 'Дата окончания обязательна'
     isValid = false
+  } else {
+    const finishDate = parseDateTimeLocal(form.finishDate)
+    if (!finishDate) {
+      errors.finishDate = `Некорректная дата окончания. Год должен быть между ${MIN_YEAR} и ${MAX_YEAR}`
+      isValid = false
+    }
+    else {
+      const now = new Date()
+      // Проверка на будущую дату (можно редактировать архивные)
+      if (!form.archived && finishDate < now) {
+        errors.finishDate = 'Дата конца не может быть в прошлом для активного турнира'
+        isValid = false
+      }
+    }
   }
 
   if (form.startDate && form.finishDate) {
-    const start = new Date(form.startDate)
-    const finish = new Date(form.finishDate)
+    const startDate = parseDateTimeLocal(form.startDate)
+    const finishDate = parseDateTimeLocal(form.finishDate)
 
-    if (start >= finish) {
+    if (startDate && finishDate && startDate >= finishDate) {
       errors.finishDate = 'Дата окончания должна быть позже даты начала'
       isValid = false
     }
@@ -370,10 +461,19 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
+    // Парсим даты с помощью нашей функции
+    const startDate = parseDateTimeLocal(form.startDate)
+    const finishDate = parseDateTimeLocal(form.finishDate)
+
+    if (!startDate || !finishDate) {
+      showNotification(`Некорректные даты в форме. Год должен быть между ${MIN_YEAR} и ${MAX_YEAR}`, 'error')
+      return
+    }
+
     const tournamentData = {
       name: form.name.trim(),
-      startDate: new Date(form.startDate).toISOString(),
-      finishDate: new Date(form.finishDate).toISOString(),
+      startDate: startDate.toISOString(),
+      finishDate: finishDate.toISOString(),
       address: form.address.trim(),
       link: form.link.trim() || undefined,
       rangId: parseInt(form.rangId),
