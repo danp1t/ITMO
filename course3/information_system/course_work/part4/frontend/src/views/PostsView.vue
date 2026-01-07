@@ -116,16 +116,33 @@
 
         <section class="modal-card-body">
           <div class="field">
-            <label class="label">Заголовок</label>
+            <div class="level">
+              <div class="level-left">
+                <label class="label">Заголовок</label>
+              </div>
+              <div class="level-right">
+                <span
+                  class="is-size-7"
+                  :class="{'has-text-danger': newPost.title.length > MAX_TITLE_LENGTH, 'has-text-grey': newPost.title.length <= MAX_TITLE_LENGTH}"
+                >
+                  {{ newPost.title.length }}/{{ MAX_TITLE_LENGTH }}
+                </span>
+              </div>
+            </div>
             <div class="control">
               <input
                 v-model="newPost.title"
                 class="input"
                 type="text"
+                :maxlength="MAX_TITLE_LENGTH"
                 placeholder="Введите заголовок"
                 :disabled="isSaving"
+                :class="{'is-danger': newPost.title.length > MAX_TITLE_LENGTH}"
               >
             </div>
+            <p v-if="newPost.title.length > MAX_TITLE_LENGTH" class="help is-danger">
+              Заголовок слишком длинный. Максимальная длина: {{ MAX_TITLE_LENGTH }} символов
+            </p>
           </div>
 
           <div class="field">
@@ -148,7 +165,7 @@
           <button
             class="button is-primary"
             @click="createPostWithAttachments"
-            :disabled="isSaving || !newPost.title.trim() || !newPost.content.trim()"
+            :disabled="isSaving || !newPost.title.trim() || !newPost.content.trim() || newPost.title.length > MAX_TITLE_LENGTH"
           >
             <span v-if="isSaving" class="icon">
               <i class="fas fa-spinner fa-spin"></i>
@@ -177,16 +194,33 @@
 
         <section class="modal-card-body">
           <div class="field">
-            <label class="label">Заголовок</label>
+            <div class="level">
+              <div class="level-left">
+                <label class="label">Заголовок</label>
+              </div>
+              <div class="level-right">
+                <span
+                  class="is-size-7"
+                  :class="{'has-text-danger': editingPost.title.length > MAX_TITLE_LENGTH, 'has-text-grey': editingPost.title.length <= MAX_TITLE_LENGTH}"
+                >
+                  {{ editingPost.title.length }}/{{ MAX_TITLE_LENGTH }}
+                </span>
+              </div>
+            </div>
             <div class="control">
               <input
                 v-model="editingPost.title"
                 class="input"
                 type="text"
+                :maxlength="MAX_TITLE_LENGTH"
                 placeholder="Введите заголовок"
                 :disabled="isSaving"
+                :class="{'is-danger': editingPost.title.length > MAX_TITLE_LENGTH}"
               >
             </div>
+            <p v-if="editingPost.title.length > MAX_TITLE_LENGTH" class="help is-danger">
+              Заголовок слишком длинный. Максимальная длина: {{ MAX_TITLE_LENGTH }} символов
+            </p>
           </div>
 
           <div class="field">
@@ -208,7 +242,7 @@
           <button
             class="button is-primary"
             @click="updatePost"
-            :disabled="isSaving || !editingPost.title.trim() || !editingPost.content.trim()"
+            :disabled="isSaving || !editingPost.title.trim() || !editingPost.content.trim() || editingPost.title.length > MAX_TITLE_LENGTH"
           >
             <span v-if="isSaving" class="icon">
               <i class="fas fa-spinner fa-spin"></i>
@@ -246,6 +280,9 @@ const showEditModal = ref(false)
 const sortBy = ref('createdAt')
 const sortDirection = ref('desc')
 const isSaving = ref(false)
+
+// Константа для максимальной длины заголовка
+const MAX_TITLE_LENGTH = 100
 
 const allTags = ref<Tag[]>([])
 const selectedTagIds = ref<number[]>([])
@@ -390,6 +427,11 @@ const createPostWithAttachments = async () => {
     return
   }
 
+  if (newPost.value.title.length > MAX_TITLE_LENGTH) {
+    alert(`Заголовок не должен превышать ${MAX_TITLE_LENGTH} символов`)
+    return
+  }
+
   if (!newPost.value.content.trim() || newPost.value.content === '<p></p>') {
     alert('Введите содержание поста')
     return
@@ -499,6 +541,11 @@ const updatePost = async () => {
   // Валидация
   if (!editingPost.value.title.trim()) {
     alert('Введите заголовок поста')
+    return
+  }
+
+  if (editingPost.value.title.length > MAX_TITLE_LENGTH) {
+    alert(`Заголовок не должен превышать ${MAX_TITLE_LENGTH} символов`)
     return
   }
 
