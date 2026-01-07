@@ -156,6 +156,7 @@
                 placeholder="Начните писать свой пост..."
                 @file-upload-error="handleFileUploadError"
                 @files-uploaded="handleFilesUploaded"
+                @tags-change="handleNewPostTagsChange"
               />
             </div>
           </div>
@@ -231,6 +232,9 @@
                 v-model="editingPost.content"
                 :disabled="isSaving"
                 :postId="editingPost.id"
+                :showTagSelector="true"
+                :initialTags="editingPost.tagIds"
+                @tags-change="handleEditPostTagsChange"
                 placeholder="Редактируйте содержимое поста..."
                 @file-upload-error="handleFileUploadError"
               />
@@ -297,6 +301,7 @@ const pendingFiles = ref<Array<{file: File, type: 'image' | 'file' | 'audio'}>>(
 const newPost = ref({
   title: '',
   content: '',
+  tagIds: [] as number[]
 })
 
 // Данные для редактирования поста
@@ -304,7 +309,8 @@ const editingPost = ref({
   id: 0,
   title: '',
   content: '',
-  ownerId: 0
+  ownerId: 0,
+  tagIds: [] as number[]
 })
 
 const loadPosts = async () => {
@@ -417,6 +423,16 @@ const handleFilesUploaded = (files: Array<{file: File, type: 'image' | 'file' | 
   pendingFiles.value = files
 }
 
+// Обработчик изменения тегов при создании
+const handleNewPostTagsChange = (tagIds: number[]) => {
+  newPost.value.tagIds = tagIds
+}
+
+// Обработчик изменения тегов при редактировании
+const handleEditPostTagsChange = (tagIds: number[]) => {
+  editingPost.value.tagIds = tagIds
+}
+
 // Создание поста с вложениями
 const createPostWithAttachments = async () => {
   if (!authStore.user) return
@@ -440,11 +456,8 @@ const createPostWithAttachments = async () => {
   isSaving.value = true
 
   try {
-    // 1. Создаем пост с тегами
-    const selectedTagIds = editorRef.value?.getSelectedTags() || []
-
     // Получаем объекты тегов по их ID
-    const tagObjects = selectedTagIds.map(id => ({
+    const tagObjects = newPost.value.tagIds.map(id => ({
       id: id,
       name: '', // Имя будет заполнено на бэкенде
       description: ''
@@ -486,7 +499,7 @@ const createPostWithAttachments = async () => {
 
     // 4. Закрываем модалку и обновляем список
     showCreateModal.value = false
-    newPost.value = { title: '', content: '' }
+    newPost.value = { title: '', content: '', tagIds: [] }
     pendingFiles.value = []
 
     if (editorRef.value) {
@@ -513,7 +526,7 @@ const closeCreateModal = () => {
   }
 
   showCreateModal.value = false
-  newPost.value = { title: '', content: '' }
+  newPost.value = { title: '', content: '', tagIds: [] }
   pendingFiles.value = []
 
   if (editorRef.value) {
@@ -529,7 +542,8 @@ const handleEdit = (post: Post) => {
     id: post.id,
     title: post.title || '',
     content: post.text || '',
-    ownerId: post.ownerId
+    ownerId: post.ownerId,
+    tagIds: post.tags?.map(tag => tag.id) || []
   }
   showEditModal.value = true
 }
@@ -557,10 +571,17 @@ const updatePost = async () => {
   isSaving.value = true
 
   try {
+    const tagObjects = editingPost.value.tagIds.map(id => ({
+      id: id,
+      name: '',
+      description: ''
+    }))
+
     const postData: UpdatePostRequest = {
       title: editingPost.value.title,
       text: editingPost.value.content,
       ownerId: editingPost.value.ownerId,
+      tags: tagObjects
     }
 
     await postsAPI.updatePost(editingPost.value.id, postData)
@@ -568,12 +589,9 @@ const updatePost = async () => {
     // Обновляем пост в списке
     const index = posts.value.findIndex(p => p.id === editingPost.value.id)
     if (index !== -1) {
-      posts.value[index] = {
-        ...posts.value[index],
-        title: editingPost.value.title,
-        text: editingPost.value.content,
-        updatedAt: new Date().toISOString()
-      }
+      // Перезагружаем пост для получения обновленных данных
+      const updatedResponse = await postsAPI.getPostById(editingPost.value.id)
+      posts.value[index] = updatedResponse.data
     }
 
     closeEditModal()
@@ -593,7 +611,8 @@ const closeEditModal = () => {
     id: 0,
     title: '',
     content: '',
-    ownerId: 0
+    ownerId: 0,
+    tagIds: []
   }
 
   if (editEditorRef.value) {

@@ -47,5 +47,5 @@ export interface UpdatePostRequest {
   title: string
   text: string
   ownerId: number
-  tagIds?: number[]
+  tags?: Tag[];
 }

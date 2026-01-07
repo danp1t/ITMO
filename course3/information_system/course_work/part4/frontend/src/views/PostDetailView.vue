@@ -104,6 +104,9 @@
                 v-model="editForm.content"
                 :disabled="isSaving"
                 :postId="post?.id"
+                :showTagSelector="true"
+                :initialTags="editForm.tagIds"
+                @tags-change="handleTagsChange"
                 placeholder="Редактируйте содержимое поста..."
                 @file-upload-error="handleFileUploadError"
               />
@@ -322,7 +325,13 @@ const isDeletingComment = ref<number | null>(null)
 const editForm = ref({
   title: '',
   content: '',
+  tagIds: [] as number[]
 })
+
+// Обработчик изменения тегов
+const handleTagsChange = (tagIds: number[]) => {
+  editForm.value.tagIds = tagIds
+}
 
 const loadPost = async () => {
   loading.value = true
@@ -459,7 +468,8 @@ const startEdit = () => {
 
   editForm.value = {
     title: post.value.title,
-    content: post.value.text
+    content: post.value.text,
+    tagIds: post.value.tags?.map(tag => tag.id) || []
   }
   isEditing.value = true
 }
@@ -468,7 +478,8 @@ const cancelEdit = () => {
   isEditing.value = false
   editForm.value = {
     title: '',
-    content: ''
+    content: '',
+    tagIds: []
   }
 
   if (editorRef.value) {
@@ -502,14 +513,14 @@ const saveEdit = async () => {
       title: editForm.value.title,
       text: editForm.value.content,
       ownerId: post.value.ownerId,
+      tags: editForm.value.tagIds.map(id => ({ id }))
     }
 
     await postsAPI.updatePost(post.value.id, postData)
 
     // Обновляем данные поста
-    post.value.title = editForm.value.title
-    post.value.text = editForm.value.content
-    post.value.updatedAt = new Date().toISOString()
+    const updatedResponse = await postsAPI.getPostById(post.value.id)
+    post.value = updatedResponse.data
 
     isEditing.value = false
   } catch (error: any) {
