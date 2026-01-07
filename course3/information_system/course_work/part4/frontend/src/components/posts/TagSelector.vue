@@ -32,12 +32,12 @@
       </div>
     </div>
 
-    <div v-if="showDropdown" class="dropdown-menu is-block">
+    <div v-if="showDropdown" class="dropdown-menu is-block dark-dropdown">
       <div class="dropdown-content">
         <div
           v-for="tag in filteredTags"
           :key="tag.id"
-          class="dropdown-item is-flex is-align-items-center"
+          class="dropdown-item is-flex is-align-items-center has-text-black-light"
           @mousedown.prevent="selectTag(tag)"
         >
           <span
@@ -46,7 +46,7 @@
           >
             {{ tag.name }}
           </span>
-          <span class="tag-description is-size-7 has-text-grey">
+          <span class="tag-description is-size-7 has-text-black-light">
             {{ tag.description }}
           </span>
         </div>
@@ -54,21 +54,6 @@
         <div v-if="filteredTags.length === 0" class="dropdown-item">
           <p class="has-text-grey">Теги не найдены</p>
         </div>
-      </div>
-    </div>
-
-    <div v-if="popularTags.length > 0" class="popular-tags mt-4">
-      <p class="is-size-7 has-text-grey mb-2">Популярные теги:</p>
-      <div class="tags">
-        <span
-          v-for="tag in popularTags"
-          :key="tag.id"
-          class="tag is-light mr-1 mb-1 is-clickable"
-          @click="selectTag(tag)"
-          :title="tag.description"
-        >
-          {{ tag.name }}
-        </span>
       </div>
     </div>
   </div>
@@ -220,7 +205,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   z-index: 1000;
-  background: white;
+  background: #131313;
   border: 1px solid #dbdbdb;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);

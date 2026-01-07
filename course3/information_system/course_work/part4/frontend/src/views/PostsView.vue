@@ -93,40 +93,14 @@
             </div>
           </div>
 
-          <!-- Блок фильтрации по тегам -->
-          <div class="box mb-4">
-            <h2 class="subtitle">Теги</h2>
-            <div class="field">
-              <div class="control">
-                <div class="tags">
-                    <span
-                      v-for="tag in allTags"
-                      :key="tag.id"
-                      class="tag is-clickable mr-1 mb-1"
-                      :class="{ 'is-primary is-light': selectedTagIds.includes(tag.id) }"
-                      @click="toggleTagFilter(tag.id)"
-                      :style="getTagStyle(tag)"
-                      :title="tag.description"
-                    >
-                      {{ tag.name }}
-                      <span v-if="tagPostCounts[tag.id]" class="tag-count ml-1">
-                        ({{ tagPostCounts[tag.id] }})
-                      </span>
-                    </span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div v-if="selectedTagIds.length > 0" class="mt-3">
-                          <button class="button is-small is-fullwidth" @click="clearTagFilters">
-                  <span class="icon">
-                    <i class="fas fa-times"></i>
-                  </span>
-                <span>Сбросить фильтры</span>
-              </button>
-            </div>
-          </div>
-
+          <!-- Компонент фильтрации по тегам -->
+          <TagFilter
+            v-if="allTags.length > 0"
+            :tags="allTags"
+            :selectedTagIds="selectedTagIds"
+            @tag-toggle="toggleTagFilter"
+            @clear="clearTagFilters"
+          />
         </div>
       </div>
     </div>
@@ -259,6 +233,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import PostCard from '../components/posts/PostCard.vue'
 import RichTextEditor from '../components/posts/RichTextEditor.vue'
+import TagFilter from '../components/posts/TagFilter.vue'
 import { postsAPI } from '../api/posts'
 import type { Post, UpdatePostRequest, Tag } from '../types/posts'
 import { tagsAPI } from '../api/tags'
@@ -274,7 +249,6 @@ const isSaving = ref(false)
 
 const allTags = ref<Tag[]>([])
 const selectedTagIds = ref<number[]>([])
-const tagPostCounts = ref<Record<number, number>>({})
 
 // Реф для редактора
 const editorRef = ref<InstanceType<typeof RichTextEditor>>()
@@ -371,40 +345,12 @@ const sortPosts = (postsToSort: Post[]) => {
   return sorted
 }
 
-const getTagStyle = (tag: Tag) => {
-  const hue = (tag.id * 137) % 360
-  return {
-    backgroundColor: `hsl(${hue}, 70%, 95%)`,
-    color: `hsl(${hue}, 50%, 30%)`,
-    border: `1px solid hsl(${hue}, 60%, 85%)`
-  }
-}
-
 const loadAllTags = async () => {
   try {
     const response = await tagsAPI.getAllTags()
     allTags.value = response.data || []
-
-    // Загружаем количество постов для каждого тега
-    await loadTagPostCounts()
   } catch (error) {
     console.error('Ошибка при загрузке тегов:', error)
-  }
-}
-
-const loadTagPostCounts = async () => {
-  try {
-    const counts: Record<number, number> = {}
-
-    // Для каждого тега получаем посты
-    for (const tag of allTags.value) {
-      const response = await postsAPI.getPostsByTag(tag.id)
-      counts[tag.id] = response.data?.length || 0
-    }
-
-    tagPostCounts.value = counts
-  } catch (error) {
-    console.error('Ошибка при загрузке статистики тегов:', error)
   }
 }
 
@@ -432,17 +378,6 @@ const handleFileUploadError = (error: string) => {
 // Обработчик добавления файлов
 const handleFilesUploaded = (files: Array<{file: File, type: 'image' | 'file' | 'audio'}>) => {
   pendingFiles.value = files
-}
-
-// Форматирование размера файла
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B'
-
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
 // Создание поста с вложениями

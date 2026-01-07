@@ -109,22 +109,6 @@
       </div>
     </div>
 
-    <!-- Теги поста -->
-    <div class="post-tags" v-if="post.tags && post.tags.length > 0">
-      <div class="tags are-medium">
-        <router-link
-          v-for="tag in post.tags"
-          :key="tag.id"
-          :to="`/posts?tag=${tag.id}`"
-          class="tag is-clickable"
-          :style="getTagStyle(tag)"
-          @click.stop="filterByTag(tag.id)"
-          :title="tag.description"
-        >
-          {{ tag.name }}
-        </router-link>
-      </div>
-    </div>
 
     <!-- Футер с действиями -->
     <footer class="card-footer">

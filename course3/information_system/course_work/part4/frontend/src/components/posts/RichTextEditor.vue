@@ -169,15 +169,8 @@
       <span>{{ pendingFiles.length }} файл(ов) будет загружен после создания поста</span>
     </div>
 
-    <!-- Область редактирования -->
-    <editor-content
-      :editor="editor"
-      class="editor-content"
-      :class="{ 'is-disabled': disabled }"
-    />
-
     <!-- Блок тегов -->
-    <div v-if="showTagSelector" class="tag-selector-wrapper mt-3">
+    <div v-if="showTagSelector" class="tag-selector-wrapper mt-3 p-3">
       <label class="label is-size-6">Теги поста:</label>
       <TagSelector
         v-model="selectedTagIds"
@@ -185,6 +178,13 @@
         @change="onTagsChange"
       />
     </div>
+
+    <!-- Область редактирования -->
+    <editor-content
+      :editor="editor"
+      class="editor-content"
+      :class="{ 'is-disabled': disabled }"
+    />
 
     <!-- Модальное окно для вставки видео -->
     <div v-if="showVideoModal" class="modal-overlay" @click="closeVideoModal">

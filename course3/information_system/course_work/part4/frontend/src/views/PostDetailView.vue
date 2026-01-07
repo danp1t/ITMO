@@ -50,7 +50,14 @@
         <div v-if="!isEditing" class="card-content">
           <div class="post-content" v-html="post.text"></div>
 
-          <div class="post-meta">
+          <!-- Отображение тегов поста -->
+          <TagList
+            v-if="post.tags && post.tags.length > 0"
+            :tags="post.tags"
+            class="mt-4"
+          />
+
+          <div class="post-meta mt-4">
             <small>
               <span class="icon-text">
                 <span class="icon">
@@ -283,6 +290,7 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import RichTextEditor from '../components/posts/RichTextEditor.vue'
+import TagList from '../components/posts/TagList.vue'
 import { postsAPI } from '../api/posts'
 import type { Post, Comment, UpdatePostRequest } from '../types/posts'
 
