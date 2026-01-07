@@ -75,7 +75,7 @@
                 <select v-model="sortBy">
                   <option value="">По умолчанию</option>
                   <option value="createdAt">По дате</option>
-                  <option value="likesCount">По лайкам</option>
+                  <option value="countLike">По лайкам</option>
                 </select>
               </div>
             </div>
