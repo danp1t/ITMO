@@ -176,11 +176,6 @@
       :class="{ 'is-disabled': disabled }"
     />
 
-    <!-- Счетчик символов -->
-    <div v-if="showCounter" class="character-counter">
-      Символов: {{ characterCount }}
-    </div>
-
     <!-- Модальное окно для вставки видео -->
     <div v-if="showVideoModal" class="modal-overlay" @click="closeVideoModal">
       <div class="modal-content" @click.stop>
@@ -566,11 +561,6 @@ const editor = useEditor({
     const html = editor.getHTML()
     emit('update:modelValue', html)
   },
-})
-
-// Счетчик символов
-const characterCount = computed(() => {
-  return editor.value?.storage.characterCount?.characters() || 0
 })
 
 // Получение embed URL для видео
