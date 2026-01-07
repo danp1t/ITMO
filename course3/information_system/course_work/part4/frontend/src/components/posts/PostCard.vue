@@ -5,8 +5,9 @@
       <p class="card-header-title">
         {{ post.title }}
       </p>
-      <div class="card-header-icons" v-if="authStore.isAuthenticated && authStore.canEditPost(post.ownerId)">
+      <div class="card-header-icons" v-if="authStore.isAuthenticated">
         <button
+          v-if="authStore.canEditPost(post.ownerId)"
           class="card-header-icon mr-1"
           @click="$emit('edit', post)"
           title="Редактировать пост"
@@ -203,7 +204,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { postsAPI } from '@/api/posts'
-import type { Post, Tag } from '@/types/posts'
+import type { Post } from '@/types/posts'
 
 const props = defineProps<{
   post: Post
