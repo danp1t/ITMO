@@ -87,7 +87,7 @@
           <th>Ранг</th>
           <th>Мин. возраст</th>
           <th>Статус</th>
-          <th v-if="showActions">Действия</th>
+          <th v-if="hasAnyTournamentPermission">Действия</th>
         </tr>
         </thead>
         <tbody>
@@ -144,11 +144,11 @@
                 {{ tournament.archived ? 'Архивный' : 'Активный' }}
               </span>
           </td>
-          <td v-if="showActions">
+          <td v-if="hasAnyTournamentPermission">
             <div class="buttons are-small">
               <button
                 v-if="hasPermission('EditTournament')"
-                class="button is-info is-light"
+                class="button is-info is-dark"
                 @click.stop="onEditClick(tournament)"
               >
                   <span class="icon">
@@ -157,7 +157,7 @@
               </button>
               <button
                 v-if="hasPermission('DeleteTournament')"
-                class="button is-danger is-light"
+                class="button is-danger is-dark"
                 @click.stop="confirmDelete(tournament)"
               >
                   <span class="icon">
@@ -254,6 +254,14 @@ const hasPermission = (permission: string) => {
   if (!authStore.user) return false
   return authStore.user.roles.includes(`OAPI:ROLE:${permission}`)
 }
+
+const hasAnyTournamentPermission = computed(() => {
+  if (!props.showActions) return false
+
+  return hasPermission('EditTournament') ||
+    hasPermission('DeleteTournament') ||
+    hasPermission('PublishTournament')
+})
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU')
