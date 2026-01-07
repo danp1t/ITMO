@@ -465,7 +465,10 @@ const createPostWithAttachments = async () => {
 
 // Закрытие модалки создания
 const closeCreateModal = () => {
-  if (isSaving.value) return
+  if (isSaving.value) {
+    isSaving.value = false
+    return
+  }
 
   showCreateModal.value = false
   newPost.value = { title: '', content: '' }
@@ -474,6 +477,7 @@ const closeCreateModal = () => {
   if (editorRef.value) {
     editorRef.value.clearPendingFiles()
     editorRef.value.clear()
+    editorRef.value.clearTags()
   }
 }
 

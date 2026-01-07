@@ -37,7 +37,7 @@
         <div
           v-for="tag in filteredTags"
           :key="tag.id"
-          class="dropdown-item is-flex is-align-items-center has-text-black-light"
+          class="dropdown-item is-flex is-align-items-center"
           @mousedown.prevent="selectTag(tag)"
         >
           <span
@@ -46,7 +46,7 @@
           >
             {{ tag.name }}
           </span>
-          <span class="tag-description is-size-7 has-text-black-light">
+          <span class="tag-description is-size-7">
             {{ tag.description }}
           </span>
         </div>
@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue' // ДОБАВЛЕНО watch
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { tagsAPI } from '@/api/tags'
 import type { Tag } from '@/types/posts'
 
@@ -84,6 +84,7 @@ const allTags = ref<Tag[]>([])
 const selectedTags = ref<Tag[]>([])
 const searchQuery = ref('')
 const showDropdown = ref(false)
+const isLoading = ref(false)
 
 // Загрузка всех тегов
 const loadTags = async () => {
@@ -99,12 +100,17 @@ const loadTags = async () => {
 const loadPostTags = async () => {
   if (!props.postId) return
 
+  if (isLoading.value) return // Предотвращаем повторные запросы
+  isLoading.value = true
+
   try {
     const response = await tagsAPI.getPostTags(props.postId)
     selectedTags.value = response.data || []
-    emit('update:modelValue', selectedTags.value.map(t => t.id))
+    // НЕ вызываем emit здесь, чтобы избежать бесконечного цикла
   } catch (error) {
     console.error('Ошибка при загрузке тегов поста:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -131,26 +137,43 @@ const popularTags = computed(() => {
 })
 
 // Выбор тега
-const selectTag = (tag: Tag) => {
+const selectTag = async (tag: Tag) => {
   if (!selectedTags.value.some(t => t.id === tag.id)) {
     selectedTags.value.push(tag)
-    emit('update:modelValue', selectedTags.value.map(t => t.id))
+
+    // Сначала обновляем локальное состояние
+    const selectedIds = selectedTags.value.map(t => t.id)
+
+    // Используем nextTick для предотвращения циклов
+    await nextTick()
+
+    // Затем эмитируем изменения
+    emit('update:modelValue', selectedIds)
     emit('change', selectedTags.value)
+
     searchQuery.value = ''
+    showDropdown.value = false
   }
 }
 
 // Удаление тега
-const removeTag = (tagId: number) => {
+const removeTag = async (tagId: number) => {
   selectedTags.value = selectedTags.value.filter(t => t.id !== tagId)
-  emit('update:modelValue', selectedTags.value.map(t => t.id))
+
+  // Сначала обновляем локальное состояние
+  const selectedIds = selectedTags.value.map(t => t.id)
+
+  // Используем nextTick для предотвращения циклов
+  await nextTick()
+
+  // Затем эмитируем изменения
+  emit('update:modelValue', selectedIds)
   emit('change', selectedTags.value)
 }
 
-// Стиль тега (можно использовать цвет из БД или генерировать)
+// Стиль тега
 const getTagStyle = (tag: Tag) => {
-  // Пример: генерируем цвет на основе id
-  const hue = (tag.id * 137) % 360 // Золотое сечение для распределения
+  const hue = (tag.id * 137) % 360
   return {
     backgroundColor: `hsl(${hue}, 70%, 90%)`,
     color: `hsl(${hue}, 50%, 30%)`,
@@ -170,13 +193,26 @@ const onBlur = () => {
   }, 200)
 }
 
-// Наблюдатель за modelValue (внешними изменениями)
-watch(() => props.modelValue, (newIds) => {
-  if (props.postId) {
-    // Для существующего поста загружаем теги по ID
+// Наблюдатель за изменениями postId
+watch(() => props.postId, (newPostId) => {
+  if (newPostId) {
     loadPostTags()
-  } else {
-    // Для нового поста используем только ID
+  }
+}, { immediate: true })
+
+// Наблюдатель за внешними изменениями modelValue
+// Используем deep: false и только для случаев без postId
+watch(() => props.modelValue, (newIds) => {
+  // Если у нас есть postId, игнорируем внешние изменения modelValue
+  // потому что теги загружаются с сервера
+  if (props.postId) {
+    return
+  }
+
+  // Только для новых постов синхронизируем с внешним значением
+  // Проверяем, действительно ли изменились ID
+  const currentIds = selectedTags.value.map(t => t.id)
+  if (JSON.stringify(currentIds.sort()) !== JSON.stringify(newIds.slice().sort())) {
     selectedTags.value = allTags.value.filter(tag => newIds.includes(tag.id))
   }
 }, { immediate: true })
@@ -184,11 +220,9 @@ watch(() => props.modelValue, (newIds) => {
 onMounted(async () => {
   await loadTags()
 
-  // Если есть ID поста, загружаем его теги
-  if (props.postId) {
-    await loadPostTags()
-  } else if (props.modelValue?.length) {
-    // Если переданы ID тегов, выбираем их
+  // Если нет postId, но есть начальные значения в modelValue
+  if (!props.postId && props.modelValue?.length) {
+    // Выбираем теги по ID
     selectedTags.value = allTags.value.filter(tag => props.modelValue.includes(tag.id))
   }
 })
@@ -199,27 +233,36 @@ onMounted(async () => {
   position: relative;
 }
 
-.dropdown-menu {
+/* Темное выпадающее меню */
+.dark-dropdown {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
   z-index: 1000;
-  background: #131313;
-  border: 1px solid #dbdbdb;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   max-height: 300px;
   overflow-y: auto;
+  margin-top: 4px;
+}
+
+.dropdown-content {
+  padding: 8px 0;
 }
 
 .dropdown-item {
   cursor: pointer;
-  padding: 8px 12px;
+  padding: 10px 16px;
+  color: #171313;
+  transition: all 0.2s ease;
 }
 
 .dropdown-item:hover {
-  background-color: #f5f5f5;
+  background-color: #252525;
+  color: #ffffff;
 }
 
 .tag-description {
@@ -227,33 +270,78 @@ onMounted(async () => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #a0a0a0;
 }
 
+/* Поле ввода в темной теме */
+.input {
+  background-color: #252525;
+  border-color: #404040;
+  color: #ffffff;
+}
+
+.input:focus {
+  border-color: #3273dc;
+  box-shadow: 0 0 0 0.125em rgba(50, 115, 220, 0.25);
+}
+
+.input::placeholder {
+  color: #888;
+}
+
+/* Иконка поиска */
+.icon {
+  color: #888;
+}
+
+/* Популярные теги */
 .popular-tags .tag {
   transition: all 0.2s;
+  background-color: #2a2a2a;
+  color: #ccc;
+  border: 1px solid #404040;
 }
 
 .popular-tags .tag:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background-color: #333;
+  color: #fff;
 }
 
+/* Выбранные теги */
 .selected-tags .tag {
   display: inline-flex;
   align-items: center;
-  padding: 6px 12px;
-  margin-right: 8px;
-  margin-bottom: 8px;
+  padding: 8px 14px;
+  margin-right: 10px;
+  margin-bottom: 10px;
   border-radius: 20px;
   font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .selected-tags .delete {
-  margin-left: 4px;
+  margin-left: 6px;
   opacity: 0.7;
+  background-color: transparent;
+  border: none;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 .selected-tags .delete:hover {
   opacity: 1;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .dark-dropdown {
+    max-height: 250px;
+  }
+
+  .dropdown-item {
+    padding: 8px 12px;
+  }
 }
 </style>

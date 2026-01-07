@@ -807,6 +807,12 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
   input.click()
 }
 
+const clearTags = () => {
+  selectedTagIds.value = []
+  if (!props.postId) {
+  }
+}
+
 const uploadFile = () => uploadFileHandler('file')
 const uploadAudio = () => uploadFileHandler('audio')
 
@@ -969,7 +975,7 @@ defineExpose({
   hasPendingFiles: computed(() => pendingFiles.value.length > 0),
   getPendingFiles: () => pendingFiles.value,
   getSelectedTags: () => selectedTagIds.value,
-  clearTags: () => { selectedTagIds.value = [] }
+  clearTags
 })
 </script>
 
