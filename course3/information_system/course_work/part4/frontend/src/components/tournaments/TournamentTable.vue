@@ -84,8 +84,18 @@
               </span>
           </th>
           <th>Адрес</th>
-          <th>Ранг</th>
-          <th>Мин. возраст</th>
+          <th @click="sortBy('rangId')" class="is-clickable">
+            Ранг
+            <span class="icon is-small" v-if="sort.field === 'rangId'">
+                <i :class="sort.direction === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+              </span>
+          </th>
+          <th @click="sortBy('minimalAge')" class="is-clickable">
+            Мин. возраст
+            <span class="icon is-small" v-if="sort.field === 'minimalAge'">
+                <i :class="sort.direction === 'asc' ? 'fas fa-sort-up' : 'fas fa-sort-down'"></i>
+              </span>
+          </th>
           <th>Статус</th>
           <th v-if="hasAnyTournamentPermission">Действия</th>
         </tr>
@@ -209,7 +219,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import {ref, computed, onMounted, watch} from 'vue'
 import { useAuthStore } from '@/stores/auth.ts'
 import type { Tournament, Rang } from '@/types/tournaments.ts'
 
@@ -220,6 +230,7 @@ interface Props {
   totalItems?: number
   itemsPerPage?: number
   showActions?: boolean
+  currentPage?: number
 }
 
 interface Emits {
@@ -236,7 +247,14 @@ interface Emits {
 const props = withDefaults(defineProps<Props>(), {
   totalItems: 0,
   itemsPerPage: 10,
-  showActions: true
+  showActions: true,
+  currentPage: 1
+})
+
+const currentPage = ref(props.currentPage)
+
+watch(() => props.currentPage, (newValue) => {
+  currentPage.value = newValue
 })
 
 const emit = defineEmits<Emits>()
@@ -248,7 +266,6 @@ const sort = ref({
   field: 'startDate',
   direction: 'desc'
 })
-const currentPage = ref(1)
 
 const hasPermission = (permission: string) => {
   if (!authStore.user) return false
@@ -333,9 +350,12 @@ const onEditClick = (tournament: Tournament) => {
   emit('edit', tournament)
 }
 
+
 // Сброс при смене данных
 onMounted(() => {
-  currentPage.value = 1
+  if (props.currentPage === 1) {
+    currentPage.value = 1
+  }
 })
 </script>
 

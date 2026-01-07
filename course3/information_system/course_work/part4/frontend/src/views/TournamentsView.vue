@@ -13,10 +13,11 @@
       <!-- Таблица турниров -->
       <div class="column is-three-quarters">
         <TournamentTable
-          :tournaments="tournaments"
+          :tournaments="paginatedTournaments"
           :rangs="rangs"
           :loading="loading"
-          :total-items="totalTournaments"
+          :total-items="filteredAndSortedTournaments.length"
+          :current-page="currentPage"
           @search="handleSearch"
           @filter-by-rang="handleFilterByRang"
           @sort="handleSort"
@@ -41,7 +42,7 @@
                   type="radio"
                   v-model="showArchived"
                   :value="false"
-                  @change="loadTournaments"
+                  @change="applyFilters"
                 >
                 Только активные
               </label>
@@ -50,7 +51,7 @@
                   type="radio"
                   v-model="showArchived"
                   :value="true"
-                  @change="loadTournaments"
+                  @change="applyFilters"
                 >
                 Все турниры
               </label>
@@ -63,7 +64,7 @@
             <label class="label">Сортировка по дате:</label>
             <div class="control">
               <div class="select is-fullwidth">
-                <select v-model="dateFilter" @change="loadTournaments">
+                <select v-model="dateFilter" @change="applyFilters">
                   <option value="all">Все даты</option>
                   <option value="upcoming">Предстоящие</option>
                   <option value="past">Прошедшие</option>
@@ -135,7 +136,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import TournamentTable from '../components/tournaments/TournamentTable.vue'
 import TournamentForm from '../components/tournaments/TournamentForm.vue'
@@ -146,10 +147,9 @@ import type { Tournament, Rang } from '../types/tournaments'
 const authStore = useAuthStore()
 
 // Данные
-const tournaments = ref<Tournament[]>([])
+const allTournaments = ref<Tournament[]>([])
 const rangs = ref<Rang[]>([])
 const loading = ref(false)
-const totalTournaments = ref(0)
 
 // Фильтры
 const searchQuery = ref('')
@@ -167,68 +167,12 @@ const showDetailModal = ref(false)
 const editingTournament = ref<Tournament | null>(null)
 const selectedTournament = ref<Tournament | null>(null)
 
-const activeTournaments = computed(() => {
-  return tournaments.value.filter(t => !t.archived).length
-})
-
-const archivedTournaments = computed(() => {
-  return tournaments.value.filter(t => t.archived).length
-})
-
+// Загрузка всех турниров
 const loadTournaments = async () => {
   loading.value = true
-
   try {
-    let params: any = {
-      sortBy: sortField.value,
-      sortDirection: sortDirection.value,
-      page: currentPage.value,
-      limit: itemsPerPage
-    }
-
-    // Применяем фильтры
-    if (searchQuery.value) {
-      const searchResult = await tournamentsAPI.searchTournaments(
-        searchQuery.value,
-        sortField.value,
-        sortDirection.value
-      )
-      tournaments.value = searchResult.data
-      totalTournaments.value = searchResult.data.length
-    } else if (selectedRangId.value) {
-      const rangResult = await tournamentsAPI.getTournamentsByRang(selectedRangId.value)
-      tournaments.value = rangResult.data
-      totalTournaments.value = rangResult.data.length
-    } else {
-      const result = await tournamentsAPI.getTournaments(params)
-      tournaments.value = result.data
-      // В реальном API должен быть total count в ответе
-      totalTournaments.value = result.data.length
-    }
-
-    // Дополнительная фильтрация на клиенте
-    if (!showArchived.value) {
-      tournaments.value = tournaments.value.filter(t => !t.archived)
-    }
-
-    if (dateFilter.value !== 'all') {
-      const now = new Date()
-      tournaments.value = tournaments.value.filter(t => {
-        const startDate = new Date(t.startDate)
-        const finishDate = new Date(t.finishDate)
-
-        switch (dateFilter.value) {
-          case 'upcoming':
-            return startDate > now
-          case 'past':
-            return finishDate < now
-          case 'current':
-            return startDate <= now && finishDate >= now
-          default:
-            return true
-        }
-      })
-    }
+    const result = await tournamentsAPI.getTournaments()
+    allTournaments.value = result.data
   } catch (error) {
     console.error('Ошибка при загрузке турниров:', error)
     alert('Не удалось загрузить турниры')
@@ -246,27 +190,126 @@ const loadRangs = async () => {
   }
 }
 
+// Применение фильтров и сортировки на клиенте
+const filteredAndSortedTournaments = computed(() => {
+  let filtered = [...allTournaments.value]
+
+  // Фильтр по поиску (только для названия)
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    filtered = filtered.filter(t =>
+      t.name.toLowerCase().includes(query)
+    )
+  }
+
+  // Фильтр по рангу
+  if (selectedRangId.value !== null) {
+    filtered = filtered.filter(t => t.rangId === selectedRangId.value)
+  }
+
+  // Фильтр по архивации
+  if (!showArchived.value) {
+    filtered = filtered.filter(t => !t.archived)
+  }
+
+  // Фильтр по дате
+  if (dateFilter.value !== 'all') {
+    const now = new Date()
+    filtered = filtered.filter(t => {
+      const startDate = new Date(t.startDate)
+      const finishDate = new Date(t.finishDate)
+
+      switch (dateFilter.value) {
+        case 'upcoming':
+          return startDate > now
+        case 'past':
+          return finishDate < now
+        case 'current':
+          return startDate <= now && finishDate >= now
+        default:
+          return true
+      }
+    })
+  }
+
+  // Сортировка
+  filtered.sort((a, b) => {
+    let aValue: any, bValue: any
+
+    switch (sortField.value) {
+      case 'name':
+        aValue = a.name.toLowerCase()
+        bValue = b.name.toLowerCase()
+        break
+      case 'startDate':
+        aValue = new Date(a.startDate).getTime()
+        bValue = new Date(b.startDate).getTime()
+        break
+      case 'finishDate':
+        aValue = new Date(a.finishDate).getTime()
+        bValue = new Date(b.finishDate).getTime()
+        break
+      case 'rangId':
+        aValue = a.rangId
+        bValue = b.rangId
+        break
+      case 'minimalAge':
+        aValue = a.minimalAge
+        bValue = b.minimalAge
+        break
+      default:
+        return 0
+    }
+
+    const direction = sortDirection.value === 'asc' ? 1 : -1
+
+    if (aValue < bValue) return -1 * direction
+    if (aValue > bValue) return 1 * direction
+    return 0
+  })
+
+  return filtered
+})
+
+// Пагинация
+const totalPages = computed(() => {
+  return Math.ceil(filteredAndSortedTournaments.value.length / itemsPerPage)
+})
+
+const paginatedTournaments = computed(() => {
+  const startIndex = (currentPage.value - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  return filteredAndSortedTournaments.value.slice(startIndex, endIndex)
+})
+
+// Статистика
+const totalTournaments = computed(() => allTournaments.value.length)
+const activeTournaments = computed(() => allTournaments.value.filter(t => !t.archived).length)
+const archivedTournaments = computed(() => allTournaments.value.filter(t => t.archived).length)
+
+// Обработчики событий из TournamentTable
 const handleSearch = (query: string) => {
   searchQuery.value = query
-  selectedRangId.value = null
-  loadTournaments()
+  currentPage.value = 1
 }
 
 const handleFilterByRang = (rangId: number | null) => {
   selectedRangId.value = rangId
-  searchQuery.value = ''
-  loadTournaments()
+  currentPage.value = 1
 }
 
 const handleSort = (field: string, direction: string) => {
   sortField.value = field
   sortDirection.value = direction
-  loadTournaments()
+  currentPage.value = 1
 }
 
 const handlePageChange = (page: number) => {
   currentPage.value = page
-  loadTournaments()
+}
+
+const applyFilters = () => {
+  currentPage.value = 1
 }
 
 const resetFilters = () => {
@@ -277,7 +320,6 @@ const resetFilters = () => {
   showArchived.value = false
   dateFilter.value = 'all'
   currentPage.value = 1
-  loadTournaments()
 }
 
 const showTournamentDetail = (tournament: Tournament) => {
@@ -313,15 +355,13 @@ const closeFormModal = () => {
 const handleFormSubmit = async (tournamentData: any) => {
   try {
     if (editingTournament.value) {
-      // Редактирование существующего турнира
       await tournamentsAPI.updateTournament(editingTournament.value.id, tournamentData)
     } else {
-      // Создание нового турнира
       await tournamentsAPI.createTournament(tournamentData)
     }
 
     closeFormModal()
-    loadTournaments()
+    loadTournaments() // Перезагружаем все турниры
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при сохранении турнира'
     alert(message)
@@ -331,7 +371,7 @@ const handleFormSubmit = async (tournamentData: any) => {
 const deleteTournament = async (tournament: Tournament) => {
   try {
     await tournamentsAPI.deleteTournament(tournament.id)
-    loadTournaments()
+    loadTournaments() // Перезагружаем все турниры
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при удалении турнира'
     alert(message)
@@ -407,7 +447,6 @@ onMounted(() => {
     width: 100%;
   }
 
-  /* Для мобильных устройств - уменьшаем ширину */
   .modal-card {
     width: 95%;
     max-width: 95%;
