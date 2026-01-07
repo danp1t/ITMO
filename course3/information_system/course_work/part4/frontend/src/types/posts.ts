@@ -14,6 +14,7 @@ export interface Post {
 export interface Tag {
   id: number
   name: string
+  description: string
   color?: string
 }
 
@@ -33,6 +34,7 @@ export interface CreatePostData {
   title: string
   text: string
   ownerId: number
+  tagIds?: number[]
 }
 
 export interface CreateCommentData {
@@ -45,5 +47,5 @@ export interface UpdatePostRequest {
   title: string
   text: string
   ownerId: number
-  tags?: number[]
+  tagIds?: number[]
 }

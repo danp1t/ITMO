@@ -109,6 +109,23 @@
       </div>
     </div>
 
+    <!-- Теги поста -->
+    <div class="post-tags" v-if="post.tags && post.tags.length > 0">
+      <div class="tags are-medium">
+        <router-link
+          v-for="tag in post.tags"
+          :key="tag.id"
+          :to="`/posts?tag=${tag.id}`"
+          class="tag is-clickable"
+          :style="getTagStyle(tag)"
+          @click.stop="filterByTag(tag.id)"
+          :title="tag.description"
+        >
+          {{ tag.name }}
+        </router-link>
+      </div>
+    </div>
+
     <!-- Футер с действиями -->
     <footer class="card-footer">
       <button
@@ -187,7 +204,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { postsAPI } from '@/api/posts'
-import type { Post } from '@/types/posts'
+import type {Post, Tag} from '@/types/posts'
 
 const props = defineProps<{
   post: Post
@@ -385,6 +402,20 @@ const copyToClipboard = async () => {
       alert('Ссылка скопирована в буфер обмена!')
       showShareModal.value = false
     }
+  }
+}
+
+const filterByTag = (tagId: number) => {
+  router.push({ path: '/posts', query: { tag: tagId } })
+}
+
+// Стиль тега
+const getTagStyle = (tag: Tag) => {
+  const hue = (tag.id * 137) % 360
+  return {
+    backgroundColor: `hsl(${hue}, 70%, 95%)`,
+    color: `hsl(${hue}, 50%, 30%)`,
+    border: `1px solid hsl(${hue}, 60%, 85%)`
   }
 }
 
