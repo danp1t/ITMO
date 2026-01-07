@@ -583,7 +583,6 @@ const uploadImage = async () => {
     const file = (e.target as HTMLInputElement).files?.[0]
     if (!file) return
 
-    // Проверка размера файла (макс 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Размер файла не должен превышать 5MB')
       return
@@ -592,18 +591,32 @@ const uploadImage = async () => {
     uploadingImage.value = true
 
     try {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        const result = e.target?.result as string
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('postId', '1') // TODO: Замените на реальный postId
+      formData.append('typeAttachmentId', '1')
 
-        // Вставляем изображение в редактор
+      // Используйте полный URL к бэкенду
+      const response = await fetch('http://localhost:8080/api/attachments/upload', {
+        method: 'POST',
+        body: formData
+        // Не добавляйте заголовок Content-Type - FormData сам его установит
+      })
+
+      if (response.ok) {
+        const attachment = await response.json()
+        const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
+
         editor.value
           ?.chain()
           .focus()
-          .setImage({ src: result })
+          .setImage({ src: fileUrl })
           .run()
+      } else {
+        const error = await response.text()
+        console.error('Ошибка загрузки:', error)
+        alert('Не удалось загрузить изображение')
       }
-      reader.readAsDataURL(file)
     } catch (error) {
       console.error('Ошибка загрузки изображения:', error)
       alert('Не удалось загрузить изображение')
@@ -622,7 +635,6 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
   const input = document.createElement('input')
   input.type = 'file'
 
-  // Устанавливаем accept в зависимости от типа
   if (type === 'audio') {
     input.accept = 'audio/*'
     uploadingAudio.value = true
@@ -638,7 +650,6 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
       return
     }
 
-    // Проверка размера файла (макс 10MB)
     if (file.size > 10 * 1024 * 1024) {
       alert('Размер файла не должен превышать 10MB')
       resetUploadState(type)
@@ -646,36 +657,43 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
     }
 
     try {
-      const reader = new FileReader()
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('postId', '3') // TODO: Замените на реальный postId
+      formData.append('typeAttachmentId', type === 'audio' ? '3' : '2')
 
-      reader.onload = async (e) => {
-        const result = e.target?.result as string
+      // Используйте полный URL к бэкенду
+      const response = await fetch('http://localhost:8080/api/attachments/upload', {
+        method: 'POST',
+        body: formData
+      })
 
-        // В зависимости от типа файла используем разные команды
+      if (response.ok) {
+        const attachment = await response.json()
+        const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
+
         if (type === 'audio') {
           editor.value
             ?.chain()
             .focus()
-            .setAudio({ src: result, title: file.name })
+            .setAudio({ src: fileUrl, title: file.name })
             .run()
         } else {
           editor.value
             ?.chain()
             .focus()
             .setFile({
-              src: result,
+              src: fileUrl,
               name: file.name,
               size: formatFileSize(file.size),
               type: file.type
             })
             .run()
         }
-      }
-
-      if (type === 'audio') {
-        reader.readAsDataURL(file)
       } else {
-        reader.readAsDataURL(file)
+        const error = await response.text()
+        console.error('Ошибка загрузки:', error)
+        alert(`Не удалось загрузить ${type === 'audio' ? 'аудио' : 'файл'}`)
       }
     } catch (error) {
       console.error(`Ошибка загрузки ${type === 'audio' ? 'аудио' : 'файла'}:`, error)
