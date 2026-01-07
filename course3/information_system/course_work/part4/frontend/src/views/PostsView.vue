@@ -25,9 +25,9 @@
               <p class="is-size-7">
                 <i class="fas fa-lock mr-1"></i>
                 Для создания постов требуется роль публикации
-                <router-link to="/profile" class="has-text-primary ml-1">
+                <a href="https://t.me/danp1t" class="has-text-primary ml-1">
                   (Обратитесь к администратору)
-                </router-link>
+                </a>
               </p>
             </div>
 

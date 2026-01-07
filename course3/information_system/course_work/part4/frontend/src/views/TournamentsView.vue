@@ -318,7 +318,6 @@ const handleFormSubmit = async (tournamentData: any) => {
     } else {
       // Создание нового турнира
       await tournamentsAPI.createTournament(tournamentData)
-      alert('Турнир успешно создан!')
     }
 
     closeFormModal()
