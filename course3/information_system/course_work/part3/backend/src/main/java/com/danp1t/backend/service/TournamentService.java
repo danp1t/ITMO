@@ -68,6 +68,16 @@ public class TournamentService {
     public TournamentDTO save(TournamentDTO tournamentDTO) {
         Tournament tournament = toEntity(tournamentDTO);
         rangRepository.findById(tournamentDTO.getRangId()).ifPresent(tournament::setRang);
+        LocalDateTime now = LocalDateTime.now();
+
+        if (tournament.getFinishDate() != null && tournament.getFinishDate().isBefore(now)) {
+            tournament.setArchived(true);
+        } else {
+            if (tournament.getArchived() == null) {
+                tournament.setArchived(false);
+            }
+        }
+
         Tournament saved = tournamentRepository.save(tournament);
         return toDTO(saved);
     }
@@ -76,9 +86,24 @@ public class TournamentService {
         if (!tournamentRepository.existsById(id)) {
             throw new RuntimeException("Tournament not found with id: " + id);
         }
+
         Tournament tournament = toEntity(tournamentDTO);
         tournament.setId(id);
+
         rangRepository.findById(tournamentDTO.getRangId()).ifPresent(tournament::setRang);
+        LocalDateTime now = LocalDateTime.now();
+
+        if (tournament.getFinishDate() != null && tournament.getFinishDate().isBefore(now)) {
+            tournament.setArchived(true);
+        } else {
+            Boolean archivedFromDTO = tournamentDTO.getArchived();
+            if (archivedFromDTO != null) {
+                tournament.setArchived(archivedFromDTO);
+            } else {
+                tournament.setArchived(false);
+            }
+        }
+
         Tournament updated = tournamentRepository.save(tournament);
         return toDTO(updated);
     }
