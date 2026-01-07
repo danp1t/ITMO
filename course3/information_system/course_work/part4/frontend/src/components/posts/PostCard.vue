@@ -34,46 +34,46 @@
     </header>
 
     <!-- Превью изображение -->
-    <div v-if="postImage" class="post-image-preview" @click="viewPost">
+    <div v-if="postImage && !isExpanded" class="post-image-preview" @click="viewPost">
       <img :src="postImage" :alt="post.title" class="preview-image" />
       <div class="image-overlay">
-        <span class="icon">
-          <i class="fas fa-eye"></i>
-        </span>
+        <i class="fas fa-eye"></i>
       </div>
     </div>
 
     <!-- Содержимое поста -->
     <div class="card-content">
-      <!-- HTML контент с ограничением по высоте -->
-      <div
-        class="post-content-preview"
-        :class="{ 'expanded': isExpanded }"
-        v-html="safeHtml"
-      ></div>
+      <!-- HTML контент -->
+      <div class="post-content-wrapper">
+        <div
+          class="post-content-preview"
+          :class="{ 'expanded': isExpanded }"
+          v-html="processedHtml"
+        ></div>
+
+        <!-- Градиент для превью -->
+        <div v-if="!isExpanded && shouldShowGradient" class="content-gradient"></div>
+      </div>
 
       <!-- Кнопка "Читать далее" если контент длинный -->
-      <button
-        v-if="hasLongContent && !isExpanded"
-        class="button is-text read-more-button"
-        @click.stop="isExpanded = true"
-      >
-        <span>Читать далее</span>
-        <span class="icon">
+      <div v-if="hasLongContent" class="content-expand-buttons">
+        <button
+          v-if="!isExpanded"
+          class="button is-text read-more-button"
+          @click.stop="isExpanded = true"
+        >
+          <span>Читать далее</span>
           <i class="fas fa-chevron-down"></i>
-        </span>
-      </button>
-
-      <button
-        v-if="isExpanded"
-        class="button is-text collapse-button"
-        @click.stop="isExpanded = false"
-      >
-        <span>Свернуть</span>
-        <span class="icon">
+        </button>
+        <button
+          v-else
+          class="button is-text collapse-button"
+          @click.stop="isExpanded = false"
+        >
+          <span>Свернуть</span>
           <i class="fas fa-chevron-up"></i>
-        </span>
-      </button>
+        </button>
+      </div>
 
       <!-- Мета-информация -->
       <div class="post-meta">
@@ -81,39 +81,30 @@
           <span
             v-for="tag in post.tags.slice(0, 3)"
             :key="tag.id"
-            class="tag is-light is-small"
+            class="tag"
           >
             {{ tag.name }}
           </span>
-          <span v-if="post.tags.length > 3" class="tag is-light is-small">
+          <span v-if="post.tags.length > 3" class="tag">
             +{{ post.tags.length - 3 }}
           </span>
         </div>
 
         <div class="meta-info">
-          <small class="has-text-grey">
-            <span class="icon-text ml-3">
-              <span class="icon">
-                <i class="fas fa-user"></i>
-              </span>
-              <span>{{ post.ownerName }}</span>
-            </span>
+          <div class="meta-item">
+            <i class="fas fa-user"></i>
+            <span>{{ post.ownerName }}</span>
+          </div>
 
-            <span class="icon-text ml-3">
-              <span class="icon">
-                <i class="fas fa-calendar"></i>
-              </span>
-              <span>{{ formatDate(post.createdAt) }}</span>
-            </span>
+          <div class="meta-item">
+            <i class="fas fa-calendar"></i>
+            <span>{{ formatDate(post.createdAt) }}</span>
+          </div>
 
-            <span class="icon-text ml-3">
-              <span class="icon">
-                <i class="fas fa-heart"></i>
-              </span>
-              <span>{{ currentLikeCount }}</span>
-            </span>
-
-          </small>
+          <div class="meta-item">
+            <i class="fas fa-heart"></i>
+            <span>{{ currentLikeCount }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -126,13 +117,11 @@
         :disabled="isLiking || !authStore.isAuthenticated"
         :title="!authStore.isAuthenticated ? 'Войдите, чтобы поставить лайк' : ''"
       >
-        <span class="icon">
-          <i class="fas fa-heart" :class="{ 'has-text-danger': isLikedByCurrentUser }"></i>
-        </span>
+        <i class="fas fa-heart" :class="{ 'liked': isLikedByCurrentUser }"></i>
         <span>{{ isLikedByCurrentUser ? 'Лайкнуто' : 'Нравится' }}</span>
-        <span class="like-count">{{ currentLikeCount }}</span>
-        <span v-if="isLiking" class="icon">
-          <i class="fas fa-spinner fa-spin ml-2"></i>
+        <span class="action-count">{{ currentLikeCount }}</span>
+        <span v-if="isLiking" class="spinner">
+          <i class="fas fa-spinner fa-spin"></i>
         </span>
       </button>
 
@@ -141,11 +130,9 @@
         class="card-footer-item"
         @click="viewPost"
       >
-        <span class="icon">
-          <i class="fas fa-comment"></i>
-        </span>
+        <i class="fas fa-comment"></i>
         <span>Комментарии</span>
-        <span class="comment-count" v-if="post.commentCount > 0">
+        <span class="action-count" v-if="post.commentCount > 0">
           {{ post.commentCount }}
         </span>
       </router-link>
@@ -155,9 +142,7 @@
         @click="sharePost"
         title="Поделиться"
       >
-        <span class="icon">
-          <i class="fas fa-share-alt"></i>
-        </span>
+        <i class="fas fa-share-alt"></i>
         <span>Поделиться</span>
       </button>
     </footer>
@@ -185,11 +170,9 @@
             </div>
             <p class="help">Нажмите на поле, чтобы скопировать ссылку</p>
           </div>
-          <div class="social-share-buttons mt-4">
-            <button class="button is-primary is-fullwidth" @click="copyToClipboard">
-              <span class="icon">
-                <i class="fas fa-copy"></i>
-              </span>
+          <div class="social-share-buttons">
+            <button class="button is-primary copy-button" @click="copyToClipboard">
+              <i class="fas fa-copy"></i>
               <span>Скопировать ссылку</span>
             </button>
           </div>
@@ -200,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { postsAPI } from '@/api/posts'
@@ -227,30 +210,45 @@ const isDeleting = ref(false)
 const currentLikeCount = ref(props.post.countLike || 0)
 const showShareModal = ref(false)
 
+// Функция для безопасного извлечения первой картинки
+const extractFirstImage = (html: string): string | null => {
+  try {
+    // Простой поиск первого тега img
+    const imgMatch = html.match(/<img[^>]+src="([^">]+)"/i)
+    return imgMatch ? imgMatch[1] : null
+  } catch (error) {
+    console.error('Ошибка при извлечении изображения:', error)
+    return null
+  }
+}
+
 // Получаем первое изображение из HTML контента
 const postImage = computed(() => {
   const content = props.post.text || ''
-  const imgMatch = content.match(/<img[^>]+src="([^">]+)"/)
-  return imgMatch ? imgMatch[1] : null
+  return extractFirstImage(content)
 })
 
-// Безопасный HTML для отображения
-const safeHtml = computed(() => {
+// Обработка HTML для отображения
+const processedHtml = computed(() => {
   let html = props.post.text || ''
 
-  // Ограничиваем изображения в превью
   if (!isExpanded.value) {
-    html = html.replace(/<img[^>]*>/g, '')
-  }
+    // В превью режиме:
 
-  // Ограничиваем количество символов в превью
-  if (!isExpanded.value) {
+    // 1. Удаляем все изображения (они показываются отдельно или не показываются в превью)
+    html = html.replace(/<img[^>]*>/gi, '')
+
+    // 2. Удаляем видео и аудио
+    html = html.replace(/<(iframe|video|audio)[^>]*>.*?<\/\1>/gis, '')
+
+    // 3. Удаляем файлы
+    html = html.replace(/<a[^>]*class="editor-file"[^>]*>.*?<\/a>/gi, '')
+
+    // 4. Ограничиваем длину текста
     const textOnly = html.replace(/<[^>]*>/g, '')
     if (textOnly.length > 500) {
-      // Находим место для обрезки, чтобы не обрезать середину тега
-      const truncated = textOnly.substring(0, 500)
-      // Возвращаем с многоточием
-      return html.substring(0, truncated.length) + '...'
+      // Безопасная обрезка
+      return html.substring(0, 500) + '...'
     }
   }
 
@@ -261,7 +259,19 @@ const safeHtml = computed(() => {
 const hasLongContent = computed(() => {
   const text = props.post.text || ''
   const textOnly = text.replace(/<[^>]*>/g, '')
-  return textOnly.length > 500 || text.includes('<img')
+  const hasMedia = text.includes('<img') || text.includes('<iframe') ||
+    text.includes('<video') || text.includes('<audio')
+  return textOnly.length > 500 || hasMedia
+})
+
+// Проверяем, нужно ли показывать градиент
+const shouldShowGradient = computed(() => {
+  if (!isExpanded.value) {
+    const text = props.post.text || ''
+    const textOnly = text.replace(/<[^>]*>/g, '')
+    return textOnly.length > 500
+  }
+  return false
 })
 
 // URL для шаринга
@@ -274,22 +284,12 @@ const shareUrlInput = ref<HTMLInputElement>()
 
 // Проверяем, лайкал ли пользователь этот пост
 const checkIfLiked = () => {
-  // В реальном приложении эту информацию должен возвращать сервер
-  // Сейчас просто сбрасываем состояние
   isLikedByCurrentUser.value = false
 }
 
 // Форматирование даты
-const formatDate = (dateString: string, timeOnly = false) => {
+const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-
-  if (timeOnly) {
-    return date.toLocaleTimeString('ru-RU', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
-
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffMins = Math.floor(diffMs / 60000)
@@ -323,26 +323,20 @@ const toggleLike = async () => {
     const wasLiked = isLikedByCurrentUser.value
     const oldCount = currentLikeCount.value
 
-    // Оптимистичное обновление UI
     isLikedByCurrentUser.value = !wasLiked
     currentLikeCount.value = wasLiked ? oldCount - 1 : oldCount + 1
 
-    // Отправляем запрос на сервер
     await postsAPI.likePost(props.post.id)
-
-    // Эмитируем событие
     emit('like', props.post.id)
 
   } catch (error: any) {
-    // Откатываем изменения в случае ошибки
     isLikedByCurrentUser.value = !isLikedByCurrentUser.value
     currentLikeCount.value = isLikedByCurrentUser.value
       ? currentLikeCount.value + 1
       : currentLikeCount.value - 1
 
     console.error('Ошибка при оценке поста:', error)
-    const errorMessage = error.response?.data?.message || 'Не удалось поставить лайк'
-    alert(errorMessage)
+    alert(error.response?.data?.message || 'Не удалось поставить лайк')
   } finally {
     isLiking.value = false
   }
@@ -362,8 +356,7 @@ const deletePost = async () => {
     emit('delete', props.post.id)
   } catch (error: any) {
     console.error('Ошибка при удалении поста:', error)
-    const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
-    alert(errorMessage)
+    alert(error.response?.data?.message || 'Не удалось удалить пост')
   } finally {
     isDeleting.value = false
   }
@@ -388,7 +381,6 @@ const copyToClipboard = async () => {
       alert('Ссылка скопирована в буфер обмена!')
       showShareModal.value = false
     } catch (err) {
-      // Fallback для старых браузеров
       document.execCommand('copy')
       alert('Ссылка скопирована в буфер обмена!')
       showShareModal.value = false
@@ -421,54 +413,70 @@ onMounted(() => {
 <style scoped>
 .post-card {
   margin-bottom: 24px;
-  border: 1px solid #e5e7eb;
   border-radius: 12px;
   overflow: hidden;
   transition: all 0.3s ease;
-  background: #121111;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .post-card:hover {
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
-  border-color: #d1d5db;
+  border-color: #404040;
 }
 
+/* Заголовок карточки */
 .card-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid #333;
 }
 
-.card-header-title {
-  color: white;
+.card-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-title {
+  color: #ffffff;
   margin: 0;
   font-weight: 600;
   font-size: 1.25rem;
-  flex-grow: 1;
   line-height: 1.4;
+  flex-grow: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .card-header-icons {
   display: flex;
-  align-items: center;
+  gap: 8px;
 }
 
 .card-header-icon {
-  background: rgba(255, 255, 255, 0.1);
+  background: #333;
   border: none;
-  color: white;
+  color: #ccc;
   cursor: pointer;
-  padding: 6px;
+  width: 32px;
+  height: 32px;
   border-radius: 6px;
-  transition: background-color 0.2s;
-  margin-left: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
 }
 
 .card-header-icon:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: #404040;
+  color: white;
 }
 
 .card-header-icon:disabled {
@@ -476,20 +484,24 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.card-header-icon .spinner {
+  margin-left: 4px;
+}
+
 /* Превью изображения */
 .post-image-preview {
   position: relative;
-  height: 200px;
+  height: 500px;
   overflow: hidden;
   cursor: pointer;
-  background: #f3f4f6;
+  background: #121212;
 }
 
 .preview-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.5s ease;
 }
 
 .post-image-preview:hover .preview-image {
@@ -514,9 +526,10 @@ onMounted(() => {
   opacity: 1;
 }
 
-.image-overlay .icon {
+.image-overlay i {
   color: white;
   font-size: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 /* Контент поста */
@@ -524,142 +537,226 @@ onMounted(() => {
   padding: 20px;
 }
 
+.post-content-wrapper {
+  position: relative;
+  margin-bottom: 16px;
+}
+
 .post-content-preview {
   font-size: 1rem;
   line-height: 1.6;
-  color: #d0d8e3;
+  color: #cccccc;
+  position: relative;
   max-height: 120px;
   overflow: hidden;
-  position: relative;
-  transition: max-height 0.3s ease;
+  transition: max-height 0.4s ease;
 }
 
 .post-content-preview.expanded {
   max-height: none;
+  overflow: visible;
 }
 
-.post-content-preview::after {
-  content: '';
+.content-gradient {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 40px;
-  opacity: 1;
-  transition: opacity 0.3s ease;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, #1a1a1a);
+  pointer-events: none;
 }
 
-.post-content-preview.expanded::after {
-  opacity: 0;
+/* Стили для HTML контента внутри превью */
+:deep(.post-content-preview) {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* Стили для HTML контента внутри preview */
-.post-content-preview :deep(h1) {
-  font-size: 1.5rem;
+:deep(.post-content-preview h1),
+:deep(.post-content-preview h2),
+:deep(.post-content-preview h3) {
+  color: #ffffff;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
   font-weight: 600;
-  margin: 1rem 0 0.5rem;
-  color: #c0c6cd;
+  line-height: 1.3;
 }
 
-.post-content-preview :deep(h2) {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0.875rem 0 0.5rem;
-  color: #dedfe3;
+:deep(.post-content-preview h1) {
+  font-size: 1.5em;
+  border-bottom: 2px solid #333;
+  padding-bottom: 0.3em;
 }
 
-.post-content-preview :deep(h3) {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin: 0.75rem 0 0.5rem;
-  color: #cdcfd5;
+:deep(.post-content-preview h2) {
+  font-size: 1.25em;
 }
 
-.post-content-preview :deep(p) {
-  margin: 0 0 1rem;
+:deep(.post-content-preview h3) {
+  font-size: 1.1em;
 }
 
-.post-content-preview :deep(ul),
-.post-content-preview :deep(ol) {
-  padding-left: 1.5rem;
-  margin: 0 0 1rem;
+:deep(.post-content-preview p) {
+  margin-bottom: 1em;
+  text-align: justify;
 }
 
-.post-content-preview :deep(blockquote) {
-  border-left: 3px solid #e5e7eb;
-  padding-left: 1rem;
-  margin: 1rem 0;
-  color: #6b7280;
+:deep(.post-content-preview ul),
+:deep(.post-content-preview ol) {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+:deep(.post-content-preview li) {
+  margin-bottom: 0.5em;
+}
+
+:deep(.post-content-preview blockquote) {
+  border-left: 3px solid #404040;
+  padding-left: 1em;
+  margin: 1em 0;
+  color: #999;
   font-style: italic;
+  background: #252525;
+  padding: 1em;
+  border-radius: 4px;
 }
 
-.post-content-preview :deep(img) {
+:deep(.post-content-preview img) {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 1rem 0;
+  margin: 1em 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Кнопки "Читать далее" и "Свернуть" */
+:deep(.post-content-preview .editor-iframe) {
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+:deep(.post-content-preview .editor-iframe iframe) {
+  border-radius: 8px;
+}
+
+:deep(.post-content-preview .editor-audio) {
+  width: 100%;
+  margin: 1em 0;
+  border-radius: 8px;
+  background: #252525;
+}
+
+:deep(.post-content-preview .editor-file) {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #252525;
+  border-radius: 6px;
+  color: #ccc;
+  text-decoration: none;
+  border: 1px solid #333;
+  margin: 0.5em 0;
+  transition: all 0.2s;
+}
+
+:deep(.post-content-preview .editor-file:hover) {
+  background: #303030;
+  border-color: #404040;
+}
+
+/* Кнопки раскрытия контента */
+.content-expand-buttons {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
 .read-more-button,
 .collapse-button {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 0;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #333;
+  border: none;
+  border-radius: 20px;
+  color: #ccc;
+  cursor: pointer;
   font-weight: 500;
-  color: #667eea;
+  transition: all 0.2s;
 }
 
 .read-more-button:hover,
 .collapse-button:hover {
-  color: #764ba2;
+  background: #404040;
+  color: white;
+}
+
+.read-more-button i,
+.collapse-button i {
+  font-size: 0.9em;
 }
 
 /* Мета-информация */
 .post-meta {
   margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  border-top: 1px solid #333;
 }
 
 .tags {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .tag {
-  font-size: 0.75rem;
-  background: #f3f4f6;
-  color: #6b7280;
-  border: none;
+  background: #252525;
+  color: #999;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  border: 1px solid #333;
+  transition: all 0.2s;
+}
+
+.tag:hover {
+  background: #303030;
+  color: #ccc;
 }
 
 .meta-info {
   display: flex;
   flex-wrap: wrap;
+  gap: 16px;
   align-items: center;
-  gap: 12px;
 }
 
-.icon-text {
+.meta-item {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.875rem;
+  gap: 6px;
+  color: #999;
+  font-size: 0.9em;
 }
 
-.icon-text .icon {
-  font-size: 0.75rem;
-  color: #9ca3af;
+.meta-item i {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.meta-item:hover {
+  color: #ccc;
 }
 
 /* Футер поста */
 .card-footer {
-  border-top: 1px solid #e5e7eb;
-  background: #f9fafb;
+  border-top: 1px solid #333;
+  background: #252525;
+  display: flex;
   padding: 0;
 }
 
@@ -669,21 +766,26 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 14px 12px;
-  color: #6b7280;
+  padding: 16px;
+  color: #999;
   text-decoration: none;
   border: none;
   background: none;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
+  transition: all 0.2s;
+  font-size: 0.9em;
   font-weight: 500;
   position: relative;
+  border-right: 1px solid #333;
+}
+
+.card-footer-item:last-child {
+  border-right: none;
 }
 
 .card-footer-item:hover:not(:disabled) {
-  background: #f3f4f6;
-  color: #374151;
+  background: #303030;
+  color: #ccc;
 }
 
 .card-footer-item:disabled {
@@ -695,38 +797,52 @@ onMounted(() => {
   color: #ef4444;
 }
 
-.like-button:hover:not(:disabled) .icon {
+.like-button:hover:not(:disabled) i {
   color: #ef4444;
 }
 
-.has-text-danger {
+.like-button .liked {
   color: #ef4444 !important;
 }
 
-.like-count,
-.comment-count {
-  background: #e5e7eb;
-  color: #6b7280;
-  font-size: 0.75rem;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-left: 4px;
+.action-count {
+  background: #333;
+  color: #999;
+  font-size: 0.8em;
+  padding: 2px 8px;
+  border-radius: 12px;
   min-width: 20px;
   text-align: center;
 }
 
-.share-button:hover:not(:disabled) {
-  color: #667eea;
+.spinner {
+  margin-left: 4px;
 }
 
-.share-button:hover:not(:disabled) .icon {
-  color: #667eea;
+.share-button:hover:not(:disabled) {
+  color: #3b82f6;
+}
+
+.share-button:hover:not(:disabled) i {
+  color: #3b82f6;
 }
 
 /* Модальное окно шаринга */
 .modal-card {
   border-radius: 12px;
   overflow: hidden;
+  background: #1a1a1a;
+  color: #ccc;
+}
+
+.modal-card-head {
+  background: #252525;
+  border-bottom: 1px solid #333;
+  color: #fff;
+}
+
+.modal-card-title {
+  color: #fff;
 }
 
 .modal-card-body {
@@ -734,22 +850,37 @@ onMounted(() => {
 }
 
 .social-share-buttons {
-  display: flex;
-  gap: 12px;
+  margin-top: 20px;
 }
 
-.fa-spinner {
-  font-size: 0.8em;
+.copy-button {
+  width: 100%;
+  background: #3b82f6;
+  border: none;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+
+.copy-button:hover {
+  background: #2563eb;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
-  .card-header-title {
-    font-size: 1.125rem;
+  .card-title {
+    font-size: 1.1rem;
+    -webkit-line-clamp: 2;
   }
 
   .post-image-preview {
-    height: 160px;
+    height: 200px;
   }
 
   .card-content {
@@ -758,7 +889,7 @@ onMounted(() => {
 
   .card-footer-item {
     padding: 12px 8px;
-    font-size: 0.75rem;
+    font-size: 0.8em;
   }
 
   .meta-info {
@@ -767,8 +898,36 @@ onMounted(() => {
     gap: 8px;
   }
 
-  .icon-text {
-    margin: 0 !important;
+  .post-content-preview {
+    font-size: 0.95em;
   }
+
+  :deep(.post-content-preview h1) {
+    font-size: 1.3em;
+  }
+
+  :deep(.post-content-preview h2) {
+    font-size: 1.15em;
+  }
+
+  :deep(.post-content-preview h3) {
+    font-size: 1em;
+  }
+}
+
+/* Анимации */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.post-card {
+  animation: fadeIn 0.3s ease;
 }
 </style>
