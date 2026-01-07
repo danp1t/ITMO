@@ -98,11 +98,11 @@
 
     <!-- Модальное окно создания поста -->
     <div class="modal" :class="{ 'is-active': showCreateModal }">
-      <div class="modal-background" @click="showCreateModal = false"></div>
+      <div class="modal-background" @click="closeCreateModal"></div>
       <div class="modal-card">
         <header class="modal-card-head">
           <p class="modal-card-title">Создать пост</p>
-          <button class="delete" @click="showCreateModal = false"></button>
+          <button class="delete" @click="closeCreateModal"></button>
         </header>
 
         <section class="modal-card-body">
@@ -123,9 +123,13 @@
             <label class="label">Содержание</label>
             <div class="control">
               <RichTextEditor
+                ref="editorRef"
                 v-model="newPost.content"
                 :disabled="isSaving"
+                :isCreating="true"
                 placeholder="Начните писать свой пост..."
+                @file-upload-error="handleFileUploadError"
+                @files-uploaded="handleFilesUploaded"
               />
             </div>
           </div>
@@ -134,7 +138,7 @@
         <footer class="modal-card-foot">
           <button
             class="button is-primary"
-            @click="createPost"
+            @click="createPostWithAttachments"
             :disabled="isSaving || !newPost.title.trim() || !newPost.content.trim()"
           >
             <span v-if="isSaving" class="icon">
@@ -144,7 +148,7 @@
           </button>
           <button
             class="button"
-            @click="showCreateModal = false"
+            @click="closeCreateModal"
             :disabled="isSaving"
           >
             Отмена
@@ -180,9 +184,12 @@
             <label class="label">Содержание</label>
             <div class="control">
               <RichTextEditor
+                ref="editEditorRef"
                 v-model="editingPost.content"
                 :disabled="isSaving"
+                :postId="editingPost.id"
                 placeholder="Редактируйте содержимое поста..."
+                @file-upload-error="handleFileUploadError"
               />
             </div>
           </div>
@@ -229,6 +236,13 @@ const sortBy = ref('createdAt')
 const sortDirection = ref('desc')
 const isSaving = ref(false)
 
+// Реф для редактора
+const editorRef = ref<InstanceType<typeof RichTextEditor>>()
+const editEditorRef = ref<InstanceType<typeof RichTextEditor>>()
+
+// Временные файлы
+const pendingFiles = ref<Array<{file: File, type: 'image' | 'file' | 'audio'}>>([])
+
 const newPost = ref({
   title: '',
   content: '',
@@ -258,7 +272,29 @@ const loadPosts = async () => {
   }
 }
 
-const createPost = async () => {
+// Обработчик ошибок загрузки файлов
+const handleFileUploadError = (error: string) => {
+  alert(error)
+}
+
+// Обработчик добавления файлов
+const handleFilesUploaded = (files: Array<{file: File, type: 'image' | 'file' | 'audio'}>) => {
+  pendingFiles.value = files
+}
+
+// Форматирование размера файла
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B'
+
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// Создание поста с вложениями
+const createPostWithAttachments = async () => {
   if (!authStore.user) return
 
   // Валидация
@@ -272,30 +308,83 @@ const createPost = async () => {
     return
   }
 
+  isSaving.value = true
+
   try {
+    // 1. Создаем пост без вложений
     const postData = {
       title: newPost.value.title,
-      text: newPost.value.content, // Здесь text - это HTML контент
+      text: newPost.value.content,
       ownerId: authStore.user.id,
     }
 
-    await postsAPI.createPost(postData)
+    const createResponse = await postsAPI.createPost(postData)
+    const newPostId = createResponse.data.id
+
+    // 2. Загружаем вложения если есть
+    if (editorRef.value?.hasPendingFiles && newPostId) {
+      // Загружаем все временные файлы
+      const uploadedFiles = await editorRef.value.uploadPendingFiles(newPostId)
+
+      if (uploadedFiles.length > 0) {
+        // Обновляем контент с реальными ссылками
+        const updatedContent = editorRef.value.replacePlaceholdersInContent(
+          newPost.value.content,
+          uploadedFiles
+        )
+
+        // 3. Обновляем пост с правильными ссылками
+        const updateData: UpdatePostRequest = {
+          title: newPost.value.title,
+          text: updatedContent,
+          ownerId: authStore.user.id,
+        }
+
+        await postsAPI.updatePost(newPostId, updateData)
+      }
+    }
+
+    // 4. Закрываем модалку и обновляем список
     showCreateModal.value = false
     newPost.value = { title: '', content: '' }
+    pendingFiles.value = []
+
+    if (editorRef.value) {
+      editorRef.value.clearPendingFiles()
+    }
+
+    // 5. Загружаем обновленный список постов
     await loadPosts()
-  } catch (error) {
-    console.error('Ошибка при создании поста:', error)
-    alert('Не удалось создать пост')
+
+  } catch (error: any) {
+    console.error('Ошибка при создании поста с вложениями:', error)
+    const message = error.response?.data?.message || 'Не удалось создать пост'
+    alert(message)
+  } finally {
+    isSaving.value = false
+  }
+}
+
+// Закрытие модалки создания
+const closeCreateModal = () => {
+  if (isSaving.value) return
+
+  showCreateModal.value = false
+  newPost.value = { title: '', content: '' }
+  pendingFiles.value = []
+
+  if (editorRef.value) {
+    editorRef.value.clearPendingFiles()
+    editorRef.value.clear()
   }
 }
 
 // Обработчик редактирования поста
 const handleEdit = (post: Post) => {
-  // Копируем данные поста в объект редактирования
   editingPost.value = {
     id: post.id,
     title: post.title || '',
-    content: post.text || '', // Используем post.text, который содержит HTML
+    content: post.text || '',
     ownerId: post.ownerId
   }
   showEditModal.value = true
@@ -321,7 +410,7 @@ const updatePost = async () => {
   try {
     const postData: UpdatePostRequest = {
       title: editingPost.value.title,
-      text: editingPost.value.content, // Отправляем HTML контент
+      text: editingPost.value.content,
       ownerId: editingPost.value.ownerId,
     }
 
@@ -334,7 +423,7 @@ const updatePost = async () => {
         ...posts.value[index],
         title: editingPost.value.title,
         text: editingPost.value.content,
-        updatedAt: new Date().toISOString() // Обновляем дату редактирования
+        updatedAt: new Date().toISOString()
       }
     }
 
@@ -351,16 +440,18 @@ const updatePost = async () => {
 // Закрытие модального окна редактирования
 const closeEditModal = () => {
   showEditModal.value = false
-  // Сбрасываем форму редактирования
   editingPost.value = {
     id: 0,
     title: '',
     content: '',
     ownerId: 0
   }
+
+  if (editEditorRef.value) {
+    editEditorRef.value.clearPendingFiles()
+  }
 }
 
-// Обработчик удаления поста
 const handleDelete = async (postId: number) => {
   try {
     await postsAPI.deletePost(postId)
@@ -369,15 +460,6 @@ const handleDelete = async (postId: number) => {
     console.error('Ошибка при удалении поста:', error)
     const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
     alert(errorMessage)
-  }
-}
-
-const handleLike = async (postId: number) => {
-  try {
-    await postsAPI.likePost(postId)
-    await loadPosts()
-  } catch (error) {
-    console.error('Ошибка при оценке поста:', error)
   }
 }
 

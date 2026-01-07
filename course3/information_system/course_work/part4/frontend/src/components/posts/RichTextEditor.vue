@@ -119,8 +119,8 @@
         <button
           @click="uploadImage"
           class="toolbar-button"
-          title="Вставить изображение"
-          :disabled="uploadingImage"
+          :title="!canAddFiles ? 'Добавление файлов временно недоступно' : 'Вставить изображение'"
+          :disabled="uploadingImage || !canAddFiles"
         >
           <i class="fas fa-image"></i>
           <span v-if="uploadingImage" class="icon">
@@ -134,8 +134,8 @@
         <button
           @click="uploadFile"
           class="toolbar-button"
-          title="Вставить файл"
-          :disabled="uploadingFile"
+          :title="!canAddFiles ? 'Добавление файлов временно недоступно' : 'Вставить файл'"
+          :disabled="uploadingFile || !canAddFiles"
         >
           <i class="fas fa-file"></i>
           <span v-if="uploadingFile" class="icon">
@@ -145,8 +145,8 @@
         <button
           @click="uploadAudio"
           class="toolbar-button"
-          title="Вставить аудио"
-          :disabled="uploadingAudio"
+          :title="!canAddFiles ? 'Добавление файлов временно недоступно' : 'Вставить аудио'"
+          :disabled="uploadingAudio || !canAddFiles"
         >
           <i class="fas fa-music"></i>
           <span v-if="uploadingAudio" class="icon">
@@ -161,6 +161,12 @@
           <i class="fas fa-video"></i>
         </button>
       </div>
+    </div>
+
+    <!-- Индикатор временных файлов -->
+    <div v-if="pendingFiles.length > 0 && isCreating" class="pending-files-notification">
+      <i class="fas fa-info-circle"></i>
+      <span>{{ pendingFiles.length }} файл(ов) будет загружен после создания поста</span>
     </div>
 
     <!-- Область редактирования -->
@@ -262,17 +268,23 @@ const props = withDefaults(
     placeholder?: string
     disabled?: boolean
     showCounter?: boolean
+    postId?: number
+    isCreating?: boolean
   }>(),
   {
     modelValue: '',
     placeholder: 'Начните писать...',
     disabled: false,
     showCounter: true,
+    postId: undefined,
+    isCreating: false
   }
 )
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
+  'file-upload-error': [error: string]
+  'files-uploaded': [files: Array<{file: File, type: 'image' | 'file' | 'audio'}>]
 }>()
 
 // Состояние для модального окна видео
@@ -280,10 +292,29 @@ const showVideoModal = ref(false)
 const videoUrl = ref('')
 const videoSource = ref<'youtube' | 'rutube'>('youtube')
 
-// Состояние для загрузки
+// Состояния для загрузки
 const uploadingImage = ref(false)
 const uploadingFile = ref(false)
 const uploadingAudio = ref(false)
+
+// Хранилище временных файлов
+const pendingFiles = ref<Array<{
+  file: File
+  type: 'image' | 'file' | 'audio'
+  placeholder: string
+  tempUrl?: string
+  mimeType?: string
+}>>([])
+
+// Можно ли загружать файлы немедленно
+const canUploadImmediately = computed(() => {
+  return props.postId !== undefined && props.postId > 0
+})
+
+// Можно ли добавлять файлы (в том числе временные)
+const canAddFiles = computed(() => {
+  return props.postId !== undefined || props.isCreating
+})
 
 // Определение расширения для Iframe (видео)
 const IframeExtension = Node.create({
@@ -398,7 +429,7 @@ const FileExtension = Node.create({
         tag: 'a[class="editor-file"]',
         getAttrs: (dom) => ({
           src: (dom as HTMLLinkElement).getAttribute('href'),
-          name: dom.textContent?.replace(/\s*\([^)]*\)$/, ''), // Удаляем размер из текста
+          name: dom.textContent?.replace(/\s*\([^)]*\)$/, ''),
           size: (dom as HTMLLinkElement).getAttribute('data-size'),
           type: (dom as HTMLLinkElement).getAttribute('data-type'),
         }),
@@ -521,9 +552,9 @@ const editor = useEditor({
     Placeholder.configure({
       placeholder: props.placeholder,
     }),
-    IframeExtension, // Добавляем поддержку iframe
-    FileExtension,   // Добавляем поддержку файлов
-    AudioExtension,  // Добавляем поддержку аудио
+    IframeExtension,
+    FileExtension,
+    AudioExtension,
   ],
   editorProps: {
     attributes: {
@@ -549,7 +580,6 @@ const videoEmbedUrl = computed(() => {
   const url = videoUrl.value.trim()
 
   if (videoSource.value === 'youtube') {
-    // Обработка YouTube ссылок
     const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
     const match = url.match(youtubeRegex)
 
@@ -558,7 +588,6 @@ const videoEmbedUrl = computed(() => {
       return `https://www.youtube.com/embed/${videoId}`
     }
   } else if (videoSource.value === 'rutube') {
-    // Обработка RuTube ссылок
     const rutubeRegex = /rutube\.ru\/video\/([a-zA-Z0-9_-]+)/
     const match = url.match(rutubeRegex)
 
@@ -571,9 +600,56 @@ const videoEmbedUrl = computed(() => {
   return null
 })
 
+// Добавление временного файла
+const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
+  const placeholder = type === 'image'
+    ? `[Загружаемое изображение: ${file.name}]`
+    : type === 'audio'
+      ? `[Загружаемое аудио: ${file.name}]`
+      : `[Загружаемый файл: ${file.name}]`
+
+  let tempUrl: string | undefined
+
+  if (type === 'image') {
+    tempUrl = URL.createObjectURL(file)
+  }
+
+  pendingFiles.value.push({
+    file,
+    type,
+    placeholder,
+    tempUrl,
+    mimeType: file.type
+  })
+
+  // Вставляем плейсхолдер в редактор
+  if (type === 'image') {
+    editor.value
+      ?.chain()
+      .focus()
+      .setImage({ src: tempUrl })
+      .run()
+  } else {
+    // Для файлов и аудио добавляем текстовый плейсхолдер
+    editor.value
+      ?.chain()
+      .focus()
+      .insertContent(`<p>${placeholder}</p>`)
+      .run()
+  }
+
+  // Сообщаем родителю о новом файле
+  emit('files-uploaded', pendingFiles.value.map(pf => ({ file: pf.file, type: pf.type })))
+}
+
 // Загрузка изображения
 const uploadImage = async () => {
-  if (!editor.value || uploadingImage.value) return
+  if (!editor.value || uploadingImage.value || !canAddFiles.value) {
+    if (!canAddFiles.value) {
+      emit('file-upload-error', 'Нельзя добавлять файлы в данный момент')
+    }
+    return
+  }
 
   const input = document.createElement('input')
   input.type = 'file'
@@ -584,44 +660,45 @@ const uploadImage = async () => {
     if (!file) return
 
     if (file.size > 5 * 1024 * 1024) {
-      alert('Размер файла не должен превышать 5MB')
+      emit('file-upload-error', 'Размер файла не должен превышать 5MB')
       return
     }
 
-    uploadingImage.value = true
+    // Если можем загрузить сразу
+    if (canUploadImmediately.value && props.postId) {
+      uploadingImage.value = true
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('postId', props.postId.toString())
+        formData.append('typeAttachmentId', '1')
 
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('postId', '1') // TODO: Замените на реальный postId
-      formData.append('typeAttachmentId', '1')
+        const response = await fetch('http://localhost:8080/api/attachments/upload', {
+          method: 'POST',
+          body: formData
+        })
 
-      // Используйте полный URL к бэкенду
-      const response = await fetch('http://localhost:8080/api/attachments/upload', {
-        method: 'POST',
-        body: formData
-        // Не добавляйте заголовок Content-Type - FormData сам его установит
-      })
+        if (response.ok) {
+          const attachment = await response.json()
+          const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
 
-      if (response.ok) {
-        const attachment = await response.json()
-        const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
-
-        editor.value
-          ?.chain()
-          .focus()
-          .setImage({ src: fileUrl })
-          .run()
-      } else {
-        const error = await response.text()
-        console.error('Ошибка загрузки:', error)
-        alert('Не удалось загрузить изображение')
+          editor.value
+            ?.chain()
+            .focus()
+            .setImage({ src: fileUrl })
+            .run()
+        } else {
+          const error = await response.text()
+          emit('file-upload-error', 'Не удалось загрузить изображение')
+        }
+      } catch (error) {
+        emit('file-upload-error', 'Не удалось загрузить изображение')
+      } finally {
+        uploadingImage.value = false
       }
-    } catch (error) {
-      console.error('Ошибка загрузки изображения:', error)
-      alert('Не удалось загрузить изображение')
-    } finally {
-      uploadingImage.value = false
+    } else {
+      // Сохраняем как временный файл
+      addTemporaryFile(file, 'image')
     }
   }
 
@@ -630,17 +707,20 @@ const uploadImage = async () => {
 
 // Общая функция загрузки файла
 const uploadFileHandler = async (type: 'file' | 'audio') => {
-  if (!editor.value) return
+  if (!editor.value || !canAddFiles.value) {
+    if (!canAddFiles.value) {
+      emit('file-upload-error', 'Нельзя добавлять файлы в данный момент')
+    }
+    return
+  }
 
   const input = document.createElement('input')
   input.type = 'file'
 
   if (type === 'audio') {
     input.accept = 'audio/*'
-    uploadingAudio.value = true
   } else {
     input.accept = '*/*'
-    uploadingFile.value = true
   }
 
   input.onchange = async (e) => {
@@ -651,55 +731,61 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      alert('Размер файла не должен превышать 10MB')
+      emit('file-upload-error', 'Размер файла не должен превышать 10MB')
       resetUploadState(type)
       return
     }
 
-    try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('postId', '3') // TODO: Замените на реальный postId
-      formData.append('typeAttachmentId', type === 'audio' ? '3' : '2')
+    // Если можем загрузить сразу
+    if (canUploadImmediately.value && props.postId) {
+      if (type === 'audio') uploadingAudio.value = true
+      else uploadingFile.value = true
 
-      // Используйте полный URL к бэкенду
-      const response = await fetch('http://localhost:8080/api/attachments/upload', {
-        method: 'POST',
-        body: formData
-      })
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('postId', props.postId.toString())
+        formData.append('typeAttachmentId', type === 'audio' ? '3' : '2')
 
-      if (response.ok) {
-        const attachment = await response.json()
-        const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
+        const response = await fetch('http://localhost:8080/api/attachments/upload', {
+          method: 'POST',
+          body: formData
+        })
 
-        if (type === 'audio') {
-          editor.value
-            ?.chain()
-            .focus()
-            .setAudio({ src: fileUrl, title: file.name })
-            .run()
+        if (response.ok) {
+          const attachment = await response.json()
+          const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
+
+          if (type === 'audio') {
+            editor.value
+              ?.chain()
+              .focus()
+              .setAudio({ src: fileUrl, title: file.name })
+              .run()
+          } else {
+            editor.value
+              ?.chain()
+              .focus()
+              .setFile({
+                src: fileUrl,
+                name: file.name,
+                size: formatFileSize(file.size),
+                type: file.type
+              })
+              .run()
+          }
         } else {
-          editor.value
-            ?.chain()
-            .focus()
-            .setFile({
-              src: fileUrl,
-              name: file.name,
-              size: formatFileSize(file.size),
-              type: file.type
-            })
-            .run()
+          const error = await response.text()
+          emit('file-upload-error', `Не удалось загрузить ${type === 'audio' ? 'аудио' : 'файл'}`)
         }
-      } else {
-        const error = await response.text()
-        console.error('Ошибка загрузки:', error)
-        alert(`Не удалось загрузить ${type === 'audio' ? 'аудио' : 'файл'}`)
+      } catch (error) {
+        emit('file-upload-error', `Не удалось загрузить ${type === 'audio' ? 'аудио' : 'файл'}`)
+      } finally {
+        resetUploadState(type)
       }
-    } catch (error) {
-      console.error(`Ошибка загрузки ${type === 'audio' ? 'аудио' : 'файла'}:`, error)
-      alert(`Не удалось загрузить ${type === 'audio' ? 'аудио' : 'файл'}`)
-    } finally {
-      resetUploadState(type)
+    } else {
+      // Сохраняем как временный файл
+      addTemporaryFile(file, type)
     }
   }
 
@@ -753,6 +839,97 @@ const closeVideoModal = () => {
   videoUrl.value = ''
 }
 
+// Загрузка всех временных файлов после создания поста
+const uploadPendingFiles = async (postId: number) => {
+  const results = []
+
+  for (const pendingFile of pendingFiles.value) {
+    try {
+      const formData = new FormData()
+      formData.append('file', pendingFile.file)
+      formData.append('postId', postId.toString())
+      formData.append('typeAttachmentId',
+        pendingFile.type === 'image' ? '1' :
+          pendingFile.type === 'audio' ? '3' : '2'
+      )
+
+      const response = await fetch('http://localhost:8080/api/attachments/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (response.ok) {
+        const attachment = await response.json()
+        const fileUrl = `http://localhost:8080/api/attachments/${attachment.id}/download`
+
+        results.push({
+          placeholder: pendingFile.placeholder,
+          url: fileUrl,
+          type: pendingFile.type,
+          name: pendingFile.file.name,
+          size: pendingFile.file.size,
+          mimeType: pendingFile.mimeType,
+          tempUrl: pendingFile.tempUrl
+        })
+
+        // Освобождаем временный URL
+        if (pendingFile.tempUrl) {
+          URL.revokeObjectURL(pendingFile.tempUrl)
+        }
+      }
+    } catch (error) {
+      console.error(`Ошибка загрузки файла ${pendingFile.file.name}:`, error)
+    }
+  }
+
+  return results
+}
+
+// Очистка временных файлов
+const clearPendingFiles = () => {
+  // Освобождаем все временные URL
+  pendingFiles.value.forEach(pf => {
+    if (pf.tempUrl) {
+      URL.revokeObjectURL(pf.tempUrl)
+    }
+  })
+  pendingFiles.value = []
+}
+
+// Замена плейсхолдеров в контенте
+const replacePlaceholdersInContent = (content: string, uploadedFiles: Array<any>): string => {
+  let updatedContent = content
+
+  for (const file of uploadedFiles) {
+    if (file.type === 'image') {
+      // Заменяем временный URL или плейсхолдер
+      if (file.tempUrl) {
+        updatedContent = updatedContent.replace(
+          new RegExp(`src="${file.tempUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`, 'g'),
+          `src="${file.url}" alt="${file.name}" class="editor-image"`
+        )
+      } else {
+        updatedContent = updatedContent.replace(
+          file.placeholder,
+          `<img src="${file.url}" alt="${file.name}" class="editor-image" />`
+        )
+      }
+    } else if (file.type === 'audio') {
+      updatedContent = updatedContent.replace(
+        file.placeholder,
+        `<audio src="${file.url}" title="${file.name}" controls class="editor-audio"></audio>`
+      )
+    } else {
+      updatedContent = updatedContent.replace(
+        file.placeholder,
+        `<a href="${file.url}" class="editor-file" download="${file.name}" data-size="${formatFileSize(file.size)}" data-type="${file.mimeType}">${file.name} (${formatFileSize(file.size)})</a>`
+      )
+    }
+  }
+
+  return updatedContent
+}
+
 // Наблюдаем за изменением modelValue
 watch(() => props.modelValue, (newValue) => {
   if (editor.value && newValue !== editor.value.getHTML()) {
@@ -768,6 +945,8 @@ watch(() => props.disabled, (newValue) => {
 })
 
 onBeforeUnmount(() => {
+  // Освобождаем все временные URL при уничтожении компонента
+  clearPendingFiles()
   editor.value?.destroy()
 })
 
@@ -776,6 +955,11 @@ defineExpose({
   editor,
   clear: () => editor.value?.commands.clearContent(),
   focus: () => editor.value?.commands.focus(),
+  uploadPendingFiles,
+  clearPendingFiles,
+  replacePlaceholdersInContent,
+  hasPendingFiles: computed(() => pendingFiles.value.length > 0),
+  getPendingFiles: () => pendingFiles.value
 })
 </script>
 
@@ -844,6 +1028,23 @@ defineExpose({
 .toolbar-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.pending-files-notification {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  color: #856404;
+  padding: 8px 12px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 12px;
+  border-radius: 4px;
+}
+
+.pending-files-notification i {
+  color: #ffc107;
 }
 
 .editor-content {

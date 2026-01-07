@@ -93,9 +93,12 @@
             <label class="label">Содержание</label>
             <div class="control">
               <RichTextEditor
+                ref="editorRef"
                 v-model="editForm.content"
                 :disabled="isSaving"
+                :postId="post?.id"
                 placeholder="Редактируйте содержимое поста..."
+                @file-upload-error="handleFileUploadError"
               />
             </div>
           </div>
@@ -298,6 +301,9 @@ const isEditing = ref(false)
 const isSaving = ref(false)
 const isDeleting = ref(false)
 
+// Реф для редактора
+const editorRef = ref<InstanceType<typeof RichTextEditor>>()
+
 // Состояния для редактирования комментариев
 const editingCommentId = ref<number | null>(null)
 const editingCommentText = ref('')
@@ -456,6 +462,15 @@ const cancelEdit = () => {
     title: '',
     content: ''
   }
+
+  if (editorRef.value) {
+    editorRef.value.clearPendingFiles()
+  }
+}
+
+// Обработчик ошибок загрузки файлов
+const handleFileUploadError = (error: string) => {
+  alert(error)
 }
 
 const saveEdit = async () => {
