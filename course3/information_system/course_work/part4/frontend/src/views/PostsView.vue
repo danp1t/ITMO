@@ -20,7 +20,7 @@
 
             <div
               v-else-if="authStore.isAuthenticated && !authStore.canPublishPosts()"
-              class="notification is-light is-small"
+              class="notification is-dark is-small"
             >
               <p class="is-size-7">
                 <i class="fas fa-lock mr-1"></i>

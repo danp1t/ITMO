@@ -504,10 +504,6 @@ const confirmDelete = async () => {
     return
   }
 
-  if (!confirm(`Вы уверены, что хотите удалить пост "${post.value.title}"?`)) {
-    return
-  }
-
   isDeleting.value = true
 
   try {

@@ -355,15 +355,9 @@ const deletePost = async () => {
 
   if (isDeleting.value) return
 
-  if (!confirm(`Вы уверены, что хотите удалить пост "${props.post.title}"?`)) {
-    return
-  }
-
   isDeleting.value = true
 
   try {
-    await postsAPI.deletePost(props.post.id)
-    // Эмитим событие удаления
     emit('delete', props.post.id)
   } catch (error: any) {
     console.error('Ошибка при удалении поста:', error)
