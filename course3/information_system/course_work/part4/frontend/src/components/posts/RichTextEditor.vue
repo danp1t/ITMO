@@ -608,9 +608,9 @@ const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
       ? `[Загружаемое аудио: ${file.name}]`
       : `[Загружаемый файл: ${file.name}]`
 
+  // Для изображений при создании поста не создаем временный URL
   let tempUrl: string | undefined
-
-  if (type === 'image') {
+  if (type === 'image' && canUploadImmediately.value) {
     tempUrl = URL.createObjectURL(file)
   }
 
@@ -622,19 +622,20 @@ const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
     mimeType: file.type
   })
 
-  // Вставляем плейсхолдер в редактор
-  if (type === 'image') {
-    editor.value
-      ?.chain()
-      .focus()
-      .setImage({ src: tempUrl })
-      .run()
-  } else {
-    // Для файлов и аудио добавляем текстовый плейсхолдер
+  // Вставляем плейсхолдер в редактор для всех типов при создании поста
+  if (!canUploadImmediately.value || type !== 'image') {
+    // Для файлов, аудио и изображений при создании поста используем текстовый плейсхолдер
     editor.value
       ?.chain()
       .focus()
       .insertContent(`<p>${placeholder}</p>`)
+      .run()
+  } else {
+    // Только для изображений при редактировании поста вставляем сразу
+    editor.value
+      ?.chain()
+      .focus()
+      .setImage({ src: tempUrl })
       .run()
   }
 
@@ -664,7 +665,7 @@ const uploadImage = async () => {
       return
     }
 
-    // Если можем загрузить сразу
+    // Если можем загрузить сразу (редактирование существующего поста)
     if (canUploadImmediately.value && props.postId) {
       uploadingImage.value = true
       try {
@@ -697,7 +698,7 @@ const uploadImage = async () => {
         uploadingImage.value = false
       }
     } else {
-      // Сохраняем как временный файл
+      // Сохраняем как временный файл (создание нового поста)
       addTemporaryFile(file, 'image')
     }
   }
@@ -902,18 +903,11 @@ const replacePlaceholdersInContent = (content: string, uploadedFiles: Array<any>
 
   for (const file of uploadedFiles) {
     if (file.type === 'image') {
-      // Заменяем временный URL или плейсхолдер
-      if (file.tempUrl) {
-        updatedContent = updatedContent.replace(
-          new RegExp(`src="${file.tempUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`, 'g'),
-          `src="${file.url}" alt="${file.name}" class="editor-image"`
-        )
-      } else {
-        updatedContent = updatedContent.replace(
-          file.placeholder,
-          `<img src="${file.url}" alt="${file.name}" class="editor-image" />`
-        )
-      }
+      // Заменяем плейсхолдер на изображение
+      updatedContent = updatedContent.replace(
+        file.placeholder,
+        `<img src="${file.url}" alt="${file.name}" class="editor-image" />`
+      )
     } else if (file.type === 'audio') {
       updatedContent = updatedContent.replace(
         file.placeholder,
