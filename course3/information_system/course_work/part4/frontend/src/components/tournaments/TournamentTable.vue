@@ -107,7 +107,7 @@
         <tr
           v-for="tournament in tournaments"
           :key="tournament.id"
-          :class="{ 'has-background-grey-light': tournament.archived }"
+          :class="{ 'has-background-grey-dark': tournament.archived }"
           class="is-clickable"
           @click="$emit('view', tournament)"
         >
