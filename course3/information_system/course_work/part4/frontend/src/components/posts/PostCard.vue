@@ -91,7 +91,7 @@
 
         <div class="meta-info">
           <small class="has-text-grey">
-            <span class="icon-text">
+            <span class="icon-text ml-3">
               <span class="icon">
                 <i class="fas fa-user"></i>
               </span>
@@ -112,12 +112,6 @@
               <span>{{ currentLikeCount }}</span>
             </span>
 
-            <span v-if="post.updatedAt !== post.createdAt" class="icon-text ml-3" title="Отредактировано">
-              <span class="icon">
-                <i class="fas fa-edit"></i>
-              </span>
-              <span>{{ formatDate(post.updatedAt, true) }}</span>
-            </span>
           </small>
         </div>
       </div>
