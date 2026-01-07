@@ -128,6 +128,39 @@
           </span>
         </button>
       </div>
+
+      <!-- Новая группа для медиа -->
+      <div class="toolbar-group">
+        <button
+          @click="uploadFile"
+          class="toolbar-button"
+          title="Вставить файл"
+          :disabled="uploadingFile"
+        >
+          <i class="fas fa-file"></i>
+          <span v-if="uploadingFile" class="icon">
+            <i class="fas fa-spinner fa-spin ml-1"></i>
+          </span>
+        </button>
+        <button
+          @click="uploadAudio"
+          class="toolbar-button"
+          title="Вставить аудио"
+          :disabled="uploadingAudio"
+        >
+          <i class="fas fa-music"></i>
+          <span v-if="uploadingAudio" class="icon">
+            <i class="fas fa-spinner fa-spin ml-1"></i>
+          </span>
+        </button>
+        <button
+          @click="insertVideo"
+          class="toolbar-button"
+          title="Вставить видео"
+        >
+          <i class="fas fa-video"></i>
+        </button>
+      </div>
     </div>
 
     <!-- Область редактирования -->
@@ -141,6 +174,77 @@
     <div v-if="showCounter" class="character-counter">
       Символов: {{ characterCount }}
     </div>
+
+    <!-- Модальное окно для вставки видео -->
+    <div v-if="showVideoModal" class="modal-overlay" @click="closeVideoModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Вставка видео</h3>
+          <button class="modal-close" @click="closeVideoModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="video-source-selector">
+            <label>
+              <input
+                type="radio"
+                v-model="videoSource"
+                value="youtube"
+              > YouTube
+            </label>
+            <label>
+              <input
+                type="radio"
+                v-model="videoSource"
+                value="rutube"
+              > RuTube
+            </label>
+          </div>
+
+          <div class="video-input-group">
+            <label for="videoUrl">Ссылка на видео:</label>
+            <input
+              id="videoUrl"
+              v-model="videoUrl"
+              type="text"
+              placeholder="https://www.youtube.com/watch?v=..."
+              @keyup.enter="insertVideoFromUrl"
+            />
+            <div class="video-examples">
+              <small>Примеры:</small>
+              <ul>
+                <li v-if="videoSource === 'youtube'">https://www.youtube.com/watch?v=dQw4w9WgXcQ</li>
+                <li v-if="videoSource === 'youtube'">https://youtu.be/dQw4w9WgXcQ</li>
+                <li v-if="videoSource === 'rutube'">https://rutube.ru/video/...</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="video-preview" v-if="videoEmbedUrl">
+            <div class="video-embed">
+              <iframe
+                width="100%"
+                height="200"
+                :src="videoEmbedUrl"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button @click="closeVideoModal" class="btn-secondary">Отмена</button>
+            <button
+              @click="insertVideoFromUrl"
+              class="btn-primary"
+              :disabled="!videoEmbedUrl"
+            >
+              Вставить
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -150,6 +254,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import Image from '@tiptap/extension-image'
 import { computed, onBeforeUnmount, watch, ref } from 'vue'
+import { Node } from '@tiptap/core'
 
 const props = withDefaults(
   defineProps<{
@@ -170,7 +275,238 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-// Создаем редактор
+// Состояние для модального окна видео
+const showVideoModal = ref(false)
+const videoUrl = ref('')
+const videoSource = ref<'youtube' | 'rutube'>('youtube')
+
+// Состояние для загрузки
+const uploadingImage = ref(false)
+const uploadingFile = ref(false)
+const uploadingAudio = ref(false)
+
+// Определение расширения для Iframe (видео)
+const IframeExtension = Node.create({
+  name: 'iframe',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      width: {
+        default: '100%',
+      },
+      height: {
+        default: '400px',
+      },
+      title: {
+        default: 'Embedded content',
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'div[class="editor-iframe"] iframe',
+        getAttrs: (dom) => ({
+          src: (dom as HTMLIFrameElement).getAttribute('src'),
+          width: (dom as HTMLIFrameElement).getAttribute('width') || '100%',
+          height: (dom as HTMLIFrameElement).getAttribute('height') || '400px',
+          title: (dom as HTMLIFrameElement).getAttribute('title') || 'Embedded content',
+        }),
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'div',
+      { class: 'editor-iframe' },
+      [
+        'iframe',
+        {
+          ...HTMLAttributes,
+          frameborder: '0',
+          allowfullscreen: 'true',
+        },
+      ],
+    ]
+  },
+
+  addCommands() {
+    return {
+      setIframe:
+        (options) =>
+          ({ commands }) => {
+            return commands.insertContent({
+              type: this.name,
+              attrs: options,
+            })
+          },
+    }
+  },
+})
+
+// Функция для определения иконки файла
+const getFileIcon = (mimeType: string): string => {
+  if (!mimeType) return 'file'
+
+  if (mimeType.includes('pdf')) return 'file-pdf'
+  if (mimeType.includes('word') || mimeType.includes('document')) return 'file-word'
+  if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'file-excel'
+  if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'file-powerpoint'
+  if (mimeType.includes('zip') || mimeType.includes('archive')) return 'file-archive'
+  if (mimeType.includes('image')) return 'file-image'
+  if (mimeType.includes('audio')) return 'file-audio'
+  if (mimeType.includes('video')) return 'file-video'
+  if (mimeType.includes('text')) return 'file-alt'
+
+  return 'file'
+}
+
+// Определение расширения для файлов
+const FileExtension = Node.create({
+  name: 'file',
+  group: 'inline',
+  inline: true,
+  draggable: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      name: {
+        default: 'Файл',
+      },
+      size: {
+        default: null,
+      },
+      type: {
+        default: null,
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'a[class="editor-file"]',
+        getAttrs: (dom) => ({
+          src: (dom as HTMLLinkElement).getAttribute('href'),
+          name: dom.textContent?.replace(/\s*\([^)]*\)$/, ''), // Удаляем размер из текста
+          size: (dom as HTMLLinkElement).getAttribute('data-size'),
+          type: (dom as HTMLLinkElement).getAttribute('data-type'),
+        }),
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const icon = getFileIcon(HTMLAttributes.type)
+
+    return [
+      'a',
+      {
+        class: 'editor-file',
+        href: HTMLAttributes.src,
+        download: HTMLAttributes.name,
+        'data-size': HTMLAttributes.size,
+        'data-type': HTMLAttributes.type,
+      },
+      [
+        'i',
+        { class: `fas fa-${icon}` },
+      ],
+      ` ${HTMLAttributes.name}${HTMLAttributes.size ? ` (${HTMLAttributes.size})` : ''}`,
+    ]
+  },
+
+  addCommands() {
+    return {
+      setFile:
+        (options) =>
+          ({ commands }) => {
+            return commands.insertContent({
+              type: this.name,
+              attrs: options,
+            })
+          },
+    }
+  },
+})
+
+// Определение расширения для аудио
+const AudioExtension = Node.create({
+  name: 'audio',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      title: {
+        default: 'Аудио',
+      },
+      controls: {
+        default: true,
+      },
+      autoplay: {
+        default: false,
+      },
+      loop: {
+        default: false,
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'audio',
+        getAttrs: (dom) => ({
+          src: (dom as HTMLAudioElement).getAttribute('src'),
+          title: (dom as HTMLAudioElement).getAttribute('title') || 'Аудио',
+          controls: (dom as HTMLAudioElement).hasAttribute('controls'),
+          autoplay: (dom as HTMLAudioElement).hasAttribute('autoplay'),
+          loop: (dom as HTMLAudioElement).hasAttribute('loop'),
+        }),
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return [
+      'audio',
+      {
+        ...HTMLAttributes,
+        class: 'editor-audio',
+        controls: HTMLAttributes.controls !== false,
+      },
+    ]
+  },
+
+  addCommands() {
+    return {
+      setAudio:
+        (options) =>
+          ({ commands }) => {
+            return commands.insertContent({
+              type: this.name,
+              attrs: options,
+            })
+          },
+    }
+  },
+})
+
+// Создаем редактор с новыми расширениями
 const editor = useEditor({
   content: props.modelValue || '',
   extensions: [
@@ -185,6 +521,9 @@ const editor = useEditor({
     Placeholder.configure({
       placeholder: props.placeholder,
     }),
+    IframeExtension, // Добавляем поддержку iframe
+    FileExtension,   // Добавляем поддержку файлов
+    AudioExtension,  // Добавляем поддержку аудио
   ],
   editorProps: {
     attributes: {
@@ -198,12 +537,38 @@ const editor = useEditor({
   },
 })
 
-// Состояние для загрузки изображения
-const uploadingImage = ref(false)
-
 // Счетчик символов
 const characterCount = computed(() => {
   return editor.value?.storage.characterCount?.characters() || 0
+})
+
+// Получение embed URL для видео
+const videoEmbedUrl = computed(() => {
+  if (!videoUrl.value) return null
+
+  const url = videoUrl.value.trim()
+
+  if (videoSource.value === 'youtube') {
+    // Обработка YouTube ссылок
+    const youtubeRegex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+    const match = url.match(youtubeRegex)
+
+    if (match) {
+      const videoId = match[1]
+      return `https://www.youtube.com/embed/${videoId}`
+    }
+  } else if (videoSource.value === 'rutube') {
+    // Обработка RuTube ссылок
+    const rutubeRegex = /rutube\.ru\/video\/([a-zA-Z0-9_-]+)/
+    const match = url.match(rutubeRegex)
+
+    if (match) {
+      const videoId = match[1]
+      return `https://rutube.ru/play/embed/${videoId}`
+    }
+  }
+
+  return null
 })
 
 // Загрузка изображения
@@ -227,14 +592,6 @@ const uploadImage = async () => {
     uploadingImage.value = true
 
     try {
-      // Здесь должен быть вызов вашего API для загрузки вложений
-      // Пример:
-      // const formData = new FormData()
-      // formData.append('file', file)
-      // const response = await attachmentService.upload(formData)
-      // const imageUrl = response.data.path
-
-      // Для демо используем Data URL
       const reader = new FileReader()
       reader.onload = (e) => {
         const result = e.target?.result as string
@@ -256,6 +613,126 @@ const uploadImage = async () => {
   }
 
   input.click()
+}
+
+// Общая функция загрузки файла
+const uploadFileHandler = async (type: 'file' | 'audio') => {
+  if (!editor.value) return
+
+  const input = document.createElement('input')
+  input.type = 'file'
+
+  // Устанавливаем accept в зависимости от типа
+  if (type === 'audio') {
+    input.accept = 'audio/*'
+    uploadingAudio.value = true
+  } else {
+    input.accept = '*/*'
+    uploadingFile.value = true
+  }
+
+  input.onchange = async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) {
+      resetUploadState(type)
+      return
+    }
+
+    // Проверка размера файла (макс 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Размер файла не должен превышать 10MB')
+      resetUploadState(type)
+      return
+    }
+
+    try {
+      const reader = new FileReader()
+
+      reader.onload = async (e) => {
+        const result = e.target?.result as string
+
+        // В зависимости от типа файла используем разные команды
+        if (type === 'audio') {
+          editor.value
+            ?.chain()
+            .focus()
+            .setAudio({ src: result, title: file.name })
+            .run()
+        } else {
+          editor.value
+            ?.chain()
+            .focus()
+            .setFile({
+              src: result,
+              name: file.name,
+              size: formatFileSize(file.size),
+              type: file.type
+            })
+            .run()
+        }
+      }
+
+      if (type === 'audio') {
+        reader.readAsDataURL(file)
+      } else {
+        reader.readAsDataURL(file)
+      }
+    } catch (error) {
+      console.error(`Ошибка загрузки ${type === 'audio' ? 'аудио' : 'файла'}:`, error)
+      alert(`Не удалось загрузить ${type === 'audio' ? 'аудио' : 'файл'}`)
+    } finally {
+      resetUploadState(type)
+    }
+  }
+
+  input.click()
+}
+
+const uploadFile = () => uploadFileHandler('file')
+const uploadAudio = () => uploadFileHandler('audio')
+
+const resetUploadState = (type: 'file' | 'audio') => {
+  if (type === 'audio') {
+    uploadingAudio.value = false
+  } else {
+    uploadingFile.value = false
+  }
+}
+
+// Форматирование размера файла
+const formatFileSize = (bytes: number): string => {
+  if (bytes === 0) return '0 B'
+
+  const k = 1024
+  const sizes = ['B', 'KB', 'MB', 'GB']
+  const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+// Вставка видео
+const insertVideo = () => {
+  showVideoModal.value = true
+  videoUrl.value = ''
+}
+
+// Вставка видео из URL
+const insertVideoFromUrl = () => {
+  if (!editor.value || !videoEmbedUrl.value) return
+
+  editor.value
+    .chain()
+    .focus()
+    .setIframe({ src: videoEmbedUrl.value })
+    .run()
+
+  closeVideoModal()
+}
+
+// Закрытие модального окна
+const closeVideoModal = () => {
+  showVideoModal.value = false
+  videoUrl.value = ''
 }
 
 // Наблюдаем за изменением modelValue
@@ -331,7 +808,7 @@ defineExpose({
   border-radius: 3px;
   cursor: pointer;
   font-size: 0.9em;
-  color: #363636;
+  color: #4a4a4a;
   transition: all 0.2s ease;
 }
 
@@ -371,16 +848,205 @@ defineExpose({
   background-color: #302c2c;
   text-align: right;
   font-size: 0.8rem;
-  color: #666;
+  color: #d8d8d8;
   border-radius: 0 0 4px 4px;
 }
 
-/* Стили для изображений в редакторе */
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #272626;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.video-source-selector {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.video-source-selector label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.video-input-group {
+  margin-bottom: 20px;
+}
+
+.video-input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.video-input-group input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.video-examples {
+  margin-top: 10px;
+  color: #b3b3b3;
+  font-size: 12px;
+}
+
+.video-examples ul {
+  margin: 5px 0 0 20px;
+  padding: 0;
+}
+
+.video-examples li {
+  margin-bottom: 2px;
+}
+
+.video-preview {
+  margin: 20px 0;
+  padding: 10px;
+  background: #e6e1e1;
+  border-radius: 4px;
+}
+
+.video-embed {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  height: 0;
+}
+
+.video-embed iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-primary,
+.btn-secondary {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: #3273dc;
+  color: white;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* Стили для медиа-элементов в редакторе */
 :deep(.editor-image) {
   max-width: 100%;
   height: auto;
   border-radius: 4px;
   margin: 10px 0;
+}
+
+:deep(.editor-audio) {
+  width: 100%;
+  max-width: 500px;
+  margin: 10px 0;
+  border-radius: 4px;
+}
+
+:deep(.editor-file) {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  margin: 5px 0;
+  text-decoration: none;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+:deep(.editor-file:hover) {
+  background: #e9e9e9;
+  text-decoration: none;
+}
+
+:deep(.editor-file i) {
+  margin-right: 8px;
+  color: #666;
+}
+
+:deep(.editor-iframe) {
+  width: 100%;
+  max-width: 100%;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+:deep(.editor-iframe iframe) {
+  width: 100%;
+  height: 400px;
+  border: none;
 }
 
 :deep(.ProseMirror:focus) {
