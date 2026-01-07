@@ -290,7 +290,7 @@ const getRangName = (rangId: number) => {
 }
 
 const getRangColor = (rangId: number) => {
-  const colors = ['is-primary', 'is-success', 'is-info', 'is-warning', 'is-danger']
+  const colors = ['is-primary', 'is-success', 'is-info', 'is-warning', 'is-danger', 'is-link', 'is-dark']
   return colors[rangId % colors.length]
 }
 

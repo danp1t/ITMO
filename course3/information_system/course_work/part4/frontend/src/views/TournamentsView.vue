@@ -271,10 +271,6 @@ const filteredAndSortedTournaments = computed(() => {
   return filtered
 })
 
-// Пагинация
-const totalPages = computed(() => {
-  return Math.ceil(filteredAndSortedTournaments.value.length / itemsPerPage)
-})
 
 const paginatedTournaments = computed(() => {
   const startIndex = (currentPage.value - 1) * itemsPerPage
