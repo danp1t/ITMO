@@ -13,10 +13,12 @@
                 class="input"
                 :class="{ 'is-danger': errors.name }"
                 placeholder="Введите название турнира"
+                maxlength="100"
                 required
               >
             </div>
             <p v-if="errors.name" class="help is-danger">{{ errors.name }}</p>
+            <p class="help has-text-grey-light">{{ form.name.length }}/100 символов</p>
           </div>
 
           <!-- Даты -->
@@ -30,6 +32,7 @@
                     type="datetime-local"
                     class="input"
                     :class="{ 'is-danger': errors.startDate }"
+                    :max="form.finishDate || maxDate"
                     required
                   >
                 </div>
@@ -46,6 +49,7 @@
                     type="datetime-local"
                     class="input"
                     :class="{ 'is-danger': errors.finishDate }"
+                    :min="form.startDate || minDate"
                     required
                   >
                 </div>
@@ -64,10 +68,12 @@
                 :class="{ 'is-danger': errors.address }"
                 placeholder="Введите адрес проведения турнира"
                 rows="3"
+                maxlength="200"
                 required
               ></textarea>
             </div>
             <p v-if="errors.address" class="help is-danger">{{ errors.address }}</p>
+            <p class="help has-text-grey-light">{{ form.address.length }}/200 символов</p>
           </div>
 
           <!-- Ссылка -->
@@ -80,9 +86,11 @@
                 class="input"
                 :class="{ 'is-danger': errors.link }"
                 placeholder="https://example.com/tournament"
+                maxlength="500"
               >
             </div>
             <p v-if="errors.link" class="help is-danger">{{ errors.link }}</p>
+            <p v-if="form.link" class="help has-text-grey-light">{{ form.link.length }}/500 символов</p>
           </div>
         </div>
 
@@ -146,10 +154,11 @@
         </div>
       </div>
 
-      <!-- Ошибки -->
-      <div v-if="serverError" class="notification is-danger is-light mb-4">
-        {{ serverError }}
-      </div>
+      <!-- Уведомление -->
+      <AppNotification
+        :notification="notification"
+        @hide="hideNotification"
+      />
 
       <!-- Кнопки -->
       <div class="field is-grouped is-grouped-right">
@@ -181,6 +190,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, watch } from 'vue'
 import type { Tournament, Rang } from '@/types/tournaments.ts'
+import AppNotification from '@/components/AppNotification.vue'
 
 interface Props {
   tournament?: Tournament
@@ -194,6 +204,11 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+// Ограничения по датам
+const currentDate = new Date()
+const maxDate = new Date(currentDate.getFullYear() + 5, 11, 31).toISOString().slice(0, 16)
+const minDate = new Date(2000, 0, 1).toISOString().slice(0, 16)
 
 const form = reactive({
   name: '',
@@ -216,11 +231,33 @@ const errors = reactive({
   minimalAge: ''
 })
 
-const serverError = ref('')
+const notification = ref({
+  visible: false,
+  message: '',
+  type: 'info' as 'info' | 'success' | 'warning' | 'error'
+})
+
 const isLoading = ref(false)
 
 const isEditMode = computed(() => !!props.tournament)
 
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info', duration: number = 5000) => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  if (duration > 0) {
+    setTimeout(() => {
+      hideNotification()
+    }, duration)
+  }
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
+}
 
 const formatDateTimeLocal = (dateString: string) => {
   const date = new Date(dateString)
@@ -251,11 +288,23 @@ const validateForm = () => {
   if (!form.name.trim()) {
     errors.name = 'Название обязательно'
     isValid = false
+  } else if (form.name.trim().length > 100) {
+    errors.name = 'Название не должно превышать 100 символов'
+    isValid = false
   }
 
   if (!form.startDate) {
     errors.startDate = 'Дата начала обязательна'
     isValid = false
+  } else {
+    const start = new Date(form.startDate)
+    const now = new Date()
+
+    // Проверка на будущую дату (можно редактировать архивные)
+    if (!form.archived && start < now) {
+      errors.startDate = 'Дата начала не может быть в прошлом для активного турнира'
+      isValid = false
+    }
   }
 
   if (!form.finishDate) {
@@ -276,6 +325,9 @@ const validateForm = () => {
   if (!form.address.trim()) {
     errors.address = 'Адрес обязателен'
     isValid = false
+  } else if (form.address.trim().length > 200) {
+    errors.address = 'Адрес не должен превышать 200 символов'
+    isValid = false
   }
 
   if (!form.rangId) {
@@ -291,6 +343,9 @@ const validateForm = () => {
 
   if (form.link && !isValidUrl(form.link)) {
     errors.link = 'Неверный формат URL'
+    isValid = false
+  } else if (form.link && form.link.length > 500) {
+    errors.link = 'Ссылка не должна превышать 500 символов'
     isValid = false
   }
 
@@ -308,11 +363,11 @@ const isValidUrl = (url: string) => {
 
 const handleSubmit = async () => {
   if (!validateForm()) {
+    showNotification('Пожалуйста, исправьте ошибки в форме', 'warning')
     return
   }
 
   isLoading.value = true
-  serverError.value = ''
 
   try {
     const tournamentData = {
@@ -327,8 +382,19 @@ const handleSubmit = async () => {
     }
 
     emit('submit', tournamentData)
-  } catch (error) {
-    serverError.value = 'Ошибка при сохранении данных'
+  } catch (error: any) {
+    console.error('Ошибка при сохранении данных:', error)
+
+    let errorMessage = 'Ошибка при сохранении данных'
+    if (error.response?.data) {
+      errorMessage = `Ошибка: ${error.response.data}`
+    } else if (error.response?.status === 400) {
+      errorMessage = 'Некорректные данные. Проверьте введённые значения'
+    } else if (error.response?.status === 401) {
+      errorMessage = 'Недостаточно прав для выполнения операции'
+    }
+
+    showNotification(errorMessage, 'error', 7000)
   } finally {
     isLoading.value = false
   }
@@ -379,6 +445,12 @@ const handleSubmit = async () => {
   margin-top: 0.25rem;
 }
 
+.help.has-text-grey-light {
+  color: #b5b5b5;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
 .checkbox {
   display: flex;
   align-items: center;
@@ -386,11 +458,6 @@ const handleSubmit = async () => {
 
 .checkbox input {
   margin-right: 0.5rem;
-}
-
-.notification {
-  border-radius: 8px;
-  border: none;
 }
 
 @media (max-width: 768px) {
