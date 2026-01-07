@@ -2,8 +2,8 @@ package com.danp1t.backend.repository;
 
 import com.danp1t.backend.model.Post;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,20 +14,20 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
 
-    // Основные методы
-    List<Post> findAll();
+    // Основные методы с сортировкой
+    List<Post> findAll(Sort sort);
 
     Optional<Post> findById(Integer id);
 
-    // Найти по владельцу
-    List<Post> findByOwnerId(Integer ownerId);
+    // Найти по владельцу с сортировкой
+    List<Post> findByOwnerId(Integer ownerId, Sort sort);
 
-    // Поиск по заголовку
-    List<Post> findByTitleContainingIgnoreCase(String title);
+    // Поиск по заголовку с сортировкой
+    List<Post> findByTitleContainingIgnoreCase(String title, Sort sort);
 
-    // Найти все посты с владельцем (жадная загрузка)
+    // Найти все посты с владельцем (жадная загрузка) с сортировкой
     @Query("SELECT p FROM Post p JOIN FETCH p.owner")
-    List<Post> findAllWithOwner();
+    List<Post> findAllWithOwner(Sort sort);
 
     // Найти пост по ID с владельцем
     @Query("SELECT p FROM Post p JOIN FETCH p.owner WHERE p.id = :id")
@@ -42,36 +42,31 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "WHERE p.id = :id")
     Optional<Post> findByIdWithDetails(@Param("id") Integer id);
 
-    // Найти посты по тегу
+    // Найти посты по тегу с сортировкой
     @Query("SELECT DISTINCT p FROM Post p " +
             "JOIN p.tags t " +
-            "WHERE t.id = :tagId " +
-            "ORDER BY p.createdAt DESC")
-    List<Post> findByTagId(@Param("tagId") Integer tagId);
+            "WHERE t.id = :tagId")
+    List<Post> findByTagId(@Param("tagId") Integer tagId, Sort sort);
 
-    // Найти посты по имени тега
+    // Найти посты по имени тега с сортировкой
     @Query("SELECT DISTINCT p FROM Post p " +
             "JOIN p.tags t " +
-            "WHERE t.name = :tagName " +
-            "ORDER BY p.createdAt DESC")
-    List<Post> findByTagName(@Param("tagName") String tagName);
+            "WHERE t.name = :tagName")
+    List<Post> findByTagName(@Param("tagName") String tagName, Sort sort);
 
-    // Найти посты по нескольким тегам (AND - все теги должны быть)
+    // Найти посты по нескольким тегам (AND - все теги должны быть) с сортировкой
     @Query("SELECT p FROM Post p " +
             "JOIN p.tags t " +
             "WHERE t.id IN :tagIds " +
             "GROUP BY p.id " +
-            "HAVING COUNT(DISTINCT t.id) = :tagCount " +
-            "ORDER BY p.createdAt DESC")
-    List<Post> findByAllTags(@Param("tagIds") List<Integer> tagIds, @Param("tagCount") long tagCount);
+            "HAVING COUNT(DISTINCT t.id) = :tagCount")
+    List<Post> findByAllTags(@Param("tagIds") List<Integer> tagIds, @Param("tagCount") long tagCount, Sort sort);
 
-    // Найти посты по нескольким тегам (OR - любой из тегов)
+    // Найти посты по нескольким тегам (OR - любой из тегов) с сортировкой
     @Query("SELECT DISTINCT p FROM Post p " +
             "JOIN p.tags t " +
-            "WHERE t.id IN :tagIds " +
-            "ORDER BY p.createdAt DESC")
-    List<Post> findByAnyTag(@Param("tagIds") List<Integer> tagIds);
-
+            "WHERE t.id IN :tagIds")
+    List<Post> findByAnyTag(@Param("tagIds") List<Integer> tagIds, Sort sort);
 
     // Найти пост по ID с тегами
     @Query("SELECT DISTINCT p FROM Post p " +
@@ -79,8 +74,9 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
             "WHERE p.id = :id")
     Optional<Post> findByIdWithTags(@Param("id") Integer id);
 
+    // Найти все посты с владельцем и тегами с сортировкой
     @Query("SELECT DISTINCT p FROM Post p " +
             "LEFT JOIN FETCH p.owner " +
             "LEFT JOIN FETCH p.tags")
-    List<Post> findAllWithOwnerAndTags();
+    List<Post> findAllWithOwnerAndTags(Sort sort);
 }

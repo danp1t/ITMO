@@ -8,6 +8,7 @@ import com.danp1t.backend.repository.AccountRepository;
 import com.danp1t.backend.repository.PostRepository;
 import com.danp1t.backend.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,11 @@ public class PostService {
 
     @Autowired
     private TagRepository tagRepository;
+
+    // Константы для полей сортировки
+    private static final String SORT_BY_CREATED_AT = "createdAt";
+    private static final String SORT_BY_TITLE = "title";
+    private static final String SORT_BY_COUNT_LIKE = "countLike";
 
     private PostDTO toDTO(Post post) {
         List<TagDTO> tagDTOs = null;
@@ -110,10 +116,31 @@ public class PostService {
         return post;
     }
 
-    public List<PostDTO> findAll() {
-        return postRepository.findAllWithOwnerAndTags().stream()
+    // Метод для создания объекта сортировки
+    private Sort createSort(String sortBy, String sortDirection) {
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = SORT_BY_CREATED_AT; // Значение по умолчанию
+        }
+
+        Sort.Direction direction = Sort.Direction.ASC;
+        if (sortDirection != null && sortDirection.equalsIgnoreCase("desc")) {
+            direction = Sort.Direction.DESC;
+        }
+
+        return Sort.by(direction, sortBy);
+    }
+
+    // Основной метод получения всех постов с сортировкой
+    public List<PostDTO> findAll(String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return postRepository.findAllWithOwnerAndTags(sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Старый метод для обратной совместимости
+    public List<PostDTO> findAll() {
+        return findAll(SORT_BY_CREATED_AT, "desc"); // Значения по умолчанию
     }
 
     public Optional<PostDTO> findById(Integer id) {
@@ -124,16 +151,30 @@ public class PostService {
         return postRepository.findByIdWithDetails(id).map(this::toDetailDTO);
     }
 
-    public List<PostDTO> findByOwnerId(Integer ownerId) {
-        return postRepository.findByOwnerId(ownerId).stream()
+    // Получение постов по владельцу с сортировкой
+    public List<PostDTO> findByOwnerId(Integer ownerId, String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return postRepository.findByOwnerId(ownerId, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<PostDTO> findByTitleContaining(String title) {
-        return postRepository.findByTitleContainingIgnoreCase(title).stream()
+    // Старый метод для обратной совместимости
+    public List<PostDTO> findByOwnerId(Integer ownerId) {
+        return findByOwnerId(ownerId, SORT_BY_CREATED_AT, "desc");
+    }
+
+    // Поиск по заголовку с сортировкой
+    public List<PostDTO> findByTitleContaining(String title, String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return postRepository.findByTitleContainingIgnoreCase(title, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Старый метод для обратной совместимости
+    public List<PostDTO> findByTitleContaining(String title) {
+        return findByTitleContaining(title, SORT_BY_CREATED_AT, "desc");
     }
 
     @Transactional
@@ -238,16 +279,30 @@ public class PostService {
         }
     }
 
-    public List<PostDTO> findByTagId(Integer tagId) {
-        return postRepository.findByTagId(tagId).stream()
+    // Получение постов по тегу с сортировкой
+    public List<PostDTO> findByTagId(Integer tagId, String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return postRepository.findByTagId(tagId, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<PostDTO> findByTagName(String tagName) {
-        return postRepository.findByTagName(tagName).stream()
+    // Старый метод для обратной совместимости
+    public List<PostDTO> findByTagId(Integer tagId) {
+        return findByTagId(tagId, SORT_BY_CREATED_AT, "desc");
+    }
+
+    // Получение постов по имени тега с сортировкой
+    public List<PostDTO> findByTagName(String tagName, String sortBy, String sortDirection) {
+        Sort sort = createSort(sortBy, sortDirection);
+        return postRepository.findByTagName(tagName, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    // Старый метод для обратной совместимости
+    public List<PostDTO> findByTagName(String tagName) {
+        return findByTagName(tagName, SORT_BY_CREATED_AT, "desc");
     }
 
     @Transactional

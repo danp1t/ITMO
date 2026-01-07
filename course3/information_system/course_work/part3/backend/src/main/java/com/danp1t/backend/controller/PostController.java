@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -21,8 +22,10 @@ public class PostController {
     private PostService postService;
 
     @GetMapping
-    public ResponseEntity<List<PostDTO>> getAllPosts() {
-        return ResponseEntity.ok(postService.findAll());
+    public ResponseEntity<List<PostDTO>> getAllPosts(
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        return ResponseEntity.ok(postService.findAll(sortBy, sortDirection));
     }
 
     @GetMapping("/{id}")
@@ -40,13 +43,19 @@ public class PostController {
     }
 
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<PostDTO>> getPostsByOwner(@PathVariable Integer ownerId) {
-        return ResponseEntity.ok(postService.findByOwnerId(ownerId));
+    public ResponseEntity<List<PostDTO>> getPostsByOwner(
+            @PathVariable Integer ownerId,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        return ResponseEntity.ok(postService.findByOwnerId(ownerId, sortBy, sortDirection));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<PostDTO>> searchPosts(@RequestParam String title) {
-        return ResponseEntity.ok(postService.findByTitleContaining(title));
+    public ResponseEntity<List<PostDTO>> searchPosts(
+            @RequestParam String title,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        return ResponseEntity.ok(postService.findByTitleContaining(title, sortBy, sortDirection));
     }
 
     @PostMapping
@@ -55,7 +64,6 @@ public class PostController {
         PostDTO created = postService.save(postDTO, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<PostDTO> updatePost(@PathVariable Integer id,
@@ -105,8 +113,11 @@ public class PostController {
     }
 
     @GetMapping("/tag/{tagId}")
-    public ResponseEntity<List<PostDTO>> getPostsByTag(@PathVariable Integer tagId) {
-        return ResponseEntity.ok(postService.findByTagId(tagId));
+    public ResponseEntity<List<PostDTO>> getPostsByTag(
+            @PathVariable Integer tagId,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        return ResponseEntity.ok(postService.findByTagId(tagId, sortBy, sortDirection));
     }
 
     @PostMapping("/{postId}/tags/{tagId}")
@@ -124,8 +135,11 @@ public class PostController {
     }
 
     @GetMapping("/tag/name/{tagName}")
-    public ResponseEntity<List<PostDTO>> getPostsByTagName(@PathVariable String tagName) {
-        return ResponseEntity.ok(postService.findByTagName(tagName));
+    public ResponseEntity<List<PostDTO>> getPostsByTagName(
+            @PathVariable String tagName,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortDirection) {
+        return ResponseEntity.ok(postService.findByTagName(tagName, sortBy, sortDirection));
     }
 
     @DeleteMapping("/{postId}/tags/{tagId}")
@@ -142,11 +156,8 @@ public class PostController {
         }
     }
 
-    // Получить теги поста
     @GetMapping("/{postId}/tags")
     public ResponseEntity<List<TagDTO>> getPostTags(@PathVariable Integer postId) {
         return ResponseEntity.ok(postService.getPostTags(postId));
     }
-
-
 }
