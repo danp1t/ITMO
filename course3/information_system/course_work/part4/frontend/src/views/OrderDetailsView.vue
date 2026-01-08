@@ -120,32 +120,51 @@
               <thead>
               <tr>
                 <th>Товар</th>
-                <th>Цена</th>
+                <th>Размер</th>
+                <th>Цена за шт.</th>
                 <th>Количество</th>
                 <th>Сумма</th>
               </tr>
               </thead>
               <tbody>
-              <tr v-for="product in order.products" :key="product.id">
+              <!-- Используем orderProducts вместо products -->
+              <tr v-for="item in order.orderProducts" :key="`${item.productId}-${item.productInfoId}`">
                 <td>
                   <div class="product-info">
-                    <div class="product-name">{{ product.name }}</div>
-                    <div class="product-description has-text-grey is-size-7">
-                      {{ truncateDescription(product.description, 100) }}
+                    <div class="product-name">{{ item.productName }}</div>
+                    <div v-if="getProductById(item.productId)" class="product-description has-text-grey is-size-7">
+                      {{ truncateDescription(getProductById(item.productId)?.description || '', 100) }}
                     </div>
                   </div>
                 </td>
-                <td>{{ product.basePrice }} ₽</td>
-                <td>1</td>
-                <td>{{ product.basePrice }} ₽</td>
+                <td>{{ item.size }}</td>
+                <td>{{ item.price }} ₽</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price * item.quantity }} ₽</td>
               </tr>
               </tbody>
               <tfoot>
               <tr>
-                <td colspan="3" class="has-text-right has-text-weight-semibold">
-                  Итого:
+                <td colspan="4" class="has-text-right has-text-weight-semibold">
+                  Товары:
                 </td>
                 <td class="has-text-weight-bold">
+                  {{ productsSubtotal }} ₽
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4" class="has-text-right has-text-weight-semibold">
+                  Доставка:
+                </td>
+                <td class="has-text-weight-bold">
+                  {{ deliveryCost }} ₽
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4" class="has-text-right has-text-weight-bold is-size-5">
+                  Итого:
+                </td>
+                <td class="has-text-weight-bold is-size-5">
                   {{ order.totalAmount }} ₽
                 </td>
               </tr>
@@ -237,7 +256,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { shopAPI } from '../api/shop'
-import type { Order } from '../types/shop'
+import type { Order, OrderProduct, Product } from '../types/shop'
 
 const route = useRoute()
 const router = useRouter()
@@ -248,6 +267,27 @@ const loading = ref(false)
 const error = ref('')
 const cancelling = ref(false)
 const downloadingInvoice = ref(false)
+
+// Computed свойства для расчета сумм
+const productsSubtotal = computed(() => {
+  if (!order.value?.orderProducts) return 0
+  return order.value.orderProducts.reduce((total, item) => {
+    return total + (item.price * item.quantity)
+  }, 0)
+})
+
+const deliveryCost = computed(() => {
+  if (!order.value) return 0
+  return order.value.totalAmount - productsSubtotal.value
+})
+
+// Вспомогательная функция для получения продукта по ID
+const getProductById = computed(() => {
+  return (productId: number) => {
+    if (!order.value?.products) return null
+    return order.value.products.find(p => p.id === productId)
+  }
+})
 
 // Загрузка заказа
 const loadOrder = async () => {

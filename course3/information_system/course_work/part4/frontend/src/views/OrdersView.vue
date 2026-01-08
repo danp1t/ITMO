@@ -16,10 +16,10 @@
       </div>
 
       <!-- Заказы -->
-      <div v-else-if="orders.length > 0">
+      <div v-else-if="filteredOrders.length > 0">
         <div class="orders-list">
           <div
-            v-for="order in orders"
+            v-for="order in filteredOrders"
             :key="order.id"
             class="order-card box mb-4"
           >
@@ -73,22 +73,53 @@
                   <thead>
                   <tr>
                     <th>Товар</th>
+                    <th>Размер</th>
                     <th>Цена</th>
                     <th>Количество</th>
                     <th>Сумма</th>
                   </tr>
                   </thead>
                   <tbody>
-                  <tr v-for="product in order.products" :key="product.id">
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.basePrice }} ₽</td>
-                    <td>1</td>
-                    <td>{{ product.basePrice }} ₽</td>
-                  </tr>
+                  <!-- Используем orderProducts если они есть, иначе fallback на products -->
+                  <template v-if="order.orderProducts && order.orderProducts.length > 0">
+                    <tr v-for="item in order.orderProducts" :key="`${item.productId}-${item.productInfoId}`">
+                      <td>{{ item.productName }}</td>
+                      <td>{{ item.size }}</td>
+                      <td>{{ item.price }} ₽</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.price * item.quantity }} ₽</td>
+                    </tr>
+                  </template>
+                  <template v-else>
+                    <!-- Fallback для старых заказов без orderProducts -->
+                    <tr v-for="product in order.products" :key="product.id">
+                      <td>{{ product.name }}</td>
+                      <td>-</td>
+                      <td>{{ product.basePrice }} ₽</td>
+                      <td>1</td>
+                      <td>{{ product.basePrice }} ₽</td>
+                    </tr>
+                  </template>
                   </tbody>
                   <tfoot>
                   <tr>
-                    <td colspan="3" class="has-text-right has-text-weight-semibold">
+                    <td colspan="4" class="has-text-right has-text-weight-semibold">
+                      Товары:
+                    </td>
+                    <td class="has-text-weight-bold">
+                      {{ getProductsSubtotal(order) }} ₽
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="4" class="has-text-right has-text-weight-semibold">
+                      Доставка:
+                    </td>
+                    <td class="has-text-weight-bold">
+                      {{ getDeliveryCost(order) }} ₽
+                    </td>
+                  </tr>
+                  <tr>
+                    <td colspan="4" class="has-text-right has-text-weight-bold">
                       Итого:
                     </td>
                     <td class="has-text-weight-bold">
@@ -183,7 +214,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
 import { shopAPI } from '../api/shop'
-import type { Order, OrderStatus } from '../types/shop'
+import type { Order, OrderStatus, OrderProduct } from '../types/shop'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
@@ -229,6 +260,25 @@ const filteredOrders = computed(() => {
   }
   return orders.value.filter(order => order.orderStatusId === selectedStatus.value)
 })
+
+// Расчет суммы товаров
+const getProductsSubtotal = (order: Order) => {
+  if (order.orderProducts && order.orderProducts.length > 0) {
+    return order.orderProducts.reduce((total, item) => {
+      return total + (item.price * item.quantity)
+    }, 0)
+  } else {
+    // Fallback для старых заказов
+    return order.products.reduce((total, product) => {
+      return total + product.basePrice
+    }, 0)
+  }
+}
+
+// Расчет стоимости доставки
+const getDeliveryCost = (order: Order) => {
+  return order.totalAmount - getProductsSubtotal(order)
+}
 
 // Форматирование даты
 const formatDate = (dateString: string) => {

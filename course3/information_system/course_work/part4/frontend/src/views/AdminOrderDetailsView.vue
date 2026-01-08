@@ -85,29 +85,67 @@
               <thead>
               <tr>
                 <th>Товар</th>
-                <th>Цена</th>
+                <th>Размер</th>
+                <th>Цена за шт.</th>
                 <th>Количество</th>
                 <th>Сумма</th>
               </tr>
               </thead>
               <tbody>
-              <tr v-for="product in order.products" :key="product.id">
-                <td>
-                  <div class="product-info">
-                    <div class="product-name">{{ product.name }}</div>
-                    <div class="product-description has-text-grey is-size-7">
-                      {{ truncateDescription(product.description, 50) }}
+              <!-- Используем orderProducts если они есть, иначе fallback на products -->
+              <template v-if="order.orderProducts && order.orderProducts.length > 0">
+                <tr v-for="item in order.orderProducts" :key="`${item.productId}-${item.productInfoId}`">
+                  <td>
+                    <div class="product-info">
+                      <div class="product-name">{{ item.productName }}</div>
+                      <div v-if="getProductById(item.productId)" class="product-description has-text-grey is-size-7">
+                        {{ truncateDescription(getProductById(item.productId)?.description || '', 50) }}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>{{ product.basePrice }} ₽</td>
-                <td>1</td>
-                <td>{{ product.basePrice }} ₽</td>
-              </tr>
+                  </td>
+                  <td>{{ item.size }}</td>
+                  <td>{{ item.price }} ₽</td>
+                  <td>{{ item.quantity }}</td>
+                  <td>{{ item.price * item.quantity }} ₽</td>
+                </tr>
+              </template>
+              <template v-else>
+                <!-- Fallback для старых заказов без orderProducts -->
+                <tr v-for="product in order.products" :key="product.id">
+                  <td>
+                    <div class="product-info">
+                      <div class="product-name">{{ product.name }}</div>
+                      <div class="product-description has-text-grey is-size-7">
+                        {{ truncateDescription(product.description, 50) }}
+                      </div>
+                    </div>
+                  </td>
+                  <td>-</td>
+                  <td>{{ product.basePrice }} ₽</td>
+                  <td>1</td>
+                  <td>{{ product.basePrice }} ₽</td>
+                </tr>
+              </template>
               </tbody>
               <tfoot>
               <tr>
-                <td colspan="3" class="has-text-right has-text-weight-semibold">
+                <td colspan="4" class="has-text-right has-text-weight-semibold">
+                  Товары:
+                </td>
+                <td class="has-text-weight-bold">
+                  {{ productsSubtotal }} ₽
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4" class="has-text-right has-text-weight-semibold">
+                  Доставка:
+                </td>
+                <td class="has-text-weight-bold">
+                  {{ deliveryCost }} ₽
+                </td>
+              </tr>
+              <tr>
+                <td colspan="4" class="has-text-right has-text-weight-bold">
                   Итого:
                 </td>
                 <td class="has-text-weight-bold">
@@ -133,11 +171,28 @@
               <strong>ID аккаунта:</strong> {{ order.accountId }}
             </p>
             <p>
+              <strong>Email:</strong> {{ order.email }}
+            </p>
+            <p>
+              <strong>Имя получателя:</strong> {{ order.customerName }}
+            </p>
+            <p>
               <strong>Дата создания заказа:</strong> {{ formatDate(order.createdAt) }}
             </p>
             <p v-if="order.updatedAt">
               <strong>Последнее обновление:</strong> {{ formatDate(order.updatedAt) }}
             </p>
+          </div>
+        </div>
+
+        <!-- Детали доставки и оплаты -->
+        <div class="box mb-4">
+          <h3 class="title is-5 mb-3">Детали доставки и оплаты</h3>
+          <div class="content">
+            <p><strong>Способ доставки:</strong> {{ getDeliveryMethodText(order.deliveryMethod) }}</p>
+            <p><strong>Способ оплаты:</strong> {{ getPaymentMethodText(order.paymentMethod) }}</p>
+            <p v-if="order.postalCode"><strong>Почтовый индекс:</strong> {{ order.postalCode }}</p>
+            <p v-if="order.notes"><strong>Комментарий:</strong> {{ order.notes }}</p>
           </div>
         </div>
 
@@ -216,6 +271,27 @@ const editForm = reactive({
   totalAmount: 0,
   phone: '',
   address: ''
+})
+
+// Computed свойства для расчета сумм
+const productsSubtotal = computed(() => {
+  if (!order.value?.orderProducts) return 0
+  return order.value.orderProducts.reduce((total, item) => {
+    return total + (item.price * item.quantity)
+  }, 0)
+})
+
+const deliveryCost = computed(() => {
+  if (!order.value) return 0
+  return order.value.totalAmount - productsSubtotal.value
+})
+
+// Вспомогательная функция для получения продукта по ID
+const getProductById = computed(() => {
+  return (productId: number) => {
+    if (!order.value?.products) return null
+    return order.value.products.find(p => p.id === productId)
+  }
 })
 
 // Проверка изменений
@@ -329,6 +405,25 @@ const formatDate = (dateString: string) => {
 const truncateDescription = (text: string, maxLength: number) => {
   if (!text || text.length <= maxLength) return text
   return text.substring(0, maxLength) + '...'
+}
+
+// Получение текста способа доставки
+const getDeliveryMethodText = (method: string) => {
+  switch (method) {
+    case 'courier': return 'Курьерская доставка'
+    case 'pickup': return 'Самовывоз'
+    default: return method
+  }
+}
+
+// Получение текста способа оплаты
+const getPaymentMethodText = (method: string) => {
+  switch (method) {
+    case 'card': return 'Банковская карта'
+    case 'cash': return 'Наличные при получении'
+    case 'online': return 'Онлайн оплата'
+    default: return method
+  }
 }
 
 // Инициализация
