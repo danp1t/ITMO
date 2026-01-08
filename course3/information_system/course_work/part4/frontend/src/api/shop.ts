@@ -85,7 +85,27 @@ export const shopAPI = {
   },
 
   // Создать заказ
-  createOrder(data: Omit<Order, 'id' | 'createdAt'>) {
+  createOrder(data: {
+    address: string;
+    phone: string;
+    email: string;
+    customerName: string;
+    totalAmount: number;
+    deliveryMethod: string;
+    paymentMethod: string;
+    postalCode: string;
+    notes: string;
+    accountId: number;
+    orderProducts: Array<{
+      productId: number;
+      productInfoId: number;
+      quantity: number;
+      price: number;
+      size: string;
+      productName: string;
+    }>;
+    pickupPointId?: string;
+  }) {
     return apiClient.post<Order>('/api/orders', data)
   },
 

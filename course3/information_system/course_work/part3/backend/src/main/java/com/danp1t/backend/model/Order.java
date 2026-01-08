@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -24,8 +25,30 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     private Integer totalAmount;
 
-    @Column(name = "phone", nullable = true)
+    @Column(name = "phone")
     private String phone;
+
+    @Column(name = "email")
+    private String email;
+
+    @Column(name = "customer_name")
+    private String customerName;
+
+    @Column(name = "delivery_method")
+    private String deliveryMethod;
+
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
+    @Column(name = "postal_code")
+    private String postalCode;
+
+    @Column(name = "notes")
+    private String notes;
+
+    // JSON поле для хранения информации о товарах с ценами из ProductInfo
+    @Column(name = "order_items_json", columnDefinition = "TEXT")
+    private String orderItemsJson;
 
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
@@ -41,5 +64,5 @@ public class Order {
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<Product> products;
+    private List<Product> products = new ArrayList<>();
 }

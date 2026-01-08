@@ -724,6 +724,16 @@ const submitOrder = async () => {
     if (form.entrance) address += `, подъезд ${form.entrance}`
     if (form.floor) address += `, этаж ${form.floor}`
 
+    // Создаем массив товаров с информацией из ProductInfo
+    const orderProducts = cartStore.items.map(item => ({
+      productId: item.productId,
+      productInfoId: item.productInfoId,
+      quantity: item.quantity,
+      price: item.price, // Цена из ProductInfo, а не basePrice!
+      size: item.size,
+      productName: item.productName
+    }))
+
     const orderData = {
       address: address,
       phone: form.phone,
@@ -735,11 +745,7 @@ const submitOrder = async () => {
       postalCode: form.postalCode,
       notes: form.notes,
       accountId: authStore.user?.id || 0,
-      products: cartStore.items.map(item => ({
-        id: item.productId,
-        productInfoId: item.productInfoId,
-        quantity: item.quantity
-      }))
+      orderProducts: orderProducts // Передаем товары с ценами из ProductInfo
     }
 
     // Если выбран самовывоз, добавляем ID пункта
