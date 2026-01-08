@@ -88,9 +88,9 @@ const routes = [
   },
   {
     path: '/shop/products/:id',
-    name: 'product-details',
-    component: () => import('../views/ProductDetailView.vue'),
-    meta: { requiresAuth: false } // Можно просматривать без авторизации
+    name: 'ProductDetail',
+    component: () => import('../views/ProductDetail.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/admin',
