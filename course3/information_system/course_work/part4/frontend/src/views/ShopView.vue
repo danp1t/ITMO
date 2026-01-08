@@ -123,6 +123,8 @@
               <ProductCard
                 :product="product"
                 :product-infos="getProductInfos(product.id)"
+                @edit="openEditModal"
+                @delete="onProductDeleted"
               />
             </div>
           </div>
@@ -250,6 +252,17 @@
       @product-added="onProductAdded"
     />
 
+    <ProductEditModal
+      v-if="authStore.canEditProducts()"
+      :is-visible="showEditProductModal"
+      :product-id="editingProductId"
+      @close="showEditProductModal = false"
+      @product-updated="onProductUpdated"
+      @product-deleted="onProductDeleted"
+    />
+
+
+
     <!-- Сайдбар корзины -->
     <CartSidebar
       :is-visible="showCart"
@@ -268,6 +281,7 @@ import CartSidebar from '../components/shop/CartSidebar.vue'
 import ProductFormModal from '../components/shop/ProductFormModal.vue'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
+import ProductEditModal from "@/components/shop/ProductEditModal.vue";
 
 const cartStore = useCartStore()
 const authStore = useAuthStore()
@@ -287,6 +301,30 @@ const showCart = ref(false)
 
 // Модальное окно добавления товара
 const showAddProductModal = ref(false)
+
+const showEditProductModal = ref(false)
+const editingProductId = ref<number | null>(null)
+
+const openEditModal = (productId: number) => {
+  editingProductId.value = productId
+  showEditProductModal.value = true
+}
+
+const onProductUpdated = () => {
+  // Обновить список товаров
+  loadProducts()
+}
+
+const onProductDeleted = (productId: number) => {
+  // Удалить товар из списка
+  products.value = products.value.filter(p => p.id !== productId)
+  productInfos.value = productInfos.value.filter(info => info.productId !== productId)
+
+  // Закрыть модальное окно редактирования если открыто
+  if (showEditProductModal.value && editingProductId.value === productId) {
+    showEditProductModal.value = false
+  }
+}
 
 // Получение всех уникальных категорий
 const categories = computed(() => {

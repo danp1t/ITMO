@@ -97,42 +97,76 @@
           <span>Подробнее</span>
         </router-link>
       </div>
+
+      <!-- Кнопки администрирования (только для админов) -->
+      <div v-if="authStore.canEditProducts() || authStore.canDeleteProducts()" class="product-admin-actions">
+        <button
+          v-if="authStore.canEditProducts()"
+          class="button is-info is-small"
+          @click.stop="handleEdit"
+          :disabled="isEditing"
+        >
+          <span class="icon">
+            <i class="fas fa-edit"></i>
+          </span>
+        </button>
+        <button
+          v-if="authStore.canDeleteProducts()"
+          class="button is-danger is-small"
+          @click.stop="handleDelete"
+          :disabled="isDeleting"
+        >
+          <span class="icon">
+            <i class="fas fa-trash"></i>
+          </span>
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useCartStore } from '@/stores/cart.ts'
-import type { Product, ProductInfo } from '@/types/shop.ts'
+import { useCartStore } from '@/stores/cart'
+import { useAuthStore } from '@/stores/auth'
+import { shopAPI } from '@/api/shop' // Или '../../api/shop' в зависимости от структуры
+import type { Product, ProductInfo } from '@/types/shop'
 
 interface Props {
   product: Product
   productInfos?: ProductInfo[]
 }
 
+interface Emits {
+  (e: 'edit', productId: number): void
+  (e: 'delete', productId: number): void
+}
+
 const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
+
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 const selectedSize = ref<ProductInfo | null>(null)
 const isAddingToCart = ref(false)
+const isEditing = ref(false)
+const isDeleting = ref(false)
 
-// Изображения товаров (в реальном приложении брать из API)
+// Изображения товаров
 const getProductImageUrl = () => {
-  // Если у товара есть изображения
   if (props.product.images && props.product.images.length > 0) {
     const firstImage = props.product.images[0];
 
-    // Проверяем, является ли URL абсолютным или относительным
     if (firstImage.startsWith('http') || firstImage.startsWith('https')) {
-      return firstImage; // Абсолютный URL
+      return firstImage;
     } else if (firstImage.startsWith('/')) {
-      return firstImage; // Относительный путь от корня
+      return firstImage;
     } else {
-      // Предполагаем, что это имя файла и добавляем базовый путь API
       return `/api/products/images/${firstImage}`;
     }
   }
+  return 'https://via.placeholder.com/400x300?text=Изображение+товара';
 }
 
 const handleImageError = (e: Event) => {
@@ -229,6 +263,24 @@ const addToCart = async () => {
     alert('Не удалось добавить товар в корзину')
   } finally {
     isAddingToCart.value = false
+  }
+}
+
+// Редактирование товара
+const handleEdit = () => {
+  emit('edit', props.product.id)
+}
+
+// Удаление товара
+const handleDelete = async () => {
+  isDeleting.value = true
+  try {
+    await shopAPI.deleteProduct(props.product.id)
+    emit('delete', props.product.id)
+  } catch (error) {
+    console.error('Ошибка при удалении товара:', error)
+  } finally {
+    isDeleting.value = false
   }
 }
 
@@ -344,6 +396,31 @@ if (availableSizes.value.length > 0) {
 
 .button.is-light {
   border: 1px solid #e5e7eb;
+}
+
+/* Кнопки администрирования */
+.product-admin-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 0.25rem;
+  z-index: 2;
+}
+
+.product-admin-actions .button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+.product-admin-actions .button:hover {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {

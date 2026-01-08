@@ -145,4 +145,16 @@ export const shopAPI = {
   deleteOrder(id: number) {
     return apiClient.delete(`/api/orders/${id}`)
   },
+
+  getProductForEdit(id: number) {
+    return apiClient.get<ProductDetail>(`/api/products/${id}/detail`)
+  },
+
+  updateProductWithImagesAndSizes(id: number, formData: FormData) {
+    return apiClient.put<Product>(`/api/products/${id}/update-with-images-and-sizes`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
 }
