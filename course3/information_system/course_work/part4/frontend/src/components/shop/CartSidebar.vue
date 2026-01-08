@@ -160,9 +160,7 @@ const updateQuantity = (item: CartItem, event: Event) => {
 }
 
 const removeItem = (item: CartItem) => {
-  if (confirm('Удалить товар из корзины?')) {
     cartStore.removeItem(item.productId, item.productInfoId)
-  }
 }
 
 const clearCart = () => {

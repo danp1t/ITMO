@@ -259,8 +259,6 @@ const addToCart = async () => {
       cartStore.addItem(props.product, productInfo, 1)
     }
 
-    // В реальном приложении можно показать уведомление
-    alert('Товар добавлен в корзину!')
   } catch (error) {
     console.error('Ошибка при добавлении в корзину:', error)
     alert('Не удалось добавить товар в корзину')

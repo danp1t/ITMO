@@ -512,7 +512,6 @@ const addToCart = async () => {
       cartStore.addItem(product.value, productInfo, quantity.value)
     }
 
-    alert('Товар добавлен в корзину!')
   } catch (err) {
     console.error('Ошибка при добавлении в корзину:', err)
     alert('Не удалось добавить товар в корзину')
