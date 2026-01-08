@@ -11,6 +11,19 @@
         </div>
 
         <div class="level-right">
+          <!-- Кнопка добавления товара (только для администраторов) -->
+          <div v-if="authStore.canPublishPosts()" class="level-item">
+            <button
+              class="button is-primary"
+              @click="showAddProductModal = true"
+            >
+              <span class="icon">
+                <i class="fas fa-plus"></i>
+              </span>
+              <span>Добавить товар</span>
+            </button>
+          </div>
+
           <div class="level-item">
             <!-- Корзина -->
             <div class="cart-indicator" @click="toggleCart">
@@ -229,6 +242,14 @@
       </div>
     </div>
 
+    <!-- Модальное окно добавления товара -->
+    <ProductFormModal
+      v-if="authStore.canPublishPosts()"
+      :is-visible="showAddProductModal"
+      @close="showAddProductModal = false"
+      @product-added="onProductAdded"
+    />
+
     <!-- Сайдбар корзины -->
     <CartSidebar
       :is-visible="showCart"
@@ -241,12 +262,15 @@
 import { ref, computed, onMounted } from 'vue'
 import { debounce } from 'lodash'
 import { useCartStore } from '../stores/cart'
+import { useAuthStore } from '../stores/auth'
 import ProductCard from '../components/shop/ProductCard.vue'
 import CartSidebar from '../components/shop/CartSidebar.vue'
+import ProductFormModal from '../components/shop/ProductFormModal.vue'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
 
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 
 // Данные
 const products = ref<Product[]>([])
@@ -260,6 +284,9 @@ const searchQuery = ref('')
 const priceRange = ref({ min: 0, max: 0 })
 const inStockOnly = ref(false)
 const showCart = ref(false)
+
+// Модальное окно добавления товара
+const showAddProductModal = ref(false)
 
 // Получение всех уникальных категорий
 const categories = computed(() => {
@@ -294,8 +321,13 @@ const filteredProducts = computed(() => {
   // Фильтрация по цене
   if (priceRange.value.min > 0 || priceRange.value.max > 0) {
     result = result.filter(p => {
-      const minPrice = Math.min(...getProductInfos(p.id).map(info => info.price))
-      const maxPrice = Math.max(...getProductInfos(p.id).map(info => info.price))
+      const infos = getProductInfos(p.id)
+      const minPrice = infos.length > 0
+        ? Math.min(...infos.map(info => info.price))
+        : p.basePrice
+      const maxPrice = infos.length > 0
+        ? Math.max(...infos.map(info => info.price))
+        : p.basePrice
 
       if (priceRange.value.min > 0 && minPrice < priceRange.value.min) return false
       if (priceRange.value.max > 0 && maxPrice > priceRange.value.max) return false
@@ -319,8 +351,12 @@ const filteredProducts = computed(() => {
     if (sortField === 'price') {
       const aInfos = getProductInfos(a.id)
       const bInfos = getProductInfos(b.id)
-      aValue = aInfos.length > 0 ? Math.min(...aInfos.map(i => i.price)) : a.basePrice
-      bValue = bInfos.length > 0 ? Math.min(...bInfos.map(i => i.price)) : b.basePrice
+      aValue = aInfos.length > 0
+        ? Math.min(...aInfos.map(i => i.price))
+        : a.basePrice
+      bValue = bInfos.length > 0
+        ? Math.min(...bInfos.map(i => i.price))
+        : b.basePrice
     } else {
       aValue = a[sortField as keyof Product]
       bValue = b[sortField as keyof Product]
@@ -366,6 +402,10 @@ const loadProducts = async () => {
   loading.value = true
 
   try {
+    // Очищаем предыдущие данные
+    products.value = []
+    productInfos.value = []
+
     const productsResponse = await shopAPI.getProducts()
     products.value = productsResponse.data
 
@@ -380,7 +420,7 @@ const loadProducts = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке товаров:', error)
-    // В реальном приложении показывать уведомление
+    alert('Не удалось загрузить товары. Пожалуйста, попробуйте позже.')
   } finally {
     loading.value = false
   }
@@ -425,6 +465,21 @@ const debouncedSearch = debounce(() => {
 const toggleCart = () => {
   showCart.value = !showCart.value
 }
+
+// Обработчик успешного добавления товара
+const onProductAdded = () => {
+  // Обновляем список товаров
+  loadProducts()
+
+  // Показываем уведомление
+  showNotification.value = true
+  setTimeout(() => {
+    showNotification.value = false
+  }, 3000)
+}
+
+// Уведомление
+const showNotification = ref(false)
 
 onMounted(() => {
   loadProducts()
@@ -523,6 +578,10 @@ onMounted(() => {
   margin-top: 0.5rem;
 }
 
+.button.is-primary:hover {
+  opacity: 0.9;
+}
+
 @media (max-width: 768px) {
   .shop-view {
     padding: 0.5rem;
@@ -538,6 +597,26 @@ onMounted(() => {
 
   .filters-panel .columns {
     flex-direction: column;
+  }
+}
+
+/* Уведомление об успешном добавлении товара */
+.success-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 </style>

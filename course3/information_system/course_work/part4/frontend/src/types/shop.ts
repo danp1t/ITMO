@@ -112,3 +112,19 @@ export interface Size {
   name: string
   description?: string
 }
+
+export interface CreateProductData {
+  name: string
+  description: string
+  category: string
+  basePrice: number
+  popularity?: number
+  images?: string[]
+}
+
+export interface CreateProductInfoData {
+  productId: number
+  sizeName: string
+  countItems: number
+  price: number
+}

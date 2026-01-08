@@ -24,7 +24,7 @@ export const tournamentsAPI = {
     return apiClient.get<Tournament>(`/api/tournaments/${id}`)
   },
 
-  // Создать турнир
+  // АСоздать турнир
   createTournament(data: Omit<Tournament, 'id'>) {
     return apiClient.post<Tournament>('/api/tournaments', data)
   },
