@@ -30,7 +30,7 @@
         <!-- Изображение товара -->
         <div class="column is-half">
           <div class="product-images">
-            <div class="main-image">
+            <div class="main-image-container">
               <img
                 :src="mainImage"
                 :alt="product.name"
@@ -551,16 +551,20 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.main-image {
+.main-image-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 12px;
   margin-bottom: 1rem;
 }
 
 .product-main-image {
   width: 100%;
-  height: 400px;
+  height: 100%;
   object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  object-position: top; /* Показываем верхнюю часть изображения */
   transition: transform 0.3s;
 }
 
@@ -599,6 +603,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: top; /* Показываем верхнюю часть и в миниатюрах */
 }
 
 /* Цена */
@@ -770,7 +775,7 @@ onMounted(() => {
     flex-direction: column;
   }
 
-  .product-main-image {
+  .main-image-container {
     height: 300px;
   }
 

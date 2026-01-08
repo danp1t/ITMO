@@ -103,8 +103,8 @@
               </div>
 
               <!-- Кнопка загрузки -->
-              <div class="file is-boxed" @click="triggerFileInput" :class="{ 'is-disabled': isSubmitting }">
-                <label class="file-label">
+              <div class="file is-boxed" :class="{ 'is-disabled': isSubmitting }">
+                <label class="file-label" :class="{ 'is-disabled': isSubmitting }">
                   <input
                     ref="fileInput"
                     type="file"
@@ -112,10 +112,9 @@
                     accept="image/*"
                     @change="handleImageSelect"
                     class="file-input"
-                    style="display: none"
                     :disabled="isSubmitting"
                   >
-                  <span class="file-cta">
+                  <span class="file-cta" @click.stop="triggerFileInput">
                     <span class="file-icon">
                       <i class="fas fa-upload"></i>
                     </span>
@@ -311,9 +310,12 @@ const getImageUrl = (image: File) => {
 }
 
 // Вызов клика по скрытому input
-const triggerFileInput = () => {
-  if (!isSubmitting.value) {
-    fileInput.value?.click()
+const triggerFileInput = (event: Event) => {
+  event.preventDefault()
+  event.stopPropagation()
+
+  if (!isSubmitting.value && fileInput.value) {
+    fileInput.value.click()
   }
 }
 
@@ -327,6 +329,7 @@ const handleImageSelect = (event: Event) => {
     const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
       alert('Некоторые файлы превышают максимальный размер 5MB')
+      input.value = ''
       return
     }
 
@@ -334,6 +337,7 @@ const handleImageSelect = (event: Event) => {
     const invalidFiles = files.filter(file => !file.type.startsWith('image/'))
     if (invalidFiles.length > 0) {
       alert('Можно загружать только изображения (JPG, PNG, GIF)')
+      input.value = ''
       return
     }
 
@@ -423,8 +427,6 @@ const submitForm = async () => {
     // Сбрасываем форму
     resetForm()
 
-    // Показываем уведомление
-    alert('Товар успешно добавлен!')
 
   } catch (error: any) {
     console.error('Ошибка при добавлении товара:', error)
@@ -555,7 +557,7 @@ defineExpose({
   border-radius: 8px;
   padding: 20px;
   text-align: center;
-  background: #201f1f;
+  background: #252527;
   transition: border-color 0.3s;
 }
 
@@ -619,7 +621,6 @@ defineExpose({
 
 .file.is-boxed {
   margin: 0 auto;
-  cursor: pointer;
 }
 
 .file.is-boxed.is-disabled {
@@ -631,9 +632,25 @@ defineExpose({
   cursor: pointer;
 }
 
-.file-input:disabled + .file-cta {
+.file-label.is-disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-cta {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1em;
+  transition: all 0.2s;
+}
+
+.file-cta:hover:not(.is-disabled) {
+  background-color: #f0f0f0;
 }
 
 /* Стили для полей формы при disabled */

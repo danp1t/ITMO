@@ -4,9 +4,7 @@
     <div class="card-image">
       <figure class="image is-4by3">
         <img
-          :src="product.images && product.images.length > 0
-          ? (product.images[0].startsWith('http') ? product.images[0] : `/api/products/images/${product.images[0]}`)
-         : 'https://via.placeholder.com/300x300?text=Нет+изображения'"
+          :src="getProductImageUrl()"
           :alt="product.name"
           @error="handleImageError"
         >
@@ -105,8 +103,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useCartStore } from '../../stores/cart'
-import type { Product, ProductInfo } from '../../types/shop'
+import { useCartStore } from '@/stores/cart.ts'
+import type { Product, ProductInfo } from '@/types/shop.ts'
 
 interface Props {
   product: Product
@@ -120,18 +118,22 @@ const selectedSize = ref<ProductInfo | null>(null)
 const isAddingToCart = ref(false)
 
 // Изображения товаров (в реальном приложении брать из API)
-const productImages = [
-  'https://images.unsplash.com/photo-1595435934247-5d33b7f92c70?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1594736797933-d0e49d051b43?w-400&h=300&fit=crop',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop'
-]
+const getProductImageUrl = () => {
+  // Если у товара есть изображения
+  if (props.product.images && props.product.images.length > 0) {
+    const firstImage = props.product.images[0];
 
-const productImage = computed(() => {
-  // В реальном приложении использовать изображения из продукта
-  const index = props.product.id % productImages.length
-  return productImages[index]
-})
+    // Проверяем, является ли URL абсолютным или относительным
+    if (firstImage.startsWith('http') || firstImage.startsWith('https')) {
+      return firstImage; // Абсолютный URL
+    } else if (firstImage.startsWith('/')) {
+      return firstImage; // Относительный путь от корня
+    } else {
+      // Предполагаем, что это имя файла и добавляем базовый путь API
+      return `/api/products/images/${firstImage}`;
+    }
+  }
+}
 
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
@@ -254,12 +256,20 @@ if (availableSizes.value.length > 0) {
 .card-image {
   position: relative;
   overflow: hidden;
+  height: 200px; /* Фиксированная высота для изображения */
+}
+
+.image.is-4by3 {
+  position: relative;
+  height: 100%;
+  width: 100%;
 }
 
 .product-image {
-  object-fit: cover;
-  height: 200px;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top; /* Показываем верхнюю часть изображения */
   transition: transform 0.3s;
 }
 
@@ -271,6 +281,7 @@ if (availableSizes.value.length > 0) {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 2;
 }
 
 .card-content {
@@ -285,7 +296,7 @@ if (availableSizes.value.length > 0) {
 }
 
 .description {
-  color: #a460d1;
+  color: #666;
   font-size: 0.9rem;
   flex: 1;
 }
@@ -297,7 +308,7 @@ if (availableSizes.value.length > 0) {
 }
 
 .price {
-  color: #6c631f;
+  color: #2d3748;
   font-size: 1.25rem;
 }
 
@@ -338,6 +349,10 @@ if (availableSizes.value.length > 0) {
 @media (max-width: 768px) {
   .product-card {
     margin-bottom: 1rem;
+  }
+
+  .card-image {
+    height: 180px; /* Немного уменьшаем высоту на мобильных */
   }
 }
 </style>
