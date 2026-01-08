@@ -40,15 +40,15 @@
             </div>
 
             <!-- Миниатюры -->
-            <div v-if="images.length > 1" class="image-thumbnails">
+            <div v-if="productImages.length > 1" class="image-thumbnails">
               <div
-                v-for="(image, index) in images"
+                v-for="(image, index) in productImages"
                 :key="index"
                 class="thumbnail"
                 :class="{ 'is-active': index === activeImageIndex }"
                 @click="activeImageIndex = index"
               >
-                <img :src="image" :alt="`Изображение ${index + 1}`">
+                <img :src="image" :alt="`Изображение ${index + 1}`" @error="handleImageError">
               </div>
             </div>
           </div>
@@ -366,12 +366,23 @@ const addingToCart = ref(false)
 const activeTab = ref('details')
 const inWishlist = ref(false)
 
-// Изображения товара (в реальном приложении брать из API)
-const images = [
-  'https://images.unsplash.com/photo-1595435934247-5d33b7f92c70?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1594736797933-d0e49d051b43?w=800&h=600&fit=crop'
-]
+// Изображения товара
+const productImages = computed(() => {
+  if (product.value?.images && product.value.images.length > 0) {
+    // Бэкенд уже возвращает полные URL
+    return product.value.images;
+  }
+  // Если нет изображений, используем placeholder
+  return ['https://via.placeholder.com/800x600?text=Not_found'];
+});
+
+// Основное изображение
+const mainImage = computed(() => {
+  if (productImages.value.length > 0 && activeImageIndex.value < productImages.value.length) {
+    return productImages.value[activeImageIndex.value]
+  }
+  return 'https://via.placeholder.com/800x600?text=Not_found'
+})
 
 // Загрузка данных о товаре
 const loadProduct = async () => {
@@ -404,13 +415,8 @@ const loadProduct = async () => {
 // Обработчик ошибки загрузки изображения
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/800x600?text=Изображение+товара'
+  img.src = 'https://via.placeholder.com/800x600?text=Изображение+не+загружено'
 }
-
-// Основное изображение
-const mainImage = computed(() => {
-  return images[activeImageIndex.value]
-})
 
 // Доступные размеры
 const availableSizes = computed(() => {

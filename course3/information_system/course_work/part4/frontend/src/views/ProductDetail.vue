@@ -21,7 +21,7 @@
         <div class="main-image mb-4">
           <figure class="image is-4by3">
             <img
-              :src="mainImage"
+              :src="mainImageUrl"
               :alt="product.name"
               class="product-main-image"
               @error="handleImageError"
@@ -39,14 +39,15 @@
               v-for="(img, index) in productImages"
               :key="index"
               class="column is-3"
-              @click="changeMainImage(img)"
+              @click="changeMainImage(index)"
             >
               <figure class="image is-square">
                 <img
                   :src="img"
                   :alt="`${product.name} - изображение ${index + 1}`"
-                  :class="{'is-active': img === mainImage}"
+                  :class="{'is-active': index === activeImageIndex}"
                   class="gallery-thumbnail"
+                  @error="handleImageError"
                 >
               </figure>
             </div>
@@ -92,7 +93,6 @@
                     от
                   </span>
                   {{ minPrice }} ₽
-
                 </p>
                 <p v-if="hasMultiplePrices" class="has-text-grey">
                   Диапазон цен: {{ minPrice }} - {{ maxPrice }} ₽
@@ -304,7 +304,7 @@ const loading = ref(true)
 const error = ref(false)
 
 // Состояние
-const mainImage = ref('')
+const activeImageIndex = ref(0)
 const selectedSize = ref<ProductInfo | null>(null)
 const quantity = ref(1)
 const isAddingToCart = ref(false)
@@ -312,18 +312,35 @@ const showNotification = ref(false)
 const isInWishlist = ref(false)
 const relatedProducts = ref<Product[]>([])
 
-// Изображения товаров (в реальном приложении брать из API)
-const productImages = [
-  'https://images.unsplash.com/photo-1595435934247-5d33b7f92c70?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1581094794329-c8112a89af12?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1594736797933-d0e49d051b43?w=800&h=600&fit=crop',
-  'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop'
-]
-
 // Получить ID товара из маршрута
 const productId = computed(() => {
   const id = route.params.id
   return typeof id === 'string' ? parseInt(id) : Array.isArray(id) ? parseInt(id[0]) : id
+})
+
+// URL главного изображения
+const mainImageUrl = computed(() => {
+  if (productImages.value.length > 0 && activeImageIndex.value < productImages.value.length) {
+    return productImages.value[activeImageIndex.value]
+  }
+  return 'https://via.placeholder.com/800x600?text=Нет+изображения'
+})
+
+// Изображения товара
+const productImages = computed(() => {
+  if (product.value?.images && product.value.images.length > 0) {
+    // Убедимся, что все изображения имеют полный URL
+    return product.value.images.map(img => {
+      // Если изображение уже содержит полный URL, возвращаем как есть
+      if (img.startsWith('http') || img.startsWith('/api/products/images/')) {
+        return img
+      }
+      // Иначе добавляем префикс API
+      return `/api/products/images/${img}`
+    })
+  }
+  // Если нет изображений, используем placeholder
+  return ['https://via.placeholder.com/800x600?text=Нет+изображения']
 })
 
 // Общее количество на складе
@@ -407,14 +424,6 @@ const loadProduct = async () => {
     const infosResponse = await shopAPI.getProductInfoByProduct(productId.value as number)
     productInfos.value = infosResponse.data
 
-    // Устанавливаем первое изображение как главное
-    if (product.value.images && product.value.images.length > 0) {
-      mainImage.value = product.value.images[0]
-    } else {
-      const index = (productId.value as number) % productImages.length
-      mainImage.value = productImages[index]
-    }
-
     // Автоматически выбираем первый доступный размер
     if (availableSizes.value.length > 0) {
       selectedSize.value = availableSizes.value[0]
@@ -445,28 +454,19 @@ const loadRelatedProducts = async () => {
   }
 }
 
-// Изображения товара
-const productImagesComputed = computed(() => {
-  if (product.value?.images && product.value.images.length > 0) {
-    return product.value.images
-  }
-  return productImages
-})
-
 // Получить информацию о товаре по ID (для похожих товаров)
 const getProductInfos = (id: number) => {
-  // В реальном приложении это должно загружаться из API
   return productInfos.value.filter(info => info.productId === id)
 }
 
 // Обработчики
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/800x600?text=Изображение+товара'
+  img.src = 'https://via.placeholder.com/800x600?text=Изображение+не+загружено'
 }
 
-const changeMainImage = (img: string) => {
-  mainImage.value = img
+const changeMainImage = (index: number) => {
+  activeImageIndex.value = index
 }
 
 const onSizeChange = () => {
@@ -528,7 +528,6 @@ const buyNow = () => {
 
 const addToWishlist = () => {
   isInWishlist.value = !isInWishlist.value
-  // В реальном приложении здесь был бы вызов API
   const message = isInWishlist.value
     ? 'Товар добавлен в избранное'
     : 'Товар удален из избранного'

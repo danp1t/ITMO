@@ -4,9 +4,10 @@
     <div class="card-image">
       <figure class="image is-4by3">
         <img
-          :src="productImage"
+          :src="product.images && product.images.length > 0
+          ? (product.images[0].startsWith('http') ? product.images[0] : `/api/products/images/${product.images[0]}`)
+         : 'https://via.placeholder.com/300x300?text=Нет+изображения'"
           :alt="product.name"
-          class="product-image"
           @error="handleImageError"
         >
         <div v-if="isOutOfStock" class="out-of-stock-overlay">

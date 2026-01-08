@@ -28,12 +28,15 @@ public class FileStorageService {
 
         Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
 
-        return Paths.get(subDirectory, fileName).toString();
+        // Используем прямой слеш для совместимости с URL
+        return subDirectory + "/" + fileName;
     }
 
     public boolean deleteFile(String filePath) {
         try {
-            Path path = Paths.get(uploadDir, filePath).toAbsolutePath().normalize();
+            // Преобразуем путь с прямыми слешами в системный путь
+            String normalizedPath = filePath.replace('/', FileSystems.getDefault().getSeparator().charAt(0));
+            Path path = Paths.get(uploadDir, normalizedPath).toAbsolutePath().normalize();
             return Files.deleteIfExists(path);
         } catch (IOException e) {
             return false;
