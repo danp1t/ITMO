@@ -98,28 +98,31 @@
         </router-link>
       </div>
 
-      <!-- Кнопки администрирования (только для админов) -->
-      <div v-if="authStore.canEditProducts() || authStore.canDeleteProducts()" class="product-admin-actions">
-        <button
-          v-if="authStore.canEditProducts()"
-          class="button is-info is-small"
-          @click.stop="handleEdit"
-          :disabled="isEditing"
-        >
-          <span class="icon">
-            <i class="fas fa-edit"></i>
-          </span>
-        </button>
-        <button
-          v-if="authStore.canDeleteProducts()"
-          class="button is-danger is-small"
-          @click.stop="handleDelete"
-          :disabled="isDeleting"
-        >
-          <span class="icon">
-            <i class="fas fa-trash"></i>
-          </span>
-        </button>
+      <!-- Кнопки администрирования (внизу карточки) -->
+      <div v-if="authStore.canEditProducts() || authStore.canDeleteProducts()"
+           class="product-admin-actions mt-3">
+        <div class="admin-buttons">
+          <button
+            v-if="authStore.canEditProducts()"
+            class="button is-info is-small"
+            @click.stop="handleEdit"
+            :disabled="isEditing"
+          >
+            <span class="icon">
+              <i class="fas fa-edit"></i>
+            </span>
+          </button>
+          <button
+            v-if="authStore.canDeleteProducts()"
+            class="button is-danger is-small"
+            @click.stop="handleDelete"
+            :disabled="isDeleting"
+          >
+            <span class="icon">
+              <i class="fas fa-trash"></i>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -129,7 +132,7 @@
 import { ref, computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
-import { shopAPI } from '@/api/shop' // Или '../../api/shop' в зависимости от структуры
+import { shopAPI } from '@/api/shop'
 import type { Product, ProductInfo } from '@/types/shop'
 
 interface Props {
@@ -340,6 +343,7 @@ if (availableSizes.value.length > 0) {
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding-bottom: 1.5rem;
 }
 
 .title {
@@ -376,6 +380,7 @@ if (availableSizes.value.length > 0) {
 
 .buttons {
   margin-top: auto;
+  margin-bottom: 0.5rem;
 }
 
 .button.is-primary {
@@ -398,29 +403,50 @@ if (availableSizes.value.length > 0) {
   border: 1px solid #e5e7eb;
 }
 
-/* Кнопки администрирования */
+/* Кнопки администрирования внизу карточки */
 .product-admin-actions {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  gap: 0.25rem;
-  z-index: 2;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 1rem;
 }
 
-.product-admin-actions .button {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+.admin-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-buttons .button {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0.9;
-  transition: opacity 0.2s;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.5rem;
 }
 
-.product-admin-actions .button:hover {
-  opacity: 1;
+.admin-buttons .button.is-info {
+  background-color: #3e74d1;
+  color: white;
+  border: none;
+}
+
+.admin-buttons .button.is-info:hover {
+  opacity: 0.9;
+}
+
+.admin-buttons .button.is-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+}
+
+.admin-buttons .button.is-danger:hover {
+  opacity: 0.9;
+}
+
+.admin-buttons .button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
@@ -429,7 +455,12 @@ if (availableSizes.value.length > 0) {
   }
 
   .card-image {
-    height: 180px; /* Немного уменьшаем высоту на мобильных */
+    height: 180px;
+  }
+
+  .admin-buttons .button {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.4rem;
   }
 }
 </style>

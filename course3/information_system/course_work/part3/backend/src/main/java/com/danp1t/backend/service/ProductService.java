@@ -422,6 +422,23 @@ public class ProductService {
         if (productDTO.getPopularity() != null) {
             existingProduct.setPopularity(productDTO.getPopularity());
         }
+        if (productDTO.getImages() == null || productDTO.getImages().isEmpty()) {
+            existingProduct.setImages(null);
+        }
+        if (productDTO.getImages() != null && !productDTO.getImages().isEmpty()) {
+            String processedImages = productDTO.getImages().stream()
+                    .map(imageUrl -> {
+                        String cleaned = imageUrl.replace("/api/products/images/", "");
+                        // Если остался еще один /api/products/images/ (как в примере), убираем и его
+                        cleaned = cleaned.replace("/api/products/images/", "");
+                        return cleaned;
+                    })
+                    .collect(Collectors.joining(","));
+
+            existingProduct.setImages(processedImages);
+        }
+
+
 
         Product updated = productRepository.save(existingProduct);
         return toDTO(updated);

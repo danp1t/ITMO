@@ -413,7 +413,7 @@ const handleImageSelect = (event: Event) => {
 
 const markImageForDeletion = (index: number) => {
   const image = existingImages.value[index]
-  if (!isSubmitting.value && confirm('Удалить это изображение?')) {
+  if (!isSubmitting.value) {
     imagesToDelete.value.push(image)
     existingImages.value.splice(index, 1)
   }
@@ -444,7 +444,7 @@ const removeSize = (index: number) => {
   }
 }
 
-// Отправка формы (раздельно - сначала основные данные, затем изображения)
+// Отправка формы
 const submitForm = async () => {
   if (isSubmitting.value || !isFormValid.value) return
 
@@ -457,7 +457,7 @@ const submitForm = async () => {
       description: formData.value.description.trim(),
       category: formData.value.category,
       basePrice: formData.value.basePrice,
-      images: existingImages.value // Текущие изображения
+      images: existingImages.value
     }
 
     await shopAPI.updateProduct(props.productId, productData)
@@ -482,8 +482,7 @@ const submitForm = async () => {
       }
     }
 
-    // 4. Обновляем информацию о размерах (если нужно)
-    // Для этого нужно создать/обновить ProductInfo
+    // 4. Обновляем информацию о размерах
     for (const size of formData.value.productInfos) {
       try {
         if (size.id) {
@@ -508,7 +507,12 @@ const submitForm = async () => {
     }
 
     emit('product-updated')
-    closeModal()
+
+    // ЗАКРЫВАЕМ МОДАЛЬНОЕ ОКНО ПРИ УСПЕШНОМ ОБНОВЛЕНИИ
+    setTimeout(() => {
+      isSubmitting.value = false
+      closeModal()
+    }, 300)
 
   } catch (error: any) {
     console.error('Ошибка при обновлении товара:', error)
@@ -519,7 +523,6 @@ const submitForm = async () => {
       errorMessage = 'Товар не найден'
     }
     alert(errorMessage)
-  } finally {
     isSubmitting.value = false
   }
 }
@@ -528,12 +531,19 @@ const submitForm = async () => {
 const deleteProduct = async () => {
   if (isSubmitting.value) return
 
+  if (!confirm('Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.')) {
+    return
+  }
+
   isSubmitting.value = true
 
   try {
     await shopAPI.deleteProduct(props.productId)
     emit('product-deleted', props.productId)
-    closeModal()
+    setTimeout(() => {
+      isSubmitting.value = false
+      closeModal()
+    }, 300)
   } catch (error: any) {
     console.error('Ошибка при удалении товара:', error)
     let errorMessage = 'Не удалось удалить товар'
@@ -541,7 +551,6 @@ const deleteProduct = async () => {
       errorMessage = 'Товар не найден'
     }
     alert(errorMessage)
-  } finally {
     isSubmitting.value = false
   }
 }
@@ -578,6 +587,8 @@ watch(() => props.productId, (newId) => {
 watch(() => props.isVisible, (newValue) => {
   if (newValue && props.productId) {
     loadProduct()
+  } else {
+    resetForm()
   }
 })
 </script>
