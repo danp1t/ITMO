@@ -60,6 +60,7 @@ public class ProductInfoService {
         ProductInfo productInfo = new ProductInfo();
         productInfo.setSizeName(productInfoDTO.getSizeName());
         productInfo.setCountItems(productInfoDTO.getCountItems());
+        productInfo.setPrice(productInfoDTO.getPrice());
 
         // Set Product
         Product product = productRepository.findById(productInfoDTO.getProductId())

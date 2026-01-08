@@ -15,5 +15,5 @@ public class ProductInfoDTO {
     private String productName;
     private String sizeName;
     private Integer countItems;
-    private Integer price; // Добавляем цену
+    private Integer price;
 }
