@@ -78,13 +78,6 @@ public class ProductInfoService {
         existingProductInfo.setSizeName(productInfoDTO.getSizeName());
         existingProductInfo.setCountItems(productInfoDTO.getCountItems());
 
-        // Update Product if changed
-        if (!existingProductInfo.getProduct().getId().equals(productInfoDTO.getProductId())) {
-            Product product = productRepository.findById(productInfoDTO.getProductId())
-                    .orElseThrow(() -> new RuntimeException("Product not found with id: " + productInfoDTO.getProductId()));
-            existingProductInfo.setProduct(product);
-        }
-
         ProductInfo updated = productInfoRepository.save(existingProductInfo);
         return toDTO(updated);
     }

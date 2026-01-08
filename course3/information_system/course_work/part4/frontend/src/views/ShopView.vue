@@ -12,7 +12,7 @@
 
         <div class="level-right">
           <!-- Кнопка добавления товара (только для администраторов) -->
-          <div v-if="authStore.canPublishPosts()" class="level-item">
+          <div v-if="authStore.canPublishProducts()" class="level-item">
             <button
               class="button is-primary"
               @click="showAddProductModal = true"
@@ -246,7 +246,7 @@
 
     <!-- Модальное окно добавления товара -->
     <ProductFormModal
-      v-if="authStore.canPublishPosts()"
+      v-if="authStore.canPublishProducts()"
       :is-visible="showAddProductModal"
       @close="showAddProductModal = false"
       @product-added="onProductAdded"

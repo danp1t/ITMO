@@ -69,7 +69,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/*/available").permitAll() // IS12
 
                                 // Защищенные endpoints для товаров
-                        .requestMatchers(HttpMethod.POST, "/api/products").hasAuthority("OAPI:ROLE:PublishProduct") // IS05
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("OAPI:ROLE:PublishProduct") // IS05
                         .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("OAPI:ROLE:EditProduct") // IS07
                         .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("OAPI:ROLE:DeleteProduct") // IS06
 
