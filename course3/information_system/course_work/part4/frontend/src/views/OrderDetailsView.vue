@@ -236,8 +236,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { shopAPI } from '../../api/shop'
-import type { Order } from '../../types/shop'
+import { shopAPI } from '../api/shop'
+import type { Order } from '../types/shop'
 
 const route = useRoute()
 const router = useRouter()

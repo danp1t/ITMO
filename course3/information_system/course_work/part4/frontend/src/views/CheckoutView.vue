@@ -277,9 +277,9 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
-import { useCartStore } from '../../stores/cart'
-import { shopAPI } from '../../api/shop'
+import { useAuthStore } from '../stores/auth'
+import { useCartStore } from '../stores/cart'
+import { shopAPI } from '../api/shop'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
