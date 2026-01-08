@@ -119,9 +119,19 @@
               </div>
             </td>
             <td>
-               <span class="tag" :class="getStatusClass(order.orderStatusId)">
-                   {{ getStatusName(order.orderStatusId) }}
-               </span>
+              <div class="select is-small">
+                <select
+                  :value="order.orderStatusId"
+                  :disabled="!authStore.canManageRoles"
+                >
+                  <option v-for="status in orderStatuses"
+                          :key="status.id"
+                          :value="status.id"
+                          :selected="status.id === order.orderStatusId">
+                    {{ status.name }}
+                  </option>
+                </select>
+              </div>
             </td>
             <td>
               <span class="has-text-weight-semibold">{{ order.totalAmount }} ₽</span>
@@ -224,22 +234,6 @@ const loadOrders = async () => {
   } finally {
     loading.value = false
   }
-}
-
-const getStatusClass = (statusId: number): string => {
-  switch (statusId) {
-    case 1: return 'is-info' // Новый
-    case 2: return 'is-warning' // В обработке
-    case 3: return 'is-primary' // Отправлен
-    case 4: return 'is-success' // Доставлен
-    case 5: return 'is-danger' // Отменен
-    default: return 'is-light'
-  }
-}
-
-const getStatusName = (statusId: number): string => {
-  const status = orderStatuses.value.find(s => s.id === statusId)
-  return status ? status.name : `Статус #${statusId}`
 }
 
 // Отфильтрованные заказы
