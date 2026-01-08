@@ -20,6 +20,7 @@
                 type="text"
                 required
                 placeholder="Введите название товара"
+                :disabled="isSubmitting"
               >
             </div>
           </div>
@@ -33,6 +34,7 @@
                 required
                 placeholder="Введите описание товара"
                 rows="3"
+                :disabled="isSubmitting"
               ></textarea>
             </div>
           </div>
@@ -43,7 +45,7 @@
                 <label class="label">Категория *</label>
                 <div class="control">
                   <div class="select is-fullwidth">
-                    <select v-model="formData.category" required>
+                    <select v-model="formData.category" required :disabled="isSubmitting">
                       <option value="" disabled>Выберите категорию</option>
                       <option value="Купальники">Купальники</option>
                       <option value="Балетки">Балетки</option>
@@ -70,24 +72,65 @@
                     min="0"
                     required
                     placeholder="0"
+                    :disabled="isSubmitting"
                   >
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Изображения -->
+          <!-- Изображения товара -->
           <div class="field">
-            <label class="label">URL изображений (по одному на строку)</label>
-            <div class="control">
-              <textarea
-                v-model="formData.imagesInput"
-                class="textarea"
-                placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
-                rows="3"
-              ></textarea>
+            <label class="label">Изображения товара</label>
+            <div class="image-upload-section">
+              <!-- Предпросмотр выбранных изображений -->
+              <div v-if="selectedImages.length > 0" class="image-preview-grid">
+                <div
+                  v-for="(image, index) in selectedImages"
+                  :key="index"
+                  class="image-preview-item"
+                >
+                  <img :src="getImageUrl(image)" :alt="`Изображение ${index + 1}`" class="preview-image">
+                  <button
+                    type="button"
+                    class="delete-image-button"
+                    @click="removeImage(index)"
+                    :disabled="isSubmitting"
+                  >
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Кнопка загрузки -->
+              <div class="file is-boxed" @click="triggerFileInput" :class="{ 'is-disabled': isSubmitting }">
+                <label class="file-label">
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    @change="handleImageSelect"
+                    class="file-input"
+                    style="display: none"
+                    :disabled="isSubmitting"
+                  >
+                  <span class="file-cta">
+                    <span class="file-icon">
+                      <i class="fas fa-upload"></i>
+                    </span>
+                    <span class="file-label">
+                      Выбрать изображения
+                    </span>
+                  </span>
+                </label>
+              </div>
+
+              <p class="help">
+                Можно загрузить несколько изображений. Максимальный размер: 5MB каждый.
+                Поддерживаемые форматы: JPG, PNG, GIF.
+              </p>
             </div>
-            <p class="help">Оставьте пустым для использования случайных изображений</p>
           </div>
 
           <!-- Размеры и цены -->
@@ -108,6 +151,7 @@
                     type="button"
                     class="button is-danger is-small"
                     @click="removeSize(index)"
+                    :disabled="formData.sizes.length <= 1 || isSubmitting"
                   >
                     Удалить
                   </button>
@@ -125,6 +169,7 @@
                         type="text"
                         required
                         placeholder="Например: S, M, L или 36, 38"
+                        :disabled="isSubmitting"
                       >
                     </div>
                   </div>
@@ -141,6 +186,7 @@
                         min="0"
                         required
                         placeholder="0"
+                        :disabled="isSubmitting"
                       >
                     </div>
                   </div>
@@ -157,6 +203,7 @@
                         min="0"
                         required
                         placeholder="0"
+                        :disabled="isSubmitting"
                       >
                     </div>
                   </div>
@@ -168,6 +215,7 @@
               type="button"
               class="button is-primary is-outlined is-fullwidth"
               @click="addSize"
+              :disabled="isSubmitting"
             >
               <span class="icon">
                 <i class="fas fa-plus"></i>
@@ -183,7 +231,7 @@
           <button
             type="button"
             class="button is-primary"
-            :disabled="isSubmitting"
+            :disabled="isSubmitting || !isFormValid"
             @click="submitForm"
           >
             <span class="icon" v-if="isSubmitting">
@@ -206,9 +254,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { shopAPI } from '../../api/shop'
-import type { CreateProductData, CreateProductInfoData } from '../../types/shop'
+import type { CreateProductData } from '../../types/shop'
 
 interface Props {
   isVisible: boolean
@@ -222,7 +270,11 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
+const fileInput = ref<HTMLInputElement | null>(null)
 const isSubmitting = ref(false)
+
+// Выбранные изображения
+const selectedImages = ref<File[]>([])
 
 // Данные формы
 const formData = ref({
@@ -231,7 +283,6 @@ const formData = ref({
   category: '',
   basePrice: 0,
   popularity: 0,
-  imagesInput: '',
   sizes: [
     {
       sizeName: '',
@@ -241,60 +292,129 @@ const formData = ref({
   ]
 })
 
+// Валидация формы
+const isFormValid = computed(() => {
+  return formData.value.name.trim() !== '' &&
+    formData.value.description.trim() !== '' &&
+    formData.value.category !== '' &&
+    formData.value.basePrice > 0 &&
+    formData.value.sizes.every(size =>
+      size.sizeName.trim() !== '' &&
+      size.price >= 0 &&
+      size.countItems >= 0
+    )
+})
+
+// Получение URL для предпросмотра
+const getImageUrl = (image: File) => {
+  return URL.createObjectURL(image)
+}
+
+// Вызов клика по скрытому input
+const triggerFileInput = () => {
+  if (!isSubmitting.value) {
+    fileInput.value?.click()
+  }
+}
+
+// Обработка выбора файлов
+const handleImageSelect = (event: Event) => {
+  const input = event.target as HTMLInputElement
+  if (input.files && !isSubmitting.value) {
+    const files = Array.from(input.files)
+
+    // Проверка размера файлов (5MB)
+    const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024)
+    if (oversizedFiles.length > 0) {
+      alert('Некоторые файлы превышают максимальный размер 5MB')
+      return
+    }
+
+    // Проверка типа файлов (только изображения)
+    const invalidFiles = files.filter(file => !file.type.startsWith('image/'))
+    if (invalidFiles.length > 0) {
+      alert('Можно загружать только изображения (JPG, PNG, GIF)')
+      return
+    }
+
+    // Добавляем новые файлы
+    selectedImages.value.push(...files)
+
+    // Сбрасываем input
+    input.value = ''
+  }
+}
+
+// Удаление изображения из предпросмотра
+const removeImage = (index: number) => {
+  if (!isSubmitting.value) {
+    const removedImage = selectedImages.value[index]
+    selectedImages.value.splice(index, 1)
+    // Освобождаем URL объекта
+    URL.revokeObjectURL(URL.createObjectURL(removedImage))
+  }
+}
+
 // Добавить размер
 const addSize = () => {
-  formData.value.sizes.push({
-    sizeName: '',
-    price: 0,
-    countItems: 0
-  })
+  if (!isSubmitting.value) {
+    formData.value.sizes.push({
+      sizeName: '',
+      price: 0,
+      countItems: 0
+    })
+  }
 }
 
 // Удалить размер
 const removeSize = (index: number) => {
-  if (formData.value.sizes.length > 1) {
+  if (formData.value.sizes.length > 1 && !isSubmitting.value) {
     formData.value.sizes.splice(index, 1)
   }
 }
 
-// Отправить форму
+// Отправка формы с использованием нового метода API
 const submitForm = async () => {
+  if (isSubmitting.value || !isFormValid.value) return
+
   isSubmitting.value = true
 
   try {
-    // Преобразуем изображения из текста в массив
-    const images = formData.value.imagesInput
-      .split('\n')
-      .map(url => url.trim())
-      .filter(url => url !== '')
+    // 1. Создаем FormData
+    const formDataToSend = new FormData()
 
-    // Подготовка данных для создания товара
-    const productData: CreateProductData = {
-      name: formData.value.name,
-      description: formData.value.description,
+    // 2. Подготавливаем данные товара как JSON строку
+    const productData = {
+      name: formData.value.name.trim(),
+      description: formData.value.description.trim(),
       category: formData.value.category,
       basePrice: formData.value.basePrice,
-      popularity: 0,
-      images: images.length > 0 ? images : undefined
+      popularity: 0
     }
 
-    // Создаем товар
-    const productResponse = await shopAPI.createProduct(productData)
-    const productId = productResponse.data.id
+    // Добавляем product как JSON строку
+    formDataToSend.append('product', JSON.stringify(productData))
 
-    // Создаем информацию о размерах
-    for (const size of formData.value.sizes) {
-      if (size.sizeName && size.price >= 0 && size.countItems >= 0) {
-        const productInfoData: CreateProductInfoData = {
-          productId,
-          sizeName: size.sizeName,
-          price: size.price,
-          countItems: size.countItems
-        }
+    // 3. Подготавливаем данные размеров как JSON строку
+    const sizesData = formData.value.sizes
+      .filter(size => size.sizeName.trim() !== '' && size.price >= 0 && size.countItems >= 0)
+      .map(size => ({
+        sizeName: size.sizeName.trim(),
+        price: size.price,
+        countItems: size.countItems
+      }))
 
-        await shopAPI.createProductInfo(productInfoData)
-      }
-    }
+    // Добавляем sizes как JSON строку
+    formDataToSend.append('sizes', JSON.stringify(sizesData))
+
+    // 4. Добавляем изображения
+    selectedImages.value.forEach((image, index) => {
+      formDataToSend.append('images', image)
+    })
+
+    // 5. Отправляем ОДИН запрос с FormData
+    const response = await shopAPI.createProductWithImages(formDataToSend)
+    const productId = response.data.id
 
     // Оповещаем об успешном добавлении
     emit('product-added')
@@ -303,12 +423,19 @@ const submitForm = async () => {
     // Сбрасываем форму
     resetForm()
 
+    // Показываем уведомление
+    alert('Товар успешно добавлен!')
+
   } catch (error: any) {
     console.error('Ошибка при добавлении товара:', error)
 
     let errorMessage = 'Не удалось добавить товар'
     if (error.response?.data?.message) {
       errorMessage = error.response.data.message
+    } else if (error.response?.status === 409) {
+      errorMessage = 'Товар с таким названием уже существует'
+    } else if (error.message) {
+      errorMessage = error.message
     }
 
     alert(errorMessage)
@@ -325,7 +452,6 @@ const resetForm = () => {
     category: '',
     basePrice: 0,
     popularity: 0,
-    imagesInput: '',
     sizes: [
       {
         sizeName: '',
@@ -334,7 +460,24 @@ const resetForm = () => {
       }
     ]
   }
+
+  // Освобождаем URL объектов выбранных изображений
+  selectedImages.value.forEach(image => {
+    URL.revokeObjectURL(URL.createObjectURL(image))
+  })
+  selectedImages.value = []
 }
+
+// Очистка при закрытии
+watch(() => props.isVisible, (newValue) => {
+  if (!newValue) {
+    resetForm()
+  }
+})
+
+defineExpose({
+  resetForm
+})
 </script>
 
 <style scoped>
@@ -361,9 +504,15 @@ const resetForm = () => {
 .box {
   background-color: #232121;
   border: 1px solid #e5e7eb;
+  padding: 1rem;
+  border-radius: 8px;
 }
 
-
+.button.is-primary {
+  background-color: #667eea;
+  color: white;
+  border: none;
+}
 
 .button.is-primary:hover {
   opacity: 0.9;
@@ -372,5 +521,159 @@ const resetForm = () => {
 .button.is-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.button.is-primary.is-outlined {
+  background: transparent;
+  border: 1px solid #667eea;
+  color: #667eea;
+}
+
+.button.is-primary.is-outlined:hover {
+  background-color: #667eea;
+  color: white;
+}
+
+.button.is-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+}
+
+.button.is-danger:hover {
+  background-color: #dc2626;
+}
+
+.button.is-small {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Стили для загрузки изображений */
+.image-upload-section {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background: #201f1f;
+  transition: border-color 0.3s;
+}
+
+.image-upload-section:hover {
+  border-color: #3273dc;
+}
+
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.image-preview-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  transition: transform 0.2s;
+}
+
+.image-preview-item:hover {
+  transform: scale(1.05);
+}
+
+.preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.delete-image-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.delete-image-button:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 1);
+}
+
+.delete-image-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file.is-boxed {
+  margin: 0 auto;
+  cursor: pointer;
+}
+
+.file.is-boxed.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file-label {
+  cursor: pointer;
+}
+
+.file-input:disabled + .file-cta {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Стили для полей формы при disabled */
+.input:disabled,
+.textarea:disabled,
+.select select:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Стили для сетки размеров */
+.columns {
+  margin-left: -0.75rem;
+  margin-right: -0.75rem;
+  margin-top: -0.75rem;
+}
+
+.column {
+  padding: 0.75rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .modal-card {
+    width: 95%;
+    margin: 0.5rem;
+  }
+
+  .columns {
+    flex-direction: column;
+  }
+
+  .image-preview-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+
+  .image-preview-item {
+    width: 80px;
+    height: 80px;
+  }
 }
 </style>

@@ -57,7 +57,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/tournaments").hasAuthority("OAPI:ROLE:PublishTournament") // TT02
                         .requestMatchers(HttpMethod.PUT, "/api/tournaments/**").hasAuthority("OAPI:ROLE:EditTournament") // TT03
                         .requestMatchers(HttpMethod.DELETE, "/api/tournaments/**").hasAuthority("OAPI:ROLE:DeleteTournament")
-                        .requestMatchers(HttpMethod.POST, "/api/posts").hasAuthority("OAPI:ROLE:PublishPost")
+                        .requestMatchers(HttpMethod.POST, "/api/posts/**").hasAuthority("OAPI:ROLE:PublishPost")
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasAuthority("OAPI:ROLE:EditPost")
                         .requestMatchers(HttpMethod.DELETE, "/api/posts/**").hasAuthority("OAPI:ROLE:DeletePost")
                         .requestMatchers(HttpMethod.POST, "/api/attachments/**").permitAll()

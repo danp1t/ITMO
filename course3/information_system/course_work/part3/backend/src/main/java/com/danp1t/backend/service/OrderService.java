@@ -39,7 +39,9 @@ public class OrderService {
                         product.getDescription(),
                         product.getCategory(),
                         product.getBasePrice(),
-                        product.getPopularity()))
+                        product.getPopularity(),
+                        product.getImagesList(),
+                        null))
                 .collect(Collectors.toList());
 
         return new OrderDTO(

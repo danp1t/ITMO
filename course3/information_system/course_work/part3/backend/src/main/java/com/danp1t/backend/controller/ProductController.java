@@ -6,9 +6,12 @@ import com.danp1t.backend.dto.ProductInfoDTO;
 import com.danp1t.backend.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -116,6 +119,66 @@ public class ProductController {
             productService.deleteById(id);
             return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Новый метод для создания товара с изображениями через FormData
+    @PostMapping(value = "/create-with-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDTO> createProductWithImages(
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images,
+            @RequestPart(value = "sizes", required = false) String sizesJson) {
+        try {
+            ProductDTO created = productService.createProductWithImages(productJson, images, sizesJson);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+    // Загрузка дополнительных изображений для существующего товара
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> uploadProductImage(
+            @PathVariable Integer id,
+            @RequestParam("image") MultipartFile image) {
+        try {
+            String imagePath = productService.uploadProductImage(image, id);
+            productService.addImageToProduct(id, imagePath);
+            return ResponseEntity.ok(imagePath); // Возвращаем только путь, без префикса
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Ошибка при загрузке изображения");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // Удаление изображения товара
+    @DeleteMapping("/{id}/images")
+    public ResponseEntity<Void> deleteProductImage(
+            @PathVariable Integer id,
+            @RequestParam("imagePath") String imagePath) {
+        try {
+            productService.removeImageFromProduct(id, imagePath);
+            return ResponseEntity.noContent().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/images/{path:.+}")
+    public ResponseEntity<byte[]> getProductImage(@PathVariable String path) {
+        try {
+            byte[] image = productService.getProductImage(path);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(image);
+        } catch (IOException e) {
             return ResponseEntity.notFound().build();
         }
     }

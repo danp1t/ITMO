@@ -4,14 +4,20 @@ import com.danp1t.backend.dto.ProductDTO;
 import com.danp1t.backend.dto.ProductDetailDTO;
 import com.danp1t.backend.dto.ProductInfoDTO;
 import com.danp1t.backend.model.Product;
+import com.danp1t.backend.model.ProductInfo;
+import com.danp1t.backend.repository.ProductInfoRepository;
 import com.danp1t.backend.repository.ProductRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,14 +27,28 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private ProductInfoRepository productInfoRepository;
+
+    @Autowired
+    private FileStorageService fileStorageService;
+
+    private static final String UPLOAD_SUB_DIR = "products";
+
     private ProductDTO toDTO(Product product) {
+        List<String> images = product.getImages() != null
+                ? Arrays.asList(product.getImages().split(","))
+                : new ArrayList<>();
+
         return new ProductDTO(
                 product.getId(),
                 product.getName(),
                 product.getDescription(),
                 product.getCategory(),
                 product.getBasePrice(),
-                product.getPopularity()
+                product.getPopularity(),
+                images,
+                null
         );
     }
 
@@ -44,7 +64,10 @@ public class ProductService {
                 ))
                 .collect(Collectors.toList());
 
-        // IS12: Проверяем наличие товара
+        List<String> images = product.getImages() != null
+                ? Arrays.asList(product.getImages().split(","))
+                : new ArrayList<>();
+
         boolean inStock = product.getProductInfos().stream()
                 .anyMatch(pi -> pi.getCountItems() > 0);
 
@@ -65,6 +88,7 @@ public class ProductService {
                 product.getCategory(),
                 product.getBasePrice(),
                 product.getPopularity(),
+                images,
                 productInfos,
                 inStock,
                 availabilityMessage
@@ -76,10 +100,103 @@ public class ProductService {
         product.setId(dto.getId());
         product.setName(dto.getName());
         product.setDescription(dto.getDescription());
-        product.setCategory(dto.getCategory()); // Добавляем категорию
-        product.setBasePrice(dto.getBasePrice()); // Добавляем базовую цену
-        product.setPopularity(dto.getPopularity() != null ? dto.getPopularity() : 0); // Добавляем популярность
+        product.setCategory(dto.getCategory());
+        product.setBasePrice(dto.getBasePrice());
+        product.setPopularity(dto.getPopularity() != null ? dto.getPopularity() : 0);
+
+        if (dto.getImages() != null && !dto.getImages().isEmpty()) {
+            product.setImages(String.join(",", dto.getImages()));
+        }
+
         return product;
+    }
+
+    public String uploadProductImage(MultipartFile file, Integer productId) throws IOException {
+        if (file.isEmpty()) {
+            throw new RuntimeException("Файл пустой");
+        }
+
+        // Проверяем тип файла
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            throw new RuntimeException("Разрешены только изображения");
+        }
+
+        // Проверяем размер файла (макс 5MB)
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new RuntimeException("Размер файла не должен превышать 5MB");
+        }
+
+        // Используем FileStorageService для сохранения файла
+        String subDirectory = UPLOAD_SUB_DIR + "/product_" + productId;
+        return fileStorageService.storeFile(file, subDirectory);
+    }
+
+    @Transactional
+    public void removeImageFromProduct(Integer productId, String imagePath) throws IOException {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Товар не найден"));
+
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            List<String> images = new ArrayList<>(Arrays.asList(product.getImages().split(",")));
+            images.remove(imagePath);
+            product.setImages(!images.isEmpty() ? String.join(",", images) : null);
+            productRepository.save(product);
+
+            // Удаляем файл с диска через FileStorageService
+            fileStorageService.deleteFile(imagePath);
+        }
+    }
+
+    @Transactional
+    public ProductDTO createProductWithImages(String productJson, List<MultipartFile> images, String sizesJson) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ProductDTO productDTO = objectMapper.readValue(productJson, ProductDTO.class);
+
+        // Проверяем уникальность названия
+        if (existsByName(productDTO.getName())) {
+            throw new RuntimeException("Товар с таким названием уже существует");
+        }
+
+        // Сначала сохраняем товар без изображений
+        Product product = toEntity(productDTO);
+        product.setId(null);
+        product.setPopularity(0);
+        Product savedProduct = productRepository.save(product);
+
+        // Загружаем изображения, если есть
+        List<String> imagePaths = new ArrayList<>();
+        if (images != null && !images.isEmpty()) {
+            for (MultipartFile image : images) {
+                if (!image.isEmpty()) {
+                    String imagePath = uploadProductImage(image, savedProduct.getId());
+                    imagePaths.add(imagePath);
+                }
+            }
+        }
+
+        // Сохраняем пути к изображениям
+        if (!imagePaths.isEmpty()) {
+            savedProduct.setImages(String.join(",", imagePaths));
+            savedProduct = productRepository.save(savedProduct);
+        }
+
+        // Создаем ProductInfo (размеры и цены), если они есть
+        if (sizesJson != null && !sizesJson.trim().isEmpty()) {
+            List<Map<String, Object>> sizesList = objectMapper.readValue(sizesJson, List.class);
+
+            for (Map<String, Object> sizeData : sizesList) {
+                ProductInfo productInfo = new ProductInfo();
+                productInfo.setProduct(savedProduct);
+                productInfo.setSizeName((String) sizeData.get("sizeName"));
+                productInfo.setPrice(((Number) sizeData.get("price")).intValue());
+                productInfo.setCountItems(((Number) sizeData.get("countItems")).intValue());
+
+                productInfoRepository.save(productInfo);
+            }
+        }
+
+        return toDTO(savedProduct);
     }
 
     // IS01, IS03, IS04: Получение товаров с сортировкой и фильтрацией
@@ -182,7 +299,13 @@ public class ProductService {
                 });
     }
 
-    // Остальные методы с исправлениями
+    // Получение изображения товара
+    public byte[] getProductImage(String path) throws IOException {
+        Path filePath = Paths.get("uploads/" + path);
+        return Files.readAllBytes(filePath);
+    }
+
+    // Остальные методы
     public List<ProductDTO> findAll() {
         return productRepository.findAll().stream()
                 .map(this::toDTO)
@@ -201,7 +324,6 @@ public class ProductService {
 
     public ProductDTO save(ProductDTO productDTO) {
         Product product = toEntity(productDTO);
-        // Убедимся, что ID null для нового товара
         product.setId(null);
         Product saved = productRepository.save(product);
         return toDTO(saved);
@@ -247,5 +369,26 @@ public class ProductService {
         return productRepository.findByNameContainingIgnoreCase(name).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void addImageToProduct(Integer productId, String imagePath) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new RuntimeException("Товар не найден с id: " + productId));
+
+        // Получаем текущий список изображений
+        List<String> images = new ArrayList<>();
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            String[] imageArray = product.getImages().split(",");
+            images.addAll(Arrays.asList(imageArray));
+        }
+
+        // Добавляем новое изображение
+        images.add(imagePath);
+
+        // Объединяем обратно в строку
+        product.setImages(String.join(",", images));
+
+        productRepository.save(product);
     }
 }
