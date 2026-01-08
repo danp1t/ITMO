@@ -67,6 +67,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/filtered").permitAll() // IS03, IS04
                         .requestMatchers(HttpMethod.GET, "/api/products/*/availability").permitAll() // IS12
                         .requestMatchers(HttpMethod.GET, "/api/products/*/available").permitAll() // IS12
+                        .requestMatchers(HttpMethod.GET, "/api/order-statuses").permitAll()
 
                                 // Защищенные endpoints для товаров
                         .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("OAPI:ROLE:PublishProduct") // IS05
