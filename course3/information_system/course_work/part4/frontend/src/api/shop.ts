@@ -109,6 +109,38 @@ export const shopAPI = {
     return apiClient.put<Order>(`/api/orders/${id}`, data)
   },
 
+  // Создать товар с изображениями и размерами
+  createProductWithImages(formData: FormData) {
+    return apiClient.post<Product>('/api/products/create-with-images', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // Загрузить изображение для товара
+  uploadProductImage(productId: number, formData: FormData) {
+    return apiClient.post<string>(`/api/products/${productId}/images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  },
+
+  // Удалить изображение товара
+  deleteProductImage(productId: number, imagePath: string) {
+    return apiClient.delete(`/api/products/${productId}/images`, {
+      params: { imagePath }
+    })
+  },
+
+  // Получить изображение товара
+  getProductImage(path: string) {
+    return apiClient.get(`/api/products/images/${path}`, {
+      responseType: 'blob'
+    })
+  },
+
   // Удалить заказ
   deleteOrder(id: number) {
     return apiClient.delete(`/api/orders/${id}`)
