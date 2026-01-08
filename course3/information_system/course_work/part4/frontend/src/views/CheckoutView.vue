@@ -446,11 +446,11 @@ populateUserData()
 }
 
 .title {
-  color: #3b5987;
+  color: #d3d9ea;
 }
 
 .subtitle {
-  color: #718096;
+  color: #c4c5cd;
 }
 
 .field {
@@ -459,7 +459,7 @@ populateUserData()
 
 .label {
   font-weight: 600;
-  color: #4b5563;
+  color: #a9afb6;
   margin-bottom: 0.5rem;
 }
 
