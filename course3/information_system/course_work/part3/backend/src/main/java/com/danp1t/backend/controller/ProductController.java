@@ -200,17 +200,4 @@ public class ProductController {
         }
         return "image/jpeg"; // по умолчанию
     }
-
-    @GetMapping("/debug/{id}/images")
-    public ResponseEntity<List<String>> debugProductImages(@PathVariable Integer id) {
-        return productService.findByIdWithProductInfos(id)
-                .map(productDetail -> {
-                    System.out.println("=== DEBUG PRODUCT IMAGES ===");
-                    System.out.println("Product ID: " + id);
-                    System.out.println("Images in DTO: " + productDetail.getImages());
-                    System.out.println("=== END DEBUG ===");
-                    return ResponseEntity.ok(productDetail.getImages());
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
 }
