@@ -202,7 +202,7 @@
           <hr class="my-4">
 
           <!-- Сброс фильтров -->
-          <button class="button is-light is-fullwidth" @click="resetFilters">
+          <button class="button is-dark is-fullwidth" @click="resetFilters">
             <span class="icon">
               <i class="fas fa-redo"></i>
             </span>
@@ -212,7 +212,7 @@
 
         <!-- Категории -->
         <div class="box">
-          <h3 class="title is-5 mb-3">Категории</h3>
+          <h3 class="title is-5 mb-1">Категории</h3>
           <aside class="menu">
             <ul class="menu-list">
               <li v-for="category in categories" :key="category">
@@ -221,7 +221,7 @@
                   @click="selectCategory(category)"
                 >
                   {{ category }}
-                  <span class="tag is-light is-pulled-right">
+                  <span class="tag is-dark is-pulled-right">
                     {{ getCategoryCount(category) }}
                   </span>
                 </a>
