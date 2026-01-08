@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,9 +37,10 @@ public class ProductService {
     private static final String UPLOAD_SUB_DIR = "products";
 
     private ProductDTO toDTO(Product product) {
-        List<String> images = product.getImages() != null
-                ? Arrays.asList(product.getImages().split(","))
-                : new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            images = parseImagePaths(product.getImages());
+        }
 
         return new ProductDTO(
                 product.getId(),
@@ -64,9 +66,10 @@ public class ProductService {
                 ))
                 .collect(Collectors.toList());
 
-        List<String> images = product.getImages() != null
-                ? Arrays.asList(product.getImages().split(","))
-                : new ArrayList<>();
+        List<String> images = new ArrayList<>();
+        if (product.getImages() != null && !product.getImages().isEmpty()) {
+            images = parseImagePaths(product.getImages());
+        }
 
         boolean inStock = product.getProductInfos().stream()
                 .anyMatch(pi -> pi.getCountItems() > 0);
@@ -95,6 +98,32 @@ public class ProductService {
         );
     }
 
+    private List<String> parseImagePaths(String imagesString) {
+        if (imagesString == null || imagesString.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Разделяем по запятой и чистим каждый путь
+        return Arrays.stream(imagesString.split(","))
+                .map(String::trim)
+                .filter(path -> !path.isEmpty())
+                .map(this::toImageUrl)
+                .collect(Collectors.toList());
+    }
+
+    private String toImageUrl(String relativePath) {
+        if (relativePath == null || relativePath.isEmpty()) {
+            return "";
+        }
+
+        // Заменяем обратные слеши на прямые
+        String normalizedPath = relativePath.replace('\\', '/');
+
+        // Возвращаем путь для API - фронтенд сам добавит host через прокси
+        return "/api/products/images/" + normalizedPath;
+    }
+
+
     private Product toEntity(ProductDTO dto) {
         Product product = new Product();
         product.setId(dto.getId());
@@ -105,11 +134,33 @@ public class ProductService {
         product.setPopularity(dto.getPopularity() != null ? dto.getPopularity() : 0);
 
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-            product.setImages(String.join(",", dto.getImages()));
+            // Сохраняем только относительные пути в БД
+            List<String> relativePaths = dto.getImages().stream()
+                    .map(this::toRelativePath)
+                    .collect(Collectors.toList());
+            product.setImages(String.join(",", relativePaths));
         }
 
         return product;
     }
+
+    // Преобразуем URL обратно в относительный путь для хранения в БД
+    private String toRelativePath(String imageUrl) {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return imageUrl;
+        }
+
+        // Убираем префикс API
+        String prefix = "/api/products/images/";
+        if (imageUrl.startsWith(prefix)) {
+            String relativePath = imageUrl.substring(prefix.length());
+            // Для Windows сохраняем с обратными слешами
+            return relativePath.replace('/', '\\');
+        }
+
+        return imageUrl;
+    }
+
 
     public String uploadProductImage(MultipartFile file, Integer productId) throws IOException {
         if (file.isEmpty()) {
@@ -138,13 +189,16 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
 
         if (product.getImages() != null && !product.getImages().isEmpty()) {
+            // Извлекаем относительный путь из URL
+            String relativePath = toRelativePath(imagePath);
+
             List<String> images = new ArrayList<>(Arrays.asList(product.getImages().split(",")));
-            images.remove(imagePath);
+            images.remove(relativePath);
             product.setImages(!images.isEmpty() ? String.join(",", images) : null);
             productRepository.save(product);
 
             // Удаляем файл с диска через FileStorageService
-            fileStorageService.deleteFile(imagePath);
+            fileStorageService.deleteFile(relativePath);
         }
     }
 
@@ -301,8 +355,27 @@ public class ProductService {
 
     // Получение изображения товара
     public byte[] getProductImage(String path) throws IOException {
-        Path filePath = Paths.get("uploads/" + path);
-        return Files.readAllBytes(filePath);
+        System.out.println("Получение изображения по пути: " + path);
+
+        // Извлекаем относительный путь из URL если нужно
+        String relativePath = toRelativePath(path);
+        System.out.println("Относительный путь: " + relativePath);
+
+        // Для Windows нормализуем путь
+        String normalizedPath = relativePath.replace('/', '\\');
+        System.out.println("Нормализованный путь для файловой системы: " + normalizedPath);
+
+        Path filePath = Paths.get("uploads", normalizedPath).toAbsolutePath().normalize();
+        System.out.println("Полный путь к файлу: " + filePath);
+
+        if (!Files.exists(filePath)) {
+            System.err.println("Файл не существует: " + filePath);
+            throw new IOException("Файл не найден: " + filePath);
+        }
+
+        byte[] data = Files.readAllBytes(filePath);
+        System.out.println("Файл прочитан, размер: " + data.length + " байт");
+        return data;
     }
 
     // Остальные методы
@@ -391,4 +464,6 @@ public class ProductService {
 
         productRepository.save(product);
     }
+
+
 }

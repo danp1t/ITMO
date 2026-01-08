@@ -171,15 +171,46 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/images/{path:.+}")
+    @GetMapping("/images/{*path}")
     public ResponseEntity<byte[]> getProductImage(@PathVariable String path) {
         try {
             byte[] image = productService.getProductImage(path);
+
+            // Определяем Content-Type по расширению файла
+            String contentType = determineContentType(path);
+
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(MediaType.parseMediaType(contentType))
                     .body(image);
         } catch (IOException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    private String determineContentType(String path) {
+        String lowerPath = path.toLowerCase();
+        if (lowerPath.endsWith(".jpg") || lowerPath.endsWith(".jpeg")) {
+            return "image/jpeg";
+        } else if (lowerPath.endsWith(".png")) {
+            return "image/png";
+        } else if (lowerPath.endsWith(".gif")) {
+            return "image/gif";
+        } else if (lowerPath.endsWith(".webp")) {
+            return "image/webp";
+        }
+        return "image/jpeg"; // по умолчанию
+    }
+
+    @GetMapping("/debug/{id}/images")
+    public ResponseEntity<List<String>> debugProductImages(@PathVariable Integer id) {
+        return productService.findByIdWithProductInfos(id)
+                .map(productDetail -> {
+                    System.out.println("=== DEBUG PRODUCT IMAGES ===");
+                    System.out.println("Product ID: " + id);
+                    System.out.println("Images in DTO: " + productDetail.getImages());
+                    System.out.println("=== END DEBUG ===");
+                    return ResponseEntity.ok(productDetail.getImages());
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 }
