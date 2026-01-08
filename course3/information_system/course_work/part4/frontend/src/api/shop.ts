@@ -104,6 +104,10 @@ export const shopAPI = {
     return apiClient.get<Order[]>(`/api/orders/status/${statusId}`)
   },
 
+  getOrderStatuses() {
+    return apiClient.get<OrderStatus[]>('/api/order-statuses')
+  },
+
   // Обновить заказ
   updateOrder(id: number, data: Partial<Order>) {
     return apiClient.put<Order>(`/api/orders/${id}`, data)
@@ -125,6 +129,10 @@ export const shopAPI = {
         'Content-Type': 'multipart/form-data'
       }
     })
+  },
+
+  getAllOrders() {
+    return apiClient.get<Order[]>('/api/orders')
   },
 
   // Удалить изображение товара

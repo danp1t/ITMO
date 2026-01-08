@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import AdminOrderDetailsView from "@/views/AdminOrderDetailsView.vue";
 
 const routes = [
   {
@@ -91,6 +92,16 @@ const routes = [
     name: 'ProductDetail',
     component: () => import('../views/ProductDetail.vue'),
     meta: { requiresAuth: false }
+  },
+  {
+    path: '/admin/orders',
+    component: () => import('../views/AdminOrdersView.vue') ,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/orders/:id',
+    component: AdminOrderDetailsView,
+    meta: { requiresAuth: true, requiresAdmin: true }
   },
   {
     path: '/admin',

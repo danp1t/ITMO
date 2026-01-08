@@ -128,3 +128,9 @@ export interface CreateProductInfoData {
   countItems: number
   price: number
 }
+
+export interface OrderStatus {
+  id: number
+  name: string
+  description?: string
+}

@@ -56,6 +56,17 @@
                   <span>Комментарии</span>
                 </router-link>
               </li>
+              <!-- В AdminView.vue добавьте новый пункт меню после комментариев -->
+              <li v-if="authStore.canManageRoles">
+                <router-link
+                  to="/admin/orders"
+                  class="menu-item"
+                  :class="{ 'active': $route.path.includes('/admin/orders') }"
+                >
+                  <i class="fas fa-shopping-cart menu-icon"></i>
+                  <span>Заказы</span>
+                </router-link>
+              </li>
             </ul>
           </nav>
 
