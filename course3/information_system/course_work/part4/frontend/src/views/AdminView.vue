@@ -36,26 +36,6 @@
                   <span>Роли</span>
                 </router-link>
               </li>
-              <li>
-                <router-link
-                  to="/admin/posts"
-                  class="menu-item"
-                  :class="{ 'active': $route.path.includes('/admin/posts') }"
-                >
-                  <i class="fas fa-newspaper menu-icon"></i>
-                  <span>Посты</span>
-                </router-link>
-              </li>
-              <li>
-                <router-link
-                  to="/admin/comments"
-                  class="menu-item"
-                  :class="{ 'active': $route.path.includes('/admin/comments') }"
-                >
-                  <i class="fas fa-comments menu-icon"></i>
-                  <span>Комментарии</span>
-                </router-link>
-              </li>
               <!-- В AdminView.vue добавьте новый пункт меню после комментариев -->
               <li v-if="authStore.canManageRoles">
                 <router-link

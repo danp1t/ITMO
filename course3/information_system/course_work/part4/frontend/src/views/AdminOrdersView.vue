@@ -643,9 +643,6 @@ const saveStatus = async (orderId: number) => {
 
 // Отмена заказа
 const cancelOrder = async (order: Order) => {
-  if (!confirm(`Вы уверены, что хотите отменить заказ #${order.id}?`)) {
-    return
-  }
 
   cancellingOrderId.value = order.id
   try {
@@ -663,7 +660,6 @@ const cancelOrder = async (order: Order) => {
       orders.value[orderIndex].orderStatusId = 5
     }
 
-    alert(`Заказ #${order.id} успешно отменен`)
   } catch (error: any) {
     console.error('Ошибка при отмене заказа:', error)
     const message = error.response?.data?.message || 'Не удалось отменить заказ'

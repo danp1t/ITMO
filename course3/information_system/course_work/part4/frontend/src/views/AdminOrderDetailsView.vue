@@ -195,54 +195,6 @@
             <p v-if="order.notes"><strong>Комментарий:</strong> {{ order.notes }}</p>
           </div>
         </div>
-
-        <!-- Действия -->
-        <div class="box">
-          <h3 class="title is-5 mb-3">Действия</h3>
-          <div class="buttons are-small is-flex-direction-column">
-            <button
-              v-if="authStore.canManageRoles && order.orderStatusId !== 5"
-              class="button is-danger is-fullwidth mb-2"
-              @click="cancelOrder"
-            >
-              <i class="fas fa-times mr-2"></i>
-              Отменить заказ
-            </button>
-
-            <button
-              class="button is-info is-light is-fullwidth mb-2"
-              @click="exportOrder"
-            >
-              <i class="fas fa-file-export mr-2"></i>
-              Экспорт в PDF
-            </button>
-
-            <button
-              class="button is-warning is-light is-fullwidth"
-              @click="sendNotification"
-            >
-              <i class="fas fa-bell mr-2"></i>
-              Уведомить пользователя
-            </button>
-          </div>
-        </div>
-
-        <!-- История изменений -->
-        <div class="box">
-          <h3 class="title is-5 mb-3">История статусов</h3>
-          <div class="timeline">
-            <div class="timeline-item">
-              <div class="timeline-marker is-primary">
-                <i class="fas fa-shopping-cart"></i>
-              </div>
-              <div class="timeline-content">
-                <p class="heading">{{ formatDate(order.createdAt) }}</p>
-                <p>Заказ создан</p>
-              </div>
-            </div>
-            <!-- Здесь можно добавить больше событий из истории -->
-          </div>
-        </div>
       </div>
     </div>
   </div>
