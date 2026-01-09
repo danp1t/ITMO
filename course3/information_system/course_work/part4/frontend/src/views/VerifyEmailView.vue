@@ -9,7 +9,6 @@
 
           <div class="card-content">
             <div v-if="!verificationComplete">
-              <!-- Автоматическая проверка при наличии параметров -->
               <div v-if="autoVerifying" class="has-text-centered">
                 <div class="mb-4">
                   <i class="fas fa-spinner fa-spin fa-2x"></i>
@@ -17,7 +16,6 @@
                 <p>Подтверждаем ваш email...</p>
               </div>
 
-              <!-- Форма для ручного ввода кода -->
               <div v-else>
                 <p class="mb-4">
                   Введите код подтверждения, который был отправлен на ваш email.
@@ -25,7 +23,6 @@
                 </p>
 
                 <form @submit.prevent="handleSubmit">
-                  <!-- Email -->
                   <div class="field">
                     <label class="label">Email</label>
                     <div class="control has-icons-left">
@@ -45,7 +42,6 @@
                     <p v-if="errors.email" class="help is-danger">{{ errors.email }}</p>
                   </div>
 
-                  <!-- Код подтверждения -->
                   <div class="field">
                     <label class="label">Код подтверждения</label>
                     <div class="control">
@@ -67,12 +63,10 @@
                     <p class="help">Код состоит из 6 цифр</p>
                   </div>
 
-                  <!-- Ошибка -->
                   <div v-if="error" class="notification is-danger is-light mb-4">
                     {{ error }}
                   </div>
 
-                  <!-- Кнопки -->
                   <div class="field">
                     <div class="control">
                       <button
@@ -89,7 +83,6 @@
               </div>
             </div>
 
-            <!-- Успешное подтверждение -->
             <div v-else class="has-text-centered">
               <div class="notification is-success is-light p-5">
                 <div class="mb-4">
@@ -117,7 +110,6 @@
               </div>
             </div>
 
-            <!-- Ссылка на вход -->
             <div v-if="!verificationComplete && !autoVerifying" class="has-text-centered mt-4">
               <router-link to="/login" class="is-size-7">
                 Вернуться к входу
@@ -132,11 +124,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
-const router = useRouter()
 const authStore = useAuthStore()
 
 const form = reactive({
@@ -160,16 +151,14 @@ const countdown = ref(60)
 const routeEmail = computed(() => route.query.email as string)
 const routeCode = computed(() => route.query.code as string)
 
-// Динамические классы для колонки
 const columnClass = computed(() => {
   if (verificationComplete.value) {
-    return 'column is-10-tablet is-8-desktop is-6-widescreen' // Шире для успешного сообщения
+    return 'column is-10-tablet is-8-desktop is-6-widescreen'
   }
-  return 'column is-half-tablet is-one-third-desktop' // Оригинальная ширина для формы
+  return 'column is-half-tablet is-one-third-desktop'
 })
 
 onMounted(() => {
-  // Если email и код есть в URL, автоматически подтверждаем
   if (routeEmail.value && routeCode.value) {
     form.email = routeEmail.value
     form.code = routeCode.value
@@ -177,7 +166,6 @@ onMounted(() => {
   }
 })
 
-// Таймер для повторной отправки кода
 let countdownInterval: number | null = null
 
 const startCountdown = () => {
@@ -263,34 +251,6 @@ const handleSubmit = async () => {
   }
 }
 
-const resendCode = async () => {
-  if (!form.email) {
-    error.value = 'Введите email для отправки кода'
-    return
-  }
-
-  resending.value = true
-  error.value = ''
-
-  try {
-    // Используем метод forgotPassword для отправки кода подтверждения
-    const result = await authStore.forgotPassword(form.email)
-
-    if (result.success) {
-      // Запускаем таймер для повторной отправки
-      startCountdown()
-      error.value = 'Новый код подтверждения отправлен на ваш email'
-    } else {
-      error.value = result.error || 'Ошибка отправки кода'
-    }
-  } catch (err: any) {
-    error.value = 'Произошла ошибка при отправке кода'
-  } finally {
-    resending.value = false
-  }
-}
-
-// Очищаем интервал при размонтировании
 import { onUnmounted } from 'vue'
 onUnmounted(() => {
   if (countdownInterval) {

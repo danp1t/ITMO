@@ -1,6 +1,5 @@
 <template>
   <div class="shop-view">
-    <!-- Заголовок и фильтры -->
     <div class="shop-header mb-5">
       <div class="level">
         <div class="level-left">
@@ -11,7 +10,6 @@
         </div>
 
         <div class="level-right">
-          <!-- Кнопка добавления товара (только для администраторов) -->
           <div v-if="authStore.canPublishProducts()" class="level-item">
             <button
               class="button is-primary"
@@ -25,7 +23,6 @@
           </div>
 
           <div class="level-item">
-            <!-- Корзина -->
             <div class="cart-indicator" @click="toggleCart">
               <div class="cart-icon">
                 <i class="fas fa-shopping-cart fa-lg"></i>
@@ -41,7 +38,6 @@
         </div>
       </div>
 
-      <!-- Панель фильтров -->
       <div class="filters-panel">
         <div class="columns">
           <div class="column is-3">
@@ -102,17 +98,13 @@
       </div>
     </div>
 
-    <!-- Основной контент -->
     <div class="columns">
-      <!-- Каталог товаров -->
       <div class="column is-three-quarters">
-        <!-- Загрузка -->
         <div v-if="loading" class="has-text-centered py-6">
           <i class="fas fa-spinner fa-spin fa-2x"></i>
           <p class="mt-3">Загрузка товаров...</p>
         </div>
 
-        <!-- Товары -->
         <div v-else-if="filteredProducts.length > 0" class="products-grid">
           <div class="columns is-multiline">
             <div
@@ -130,7 +122,6 @@
           </div>
         </div>
 
-        <!-- Нет товаров -->
         <div v-else class="has-text-centered py-6">
           <div class="empty-state">
             <i class="fas fa-box-open fa-3x has-text-grey-light"></i>
@@ -145,13 +136,10 @@
         </div>
       </div>
 
-      <!-- Боковая панель -->
       <div class="column">
-        <!-- Фильтры -->
         <div class="box">
           <h3 class="title is-5 mb-4">Фильтры</h3>
 
-          <!-- Цена -->
           <div class="field">
             <label class="label">Цена, ₽</label>
             <div class="price-range">
@@ -186,7 +174,6 @@
 
           <hr class="my-4">
 
-          <!-- Наличие -->
           <div class="field">
             <label class="label">Наличие</label>
             <div class="control">
@@ -203,7 +190,6 @@
 
           <hr class="my-4">
 
-          <!-- Сброс фильтров -->
           <button class="button is-dark is-fullwidth" @click="resetFilters">
             <span class="icon">
               <i class="fas fa-redo"></i>
@@ -212,7 +198,6 @@
           </button>
         </div>
 
-        <!-- Категории -->
         <div class="box">
           <h3 class="title is-5 mb-1">Категории</h3>
           <aside class="menu">
@@ -232,7 +217,6 @@
           </aside>
         </div>
 
-        <!-- Статистика -->
         <div class="box">
           <h3 class="title is-5 mb-3">Статистика</h3>
           <div class="content">
@@ -244,7 +228,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно добавления товара -->
     <ProductFormModal
       v-if="authStore.canPublishProducts()"
       :is-visible="showAddProductModal"
@@ -261,9 +244,6 @@
       @product-deleted="onProductDeleted"
     />
 
-
-
-    <!-- Сайдбар корзины -->
     <CartSidebar
       :is-visible="showCart"
       @close="showCart = false"
@@ -286,12 +266,10 @@ import ProductEditModal from "@/components/shop/ProductEditModal.vue";
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 
-// Данные
 const products = ref<Product[]>([])
 const productInfos = ref<ProductInfo[]>([])
 const loading = ref(false)
 
-// Фильтры
 const selectedCategory = ref('')
 const selectedSort = ref('name:asc')
 const searchQuery = ref('')
@@ -299,7 +277,6 @@ const priceRange = ref({ min: 0, max: 0 })
 const inStockOnly = ref(false)
 const showCart = ref(false)
 
-// Модальное окно добавления товара
 const showAddProductModal = ref(false)
 
 const showEditProductModal = ref(false)
@@ -311,42 +288,34 @@ const openEditModal = (productId: number) => {
 }
 
 const onProductUpdated = () => {
-  // Обновить список товаров
   loadProducts()
 }
 
 const onProductDeleted = (productId: number) => {
-  // Удалить товар из списка
   products.value = products.value.filter(p => p.id !== productId)
   productInfos.value = productInfos.value.filter(info => info.productId !== productId)
 
-  // Закрыть модальное окно редактирования если открыто
   if (showEditProductModal.value && editingProductId.value === productId) {
     showEditProductModal.value = false
   }
 }
 
-// Получение всех уникальных категорий
 const categories = computed(() => {
   const allCategories = products.value.map(p => p.category)
   return Array.from(new Set(allCategories))
 })
 
-// Получение информации о товаре по ID
 const getProductInfos = (productId: number) => {
   return productInfos.value.filter(info => info.productId === productId)
 }
 
-// Фильтрация товаров
 const filteredProducts = computed(() => {
   let result = [...products.value]
 
-  // Фильтрация по категории
   if (selectedCategory.value) {
     result = result.filter(p => p.category === selectedCategory.value)
   }
 
-  // Фильтрация по поисковому запросу
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(p =>
@@ -356,7 +325,6 @@ const filteredProducts = computed(() => {
     )
   }
 
-  // Фильтрация по цене
   if (priceRange.value.min > 0 || priceRange.value.max > 0) {
     result = result.filter(p => {
       const infos = getProductInfos(p.id)
@@ -373,7 +341,6 @@ const filteredProducts = computed(() => {
     })
   }
 
-  // Фильтрация по наличию
   if (inStockOnly.value) {
     result = result.filter(p => {
       const infos = getProductInfos(p.id)
@@ -381,7 +348,6 @@ const filteredProducts = computed(() => {
     })
   }
 
-  // Сортировка
   const [sortField, sortDirection] = selectedSort.value.split(':')
   result.sort((a, b) => {
     let aValue: any, bValue: any
@@ -408,7 +374,6 @@ const filteredProducts = computed(() => {
   return result
 })
 
-// Статистика
 const availableProductsCount = computed(() => {
   return filteredProducts.value.filter(p => {
     const infos = getProductInfos(p.id)
@@ -430,24 +395,20 @@ const averagePrice = computed(() => {
   return Math.round(total / filteredProducts.value.length)
 })
 
-// Количество товаров по категории
 const getCategoryCount = (category: string) => {
   return products.value.filter(p => p.category === category).length
 }
 
-// Загрузка данных
 const loadProducts = async () => {
   loading.value = true
 
   try {
-    // Очищаем предыдущие данные
     products.value = []
     productInfos.value = []
 
     const productsResponse = await shopAPI.getProducts()
     products.value = productsResponse.data
 
-    // Загружаем информацию о товарах
     for (const product of products.value) {
       try {
         const infosResponse = await shopAPI.getProductInfoByProduct(product.id)
@@ -464,28 +425,17 @@ const loadProducts = async () => {
   }
 }
 
-// Применение фильтров
-const applyFilters = () => {
-  // Реактивные computed свойства уже обработают изменения
-}
-
-// Применение сортировки
-const applySorting = () => {
-  // Реактивные computed свойства уже обработают изменения
-}
-
-// Применение фильтра по цене
+const applyFilters = () => {}
+const applySorting = () => {}
 const applyPriceFilter = () => {
   applyFilters()
 }
 
-// Выбор категории
 const selectCategory = (category: string) => {
   selectedCategory.value = selectedCategory.value === category ? '' : category
   applyFilters()
 }
 
-// Сброс всех фильтров
 const resetFilters = () => {
   selectedCategory.value = ''
   selectedSort.value = 'name:asc'
@@ -494,29 +444,23 @@ const resetFilters = () => {
   inStockOnly.value = false
 }
 
-// Отложенный поиск
 const debouncedSearch = debounce(() => {
   applyFilters()
 }, 500)
 
-// Открытие/закрытие корзины
 const toggleCart = () => {
   showCart.value = !showCart.value
 }
 
-// Обработчик успешного добавления товара
 const onProductAdded = () => {
-  // Обновляем список товаров
   loadProducts()
 
-  // Показываем уведомление
   showNotification.value = true
   setTimeout(() => {
     showNotification.value = false
   }, 3000)
 }
 
-// Уведомление
 const showNotification = ref(false)
 
 onMounted(() => {
@@ -636,15 +580,6 @@ onMounted(() => {
   .filters-panel .columns {
     flex-direction: column;
   }
-}
-
-/* Уведомление об успешном добавлении товара */
-.success-notification {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  animation: slideInRight 0.3s ease;
 }
 
 @keyframes slideInRight {

@@ -43,7 +43,6 @@
           <div class="navbar-end">
             <div class="navbar-item">
               <div class="buttons">
-                <!-- Корзина -->
                 <button
                   v-if="authStore.isAuthenticated"
                   class="button cart-button"
@@ -58,7 +57,6 @@
                   </span>
                 </button>
 
-                <!-- Авторизация -->
                 <template v-if="!authStore.isAuthenticated">
                   <router-link to="/register" class="button register-button">
                     Регистрация
@@ -102,12 +100,10 @@
       </div>
     </nav>
 
-    <!-- Основной контент -->
     <main class="container main-content">
       <router-view />
     </main>
 
-    <!-- Корзина -->
     <CartSidebar
       :is-visible="showCart"
       @close="showCart = false"
@@ -135,12 +131,11 @@ const toggleCart = () => {
 const logout = async () => {
   await authStore.logout()
   cartStore.clearCart()
-  router.push('/login')
+  await router.push('/login')
 }
 </script>
 
 <style scoped>
-/* Общие стили для навбара - ТЕМНАЯ ТЕМА */
 .custom-navbar {
   background: #1a1a1a;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -158,7 +153,6 @@ const logout = async () => {
   padding: 0 1.5rem;
 }
 
-/* Бренд */
 .brand-item {
   padding: 0.5rem 0;
 }
@@ -167,25 +161,6 @@ const logout = async () => {
   display: flex;
   align-items: center;
   gap: 1rem;
-}
-
-.brand-icon-wrapper {
-  background: linear-gradient(135deg, rgba(199, 210, 254, 0.2) 0%, rgba(129, 140, 248, 0.2) 100%);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(129, 140, 248, 0.3);
-}
-
-.brand-icon {
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, #c7d2fe 0%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .brand-text {
@@ -212,7 +187,6 @@ const logout = async () => {
   text-transform: uppercase;
 }
 
-/* Навигационные пункты */
 .navbar-start {
   margin-left: 2rem;
 }
@@ -235,13 +209,6 @@ const logout = async () => {
   transform: translateY(-1px);
 }
 
-
-.nav-icon {
-  margin-right: 0.5rem;
-  font-size: 0.9rem;
-  opacity: 0.8;
-}
-
 .admin-nav {
   color: #c4b5fd !important;
 }
@@ -256,7 +223,6 @@ const logout = async () => {
   background: rgba(139, 92, 246, 0.3);
 }
 
-/* Кнопки */
 .button {
   border: none;
   border-radius: 8px;
@@ -267,7 +233,6 @@ const logout = async () => {
   font-size: 0.9rem;
 }
 
-/* Кнопка корзины */
 .cart-button {
   background: rgba(71, 85, 105, 0.4);
   color: #cbd5e1;
@@ -328,7 +293,6 @@ const logout = async () => {
   padding: 0 0.25rem;
 }
 
-/* Кнопки регистрации и входа */
 .register-button {
   background: rgba(71, 85, 105, 0.4);
   color: #cbd5e1;
@@ -355,7 +319,6 @@ const logout = async () => {
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-/* Кнопка пользователя */
 .user-button {
   background: rgba(71, 85, 105, 0.4);
   color: #cbd5e1;
@@ -394,7 +357,6 @@ const logout = async () => {
   font-weight: 500;
 }
 
-/* Выпадающее меню */
 .custom-dropdown-content {
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
   border-radius: 8px;
@@ -438,13 +400,11 @@ const logout = async () => {
   color: #fecaca;
 }
 
-/* Основной контент */
 .main-content {
   padding: 2rem 0;
   min-height: calc(100vh - 80px);
 }
 
-/* Анимации */
 @keyframes slideIn {
   from {
     width: 0;
@@ -476,11 +436,6 @@ const logout = async () => {
   }
 }
 
-.brand-icon-wrapper {
-  animation: float 3s ease-in-out infinite;
-}
-
-/* Адаптивность */
 @media (max-width: 1024px) {
   .brand-title {
     font-size: 1.1rem;
@@ -519,17 +474,8 @@ const logout = async () => {
     font-size: 1rem;
   }
 
-  .nav-icon {
-    display: none;
-  }
-
   .brand-text {
     display: none;
-  }
-
-  .brand-icon-wrapper {
-    width: 32px;
-    height: 32px;
   }
 
   .container {

@@ -10,7 +10,6 @@
           <div class="card-content">
             <div v-if="!passwordReset">
               <form @submit.prevent="handleSubmit">
-                <!-- Новый пароль -->
                 <div class="field">
                   <label class="label">Новый пароль</label>
                   <div class="control has-icons-left">
@@ -29,7 +28,6 @@
                   <p v-if="errors.newPassword" class="help is-danger">{{ errors.newPassword }}</p>
                 </div>
 
-                <!-- Подтверждение пароля -->
                 <div class="field">
                   <label class="label">Подтверждение пароля</label>
                   <div class="control has-icons-left">
@@ -48,12 +46,10 @@
                   <p v-if="errors.confirmPassword" class="help is-danger">{{ errors.confirmPassword }}</p>
                 </div>
 
-                <!-- Ошибка -->
                 <div v-if="error" class="notification is-danger is-light mb-4">
                   {{ error }}
                 </div>
 
-                <!-- Кнопка -->
                 <div class="field">
                   <div class="control">
                     <button
@@ -89,11 +85,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
-const router = useRouter()
 const authStore = useAuthStore()
 
 const form = reactive({

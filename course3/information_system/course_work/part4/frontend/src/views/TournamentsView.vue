@@ -1,6 +1,5 @@
 <template>
   <div class="tournaments-view">
-    <!-- Заголовок -->
     <div class="mb-5">
       <h1 class="title is-2">Соревнования по художественной гимнастике</h1>
       <p class="subtitle is-5 has-text-grey">
@@ -8,9 +7,7 @@
       </p>
     </div>
 
-    <!-- Основной контент -->
     <div class="columns">
-      <!-- Таблица турниров -->
       <div class="column is-three-quarters">
         <TournamentTable
           :tournaments="paginatedTournaments"
@@ -29,7 +26,6 @@
         />
       </div>
 
-      <!-- Боковая панель -->
       <div class="column">
         <div class="box">
           <h3 class="title is-5 mb-3">Фильтры</h3>
@@ -89,7 +85,6 @@
           </div>
         </div>
 
-        <!-- Статистика -->
         <div class="box">
           <h3 class="title is-5 mb-3">Статистика</h3>
           <div class="content">
@@ -101,7 +96,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно создания/редактирования -->
     <div class="modal" :class="{ 'is-active': showFormModal }">
       <div class="modal-background" @click="closeFormModal"></div>
       <div class="modal-card">
@@ -124,7 +118,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно деталей -->
     <TournamentDetailModal
       :tournament="selectedTournament"
       :rangs="rangs"
@@ -136,22 +129,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
-import { useAuthStore } from '../stores/auth'
+import { ref, onMounted, computed } from 'vue'
 import TournamentTable from '../components/tournaments/TournamentTable.vue'
 import TournamentForm from '../components/tournaments/TournamentForm.vue'
 import TournamentDetailModal from '../components/tournaments/TournamentDetailModal.vue'
 import { tournamentsAPI } from '../api/tournaments'
 import type { Tournament, Rang } from '../types/tournaments'
 
-const authStore = useAuthStore()
-
-// Данные
 const allTournaments = ref<Tournament[]>([])
 const rangs = ref<Rang[]>([])
 const loading = ref(false)
 
-// Фильтры
 const searchQuery = ref('')
 const selectedRangId = ref<number | null>(null)
 const sortField = ref('startDate')
@@ -161,13 +149,11 @@ const dateFilter = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 10
 
-// Модальные окна
 const showFormModal = ref(false)
 const showDetailModal = ref(false)
 const editingTournament = ref<Tournament | null>(null)
 const selectedTournament = ref<Tournament | null>(null)
 
-// Загрузка всех турниров
 const loadTournaments = async () => {
   loading.value = true
   try {
@@ -190,11 +176,9 @@ const loadRangs = async () => {
   }
 }
 
-// Применение фильтров и сортировки на клиенте
 const filteredAndSortedTournaments = computed(() => {
   let filtered = [...allTournaments.value]
 
-  // Фильтр по поиску (только для названия)
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     filtered = filtered.filter(t =>
@@ -202,17 +186,14 @@ const filteredAndSortedTournaments = computed(() => {
     )
   }
 
-  // Фильтр по рангу
   if (selectedRangId.value !== null) {
     filtered = filtered.filter(t => t.rangId === selectedRangId.value)
   }
 
-  // Фильтр по архивации
   if (!showArchived.value) {
     filtered = filtered.filter(t => !t.archived)
   }
 
-  // Фильтр по дате
   if (dateFilter.value !== 'all') {
     const now = new Date()
     filtered = filtered.filter(t => {
@@ -232,7 +213,6 @@ const filteredAndSortedTournaments = computed(() => {
     })
   }
 
-  // Сортировка
   filtered.sort((a, b) => {
     let aValue: any, bValue: any
 
@@ -278,12 +258,10 @@ const paginatedTournaments = computed(() => {
   return filteredAndSortedTournaments.value.slice(startIndex, endIndex)
 })
 
-// Статистика
 const totalTournaments = computed(() => allTournaments.value.length)
 const activeTournaments = computed(() => allTournaments.value.filter(t => !t.archived).length)
 const archivedTournaments = computed(() => allTournaments.value.filter(t => t.archived).length)
 
-// Обработчики событий из TournamentTable
 const handleSearch = (query: string) => {
   searchQuery.value = query
   currentPage.value = 1
@@ -357,7 +335,7 @@ const handleFormSubmit = async (tournamentData: any) => {
     }
 
     closeFormModal()
-    loadTournaments() // Перезагружаем все турниры
+    await loadTournaments()
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при сохранении турнира'
     alert(message)
@@ -367,7 +345,7 @@ const handleFormSubmit = async (tournamentData: any) => {
 const deleteTournament = async (tournament: Tournament) => {
   try {
     await tournamentsAPI.deleteTournament(tournament.id)
-    loadTournaments() // Перезагружаем все турниры
+    await loadTournaments()
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при удалении турнира'
     alert(message)
