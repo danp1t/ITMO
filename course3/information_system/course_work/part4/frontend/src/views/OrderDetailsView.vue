@@ -48,19 +48,22 @@
             </div>
             <div class="level-right">
               <span class="tag is-large" :class="statusClass">
-                {{ orderStatusText }}
+                {{ getStatusText(order.orderStatusName) }}
               </span>
             </div>
           </div>
 
-          <!-- Прогресс доставки -->
-          <div class="progress-container mt-4">
+          <!-- Прогресс доставки (только для активных заказов) -->
+          <div v-if="order.orderStatusName !== 'cancelled'" class="progress-container mt-4">
             <div class="progress-steps">
               <div
                 v-for="step in deliverySteps"
                 :key="step.id"
                 class="step"
-                :class="{ 'is-active': isStepActive(step.id), 'is-completed': isStepCompleted(step.id) }"
+                :class="{
+                  'is-active': isStepActive(step.statusName),
+                  'is-completed': isStepCompleted(step.statusName)
+                }"
               >
                 <div class="step-icon">
                   <i :class="step.icon"></i>
@@ -80,7 +83,7 @@
                 <p><strong>Телефон:</strong> {{ order.phone }}</p>
                 <p><strong>Адрес доставки:</strong> {{ order.address }}</p>
                 <p>
-                  <strong>Статус:</strong> {{ orderStatusText }}
+                  <strong>Статус:</strong> {{ getStatusText(order.orderStatusName) }}
                 </p>
               </div>
             </div>
@@ -223,6 +226,23 @@ const loading = ref(false)
 const error = ref('')
 const cancelling = ref(false)
 
+// Карта статусов
+const statusMap = {
+  'pending': { id: 1, text: 'Ожидает обработки', class: 'is-info', icon: 'fas fa-clock' },
+  'processing': { id: 2, text: 'В обработке', class: 'is-warning', icon: 'fas fa-cog' },
+  'shipped': { id: 3, text: 'Отправлен', class: 'is-primary', icon: 'fas fa-shipping-fast' },
+  'delivered': { id: 4, text: 'Доставлен', class: 'is-success', icon: 'fas fa-check-circle' },
+  'cancelled': { id: 5, text: 'Отменен', class: 'is-danger', icon: 'fas fa-times-circle' }
+}
+
+// Шаги доставки (только для активных заказов)
+const deliverySteps = [
+  { id: 1, statusName: 'pending', label: 'Ожидает обработки', icon: 'fas fa-clock' },
+  { id: 2, statusName: 'processing', label: 'В обработке', icon: 'fas fa-cog' },
+  { id: 3, statusName: 'shipped', label: 'Отправлен', icon: 'fas fa-shipping-fast' },
+  { id: 4, statusName: 'delivered', label: 'Доставлен', icon: 'fas fa-check-circle' }
+]
+
 // Computed свойства для расчета сумм
 const productsSubtotal = computed(() => {
   if (!order.value?.orderProducts) return 0
@@ -260,64 +280,41 @@ const loadOrder = async () => {
   }
 }
 
-// Шаги доставки
-const deliverySteps = [
-  { id: 1, label: 'Оформлен', icon: 'fas fa-shopping-cart' },
-  { id: 2, label: 'Обрабатывается', icon: 'fas fa-cog' },
-  { id: 3, label: 'Отправлен', icon: 'fas fa-shipping-fast' },
-  { id: 4, label: 'В пути', icon: 'fas fa-truck' },
-  { id: 5, label: 'Доставлен', icon: 'fas fa-check-circle' }
-]
+// Получение текста статуса
+const getStatusText = (statusName: string) => {
+  const status = statusMap[statusName as keyof typeof statusMap]
+  return status ? status.text : 'Неизвестно'
+}
 
-// Статус заказа
-const orderStatusText = computed(() => {
-  if (!order.value) return 'Неизвестно'
-
-  // Используем orderStatusName из API
-  if (order.value.orderStatusName) {
-    return order.value.orderStatusName
-  }
-
-  // Если нет orderStatusName, используем orderStatusId для определения статуса
-  switch (order.value.orderStatusId) {
-    case 1: return 'Новый'
-    case 2: return 'В обработке'
-    case 3: return 'Отправлен'
-    case 4: return 'Доставлен'
-    case 5: return 'Отменен'
-    default: return 'Неизвестно'
-  }
-})
-
+// Получение класса для статуса
 const statusClass = computed(() => {
   if (!order.value) return 'is-light'
-
-  switch (order.value.orderStatusId) {
-    case 1: return 'is-info' // Новый
-    case 2: return 'is-warning' // В обработке
-    case 3: return 'is-primary' // Отправлен
-    case 4: return 'is-success' // Доставлен
-    case 5: return 'is-danger' // Отменен
-    default: return 'is-light'
-  }
+  const status = statusMap[order.value.orderStatusName as keyof typeof statusMap]
+  return status ? status.class : 'is-light'
 })
 
 // Активность шагов доставки
-const isStepActive = (stepId: number) => {
-  if (!order.value) return false
-  return order.value.orderStatusId === stepId
+const isStepActive = (statusName: string) => {
+  if (!order.value || order.value.orderStatusName === 'cancelled') return false
+  return order.value.orderStatusName === statusName
 }
 
-const isStepCompleted = (stepId: number) => {
-  if (!order.value) return false
-  return order.value.orderStatusId > stepId
+const isStepCompleted = (statusName: string) => {
+  if (!order.value || order.value.orderStatusName === 'cancelled') return false
+
+  const currentStatus = order.value.orderStatusName
+  const currentStep = deliverySteps.find(step => step.statusName === currentStatus)
+  const targetStep = deliverySteps.find(step => step.statusName === statusName)
+
+  if (!currentStep || !targetStep) return false
+  return currentStep.id > targetStep.id
 }
 
 // Можно ли отменить заказ
 const canCancelOrder = computed(() => {
   if (!order.value) return false
-  // Можно отменять только новые заказы
-  return order.value.orderStatusId === 1
+  // Можно отменять только заказы со статусом "pending" (Ожидает обработки)
+  return order.value.orderStatusName === 'pending'
 })
 
 // Форматирование даты
@@ -346,10 +343,33 @@ const cancelOrder = async () => {
   cancelling.value = true
 
   try {
-    await shopAPI.updateOrder(order.value.id, { orderStatusId: 5 })
-    await loadOrder() // Перезагружаем данные
+    // Отправляем только нужные данные для обновления статуса
+    const updateData = {
+      orderStatusId: 5, // ID статуса "Отменен"
+      orderStatusName: 'cancelled'
+    }
+
+    console.log('Отправка данных для отмены заказа:', updateData)
+
+    // Обновляем статус заказа
+    await shopAPI.updateOrder(order.value.id, updateData)
+
+    // Перезагружаем данные заказа
+    await loadOrder()
+
+    alert('Заказ успешно отменен')
   } catch (err: any) {
-    const message = err.response?.data?.message || 'Не удалось отменить заказ'
+    console.error('Ошибка при отмене заказа:', err)
+
+    // Проверяем, возможно, заказ уже был обновлен
+    if (err.response?.status === 404) {
+      // Попробуем загрузить заказ снова, возможно он уже был удален или изменен
+      await loadOrder()
+      alert('Заказ уже был обновлен. Статус обновлен.')
+      return
+    }
+
+    const message = err.response?.data?.message || 'Не удалось отменить заказ. Пожалуйста, свяжитесь с поддержкой.'
     alert(message)
   } finally {
     cancelling.value = false
