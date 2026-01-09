@@ -1,6 +1,5 @@
 <template>
   <div class="user-management dark-theme">
-    <!-- Заголовок и кнопки управления -->
     <div class="header-section mb-4">
       <div class="level">
         <div class="level-left">
@@ -34,7 +33,6 @@
       @hide="hideNotification"
     />
 
-    <!-- Панель фильтров (сворачиваемая) -->
     <div class="filters-panel mb-4" v-if="showFilters">
       <div class="columns is-multiline">
         <div class="column is-4">
@@ -97,7 +95,6 @@
       </div>
     </div>
 
-    <!-- Таблица пользователей -->
     <div class="table-container">
       <div v-if="loading" class="loading-overlay">
         <div class="loading-content">
@@ -168,7 +165,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно детальной информации о пользователе -->
     <div class="modal dark-modal" :class="{ 'is-active': showUserDetailsModal }">
       <div class="modal-background" @click="closeUserDetailsModal"></div>
       <div class="modal-card" style="max-width: 800px;">
@@ -184,7 +180,6 @@
           </div>
 
           <div v-else-if="selectedUser && userDetails" class="user-details-content">
-            <!-- Заголовок пользователя -->
             <div class="user-header mb-4">
               <div class="user-avatar-large">
                 {{ selectedUser.name?.charAt(0) || 'U' }}
@@ -198,7 +193,6 @@
               </div>
             </div>
 
-            <!-- Табы -->
             <div class="tabs is-boxed is-small mb-4">
               <ul>
                 <li :class="{ 'is-active': activeTab === 'general' }">
@@ -222,7 +216,6 @@
               </ul>
             </div>
 
-            <!-- Вкладка "Основное" -->
             <div v-if="activeTab === 'general'" class="tab-content">
               <div class="columns is-multiline">
                 <div class="column is-6">
@@ -251,7 +244,6 @@
               </div>
             </div>
 
-            <!-- Вкладка "Роли" -->
             <div v-if="activeTab === 'roles'" class="tab-content">
               <div class="detail-field mb-4">
                 <label class="label has-text-light">Назначенные роли</label>
@@ -315,7 +307,6 @@
               </div>
             </div>
 
-            <!-- Вкладка "Активность" -->
             <div v-if="activeTab === 'activity'" class="tab-content">
               <div class="columns is-multiline">
                 <div class="column is-6">
@@ -331,7 +322,6 @@
                   </div>
                 </div>
 
-                <!-- Посты пользователя -->
                 <div class="column is-12" v-if="userDetails.posts && userDetails.posts.length">
                   <div class="detail-field">
                     <label class="label has-text-light">Последние посты</label>
@@ -355,7 +345,6 @@
                   </div>
                 </div>
 
-                <!-- Комментарии пользователя -->
                 <div class="column is-12" v-if="userDetails.comments && userDetails.comments.length">
                   <div class="detail-field">
                     <label class="label has-text-light">Последние комментарии</label>
@@ -420,7 +409,6 @@ import AppNotification from "@/components/AppNotification.vue";
 
 const authStore = useAuthStore()
 
-// Состояния
 const users = ref<UserWithDetails[]>([])
 const loading = ref(false)
 const searchQuery = ref('')
@@ -428,7 +416,6 @@ const statusFilter = ref('all')
 const roleFilter = ref('all')
 const showFilters = ref(true)
 
-// Новые состояния для детальной информации
 const showUserDetailsModal = ref(false)
 const selectedUser = ref<UserWithDetails | null>(null)
 const userDetails = ref<UserDetail | null>(null)
@@ -436,7 +423,6 @@ const loadingUserDetails = ref(false)
 const togglingStatus = ref(false)
 const addingRole = ref(false)
 
-// Для управления ролями
 const availableRoles = ref<Role[]>([])
 const newRoleToAdd = ref<string>('')
 const activeTab = ref<'general' | 'roles' | 'activity'>('general')
@@ -464,8 +450,6 @@ const hideNotification = () => {
   notification.value.visible = false
 }
 
-
-// Получение уникальных ролей для фильтра
 const uniqueRoles = computed(() => {
   const roles = new Set<string>()
   users.value.forEach(user => {
@@ -482,16 +466,13 @@ const uniqueRoles = computed(() => {
   return Array.from(roles)
 })
 
-// Получение ролей пользователя (поддержка старого и нового формата)
 const getUserRoles = (user: UserWithDetails) => {
   if (!user.roles) return []
 
   if (Array.isArray(user.roles) && user.roles.length > 0) {
-    // Проверяем, это объекты ролей или строки
     if (typeof user.roles[0] === 'object' && user.roles[0].name) {
       return user.roles as any[]
     } else if (typeof user.roles[0] === 'string') {
-      // Конвертируем строки в объекты ролей
       return user.roles.map((role: string) => ({
         id: 0,
         name: role,
@@ -502,7 +483,6 @@ const getUserRoles = (user: UserWithDetails) => {
   return []
 }
 
-// Загрузка данных
 const loadUsers = async () => {
   loading.value = true
   try {
@@ -526,7 +506,6 @@ const loadUsers = async () => {
   }
 }
 
-// Загрузка доступных ролей
 const loadAvailableRoles = async () => {
   try {
     const response = await adminAPI.getAllRoles()
@@ -537,14 +516,12 @@ const loadAvailableRoles = async () => {
   }
 }
 
-// Загрузка детальной информации о пользователе
 const loadUserDetails = async (userId: number) => {
   loadingUserDetails.value = true
   try {
     const response = await adminAPI.getUserDetails(userId)
     userDetails.value = response.data
 
-    // Загружаем доступные роли
     await loadAvailableRoles()
   } catch (error) {
     console.error('Ошибка при загрузке детальной информации:', error)
@@ -554,7 +531,6 @@ const loadUserDetails = async (userId: number) => {
   }
 }
 
-// Фильтрация
 const filteredUsers = computed(() => {
   let filtered = users.value
 
@@ -582,7 +558,6 @@ const filteredUsers = computed(() => {
   return filtered
 })
 
-// Функции
 const refreshData = () => {
   loadUsers()
 }
@@ -615,12 +590,6 @@ const closeUserDetailsModal = () => {
   togglingStatus.value = false
 }
 
-const openEditUserModal = (user: UserWithDetails) => {
-  console.log('Редактировать профиль:', user)
-  // Можно добавить модальное окно редактирования
-  closeUserDetailsModal()
-}
-
 const toggleUserStatus = async (user: UserWithDetails) => {
   if (!authStore.canManageUsers || user.id === authStore.user?.id) return
 
@@ -642,13 +611,11 @@ const toggleUserStatus = async (user: UserWithDetails) => {
   }
 }
 
-// Проверка, назначена ли уже роль
 const isRoleAssigned = (roleId: string) => {
   if (!userDetails.value || !userDetails.value.roles) return false
   return userDetails.value.roles.some(role => role.id.toString() === roleId)
 }
 
-// Управление ролями
 const addRoleToUser = async () => {
   if (!newRoleToAdd.value || !selectedUser.value || !userDetails.value || addingRole.value) return
 
@@ -711,16 +678,13 @@ const removeRole = async (roleToRemove: Role) => {
   if (!selectedUser.value || !userDetails.value) return
 
   try {
-    // Обновляем локально
     if (userDetails.value.roles) {
       userDetails.value.roles = userDetails.value.roles.filter(role => role.id !== roleToRemove.id)
     }
 
-    // Отправляем на сервер
     const updatedRoles = userDetails.value.roles ? userDetails.value.roles.map(role => role.name) : []
     await adminAPI.removeRoleFromAccountByName(selectedUser.value.id, roleToRemove.name)
 
-    // Обновляем основной список
     const userIndex = users.value.findIndex(u => u.id === selectedUser.value!.id)
     if (userIndex !== -1) {
       users.value[userIndex].roles = updatedRoles
@@ -732,18 +696,9 @@ const removeRole = async (roleToRemove: Role) => {
   }
 }
 
-// Вспомогательные функции
 const formatDate = (dateString: string) => {
   try {
     return new Date(dateString).toLocaleDateString('ru-RU')
-  } catch {
-    return 'Неизвестно'
-  }
-}
-
-const formatDateTime = (dateString: string) => {
-  try {
-    return new Date(dateString).toLocaleString('ru-RU')
   } catch {
     return 'Неизвестно'
   }
@@ -764,7 +719,6 @@ const getRoleTagClass = (role: string) => {
   return 'is-light'
 }
 
-// Инициализация
 onMounted(async () => {
   if (!authStore.canManageUsers) return
   await loadUsers()
@@ -779,13 +733,11 @@ onMounted(async () => {
   color: #e0e0e0;
 }
 
-/* Заголовок */
 .header-section {
   border-bottom: 1px solid #333;
   padding-bottom: 15px;
 }
 
-/* Панель фильтров */
 .filters-panel {
   background: #1e1e1e;
   border-radius: 8px;
@@ -799,7 +751,6 @@ onMounted(async () => {
   color: #e0e0e0;
 }
 
-/* Таблица */
 .table-container {
   background: #1e1e1e;
   border-radius: 8px;
@@ -851,7 +802,6 @@ tr:hover {
   background: #2d2d2d;
 }
 
-/* Ячейки */
 .user-cell {
   display: flex;
   align-items: center;
@@ -884,20 +834,12 @@ tr:hover {
   font-size: 0.875rem;
 }
 
-/* Теги */
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-}
-
 .tag {
   font-size: 0.75rem;
   padding: 3px 8px;
   border-radius: 4px;
 }
 
-/* Статус */
 .status-tag {
   display: inline-block;
   padding: 4px 12px;
@@ -918,7 +860,6 @@ tr:hover {
   border: 1px solid rgba(255, 56, 96, 0.4);
 }
 
-/* Кнопки действий */
 .action-buttons {
   display: flex;
   gap: 5px;
@@ -929,7 +870,6 @@ tr:hover {
   height: 32px;
 }
 
-/* Стили для модального окна */
 .dark-modal .modal-card {
   background: #1e1e1e;
   border: 1px solid #333;
@@ -949,7 +889,6 @@ tr:hover {
   border-top: 1px solid #333;
 }
 
-/* Стили для детальной информации */
 .user-details-content {
   padding: 10px;
 }
@@ -994,7 +933,6 @@ tr:hover {
   color: #aaa;
 }
 
-/* Табы */
 .tabs ul {
   border-bottom-color: #333;
 }
@@ -1016,7 +954,6 @@ tr:hover {
   color: white;
 }
 
-/* Роли */
 .roles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1051,7 +988,6 @@ tr:hover {
   text-align: right;
 }
 
-/* Посты и комментарии */
 .posts-list, .comments-list {
   background: #2d2d2d;
   border-radius: 8px;
@@ -1074,7 +1010,6 @@ tr:hover {
   font-size: 0.875rem;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .user-management {
     padding: 15px;

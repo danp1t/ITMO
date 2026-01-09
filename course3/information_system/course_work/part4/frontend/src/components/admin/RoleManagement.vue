@@ -11,7 +11,6 @@
       </button>
     </div>
 
-    <!-- Список ролей -->
     <div class="roles-list">
       <div v-if="loading" class="loading">
         <i class="fas fa-spinner fa-spin fa-2x has-text-primary"></i>
@@ -46,7 +45,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно создания роли -->
     <div class="modal dark-modal" :class="{ 'is-active': showCreateModal }">
       <div class="modal-background" @click="closeModal"></div>
       <div class="modal-card">
@@ -79,7 +77,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно управления пользователями роли -->
     <div class="modal dark-modal" :class="{ 'is-active': showManageUsersModal }">
       <div class="modal-background" @click="closeManageUsersModal"></div>
       <div class="modal-card" style="width: 800px; max-width: 90vw;">
@@ -96,7 +93,6 @@
           </div>
 
           <div v-else>
-            <!-- Поиск пользователей -->
             <div class="field">
               <label class="label has-text-light">Добавить пользователя</label>
               <div class="field has-addons">
@@ -116,7 +112,6 @@
               </div>
             </div>
 
-            <!-- Результат поиска -->
             <div v-if="searchResult && !searchResult.hasRole" class="notification is-info is-dark mt-3">
               <div class="is-flex is-justify-content-space-between is-align-items-center">
                 <div>
@@ -139,7 +134,6 @@
               </div>
             </div>
 
-            <!-- Список пользователей с этой ролью -->
             <div class="mt-5">
               <h4 class="subtitle has-text-light mb-3">Пользователи с этой ролью ({{ roleUsers.length }})</h4>
 
@@ -202,14 +196,12 @@ const newRole = ref({
   description: ''
 })
 
-// Загрузка ролей
 const loadRoles = async () => {
   loading.value = true
   try {
     const response = await adminAPI.getAllRoles()
     roles.value = response.data || []
 
-    // Загружаем количество пользователей для каждой роли
     for (const role of roles.value) {
       await loadRoleUsersCount(role)
     }
@@ -220,12 +212,9 @@ const loadRoles = async () => {
   }
 }
 
-// Загрузка пользователей для роли
 const loadRoleUsers = async (roleId: number) => {
   manageLoading.value = true
   try {
-    // Здесь нужно реализовать API для получения пользователей с определенной ролью
-    // Временная заглушка
     const response = await adminAPI.getAccountsByRole(roleId)
     roleUsers.value = response.data || []
   } catch (error) {
@@ -236,7 +225,6 @@ const loadRoleUsers = async (roleId: number) => {
   }
 }
 
-// Загрузка количества пользователей для роли
 const loadRoleUsersCount = async (role: Role) => {
   try {
     const response = await adminAPI.getRoleUsersCount(role.id)
@@ -247,7 +235,6 @@ const loadRoleUsersCount = async (role: Role) => {
   }
 }
 
-// Управление пользователями роли
 const manageRoleUsers = async (role: Role) => {
   selectedRole.value = role
   searchEmail.value = ''
@@ -256,7 +243,6 @@ const manageRoleUsers = async (role: Role) => {
   await loadRoleUsers(role.id)
 }
 
-// Поиск пользователя
 const searchUser = async () => {
   if (!searchEmail.value.trim() || !selectedRole.value) return
 
@@ -265,7 +251,6 @@ const searchUser = async () => {
     const user = response.data
 
     if (user) {
-      // Проверяем, есть ли у пользователя эта роль
       const hasRole = roleUsers.value.some(u => u.id === user.id)
       searchResult.value = {
         ...user,
@@ -281,20 +266,14 @@ const searchUser = async () => {
   }
 }
 
-// Добавление роли пользователю
 const addRoleToUser = async (userId: number) => {
   if (!selectedRole.value) return
 
   try {
     await adminAPI.addRoleToAccountByName(userId, selectedRole.value.name)
-
-    // Обновляем список пользователей
     await loadRoleUsers(selectedRole.value.id)
-
-    // Обновляем количество пользователей в списке ролей
     await loadRoleUsersCount(selectedRole.value)
 
-    // Обновляем результат поиска
     if (searchResult.value) {
       searchResult.value.hasRole = true
     }
@@ -305,20 +284,14 @@ const addRoleToUser = async (userId: number) => {
   }
 }
 
-// Удаление роли у пользователя
 const removeRoleFromUser = async (userId: number) => {
   if (!selectedRole.value) return
 
   try {
     await adminAPI.removeRoleFromAccountByName(userId, selectedRole.value.name)
-
-    // Обновляем список пользователей
     await loadRoleUsers(selectedRole.value.id)
-
-    // Обновляем количество пользователей в списке ролей
     await loadRoleUsersCount(selectedRole.value)
 
-    // Обновляем результат поиска
     if (searchResult.value && searchResult.value.id === userId) {
       searchResult.value.hasRole = false
     }
@@ -329,7 +302,6 @@ const removeRoleFromUser = async (userId: number) => {
   }
 }
 
-// Функции
 const createRole = async () => {
   if (!newRole.value.name.trim() || !newRole.value.description.trim()) return
 
@@ -342,21 +314,6 @@ const createRole = async () => {
     console.error('Ошибка при создании роли:', error)
   } finally {
     isSaving.value = false
-  }
-}
-
-const editRole = (role: Role) => {
-  console.log('Редактировать роль:', role)
-  // Реализация редактирования
-}
-
-const deleteRole = async (roleId: number) => {
-  if (!confirm('Удалить роль?')) return
-  try {
-    await adminAPI.deleteRole(roleId)
-    await loadRoles()
-  } catch (error) {
-    console.error('Ошибка при удалении роли:', error)
   }
 }
 
@@ -395,7 +352,6 @@ onMounted(() => {
   padding-bottom: 15px;
 }
 
-/* Список ролей */
 .roles-list {
   min-height: 400px;
 }
@@ -412,7 +368,6 @@ onMounted(() => {
   opacity: 0.3;
 }
 
-/* Сетка ролей */
 .roles-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -461,7 +416,6 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
-/* Список пользователей */
 .users-list {
   max-height: 300px;
   overflow-y: auto;
@@ -481,7 +435,6 @@ onMounted(() => {
   border-bottom: none;
 }
 
-/* Модальное окно */
 .dark-modal .modal-card {
   background: #1e1e1e;
   border: 1px solid #333;
@@ -502,7 +455,6 @@ onMounted(() => {
   border-top: 1px solid #333;
 }
 
-/* Уведомления */
 .notification {
   background-color: #2d2d2d;
   border-left: 4px solid;
@@ -516,7 +468,6 @@ onMounted(() => {
   border-left-color: #ffdd57;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .role-header {
     flex-direction: column;
