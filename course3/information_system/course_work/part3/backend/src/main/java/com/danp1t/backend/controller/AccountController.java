@@ -2,6 +2,7 @@ package com.danp1t.backend.controller;
 
 import com.danp1t.backend.dto.AccountDTO;
 import com.danp1t.backend.dto.AccountDetailDTO;
+import com.danp1t.backend.dto.AccountStatusDTO;
 import com.danp1t.backend.dto.RoleAssignmentDTO;
 import com.danp1t.backend.model.Account;
 import com.danp1t.backend.service.AccountService;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -120,16 +122,30 @@ public class AccountController {
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> banUser(@PathVariable Integer id) {
-        try {
-            System.out.printf("BANNING USER ID: %d\n", id);
-            accountService.banUser(id);
+    public ResponseEntity<Void> banUser(@PathVariable Integer id, @RequestBody Map<String, Boolean> request) {
+        Boolean isActive = request.get("isActive");
+
+        if (isActive == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (isActive) {
+            System.out.printf("HFPPP");
+            accountService.unbanUser(id);
             return ResponseEntity.ok().build();
-        } catch (RuntimeException e) {
-            if (e.getMessage().contains("не найден")) {
-                return ResponseEntity.notFound().build();
+        }
+        else {
+            System.out.printf("BANNN");
+            System.out.printf("AccoundStatusDTO: %s", isActive);
+            try {
+                accountService.banUser(id);
+                return ResponseEntity.ok().build();
+            } catch (RuntimeException e) {
+                if (e.getMessage().contains("не найден")) {
+                    return ResponseEntity.notFound().build();
+                }
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

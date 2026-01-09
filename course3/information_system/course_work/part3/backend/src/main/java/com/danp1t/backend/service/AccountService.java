@@ -289,14 +289,22 @@ public class AccountService {
         if (!accountRepository.existsById(accountId)) {
             throw new ResourceNotFoundException("Пользователь с ID " + accountId + " не найден");
         }
-
         accountRepository.banUser(accountId);
-
-        System.out.printf("Успех");
-
         Optional<Account> accountOpt = accountRepository.findById(accountId);
         accountOpt.ifPresent(account -> {
             account.setEnabled(false);
+            accountRepository.save(account);
+        });
+    }
+
+    @Transactional
+    public void unbanUser(Integer accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new ResourceNotFoundException("Пользователь с ID " + accountId + " не найден");
+        }
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        accountOpt.ifPresent(account -> {
+            account.setEnabled(true);
             accountRepository.save(account);
         });
     }
