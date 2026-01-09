@@ -9,7 +9,6 @@ const apiClient = axios.create({
   },
 })
 
-// Интерцептор для добавления токена
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token')
@@ -23,7 +22,6 @@ apiClient.interceptors.request.use(
   }
 )
 
-// Интерцептор для обработки ошибок
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
