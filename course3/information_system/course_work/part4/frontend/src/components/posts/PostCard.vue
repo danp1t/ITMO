@@ -178,7 +178,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { postsAPI } from '@/api/posts'
-import type {Post, Tag} from '@/types/posts'
+import type {Post} from '@/types/posts'
 
 const props = defineProps<{
   post: Post
@@ -286,7 +286,7 @@ const createPreviewHtml = (html: string): string => {
   // Очищаем от пустых элементов и исправляем пробелы
   let cleaned = cleanHtml(html)
 
-  // Удаляем только медиа-элементы для предпросмотра
+  // Удаляем медиа-элементы для предпросмотра
   cleaned = cleaned.replace(/<img[^>]*>/gi, '')
   cleaned = cleaned.replace(/<(iframe|video|audio)[^>]*>.*?<\/\1>/gis, '')
   cleaned = cleaned.replace(/<a[^>]*class="editor-file"[^>]*>.*?<\/a>/gi, '')
@@ -359,9 +359,10 @@ const createPreviewHtml = (html: string): string => {
   return result
 }
 
-// Функция для получения полного HTML
+// Функция для получения полного HTML - БЕЗ удаления медиа-элементов!
 const getFullHtml = (html: string): string => {
   if (!html) return ''
+  // Просто очищаем HTML, но не удаляем медиа-элементы
   return cleanHtml(html)
 }
 
@@ -656,185 +657,14 @@ onMounted(() => {
   pointer-events: none;
 }
 
-/* Важное исправление для слипания текста */
-:deep(.post-content-preview) {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  white-space: normal;
-  word-spacing: normal;
-  text-rendering: optimizeLegibility;
-}
-
-/* Обеспечиваем пробелы вокруг инлайновых элементов */
-:deep(.post-content-preview) strong,
-:deep(.post-content-preview) b,
-:deep(.post-content-preview) em,
-:deep(.post-content-preview) i,
-:deep(.post-content-preview) u {
-  margin: 0 0.1em;
-  padding: 0 0.1em;
-}
-
-/* Специальное правило для предотвращения слипания */
-:deep(.post-content-preview) :not(strong, b, em, i, u) + strong,
-:deep(.post-content-preview) :not(strong, b, em, i, u) + b,
-:deep(.post-content-preview) :not(strong, b, em, i, u) + em,
-:deep(.post-content-preview) :not(strong, b, em, i, u) + i,
-:deep(.post-content-preview) :not(strong, b, em, i, u) + u,
-:deep(.post-content-preview) strong + :not(strong, b, em, i, u),
-:deep(.post-content-preview) b + :not(strong, b, em, i, u),
-:deep(.post-content-preview) em + :not(strong, b, em, i, u),
-:deep(.post-content-preview) i + :not(strong, b, em, i, u),
-:deep(.post-content-preview) u + :not(strong, b, em, i, u) {
-  letter-spacing: 0.01em;
-}
-
-:deep(.post-content-preview) * {
-  max-width: 100%;
-}
-
-:deep(.post-content-preview :empty) {
-  display: none !important;
-}
-
-/* Заголовки */
-:deep(.post-content-preview h1),
-:deep(.post-content-preview h2),
-:deep(.post-content-preview h3),
-:deep(.post-content-preview h4),
-:deep(.post-content-preview h5),
-:deep(.post-content-preview h6) {
-  color: #ffffff;
-  font-weight: 600;
-  margin-top: 1.2em;
-  margin-bottom: 0.6em;
-  line-height: 1.3;
-}
-
-:deep(.post-content-preview h1) {
-  font-size: 1.6em;
-  border-bottom: 2px solid #333;
-  padding-bottom: 0.3em;
-  margin-top: 0;
-}
-
-:deep(.post-content-preview h2) {
-  font-size: 1.4em;
-}
-
-:deep(.post-content-preview h3) {
-  font-size: 1.2em;
-}
-
-:deep(.post-content-preview h4) {
-  font-size: 1.1em;
-}
-
-/* Параграфы */
-:deep(.post-content-preview p) {
-  margin-bottom: 1em;
-  line-height: 1.6;
-  text-align: justify;
-}
-
-/* Списки */
-:deep(.post-content-preview ul),
-:deep(.post-content-preview ol) {
-  padding-left: 1.5em;
-  margin-bottom: 1em;
-  margin-top: 0.5em;
-}
-
-:deep(.post-content-preview li) {
-  margin-bottom: 0.5em;
-  padding-left: 0.5em;
-}
-
-:deep(.post-content-preview li:empty) {
+/* Убираем градиент в развернутом виде */
+.post-content-preview.expanded ~ .content-gradient {
   display: none;
 }
 
-/* Цитаты */
-:deep(.post-content-preview blockquote) {
-  border-left: 3px solid #404040;
-  padding-left: 1em;
-  margin: 1.2em 0;
-  color: #999;
-  font-style: italic;
-  background: #252525;
-  padding: 1em;
-  border-radius: 6px;
-}
-
-/* Жирный и курсив */
-:deep(.post-content-preview strong),
-:deep(.post-content-preview b) {
-  font-weight: 700;
-  color: #ffffff;
-}
-
-:deep(.post-content-preview em),
-:deep(.post-content-preview i) {
-  font-style: italic;
-}
-
-/* Ссылки */
-:deep(.post-content-preview a:not(.editor-file)) {
-  color: #3b82f6;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: all 0.2s;
-}
-
-:deep(.post-content-preview a:not(.editor-file):hover) {
-  border-bottom-color: #3b82f6;
-}
-
-/* Изображения (только в развернутом виде) */
-:deep(.post-content-preview.expanded img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  margin: 1.2em 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Медиа-элементы (только в развернутом виде) */
-:deep(.post-content-preview.expanded iframe),
-:deep(.post-content-preview.expanded video),
-:deep(.post-content-preview.expanded audio) {
-  width: 100%;
-  max-width: 100%;
-  margin: 1.5em 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Файлы */
-:deep(.post-content-preview a.editor-file) {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 12px;
-  background: #252525;
-  border-radius: 6px;
-  color: #ccc;
-  text-decoration: none;
-  border: 1px solid #333;
-  margin: 0.5em 0;
-  transition: all 0.2s;
-}
-
-:deep(.post-content-preview a.editor-file:hover) {
-  background: #303030;
-  border-color: #404040;
-}
-
-/* Многоточие в конце предпросмотра */
-:deep(.post-content-preview:not(.expanded))::after {
-  content: '...';
-  color: #666;
+/* Убираем многоточие в развернутом виде */
+.post-content-preview.expanded::after {
+  display: none;
 }
 
 .content-expand-buttons {
@@ -1063,27 +893,6 @@ onMounted(() => {
     font-size: 0.95em;
     max-height: 150px;
   }
-
-  :deep(.post-content-preview h1) {
-    font-size: 1.3em;
-  }
-
-  :deep(.post-content-preview h2) {
-    font-size: 1.15em;
-  }
-
-  :deep(.post-content-preview h3) {
-    font-size: 1em;
-  }
-
-  :deep(.post-content-preview h4) {
-    font-size: 0.95em;
-  }
-
-  :deep(.post-content-preview ul),
-  :deep(.post-content-preview ol) {
-    padding-left: 1.2em;
-  }
 }
 
 @keyframes fadeIn {
@@ -1099,5 +908,274 @@ onMounted(() => {
 
 .post-card {
   animation: fadeIn 0.3s ease;
+}
+</style>
+
+<style>
+/* Стили для развернутого вида - совпадают с PostDetailView */
+.post-content-preview.expanded {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #cccccc;
+  margin-bottom: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  word-spacing: normal;
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
+}
+
+/* Глобальные стили для всех элементов внутри .post-content-preview.expanded */
+.post-content-preview.expanded * {
+  max-width: 100%;
+  word-spacing: normal;
+  white-space: normal;
+}
+
+/* Заголовки */
+.post-content-preview.expanded h1,
+.post-content-preview.expanded h2,
+.post-content-preview.expanded h3,
+.post-content-preview.expanded h4,
+.post-content-preview.expanded h5,
+.post-content-preview.expanded h6 {
+  color: #ffffff;
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  line-height: 1.3;
+}
+
+.post-content-preview.expanded h1 {
+  font-size: 1.8em;
+  border-bottom: 2px solid #404040;
+  padding-bottom: 0.3em;
+  margin-top: 0;
+}
+
+.post-content-preview.expanded h2 {
+  font-size: 1.5em;
+  border-left: 4px solid #3b82f6;
+  padding-left: 10px;
+}
+
+.post-content-preview.expanded h3 {
+  font-size: 1.3em;
+}
+
+.post-content-preview.expanded h4 {
+  font-size: 1.2em;
+  color: #a5a5a5;
+}
+
+/* Параграфы */
+.post-content-preview.expanded p {
+  margin-bottom: 1em;
+  line-height: 1.6;
+  text-align: justify;
+}
+
+/* Списки */
+.post-content-preview.expanded ul,
+.post-content-preview.expanded ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+  margin-top: 0.5em;
+}
+
+.post-content-preview.expanded li {
+  margin-bottom: 0.5em;
+  padding-left: 0.5em;
+}
+
+.post-content-preview.expanded ul li {
+  list-style-type: disc;
+}
+
+.post-content-preview.expanded ol li {
+  list-style-type: decimal;
+}
+
+/* Цитаты */
+.post-content-preview.expanded blockquote {
+  border-left: 4px solid #404040;
+  padding-left: 1em;
+  margin: 1.5em 0;
+  color: #a5a5a5;
+  font-style: italic;
+  background: #252525;
+  padding: 1em;
+  border-radius: 6px;
+}
+
+.post-content-preview.expanded blockquote p {
+  margin-bottom: 0;
+}
+
+/* Жирный и курсив */
+.post-content-preview.expanded strong,
+.post-content-preview.expanded b {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.post-content-preview.expanded em,
+.post-content-preview.expanded i {
+  font-style: italic;
+}
+
+/* Ссылки */
+.post-content-preview.expanded a:not(.editor-file) {
+  color: #3b82f6;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.post-content-preview.expanded a:not(.editor-file):hover {
+  border-bottom-color: #3b82f6;
+  color: #60a5fa;
+}
+
+/* Изображения */
+.post-content-preview.expanded img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 1.2em 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #404040;
+}
+
+/* Медиа-элементы */
+.post-content-preview.expanded iframe,
+.post-content-preview.expanded video,
+.post-content-preview.expanded audio {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #404040;
+  background: #000;
+}
+
+/* Файлы */
+.post-content-preview.expanded a.editor-file {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #252525;
+  border-radius: 6px;
+  color: #ccc;
+  text-decoration: none;
+  border: 1px solid #333;
+  margin: 0.5em 0;
+  transition: all 0.2s;
+}
+
+.post-content-preview.expanded a.editor-file:hover {
+  background: #303030;
+  border-color: #404040;
+}
+
+/* Линии */
+.post-content-preview.expanded hr {
+  border: none;
+  border-top: 2px solid #404040;
+  margin: 2em 0;
+}
+
+/* Код */
+.post-content-preview.expanded code {
+  font-family: 'Courier New', Courier, monospace;
+  background: #252525;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #f0f0f0;
+  font-size: 0.9em;
+}
+
+.post-content-preview.expanded pre {
+  background: #1a1a1a;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  border: 1px solid #333;
+}
+
+.post-content-preview.expanded pre code {
+  background: none;
+  padding: 0;
+  color: #f0f0f0;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+}
+
+/* Таблицы */
+.post-content-preview.expanded table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  background: #252525;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.post-content-preview.expanded th,
+.post-content-preview.expanded td {
+  padding: 10px;
+  border: 1px solid #404040;
+  text-align: left;
+}
+
+.post-content-preview.expanded th {
+  background: #2d2d2d;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Подчеркивание и зачеркивание */
+.post-content-preview.expanded u {
+  text-decoration: underline;
+}
+
+.post-content-preview.expanded s {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* Маркировка */
+.post-content-preview.expanded mark {
+  background: rgba(255, 255, 0, 0.2);
+  color: #ffffff;
+  padding: 2px 4px;
+}
+
+/* Адаптивность для развернутого вида */
+@media (max-width: 768px) {
+  .post-content-preview.expanded {
+    font-size: 0.95em;
+  }
+
+  .post-content-preview.expanded h1 {
+    font-size: 1.5em;
+  }
+
+  .post-content-preview.expanded h2 {
+    font-size: 1.3em;
+  }
+
+  .post-content-preview.expanded h3 {
+    font-size: 1.2em;
+  }
+
+  .post-content-preview.expanded ul,
+  .post-content-preview.expanded ol {
+    padding-left: 1.2em;
+  }
 }
 </style>
