@@ -1,6 +1,5 @@
 <template>
   <div class="product-detail-view">
-    <!-- Навигация назад -->
     <div class="mb-4">
       <router-link to="/shop" class="button is-light">
         <span class="icon">
@@ -10,13 +9,11 @@
       </router-link>
     </div>
 
-    <!-- Загрузка -->
     <div v-if="loading" class="has-text-centered py-6">
       <i class="fas fa-spinner fa-spin fa-2x"></i>
       <p class="mt-3">Загрузка товара...</p>
     </div>
 
-    <!-- Ошибка -->
     <div v-else-if="error" class="notification is-danger">
       {{ error }}
       <router-link to="/shop" class="button is-light ml-2">
@@ -24,10 +21,8 @@
       </router-link>
     </div>
 
-    <!-- Информация о товаре -->
     <div v-else-if="product" class="product-detail">
       <div class="columns">
-        <!-- Изображение товара -->
         <div class="column is-half">
           <div class="product-images">
             <div class="main-image-container">
@@ -39,7 +34,6 @@
               >
             </div>
 
-            <!-- Миниатюры -->
             <div v-if="productImages.length > 1" class="image-thumbnails">
               <div
                 v-for="(image, index) in productImages"
@@ -54,9 +48,7 @@
           </div>
         </div>
 
-        <!-- Информация о товаре -->
         <div class="column is-half">
-          <!-- Категория -->
           <div class="mb-3">
             <span class="tag is-info is-medium">{{ product.category }}</span>
             <span
@@ -67,10 +59,8 @@
             </span>
           </div>
 
-          <!-- Название -->
           <h1 class="title is-2 mb-3">{{ product.name }}</h1>
 
-          <!-- Цена -->
           <div class="price-section mb-4">
             <div class="level is-mobile">
               <div class="level-left">
@@ -95,13 +85,11 @@
             </div>
           </div>
 
-          <!-- Описание -->
           <div class="description mb-5">
             <h3 class="title is-5 mb-2">Описание</h3>
             <p class="content">{{ product.description }}</p>
           </div>
 
-          <!-- Размеры -->
           <div v-if="availableSizes.length > 0" class="sizes-section mb-5">
             <h3 class="title is-5 mb-3">Доступные размеры</h3>
             <div class="size-options">
@@ -126,7 +114,6 @@
             </div>
           </div>
 
-          <!-- Количество -->
           <div class="quantity-section mb-5">
             <h3 class="title is-5 mb-2">Количество</h3>
             <div class="field has-addons">
@@ -170,7 +157,6 @@
             </div>
           </div>
 
-          <!-- Кнопки действий -->
           <div class="action-buttons mb-6">
             <div class="buttons">
               <button
@@ -199,7 +185,6 @@
             </div>
           </div>
 
-          <!-- Информация о доставке -->
           <div class="delivery-info mb-4">
             <div class="message is-info">
               <div class="message-body">
@@ -220,9 +205,7 @@
         </div>
       </div>
 
-      <!-- Дополнительная информация -->
       <div class="additional-info mt-6">
-        <!-- Табы -->
         <div class="tabs is-boxed">
           <ul>
             <li :class="{ 'is-active': activeTab === 'details' }">
@@ -252,9 +235,7 @@
           </ul>
         </div>
 
-        <!-- Содержимое табов -->
         <div class="tab-content">
-          <!-- Характеристики -->
           <div v-if="activeTab === 'details'" class="box">
             <h3 class="title is-5 mb-3">Характеристики товара</h3>
             <div class="content">
@@ -285,7 +266,6 @@
             </div>
           </div>
 
-          <!-- Отзывы -->
           <div v-else-if="activeTab === 'reviews'" class="box">
             <h3 class="title is-5 mb-3">Отзывы покупателей</h3>
             <div class="reviews">
@@ -322,7 +302,6 @@
             </div>
           </div>
 
-          <!-- Вопросы и ответы -->
           <div v-else class="box">
             <h3 class="title is-5 mb-3">Вопросы и ответы</h3>
             <div class="content">
@@ -344,13 +323,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
 
 const route = useRoute()
-const router = useRouter()
 const cartStore = useCartStore()
 
 const product = ref<Product | null>(null)
@@ -358,7 +336,6 @@ const productInfos = ref<ProductInfo[]>([])
 const loading = ref(false)
 const error = ref('')
 
-// Состояние UI
 const activeImageIndex = ref(0)
 const selectedSize = ref<ProductInfo | null>(null)
 const quantity = ref(1)
@@ -366,17 +343,13 @@ const addingToCart = ref(false)
 const activeTab = ref('details')
 const inWishlist = ref(false)
 
-// Изображения товара
 const productImages = computed(() => {
   if (product.value?.images && product.value.images.length > 0) {
-    // Бэкенд уже возвращает полные URL
     return product.value.images;
   }
-  // Если нет изображений, используем placeholder
   return ['https://via.placeholder.com/800x600?text=Not_found'];
 });
 
-// Основное изображение
 const mainImage = computed(() => {
   if (productImages.value.length > 0 && activeImageIndex.value < productImages.value.length) {
     return productImages.value[activeImageIndex.value]
@@ -384,7 +357,6 @@ const mainImage = computed(() => {
   return 'https://via.placeholder.com/800x600?text=Not_found'
 })
 
-// Загрузка данных о товаре
 const loadProduct = async () => {
   loading.value = true
   error.value = ''
@@ -392,15 +364,12 @@ const loadProduct = async () => {
   const productId = parseInt(route.params.id as string)
 
   try {
-    // Загружаем информацию о товаре
     const productResponse = await shopAPI.getProductDetail(productId)
     product.value = productResponse.data
 
-    // Загружаем информацию о размерах/вариантах
     const infosResponse = await shopAPI.getProductInfoByProduct(productId)
     productInfos.value = infosResponse.data
 
-    // Выбираем первый доступный размер по умолчанию
     if (availableSizes.value.length > 0) {
       selectedSize.value = availableSizes.value[0]
     }
@@ -412,18 +381,15 @@ const loadProduct = async () => {
   }
 }
 
-// Обработчик ошибки загрузки изображения
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
   img.src = 'https://via.placeholder.com/800x600?text=Изображение+не+загружено'
 }
 
-// Доступные размеры
 const availableSizes = computed(() => {
   return productInfos.value.filter(info => info.countItems > 0)
 })
 
-// Цены
 const minPrice = computed(() => {
   if (availableSizes.value.length === 0) return product.value?.basePrice || 0
   return Math.min(...availableSizes.value.map(info => info.price))
@@ -446,13 +412,11 @@ const hasMultiplePrices = computed(() => {
   return minPrice.value !== maxPrice.value
 })
 
-// Максимальное количество для заказа
 const maxQuantity = computed(() => {
   if (!selectedSize.value) return 0
   return selectedSize.value.countItems
 })
 
-// Можно ли добавить в корзину
 const canAddToCart = computed(() => {
   if (!product.value) return false
   if (availableSizes.value.length > 0 && !selectedSize.value) return false
@@ -460,13 +424,11 @@ const canAddToCart = computed(() => {
   return quantity.value > 0 && quantity.value <= maxQuantity.value
 })
 
-// Текст для кнопки добавления в корзину
 const addToCartText = computed(() => {
   if (!canAddToCart.value) return 'Недоступно'
   return `Добавить в корзину — ${selectedPrice.value * quantity.value} ₽`
 })
 
-// Тег популярности
 const popularityTag = computed(() => {
   if (!product.value) return ''
   if (product.value.popularity > 50) return 'Популярный'
@@ -474,7 +436,6 @@ const popularityTag = computed(() => {
   return ''
 })
 
-// Изменение количества
 const decreaseQuantity = () => {
   if (quantity.value > 1) quantity.value--
 }
@@ -483,7 +444,6 @@ const increaseQuantity = () => {
   if (quantity.value < maxQuantity.value) quantity.value++
 }
 
-// Выбор размера
 const selectSize = (size: ProductInfo) => {
   if (size.countItems > 0) {
     selectedSize.value = size
@@ -491,7 +451,6 @@ const selectSize = (size: ProductInfo) => {
   }
 }
 
-// Добавление в корзину
 const addToCart = async () => {
   if (!product.value || !canAddToCart.value) return
 
@@ -501,7 +460,6 @@ const addToCart = async () => {
     if (selectedSize.value) {
       cartStore.addItem(product.value, selectedSize.value, quantity.value)
     } else {
-      // Если нет размеров, создаем фиктивную ProductInfo
       const productInfo: ProductInfo = {
         id: product.value.id,
         productId: product.value.id,
@@ -520,7 +478,6 @@ const addToCart = async () => {
   }
 }
 
-// Избранное
 const wishlistIcon = computed(() => {
   return inWishlist.value ? 'fas fa-heart has-text-danger' : 'far fa-heart'
 })
@@ -544,7 +501,6 @@ onMounted(() => {
   padding: 2rem 1rem;
 }
 
-/* Изображения */
 .product-images {
   border-radius: 12px;
   overflow: hidden;
@@ -563,7 +519,7 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top; /* Показываем верхнюю часть изображения */
+  object-position: top;
   transition: transform 0.3s;
 }
 
@@ -602,10 +558,9 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top; /* Показываем верхнюю часть и в миниатюрах */
+  object-position: top;
 }
 
-/* Цена */
 .price-section {
   padding: 1rem 0;
   border-bottom: 1px solid #e5e7eb;
@@ -620,7 +575,6 @@ onMounted(() => {
   align-items: center;
 }
 
-/* Размеры */
 .size-options {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -661,12 +615,10 @@ onMounted(() => {
   font-size: 0.75rem;
 }
 
-/* Количество */
 .quantity-section .field {
   align-items: center;
 }
 
-/* Кнопки действий */
 .action-buttons .buttons {
   display: flex;
   gap: 1rem;
@@ -694,12 +646,10 @@ onMounted(() => {
   flex: 1;
 }
 
-/* Информация о доставке */
 .message {
   border-radius: 8px;
 }
 
-/* Табы */
 .tabs {
   margin-bottom: 1rem;
 }
@@ -719,14 +669,12 @@ onMounted(() => {
   padding: 1.5rem;
 }
 
-/* Таблица характеристик */
 .table th {
   width: 200px;
   background-color: #f8f9fa;
   font-weight: 600;
 }
 
-/* Отзывы */
 .review {
   padding: 1rem 0;
   border-bottom: 1px solid #f1f3f5;
@@ -752,7 +700,6 @@ onMounted(() => {
   margin-top: 0.5rem;
 }
 
-/* FAQ */
 .faq-item {
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;

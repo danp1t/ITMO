@@ -93,7 +93,6 @@
             </div>
           </div>
 
-          <!-- Компонент фильтрации по тегам -->
           <TagFilter
             v-if="allTags.length > 0"
             :tags="allTags"
@@ -105,7 +104,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно создания поста -->
     <div class="modal" :class="{ 'is-active': showCreateModal }">
       <div class="modal-background" @click="closeCreateModal"></div>
       <div class="modal-card">
@@ -184,7 +182,6 @@
       </div>
     </div>
 
-    <!-- Модальное окно редактирования поста -->
     <div class="modal" :class="{ 'is-active': showEditModal }">
       <div class="modal-background" @click="closeEditModal"></div>
       <div class="modal-card">
@@ -285,17 +282,14 @@ const sortBy = ref('createdAt')
 const sortDirection = ref('desc')
 const isSaving = ref(false)
 
-// Константа для максимальной длины заголовка
 const MAX_TITLE_LENGTH = 100
 
 const allTags = ref<Tag[]>([])
 const selectedTagIds = ref<number[]>([])
 
-// Реф для редактора
 const editorRef = ref<InstanceType<typeof RichTextEditor>>()
 const editEditorRef = ref<InstanceType<typeof RichTextEditor>>()
 
-// Временные файлы
 const pendingFiles = ref<Array<{file: File, type: 'image' | 'file' | 'audio'}>>([])
 
 const newPost = ref({
@@ -304,7 +298,6 @@ const newPost = ref({
   tagIds: [] as number[]
 })
 
-// Данные для редактирования поста
 const editingPost = ref({
   id: 0,
   title: '',
@@ -316,13 +309,7 @@ const editingPost = ref({
 const loadPosts = async () => {
   loading.value = true
   try {
-    // Если выбраны теги, фильтруем по ним
     if (selectedTagIds.value.length > 0) {
-      // Для нескольких тегов можно делать по-разному
-      // Вариант 1: Использовать intersection (посты, содержащие все выбранные теги)
-      // Вариант 2: Использовать union (посты, содержащие любой из выбранных тегов)
-
-      // Здесь используем union (любой из тегов)
       const allPosts: Post[] = []
       const uniquePostIds = new Set<number>()
 
@@ -338,10 +325,8 @@ const loadPosts = async () => {
         }
       }
 
-      // Применяем сортировку
       posts.value = sortPosts(allPosts)
     } else {
-      // Загружаем все посты
       const params = {
         sortBy: sortBy.value,
         sortDirection: sortDirection.value,
@@ -377,7 +362,6 @@ const sortPosts = (postsToSort: Post[]) => {
       break
 
     default:
-      // По умолчанию сортируем по дате создания (новые сверху)
       sorted.sort((a, b) => {
         const dateA = new Date(a.createdAt).getTime()
         const dateB = new Date(b.createdAt).getTime()
@@ -407,37 +391,30 @@ const toggleTagFilter = (tagId: number) => {
   loadPosts()
 }
 
-// Очистка фильтров тегов
 const clearTagFilters = () => {
   selectedTagIds.value = []
   loadPosts()
 }
 
-// Обработчик ошибок загрузки файлов
 const handleFileUploadError = (error: string) => {
   alert(error)
 }
 
-// Обработчик добавления файлов
 const handleFilesUploaded = (files: Array<{file: File, type: 'image' | 'file' | 'audio'}>) => {
   pendingFiles.value = files
 }
 
-// Обработчик изменения тегов при создании
 const handleNewPostTagsChange = (tagIds: number[]) => {
   newPost.value.tagIds = tagIds
 }
 
-// Обработчик изменения тегов при редактировании
 const handleEditPostTagsChange = (tagIds: number[]) => {
   editingPost.value.tagIds = tagIds
 }
 
-// Создание поста с вложениями
 const createPostWithAttachments = async () => {
   if (!authStore.user) return
 
-  // Валидация
   if (!newPost.value.title.trim()) {
     alert('Введите заголовок поста')
     return
@@ -456,10 +433,9 @@ const createPostWithAttachments = async () => {
   isSaving.value = true
 
   try {
-    // Получаем объекты тегов по их ID
     const tagObjects = newPost.value.tagIds.map(id => ({
       id: id,
-      name: '', // Имя будет заполнено на бэкенде
+      name: '',
       description: ''
     }))
 
@@ -467,37 +443,32 @@ const createPostWithAttachments = async () => {
       title: newPost.value.title,
       text: newPost.value.content,
       ownerId: authStore.user.id,
-      tags: tagObjects  // Добавляем теги
+      tags: tagObjects
     }
 
     const createResponse = await postsAPI.createPost(postData)
     const newPostId = createResponse.data.id
 
-    // 2. Загружаем вложения если есть
     if (editorRef.value?.hasPendingFiles && newPostId) {
-      // Загружаем все временные файлы
       const uploadedFiles = await editorRef.value.uploadPendingFiles(newPostId)
 
       if (uploadedFiles.length > 0) {
-        // Обновляем контент с реальными ссылками
         const updatedContent = editorRef.value.replacePlaceholdersInContent(
           newPost.value.content,
           uploadedFiles
         )
 
-        // 3. Обновляем пост с правильными ссылками
         const updateData: UpdatePostRequest = {
           title: newPost.value.title,
           text: updatedContent,
           ownerId: authStore.user.id,
-          tags: tagObjects  // Также передаем теги при обновлении
+          tags: tagObjects
         }
 
         await postsAPI.updatePost(newPostId, updateData)
       }
     }
 
-    // 4. Закрываем модалку и обновляем список
     showCreateModal.value = false
     newPost.value = { title: '', content: '', tagIds: [] }
     pendingFiles.value = []
@@ -506,7 +477,6 @@ const createPostWithAttachments = async () => {
       editorRef.value.clearPendingFiles()
     }
 
-    // 5. Загружаем обновленный список постов
     await loadPosts()
 
   } catch (error: any) {
@@ -518,7 +488,6 @@ const createPostWithAttachments = async () => {
   }
 }
 
-// Закрытие модалки создания
 const closeCreateModal = () => {
   if (isSaving.value) {
     isSaving.value = false
@@ -536,7 +505,6 @@ const closeCreateModal = () => {
   }
 }
 
-// Обработчик редактирования поста
 const handleEdit = (post: Post) => {
   editingPost.value = {
     id: post.id,
@@ -548,11 +516,9 @@ const handleEdit = (post: Post) => {
   showEditModal.value = true
 }
 
-// Функция обновления поста
 const updatePost = async () => {
   if (!authStore.user) return
 
-  // Валидация
   if (!editingPost.value.title.trim()) {
     alert('Введите заголовок поста')
     return
@@ -586,10 +552,8 @@ const updatePost = async () => {
 
     await postsAPI.updatePost(editingPost.value.id, postData)
 
-    // Обновляем пост в списке
     const index = posts.value.findIndex(p => p.id === editingPost.value.id)
     if (index !== -1) {
-      // Перезагружаем пост для получения обновленных данных
       const updatedResponse = await postsAPI.getPostById(editingPost.value.id)
       posts.value[index] = updatedResponse.data
     }
@@ -604,7 +568,6 @@ const updatePost = async () => {
   }
 }
 
-// Закрытие модального окна редактирования
 const closeEditModal = () => {
   showEditModal.value = false
   editingPost.value = {

@@ -1,6 +1,5 @@
 <template>
   <div class="product-detail">
-    <!-- Хлебные крошки (только когда product загружен) -->
     <nav v-if="product" class="breadcrumb mb-5" aria-label="breadcrumbs">
       <ul>
         <li><router-link to="/shop">Магазин</router-link></li>
@@ -15,9 +14,7 @@
     </div>
 
     <div v-else-if="product" class="columns">
-      <!-- Левая колонка - Изображения -->
       <div class="column is-half">
-        <!-- Главное изображение -->
         <div class="main-image mb-4">
           <figure class="image is-4by3">
             <img
@@ -32,7 +29,6 @@
           </figure>
         </div>
 
-        <!-- Галерея изображений -->
         <div v-if="productImages.length > 1" class="image-gallery">
           <div class="columns is-multiline is-mobile">
             <div
@@ -55,9 +51,7 @@
         </div>
       </div>
 
-      <!-- Правая колонка - Информация -->
       <div class="column is-half">
-        <!-- Категория -->
         <div class="tags has-addons mb-3">
           <span class="tag is-dark">{{ product.category }}</span>
           <span v-if="totalStock > 0" class="tag is-success">
@@ -68,7 +62,6 @@
           </span>
         </div>
 
-        <!-- Название и рейтинг -->
         <div class="level is-mobile mb-4">
           <div class="level-left">
             <h1 class="title is-3">{{ product.name }}</h1>
@@ -83,7 +76,6 @@
           </div>
         </div>
 
-        <!-- Цена -->
         <div class="price-section mb-5">
           <div class="level is-mobile">
             <div class="level-left">
@@ -109,13 +101,11 @@
           </div>
         </div>
 
-        <!-- Описание -->
         <div class="description-section mb-5">
           <h3 class="title is-5 mb-3">Описание</h3>
           <p class="content">{{ product.description }}</p>
         </div>
 
-        <!-- Выбор размера и количества -->
         <div class="selection-section mb-5">
           <div class="field">
             <label class="label">Размер:</label>
@@ -182,7 +172,6 @@
           </div>
         </div>
 
-        <!-- Кнопки действий -->
         <div class="action-buttons mb-6">
           <div class="buttons">
             <button
@@ -210,7 +199,6 @@
           </div>
         </div>
 
-        <!-- Детали товара -->
         <div class="details-section">
           <div class="box">
             <h3 class="title is-5 mb-3">Характеристики</h3>
@@ -245,7 +233,6 @@
       </div>
     </div>
 
-    <!-- Связанные товары -->
     <div v-if="!loading && product" class="related-products mt-6">
       <h2 class="title is-4 mb-4">Похожие товары</h2>
       <div v-if="relatedProducts.length > 0" class="columns is-multiline">
@@ -265,7 +252,6 @@
       </div>
     </div>
 
-    <!-- Сообщение об ошибке -->
     <div v-if="error" class="has-text-centered py-6">
       <i class="fas fa-exclamation-triangle fa-3x has-text-danger"></i>
       <p class="title is-4 mt-4">Товар не найден</p>
@@ -277,7 +263,6 @@
       </router-link>
     </div>
 
-    <!-- Уведомление -->
     <div v-if="showNotification" class="notification is-success is-light fixed-notification">
       <button class="delete" @click="showNotification = false"></button>
       <p>Товар успешно добавлен в корзину!</p>
@@ -297,13 +282,11 @@ const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
 
-// Данные
 const product = ref<Product | null>(null)
 const productInfos = ref<ProductInfo[]>([])
 const loading = ref(true)
 const error = ref(false)
 
-// Состояние
 const activeImageIndex = ref(0)
 const selectedSize = ref<ProductInfo | null>(null)
 const quantity = ref(1)
@@ -312,13 +295,11 @@ const showNotification = ref(false)
 const isInWishlist = ref(false)
 const relatedProducts = ref<Product[]>([])
 
-// Получить ID товара из маршрута
 const productId = computed(() => {
   const id = route.params.id
   return typeof id === 'string' ? parseInt(id) : Array.isArray(id) ? parseInt(id[0]) : id
 })
 
-// URL главного изображения
 const mainImageUrl = computed(() => {
   if (productImages.value.length > 0 && activeImageIndex.value < productImages.value.length) {
     return productImages.value[activeImageIndex.value]
@@ -326,44 +307,34 @@ const mainImageUrl = computed(() => {
   return 'https://via.placeholder.com/800x600?text=Нет+изображения'
 })
 
-// Изображения товара
 const productImages = computed(() => {
   if (product.value?.images && product.value.images.length > 0) {
-    // Убедимся, что все изображения имеют полный URL
     return product.value.images.map(img => {
-      // Если изображение уже содержит полный URL, возвращаем как есть
       if (img.startsWith('http') || img.startsWith('/api/products/images/')) {
         return img
       }
-      // Иначе добавляем префикс API
       return `/api/products/images/${img}`
     })
   }
-  // Если нет изображений, используем placeholder
   return ['https://via.placeholder.com/800x600?text=Нет+изображения']
 })
 
-// Общее количество на складе
 const totalStock = computed(() => {
   return productInfos.value.reduce((total, info) => total + info.countItems, 0)
 })
 
-// Доступные размеры
 const availableSizes = computed(() => {
   return productInfos.value.filter(info => info.countItems > 0)
 })
 
-// Сортированные размеры
 const sortedProductInfos = computed(() => {
   return [...productInfos.value].sort((a, b) => {
-    // Сначала доступные, потом по алфавиту
     if (a.countItems === 0 && b.countItems > 0) return 1
     if (a.countItems > 0 && b.countItems === 0) return -1
     return a.sizeName.localeCompare(b.sizeName)
   })
 })
 
-// Минимальная цена
 const minPrice = computed(() => {
   if (productInfos.value.length === 0) {
     return product.value?.basePrice || 0
@@ -372,7 +343,6 @@ const minPrice = computed(() => {
   return Math.min(...prices)
 })
 
-// Максимальная цена
 const maxPrice = computed(() => {
   if (productInfos.value.length === 0) {
     return product.value?.basePrice || 0
@@ -381,17 +351,14 @@ const maxPrice = computed(() => {
   return Math.max(...prices)
 })
 
-// Есть ли несколько цен
 const hasMultiplePrices = computed(() => {
   if (productInfos.value.length <= 1) return false
   const prices = productInfos.value.map(info => info.price)
   return new Set(prices).size > 1
 })
 
-// Товар отсутствует
 const isOutOfStock = computed(() => totalStock.value === 0)
 
-// Можно ли добавить в корзину
 const canAddToCart = computed(() => {
   if (isOutOfStock.value) return false
   if (availableSizes.value.length > 0) {
@@ -400,7 +367,6 @@ const canAddToCart = computed(() => {
   return quantity.value > 0
 })
 
-// Текст для кнопки добавления в корзину
 const addToCartText = computed(() => {
   if (isOutOfStock.value) return 'Нет в наличии'
   if (availableSizes.value.length > 0 && !selectedSize.value) {
@@ -410,26 +376,21 @@ const addToCartText = computed(() => {
   return `Добавить в корзину (${price * quantity.value} ₽)`
 })
 
-// Загрузить товар
 const loadProduct = async () => {
   loading.value = true
   error.value = false
 
   try {
-    // Загружаем основной товар
     const productResponse = await shopAPI.getProductById(productId.value as number)
     product.value = productResponse.data
 
-    // Загружаем информацию о товаре
     const infosResponse = await shopAPI.getProductInfoByProduct(productId.value as number)
     productInfos.value = infosResponse.data
 
-    // Автоматически выбираем первый доступный размер
     if (availableSizes.value.length > 0) {
       selectedSize.value = availableSizes.value[0]
     }
 
-    // Загружаем похожие товары
     await loadRelatedProducts()
   } catch (err) {
     console.error('Ошибка при загрузке товара:', err)
@@ -439,12 +400,10 @@ const loadProduct = async () => {
   }
 }
 
-// Загрузить похожие товары
 const loadRelatedProducts = async () => {
   try {
     const response = await shopAPI.getProducts()
     if (product.value) {
-      // Фильтруем товары той же категории, исключая текущий
       relatedProducts.value = response.data
         .filter(p => p.category === product.value!.category && p.id !== productId.value)
         .slice(0, 4)
@@ -454,12 +413,10 @@ const loadRelatedProducts = async () => {
   }
 }
 
-// Получить информацию о товаре по ID (для похожих товаров)
 const getProductInfos = (id: number) => {
   return productInfos.value.filter(info => info.productId === id)
 }
 
-// Обработчики
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
   img.src = 'https://via.placeholder.com/800x600?text=Изображение+не+загружено'
@@ -494,7 +451,6 @@ const addToCart = async () => {
     if (availableSizes.value.length > 0 && selectedSize.value) {
       cartStore.addItem(product.value, selectedSize.value, quantity.value)
     } else {
-      // Если нет размеров, создаем фиктивную ProductInfo
       const productInfo: ProductInfo = {
         id: product.value.id,
         productId: product.value.id,
@@ -505,7 +461,6 @@ const addToCart = async () => {
       cartStore.addItem(product.value, productInfo, quantity.value)
     }
 
-    // Показываем уведомление
     showNotification.value = true
     setTimeout(() => {
       showNotification.value = false

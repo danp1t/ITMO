@@ -46,11 +46,9 @@
           </div>
         </header>
 
-        <!-- Режим просмотра -->
         <div v-if="!isEditing" class="card-content">
           <div class="post-content" v-html="post.text"></div>
 
-          <!-- Отображение тегов поста -->
           <TagList
             v-if="post.tags && post.tags.length > 0"
             :tags="post.tags"
@@ -81,7 +79,6 @@
           </div>
         </div>
 
-        <!-- Режим редактирования -->
         <div v-else class="card-content">
           <div class="field">
             <label class="label">Заголовок</label>
@@ -156,7 +153,6 @@
         </footer>
       </article>
 
-      <!-- Комментарии (только в режиме просмотра) -->
       <div v-if="!isEditing" class="comments-section mt-6">
         <h2 class="title is-4">Комментарии</h2>
 
@@ -214,7 +210,6 @@
                 </p>
               </div>
 
-              <!-- Форма редактирования комментария -->
               <div v-else class="comment-edit-form">
                 <div class="field">
                   <div class="control">
@@ -247,7 +242,6 @@
                 </div>
               </div>
 
-              <!-- Кнопки действий (только для автора комментария) -->
               <div
                 v-if="authStore.isAuthenticated &&
                       authStore.canEditComment(comment.accountId) &&
@@ -312,23 +306,19 @@ const isEditing = ref(false)
 const isSaving = ref(false)
 const isDeleting = ref(false)
 
-// Реф для редактора
 const editorRef = ref<InstanceType<typeof RichTextEditor>>()
 
-// Состояния для редактирования комментариев
 const editingCommentId = ref<number | null>(null)
 const editingCommentText = ref('')
 const isEditingComment = ref(false)
 const isDeletingComment = ref<number | null>(null)
 
-// Форма редактирования поста
 const editForm = ref({
   title: '',
   content: '',
   tagIds: [] as number[]
 })
 
-// Обработчик изменения тегов
 const handleTagsChange = (tagIds: number[]) => {
   editForm.value.tagIds = tagIds
 }
@@ -363,14 +353,12 @@ const toggleLike = async () => {
   isLiking.value = true
 
   try {
-    // Оптимистичное обновление
     isLiked.value = !isLiked.value
     post.value.countLike += isLiked.value ? 1 : -1
 
     await postsAPI.likePost(post.value.id)
 
   } catch (error) {
-    // Откатываем изменения в случае ошибки
     isLiked.value = !isLiked.value
     post.value.countLike += isLiked.value ? -1 : 1
     console.error('Ошибка при оценке поста:', error)
@@ -401,7 +389,6 @@ const addComment = async () => {
   }
 }
 
-// Редактирование комментария
 const startEditComment = (comment: Comment) => {
   editingCommentId.value = comment.id
   editingCommentText.value = comment.userComment
@@ -442,7 +429,6 @@ const saveEditedComment = async (commentId: number) => {
   }
 }
 
-// Удаление комментария
 const deleteComment = async (commentId: number) => {
   if (!authStore.user || !authStore.canDeleteComment(
     comments.value.find(c => c.id === commentId)?.accountId || 0
@@ -462,7 +448,6 @@ const deleteComment = async (commentId: number) => {
   }
 }
 
-// Редактирование поста
 const startEdit = () => {
   if (!post.value) return
 
@@ -487,7 +472,6 @@ const cancelEdit = () => {
   }
 }
 
-// Обработчик ошибок загрузки файлов
 const handleFileUploadError = (error: string) => {
   alert(error)
 }
@@ -495,7 +479,6 @@ const handleFileUploadError = (error: string) => {
 const saveEdit = async () => {
   if (!post.value || !authStore.user) return
 
-  // Валидация
   if (!editForm.value.title.trim()) {
     alert('Введите заголовок поста')
     return
@@ -518,7 +501,6 @@ const saveEdit = async () => {
 
     await postsAPI.updatePost(post.value.id, postData)
 
-    // Обновляем данные поста
     const updatedResponse = await postsAPI.getPostById(post.value.id)
     post.value = updatedResponse.data
 
@@ -532,7 +514,6 @@ const saveEdit = async () => {
   }
 }
 
-// Удаление поста
 const confirmDelete = async () => {
   if (!post.value || !authStore.canDeletePost(post.value.ownerId)) {
     return
@@ -639,7 +620,6 @@ onMounted(async () => {
   cursor: not-allowed;
 }
 
-/* Стили для отображения HTML контента поста */
 .post-content {
   font-size: 1rem;
   line-height: 1.6;
