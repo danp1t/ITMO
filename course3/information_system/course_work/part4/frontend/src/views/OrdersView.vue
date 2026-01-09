@@ -138,20 +138,24 @@
                   v-if="canCancelOrder(order)"
                   class="button is-danger is-light"
                   @click="cancelOrder(order)"
+                  :disabled="cancellingOrderId === order.id"
                 >
-                  Отменить заказ
-                </button>
-                <button
-                  class="button is-light"
-                  @click="repeatOrder(order)"
-                >
-                  Повторить заказ
+                  <span class="icon" v-if="cancellingOrderId === order.id">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </span>
+                  <span v-else class="icon">
+                    <i class="fas fa-times"></i>
+                  </span>
+                  <span>Отменить заказ</span>
                 </button>
                 <button
                   class="button is-primary is-light"
                   @click="viewOrderDetails(order)"
                 >
-                  Подробнее
+                  <span class="icon">
+                    <i class="fas fa-eye"></i>
+                  </span>
+                  <span>Подробнее</span>
                 </button>
               </div>
             </div>
@@ -212,18 +216,17 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import { useCartStore } from '../stores/cart'
 import { shopAPI } from '../api/shop'
-import type { Order, OrderStatus, OrderProduct } from '../types/shop'
+import type { Order, OrderStatus } from '../types/shop'
 
 const authStore = useAuthStore()
-const cartStore = useCartStore()
 const router = useRouter()
 
 // Данные
 const orders = ref<Order[]>([])
 const orderStatuses = ref<OrderStatus[]>([])
 const loading = ref(false)
+const cancellingOrderId = ref<number | null>(null)
 
 // Фильтры
 const selectedStatus = ref<number | null>(null)
@@ -247,7 +250,6 @@ const loadOrders = async () => {
 
   } catch (error) {
     console.error('Ошибка при загрузке заказов:', error)
-    // В реальном приложении можно показать уведомление
   } finally {
     loading.value = false
   }
@@ -311,36 +313,54 @@ const getStatusClass = (statusId: number) => {
 
 // Можно ли отменить заказ
 const canCancelOrder = (order: Order) => {
-  // Можно отменять только новые заказы
+  // Можно отменять только заказы со статусом "pending" (Ожидает обработки)
   return order.orderStatusId === 1
 }
 
 // Отмена заказа
 const cancelOrder = async (order: Order) => {
-  if (!confirm('Вы уверены, что хотите отменить этот заказ?')) {
-    return
-  }
+
+  cancellingOrderId.value = order.id
 
   try {
-    // Обновляем статус заказа на "Отменен"
-    await shopAPI.updateOrder(order.id, { orderStatusId: 5 })
+    // Создаем полный объект с данными заказа для обновления
+    const updateData = {
+      id: order.id,
+      address: order.address,
+      phone: order.phone,
+      email: order.email,
+      customerName: order.customerName,
+      totalAmount: order.totalAmount,
+      accountId: order.accountId,
+      orderStatusId: 5, // Изменяем статус на "Отменен"
+      orderStatusName: 'cancelled',
+      deliveryMethod: order.deliveryMethod,
+      paymentMethod: order.paymentMethod,
+      postalCode: order.postalCode,
+      notes: order.notes || ''
+    }
 
-    // Обновляем список заказов
-    await loadOrders()
+    console.log('Отправка данных для обновления заказа:', updateData)
 
-    alert('Заказ успешно отменен')
+    // Используем updateOrder с полными данными
+    const response = await shopAPI.updateOrder(order.id, updateData)
+    console.log('Ответ от сервера:', response)
+
+    // Обновляем статус заказа локально
+    const orderIndex = orders.value.findIndex(o => o.id === order.id)
+    if (orderIndex !== -1) {
+      orders.value[orderIndex].orderStatusId = 5
+      orders.value[orderIndex].orderStatusName = 'cancelled'
+    }
+
   } catch (error: any) {
     console.error('Ошибка при отмене заказа:', error)
+    console.error('Полный ответ ошибки:', error.response)
     const message = error.response?.data?.message || 'Не удалось отменить заказ'
     alert(message)
+  } finally {
+    cancellingOrderId.value = null
   }
-}
-
-// Повторить заказ
-const repeatOrder = async (order: Order) => {
-  // В реальном приложении здесь можно было бы добавлять товары из заказа в корзину
-  alert('Функция "Повторить заказ" в разработке')
-  // router.push('/shop')
 }
 
 // Просмотр деталей заказа
@@ -389,11 +409,11 @@ onMounted(() => {
 }
 
 .title {
-  color: #2d3748;
+  color: #bcc0c8;
 }
 
 .subtitle {
-  color: #718096;
+  color: #bfc6d1;
 }
 
 .tag {
@@ -412,7 +432,7 @@ onMounted(() => {
 .table th {
   background-color: #f8f9fa;
   font-weight: 600;
-  color: #495057;
+  color: #202833;
   border-bottom: 2px solid #dee2e6;
 }
 
@@ -425,12 +445,6 @@ onMounted(() => {
   padding: 3rem 1rem;
 }
 
-.button.is-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
-}
 
 .button.is-primary:hover {
   opacity: 0.9;
@@ -438,6 +452,16 @@ onMounted(() => {
 
 .button.is-light {
   border: 1px solid #e5e7eb;
+}
+
+.button.is-danger.is-light {
+  border-color: #f14668;
+  color: #f14668;
+}
+
+.button.is-danger.is-light:hover {
+  background-color: #f14668;
+  color: white;
 }
 
 @media (max-width: 768px) {
