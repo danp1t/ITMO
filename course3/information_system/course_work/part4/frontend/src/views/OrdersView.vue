@@ -305,7 +305,7 @@ const cancelOrder = async (order: Order) => {
       customerName: order.customerName,
       totalAmount: order.totalAmount,
       accountId: order.accountId,
-      orderStatusId: 5, // Изменяем статус на "Отменен"
+      orderStatusId: 5,
       orderStatusName: 'cancelled',
       deliveryMethod: order.deliveryMethod,
       paymentMethod: order.paymentMethod,

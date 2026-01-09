@@ -213,7 +213,6 @@ const editForm = reactive({
   address: ''
 })
 
-// Computed свойства для расчета сумм
 const productsSubtotal = computed(() => {
   if (!order.value?.orderProducts) return 0
   return order.value.orderProducts.reduce((total, item) => {

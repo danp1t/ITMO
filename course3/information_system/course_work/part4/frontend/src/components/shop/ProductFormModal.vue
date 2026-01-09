@@ -394,7 +394,6 @@ const submitForm = async () => {
     emit('product-added')
     emit('close')
 
-    // Сбрасываем форму
     resetForm()
 
 

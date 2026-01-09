@@ -306,7 +306,7 @@ const parseDateTimeLocal = (dateTimeString: string): Date | null => {
     const [hoursStr, minutesStr] = (timePart || '').split(':').map(Number)
 
     const year = yearStr
-    const month = monthStr - 1 // JS месяцы 0-11
+    const month = monthStr - 1
     const day = dayStr
     const hours = hoursStr || 0
     const minutes = minutesStr || 0
