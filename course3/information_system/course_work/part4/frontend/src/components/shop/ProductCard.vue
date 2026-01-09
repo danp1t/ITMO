@@ -284,7 +284,7 @@ if (availableSizes.value.length > 0) {
 .card-image {
   position: relative;
   overflow: hidden;
-  height: 200px;
+  height: 270px;
 }
 
 .image.is-4by3 {

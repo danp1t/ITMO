@@ -130,13 +130,10 @@ public class AccountController {
         }
 
         if (isActive) {
-            System.out.printf("HFPPP");
             accountService.unbanUser(id);
             return ResponseEntity.ok().build();
         }
         else {
-            System.out.printf("BANNN");
-            System.out.printf("AccoundStatusDTO: %s", isActive);
             try {
                 accountService.banUser(id);
                 return ResponseEntity.ok().build();

@@ -47,7 +47,7 @@
                     <select v-model="formData.category" required :disabled="isSubmitting">
                       <option value="" disabled>Выберите категорию</option>
                       <option value="Купальники">Купальники</option>
-                      <option value="Балетки">Балетки</option>
+                      <option value="Балетки">Получешки</option>
                       <option value="Булавы">Булавы</option>
                       <option value="Обручи">Обручи</option>
                       <option value="Мячи">Мячи</option>

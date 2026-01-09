@@ -1,11 +1,8 @@
 <template>
   <div class="cart-sidebar" :class="{ 'is-active': isVisible }">
-    <!-- Оверлей -->
     <div class="sidebar-overlay" @click="$emit('close')"></div>
 
-    <!-- Сайдбар -->
     <div class="sidebar-content">
-      <!-- Заголовок -->
       <div class="sidebar-header">
         <h3 class="title is-4">Корзина</h3>
         <button class="delete" @click="$emit('close')"></button>
