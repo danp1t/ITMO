@@ -50,11 +50,13 @@
                   :class="{ 'has-items': cartStore.totalItems > 0 }"
                 >
                   <span class="icon">
-                    <i class="fas fa-shopping-bag"></i>
+                    <i class="fas fa-shopping-cart"></i>
                   </span>
                   <span v-if="cartStore.totalItems > 0" class="cart-info">
                     <span class="cart-count">{{ cartStore.totalItems }}</span>
+                    <span class="cart-amount">{{ cartStore.totalAmount }} ₽</span>
                   </span>
+                  <span v-else class="cart-label">Корзина</span>
                 </button>
 
                 <template v-if="!authStore.isAuthenticated">

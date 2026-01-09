@@ -1,13 +1,19 @@
 <template>
   <div class="cart-sidebar" :class="{ 'is-active': isVisible }">
+    <!-- Оверлей -->
     <div class="sidebar-overlay" @click="$emit('close')"></div>
+
+    <!-- Сайдбар -->
     <div class="sidebar-content">
+      <!-- Заголовок -->
       <div class="sidebar-header">
         <h3 class="title is-4">Корзина</h3>
         <button class="delete" @click="$emit('close')"></button>
       </div>
 
+      <!-- Содержимое корзины -->
       <div class="sidebar-body">
+        <!-- Пустая корзина -->
         <div v-if="cartStore.isEmpty" class="empty-cart">
           <div class="empty-cart-icon">
             <i class="fas fa-shopping-cart fa-3x has-text-grey-light"></i>
@@ -18,6 +24,7 @@
           </button>
         </div>
 
+        <!-- Товары в корзине -->
         <div v-else>
           <div class="cart-items">
             <div
@@ -85,6 +92,7 @@
             </div>
           </div>
 
+          <!-- Итоговая сумма -->
           <div class="cart-total">
             <div class="level is-mobile">
               <div class="level-left">
@@ -96,6 +104,7 @@
             </div>
           </div>
 
+          <!-- Кнопки действий -->
           <div class="cart-actions">
             <button class="button is-danger is-light is-fullwidth" @click="clearCart">
               Очистить корзину
@@ -118,8 +127,8 @@
 </template>
 
 <script setup lang="ts">
-import { useCartStore } from '@/stores/cart.ts'
-import type { CartItem } from '@/types/shop.ts'
+import { useCartStore } from '../../stores/cart'
+import type { CartItem } from '../../types/shop'
 
 interface Props {
   isVisible: boolean
@@ -128,6 +137,9 @@ interface Props {
 interface Emits {
   (e: 'close'): void
 }
+
+const props = defineProps<Props>()
+const emit = defineEmits<Emits>()
 
 const cartStore = useCartStore()
 
@@ -148,13 +160,11 @@ const updateQuantity = (item: CartItem, event: Event) => {
 }
 
 const removeItem = (item: CartItem) => {
-    cartStore.removeItem(item.productId, item.productInfoId)
+  cartStore.removeItem(item.productId, item.productInfoId)
 }
 
 const clearCart = () => {
-  if (confirm('Очистить всю корзину?')) {
-    cartStore.clearCart()
-  }
+  cartStore.clearCart()
 }
 </script>
 
@@ -202,7 +212,6 @@ const clearCart = () => {
   align-items: center;
   padding: 1.5rem;
   border-bottom: 1px solid #e5e7eb;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
@@ -268,7 +277,7 @@ const clearCart = () => {
 }
 
 .cart-item-price {
-  color: #8d939f;
+  color: #7b8591;
 }
 
 .cart-item-actions {
@@ -288,13 +297,6 @@ const clearCart = () => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-}
-
-.button.is-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
 }
 
 .button.is-primary:hover {
