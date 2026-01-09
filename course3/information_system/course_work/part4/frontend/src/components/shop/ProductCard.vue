@@ -15,7 +15,7 @@
 
     <div class="card-content">
       <div class="tags has-addons mb-2">
-        <span class="tag is-light">{{ product.category }}</span>
+        <span class="tag is-dark">{{ product.category }}</span>
       </div>
 
       <h3 class="title is-5 mb-2">{{ product.name }}</h3>
@@ -329,7 +329,7 @@ if (availableSizes.value.length > 0) {
 }
 
 .price {
-  color: #2d3748;
+  color: #949cae;
   font-size: 1.25rem;
 }
 
