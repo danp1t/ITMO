@@ -10,7 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
-    List<Comment> findByPostId(Integer postId);
     List<Comment> findByAccountId(Integer accountId);
 
     @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.post LEFT JOIN FETCH c.account WHERE c.id = :id")

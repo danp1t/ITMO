@@ -114,12 +114,10 @@ public class AccountService {
         account.setPassword(passwordEncoder.encode(request.getPassword()));
         account.setEnabled(false);
 
-        // Генерируем verification code
         String verificationCode = generateVerificationCode();
         account.setVerificationCode(verificationCode);
         account.setVerificationCodeExpiry(LocalDateTime.now().plusHours(24));
 
-        // Назначаем роль по умолчанию
         Role userRole = roleRepository.findByName("ROLE_USER");
         if (userRole != null) {
             account.setRoles(List.of(userRole));
@@ -129,7 +127,6 @@ public class AccountService {
         return toDTO(saved);
     }
 
-    // RG03 - верификация email
     public boolean verifyEmail(String email, String code) {
         Optional<Account> accountOpt = accountRepository.findByEmail(email);
         if (accountOpt.isPresent()) {
@@ -146,7 +143,6 @@ public class AccountService {
         return false;
     }
 
-    // AU05 - смена пароля
     public void changePassword(String email, String oldPassword, String newPassword) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -159,7 +155,6 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    // AU06 - инициация сброса пароля
     public void initiatePasswordReset(String email) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -170,7 +165,6 @@ public class AccountService {
         accountRepository.save(account);
     }
 
-    // AU06 - сброс пароля
     public boolean resetPassword(String token, String newPassword) {
         Optional<Account> accountOpt = accountRepository.findByResetPasswordToken(token);
         if (accountOpt.isPresent()) {
@@ -202,40 +196,17 @@ public class AccountService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public void saveVerificationCode(Integer accountId, String verificationCode) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
-        account.setVerificationCode(verificationCode);
-        account.setVerificationCodeExpiry(LocalDateTime.now().plusHours(24));
-        accountRepository.save(account);
-    }
-
-    public void savePasswordResetToken(String email, String resetToken) {
-        Account account = accountRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        account.setResetPasswordToken(resetToken);
-        account.setResetPasswordTokenExpiry(LocalDateTime.now().plusHours(1));
-        accountRepository.save(account);
-    }
-
     public Optional<AccountDetailDTO> findByIdWithDetails(Integer id) {
-        // Загружаем аккаунт с ролями (основная информация)
         Optional<Account> accountOpt = accountRepository.findByIdWithRoles(id);
 
         if (accountOpt.isPresent()) {
             Account account = accountOpt.get();
 
-            // Отдельно загружаем посты
             Optional<Account> accountWithPosts = accountRepository.findByIdWithPosts(id);
-            if (accountWithPosts.isPresent()) {
-                account.setPosts(accountWithPosts.get().getPosts());
-            }
+            accountWithPosts.ifPresent(value -> account.setPosts(value.getPosts()));
 
-            // Отдельно загружаем комментарии
             Optional<Account> accountWithComments = accountRepository.findByIdWithComments(id);
-            if (accountWithComments.isPresent()) {
-                account.setComments(accountWithComments.get().getComments());
-            }
+            accountWithComments.ifPresent(value -> account.setComments(value.getComments()));
 
             return Optional.of(toDetailDTO(account));
         }
@@ -262,7 +233,6 @@ public class AccountService {
         Role role = roleService.findById(roleId)
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
 
-        // Проверяем, нет ли уже такой роли у пользователя
         boolean roleAlreadyExists = account.getRoles().stream()
                 .anyMatch(r -> r.getId().equals(roleId));
 
@@ -271,14 +241,13 @@ public class AccountService {
             return accountRepository.save(account);
         }
 
-        return account; // Если роль уже есть, возвращаем аккаунт без изменений
+        return account;
     }
 
     public Account removeRoleFromAccount(Integer accountId, Integer roleId) {
         Account account = accountRepository.findByIdWithRoles(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
 
-        // Удаляем роль по id
         account.getRoles().removeIf(role -> role.getId().equals(roleId));
 
         return accountRepository.save(account);

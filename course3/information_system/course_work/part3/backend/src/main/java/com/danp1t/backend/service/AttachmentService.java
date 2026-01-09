@@ -48,7 +48,6 @@ public class AttachmentService {
         attachment.setName(dto.getName());
         attachment.setPath(dto.getPath());
 
-        // Устанавливаем связь с Post
         if (dto.getPostId() != null) {
             Post post = postRepository.findById(dto.getPostId())
                     .orElseThrow(() -> new RuntimeException("Post not found with id: " + dto.getPostId()));
@@ -57,7 +56,6 @@ public class AttachmentService {
             throw new RuntimeException("PostId cannot be null for Attachment");
         }
 
-        // Устанавливаем связь с TypeAttachment
         if (dto.getTypeAttachmentId() != null) {
             TypeAttachment typeAttachment = typeAttachmentRepository.findById(dto.getTypeAttachmentId())
                     .orElseThrow(() -> new RuntimeException("TypeAttachment not found with id: " + dto.getTypeAttachmentId()));
@@ -115,16 +113,13 @@ public class AttachmentService {
     }
 
     public AttachmentDTO uploadFile(MultipartFile file, Integer postId, Integer typeAttachmentId) {
-        // Проверяем существование поста
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
         System.out.printf("Uploading file: %s\n", file.getOriginalFilename());
 
-        // Получаем тип вложения
         TypeAttachment typeAttachment = typeAttachmentRepository.findById(typeAttachmentId)
                 .orElseThrow(() -> new RuntimeException("TypeAttachment not found with id: " + typeAttachmentId));
         System.out.printf("Uploading file: %s\n", typeAttachment.getName());
-        // Сохраняем файл на диск
         String filePath;
         try {
             String subDirectory = "post_" + postId;
@@ -133,7 +128,6 @@ public class AttachmentService {
             throw new RuntimeException("Failed to store file: " + e.getMessage());
         }
 
-        // Создаем запись в базе
         Attachment attachment = new Attachment();
         attachment.setName(file.getOriginalFilename());
         attachment.setPath(filePath);
@@ -148,13 +142,11 @@ public class AttachmentService {
         Attachment attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new RuntimeException("Attachment not found with id: " + attachmentId));
 
-        // Удаляем файл с диска
         boolean deleted = fileStorageService.deleteFile(attachment.getPath());
         if (!deleted) {
             System.err.println("Warning: Could not delete file at path: " + attachment.getPath());
         }
 
-        // Удаляем запись из базы
         attachmentRepository.delete(attachment);
     }
 }

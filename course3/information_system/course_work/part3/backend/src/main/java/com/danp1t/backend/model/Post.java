@@ -16,13 +16,10 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    //@Column(name = "name", nullable = false)
-    //private String owner;
-
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "text")
+    @Column(name = "text", columnDefinition = "TEXT")
     private String text;
 
     @Column(name = "created_at", nullable = false)

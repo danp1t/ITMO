@@ -7,5 +7,4 @@ import java.util.Optional;
 
 @Repository
 public interface TypeAttachmentRepository extends JpaRepository<TypeAttachment, Integer> {
-    Optional<TypeAttachment> findByName(String name);
 }

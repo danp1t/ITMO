@@ -19,10 +19,9 @@ public class PostDTO {
     private Integer countLike;
     private Integer ownerId;
     private String ownerName;
-    private List<TagDTO> tags; // Добавляем теги
-    private Integer commentsCount; // Количество комментариев
+    private List<TagDTO> tags;
+    private Integer commentsCount;
 
-    // Конструктор без тегов для обратной совместимости
     public PostDTO(Integer id, String title, String text, LocalDateTime createdAt,
                    Integer countLike, Integer ownerId, String ownerName) {
         this.id = id;

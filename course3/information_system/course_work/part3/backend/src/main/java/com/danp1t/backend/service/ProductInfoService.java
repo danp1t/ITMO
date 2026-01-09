@@ -62,7 +62,6 @@ public class ProductInfoService {
         productInfo.setCountItems(productInfoDTO.getCountItems());
         productInfo.setPrice(productInfoDTO.getPrice());
 
-        // Set Product
         Product product = productRepository.findById(productInfoDTO.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + productInfoDTO.getProductId()));
         productInfo.setProduct(product);

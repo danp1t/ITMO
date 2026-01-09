@@ -103,7 +103,6 @@ public class ProductService {
             return new ArrayList<>();
         }
 
-        // Разделяем по запятой и чистим каждый путь
         return Arrays.stream(imagesString.split(","))
                 .map(String::trim)
                 .filter(path -> !path.isEmpty())
@@ -116,10 +115,7 @@ public class ProductService {
             return "";
         }
 
-        // Заменяем обратные слеши на прямые
         String normalizedPath = relativePath.replace('\\', '/');
-
-        // Возвращаем путь для API - фронтенд сам добавит host через прокси
         return "/api/products/images/" + normalizedPath;
     }
 
@@ -134,7 +130,6 @@ public class ProductService {
         product.setPopularity(dto.getPopularity() != null ? dto.getPopularity() : 0);
 
         if (dto.getImages() != null && !dto.getImages().isEmpty()) {
-            // Сохраняем только относительные пути в БД
             List<String> relativePaths = dto.getImages().stream()
                     .map(this::toRelativePath)
                     .collect(Collectors.toList());
@@ -144,17 +139,14 @@ public class ProductService {
         return product;
     }
 
-    // Преобразуем URL обратно в относительный путь для хранения в БД
     private String toRelativePath(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return imageUrl;
         }
 
-        // Убираем префикс API
         String prefix = "/api/products/images/";
         if (imageUrl.startsWith(prefix)) {
             String relativePath = imageUrl.substring(prefix.length());
-            // Для Windows сохраняем с обратными слешами
             return relativePath.replace('/', '\\');
         }
 
@@ -167,18 +159,15 @@ public class ProductService {
             throw new RuntimeException("Файл пустой");
         }
 
-        // Проверяем тип файла
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new RuntimeException("Разрешены только изображения");
         }
 
-        // Проверяем размер файла (макс 5MB)
         if (file.getSize() > 5 * 1024 * 1024) {
             throw new RuntimeException("Размер файла не должен превышать 5MB");
         }
 
-        // Используем FileStorageService для сохранения файла
         String subDirectory = UPLOAD_SUB_DIR + "/product_" + productId;
         return fileStorageService.storeFile(file, subDirectory);
     }
@@ -189,15 +178,12 @@ public class ProductService {
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
 
         if (product.getImages() != null && !product.getImages().isEmpty()) {
-            // Извлекаем относительный путь из URL
             String relativePath = toRelativePath(imagePath);
 
             List<String> images = new ArrayList<>(Arrays.asList(product.getImages().split(",")));
             images.remove(relativePath);
             product.setImages(!images.isEmpty() ? String.join(",", images) : null);
             productRepository.save(product);
-
-            // Удаляем файл с диска через FileStorageService
             fileStorageService.deleteFile(relativePath);
         }
     }
@@ -207,18 +193,15 @@ public class ProductService {
         ObjectMapper objectMapper = new ObjectMapper();
         ProductDTO productDTO = objectMapper.readValue(productJson, ProductDTO.class);
 
-        // Проверяем уникальность названия
         if (existsByName(productDTO.getName())) {
             throw new RuntimeException("Товар с таким названием уже существует");
         }
 
-        // Сначала сохраняем товар без изображений
         Product product = toEntity(productDTO);
         product.setId(null);
         product.setPopularity(0);
         Product savedProduct = productRepository.save(product);
 
-        // Загружаем изображения, если есть
         List<String> imagePaths = new ArrayList<>();
         if (images != null && !images.isEmpty()) {
             for (MultipartFile image : images) {
@@ -229,13 +212,11 @@ public class ProductService {
             }
         }
 
-        // Сохраняем пути к изображениям
         if (!imagePaths.isEmpty()) {
             savedProduct.setImages(String.join(",", imagePaths));
             savedProduct = productRepository.save(savedProduct);
         }
 
-        // Создаем ProductInfo (размеры и цены), если они есть
         if (sizesJson != null && !sizesJson.trim().isEmpty()) {
             List<Map<String, Object>> sizesList = objectMapper.readValue(sizesJson, List.class);
 
@@ -253,18 +234,15 @@ public class ProductService {
         return toDTO(savedProduct);
     }
 
-    // IS01, IS03, IS04: Получение товаров с сортировкой и фильтрацией
     public List<ProductDetailDTO> findAllWithFilters(String category, String size, String sortBy, String sortOrder) {
         List<Product> products = productRepository.findAll();
 
-        // Фильтрация по категории (IS04)
         if (category != null && !category.isEmpty()) {
             products = products.stream()
                     .filter(p -> category.equalsIgnoreCase(p.getCategory()))
                     .collect(Collectors.toList());
         }
 
-        // Фильтрация по размеру (IS04)
         if (size != null && !size.isEmpty()) {
             products = products.stream()
                     .filter(p -> p.getProductInfos().stream()
@@ -272,7 +250,6 @@ public class ProductService {
                     .collect(Collectors.toList());
         }
 
-        // Сортировка (IS03)
         if (sortBy != null && !sortBy.isEmpty()) {
             Comparator<Product> comparator = getComparator(sortBy);
 
@@ -303,7 +280,6 @@ public class ProductService {
         }
     }
 
-    // IS12: Проверка наличия товара
     public boolean isProductAvailable(Integer productId, String size, Integer quantity) {
         return productRepository.findById(productId)
                 .map(product -> product.getProductInfos().stream()
@@ -312,7 +288,6 @@ public class ProductService {
                 .orElse(false);
     }
 
-    // IS12: Получение информации о наличии
     public String getAvailabilityMessage(Integer productId) {
         return productRepository.findById(productId)
                 .map(product -> {
@@ -329,7 +304,6 @@ public class ProductService {
                 .orElse("Товар не найден");
     }
 
-    // IS14: Получение остатков для админов
     public List<ProductInfoDTO> getStockInfo() {
         return productRepository.findAll().stream()
                 .flatMap(product -> product.getProductInfos().stream()
@@ -344,7 +318,6 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // IS15: Увеличение популярности при просмотре
     public void incrementPopularity(Integer productId) {
         productRepository.findById(productId)
                 .ifPresent(product -> {
@@ -353,15 +326,12 @@ public class ProductService {
                 });
     }
 
-    // Получение изображения товара
     public byte[] getProductImage(String path) throws IOException {
         System.out.println("Получение изображения по пути: " + path);
 
-        // Извлекаем относительный путь из URL если нужно
         String relativePath = toRelativePath(path);
         System.out.println("Относительный путь: " + relativePath);
 
-        // Для Windows нормализуем путь
         String normalizedPath = relativePath.replace('/', '\\');
         System.out.println("Нормализованный путь для файловой системы: " + normalizedPath);
 
@@ -378,7 +348,6 @@ public class ProductService {
         return data;
     }
 
-    // Остальные методы
     public List<ProductDTO> findAll() {
         return productRepository.findAll().stream()
                 .map(this::toDTO)
@@ -406,7 +375,6 @@ public class ProductService {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
 
-        // Обновляем только те поля, которые пришли в DTO (если они не null)
         if (productDTO.getName() != null) {
             existingProduct.setName(productDTO.getName());
         }
@@ -429,16 +397,12 @@ public class ProductService {
             String processedImages = productDTO.getImages().stream()
                     .map(imageUrl -> {
                         String cleaned = imageUrl.replace("/api/products/images/", "");
-                        // Если остался еще один /api/products/images/ (как в примере), убираем и его
                         cleaned = cleaned.replace("/api/products/images/", "");
                         return cleaned;
                     })
                     .collect(Collectors.joining(","));
-
             existingProduct.setImages(processedImages);
         }
-
-
 
         Product updated = productRepository.save(existingProduct);
         return toDTO(updated);
@@ -466,21 +430,14 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Товар не найден с id: " + productId));
 
-        // Получаем текущий список изображений
         List<String> images = new ArrayList<>();
         if (product.getImages() != null && !product.getImages().isEmpty()) {
             String[] imageArray = product.getImages().split(",");
             images.addAll(Arrays.asList(imageArray));
         }
 
-        // Добавляем новое изображение
         images.add(imagePath);
-
-        // Объединяем обратно в строку
         product.setImages(String.join(",", images));
-
         productRepository.save(product);
     }
-
-
 }

@@ -29,10 +29,7 @@ public class PostService {
     @Autowired
     private TagRepository tagRepository;
 
-    // Константы для полей сортировки
     private static final String SORT_BY_CREATED_AT = "createdAt";
-    private static final String SORT_BY_TITLE = "title";
-    private static final String SORT_BY_COUNT_LIKE = "countLike";
 
     private PostDTO toDTO(Post post) {
         List<TagDTO> tagDTOs = null;
@@ -116,10 +113,9 @@ public class PostService {
         return post;
     }
 
-    // Метод для создания объекта сортировки
     private Sort createSort(String sortBy, String sortDirection) {
         if (sortBy == null || sortBy.isEmpty()) {
-            sortBy = SORT_BY_CREATED_AT; // Значение по умолчанию
+            sortBy = SORT_BY_CREATED_AT;
         }
 
         Sort.Direction direction = Sort.Direction.ASC;
@@ -130,7 +126,6 @@ public class PostService {
         return Sort.by(direction, sortBy);
     }
 
-    // Основной метод получения всех постов с сортировкой
     public List<PostDTO> findAll(String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findAllWithOwnerAndTags(sort).stream()
@@ -138,9 +133,8 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // Старый метод для обратной совместимости
     public List<PostDTO> findAll() {
-        return findAll(SORT_BY_CREATED_AT, "desc"); // Значения по умолчанию
+        return findAll(SORT_BY_CREATED_AT, "desc");
     }
 
     public Optional<PostDTO> findById(Integer id) {
@@ -151,7 +145,6 @@ public class PostService {
         return postRepository.findByIdWithDetails(id).map(this::toDetailDTO);
     }
 
-    // Получение постов по владельцу с сортировкой
     public List<PostDTO> findByOwnerId(Integer ownerId, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByOwnerId(ownerId, sort).stream()
@@ -159,22 +152,11 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // Старый метод для обратной совместимости
-    public List<PostDTO> findByOwnerId(Integer ownerId) {
-        return findByOwnerId(ownerId, SORT_BY_CREATED_AT, "desc");
-    }
-
-    // Поиск по заголовку с сортировкой
     public List<PostDTO> findByTitleContaining(String title, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByTitleContainingIgnoreCase(title, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
-    }
-
-    // Старый метод для обратной совместимости
-    public List<PostDTO> findByTitleContaining(String title) {
-        return findByTitleContaining(title, SORT_BY_CREATED_AT, "desc");
     }
 
     @Transactional
@@ -192,7 +174,6 @@ public class PostService {
         Post post = toEntity(postDTO);
         post.setOwner(currentUser);
 
-        // Сохраняем теги если есть
         if (postDTO.getTags() != null && !postDTO.getTags().isEmpty()) {
             List<Tag> tags = tagRepository.findAllById(
                     postDTO.getTags().stream()
@@ -214,7 +195,6 @@ public class PostService {
         Account currentUser = accountRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Проверяем, является ли пользователь владельцем или имеет роль редактирования
         boolean isOwner = existingPost.getOwner().getEmail().equals(currentUserEmail);
         boolean canEdit = currentUser.getRoles().stream()
                 .anyMatch(role -> "OAPI:ROLE:EditPost".equals(role.getName()));
@@ -223,11 +203,9 @@ public class PostService {
             throw new SecurityException("Not authorized to edit this post");
         }
 
-        // Обновляем пост
         existingPost.setTitle(postDTO.getTitle());
         existingPost.setText(postDTO.getText());
 
-        // Обновляем теги если есть
         if (postDTO.getTags() != null) {
             List<Tag> tags = tagRepository.findAllById(
                     postDTO.getTags().stream()
@@ -249,7 +227,6 @@ public class PostService {
         Account currentUser = accountRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Проверяем, является ли пользователь владельцем или имеет роль удаления
         boolean isOwner = existingPost.getOwner().getEmail().equals(currentUserEmail);
         boolean canDelete = currentUser.getRoles().stream()
                 .anyMatch(role -> "OAPI:ROLE:DeletePost".equals(role.getName()));
@@ -279,7 +256,6 @@ public class PostService {
         }
     }
 
-    // Получение постов по тегу с сортировкой
     public List<PostDTO> findByTagId(Integer tagId, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByTagId(tagId, sort).stream()
@@ -287,22 +263,11 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    // Старый метод для обратной совместимости
-    public List<PostDTO> findByTagId(Integer tagId) {
-        return findByTagId(tagId, SORT_BY_CREATED_AT, "desc");
-    }
-
-    // Получение постов по имени тега с сортировкой
     public List<PostDTO> findByTagName(String tagName, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByTagName(tagName, sort).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
-    }
-
-    // Старый метод для обратной совместимости
-    public List<PostDTO> findByTagName(String tagName) {
-        return findByTagName(tagName, SORT_BY_CREATED_AT, "desc");
     }
 
     @Transactional
@@ -313,7 +278,6 @@ public class PostService {
         Account currentUser = accountRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Проверка прав
         boolean isOwner = post.getOwner().getEmail().equals(currentUserEmail);
         boolean canEdit = currentUser.getRoles().stream()
                 .anyMatch(role -> "OAPI:ROLE:EditPost".equals(role.getName()));
@@ -339,7 +303,6 @@ public class PostService {
         Account currentUser = accountRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Проверка прав
         boolean isOwner = post.getOwner().getEmail().equals(currentUserEmail);
         boolean canEdit = currentUser.getRoles().stream()
                 .anyMatch(role -> "OAPI:ROLE:EditPost".equals(role.getName()));

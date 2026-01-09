@@ -7,6 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface RangRepository extends JpaRepository<Rang, Integer> {
-    Optional<Rang> findByName(String name);
     boolean existsByName(String name);
 }

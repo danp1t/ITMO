@@ -25,5 +25,5 @@ public class ProductInfo {
     private Integer countItems;
 
     @Column(name = "price")
-    private Integer price; // Цена для конкретного размера
+    private Integer price;
 }

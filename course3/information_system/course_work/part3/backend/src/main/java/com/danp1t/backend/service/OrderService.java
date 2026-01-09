@@ -40,7 +40,6 @@ public class OrderService {
     private OrderDTO toDTO(Order order) {
         OrderDTO dto = new OrderDTO();
 
-        // Основные поля
         dto.setId(order.getId());
         dto.setAddress(order.getAddress());
         dto.setPhone(order.getPhone());
@@ -53,7 +52,6 @@ public class OrderService {
         dto.setPostalCode(order.getPostalCode());
         dto.setNotes(order.getNotes());
 
-        // Поля из связей
         if (order.getAccount() != null) {
             dto.setAccountId(order.getAccount().getId());
             dto.setAccountName(order.getAccount().getName());
@@ -64,7 +62,6 @@ public class OrderService {
             dto.setOrderStatusName(order.getOrderStatus().getName());
         }
 
-        // Продукты
         List<ProductDTO> products = (order.getProducts() != null) ?
                 order.getProducts().stream()
                         .map(product -> new ProductDTO(
@@ -80,7 +77,6 @@ public class OrderService {
                 new ArrayList<>();
         dto.setProducts(products);
 
-        // OrderProducts из JSON
         if (order.getOrderItemsJson() != null && !order.getOrderItemsJson().isEmpty()) {
             try {
                 List<OrderItemDTO> orderProducts = objectMapper.readValue(
@@ -89,7 +85,6 @@ public class OrderService {
                 );
                 dto.setOrderProducts(orderProducts);
             } catch (Exception e) {
-                // Логируем ошибку, но не падаем
                 e.printStackTrace();
             }
         }
@@ -97,7 +92,6 @@ public class OrderService {
         return dto;
     }
 
-    // Создание заказа
     public OrderDTO createOrder(OrderDTO orderDTO) {
         Order order = new Order();
         order.setAddress(orderDTO.getAddress());
@@ -112,7 +106,6 @@ public class OrderService {
         order.setPostalCode(orderDTO.getPostalCode());
         order.setNotes(orderDTO.getNotes());
 
-        // Сохраняем информацию о товарах с ценами из ProductInfo в JSON
         if (orderDTO.getOrderProducts() != null) {
             try {
                 String orderItemsJson = objectMapper.writeValueAsString(orderDTO.getOrderProducts());
@@ -122,17 +115,14 @@ public class OrderService {
             }
         }
 
-        // Устанавливаем статус "pending" по умолчанию
         OrderStatus pendingStatus = orderStatusRepository.findByName("pending")
                 .orElseThrow(() -> new RuntimeException("Pending status not found"));
         order.setOrderStatus(pendingStatus);
 
-        // Устанавливаем аккаунт
         Account account = accountRepository.findById(orderDTO.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
         order.setAccount(account);
 
-        // Устанавливаем продукты для связи ManyToMany
         if (orderDTO.getOrderProducts() != null && !orderDTO.getOrderProducts().isEmpty()) {
             List<Integer> productIds = orderDTO.getOrderProducts().stream()
                     .map(OrderItemDTO::getProductId)
@@ -145,21 +135,18 @@ public class OrderService {
             }
         }
 
-        // Уменьшаем количество товаров на складе с учетом ProductInfo
         if (orderDTO.getOrderProducts() != null && !orderDTO.getOrderProducts().isEmpty()) {
             updateProductStock(orderDTO.getOrderProducts());
         }
 
         Order saved = orderRepository.save(order);
 
-        // Перезагружаем заказ со всеми связями
         Order loadedOrder = orderRepository.findByIdWithDetails(saved.getId())
                 .orElseThrow(() -> new RuntimeException("Order not found after creation"));
 
         return toDTO(loadedOrder);
     }
 
-    // Обновление остатков товаров с учетом ProductInfo
     private void updateProductStock(List<OrderItemDTO> orderItems) {
         for (OrderItemDTO orderItem : orderItems) {
             ProductInfo productInfo = productInfoRepository.findById(orderItem.getProductInfoId())
@@ -175,7 +162,6 @@ public class OrderService {
         }
     }
 
-    // Остальные методы остаются без изменений
     public List<OrderDTO> findAll() {
         return orderRepository.findAllWithDetails().stream()
                 .map(this::toDTO)
@@ -212,7 +198,6 @@ public class OrderService {
         existingOrder.setPostalCode(orderDTO.getPostalCode());
         existingOrder.setNotes(orderDTO.getNotes());
 
-        // Обновляем статус если изменился
         if (!existingOrder.getOrderStatus().getId().equals(orderDTO.getOrderStatusId())) {
             OrderStatus status = orderStatusRepository.findById(orderDTO.getOrderStatusId())
                     .orElseThrow(() -> new RuntimeException("OrderStatus not found"));

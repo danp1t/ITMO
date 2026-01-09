@@ -62,14 +62,12 @@ public class CommentService {
         comment.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : LocalDateTime.now());
         comment.setUserComment(dto.getUserComment());
 
-        // Устанавливаем связь с постом
         if (dto.getPostId() != null) {
             Post post = new Post();
             post.setId(dto.getPostId());
             comment.setPost(post);
         }
 
-        // Устанавливаем связь с аккаунтом
         if (dto.getAccountId() != null) {
             Account account = new Account();
             account.setId(dto.getAccountId());

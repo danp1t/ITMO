@@ -89,7 +89,6 @@ public class TagService {
         return tagRepository.existsByName(name);
     }
 
-    // Получить теги поста
     public List<TagDTO> findByPostId(Integer postId) {
         return tagRepository.findByPostId(postId).stream()
                 .map(this::toDTO)

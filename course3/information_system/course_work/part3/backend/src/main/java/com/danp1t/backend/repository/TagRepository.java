@@ -12,21 +12,12 @@ import java.util.Optional;
 
 @Repository
 public interface TagRepository extends JpaRepository<Tag, Integer> {
-
-    // Найти по имени (точное совпадение)
-    Optional<Tag> findByName(String name);
-
-    // Найти по части имени (без учета регистра)
     List<Tag> findByNameContainingIgnoreCase(String name);
-
-    // Проверить существование по имени
     boolean existsByName(String name);
 
-    // Найти теги поста
     @Query("SELECT t FROM Tag t JOIN t.posts p WHERE p.id = :postId ORDER BY t.name")
     List<Tag> findByPostId(@Param("postId") Integer postId);
 
-    // Найти тег по ID с постами
     @Query("SELECT t FROM Tag t LEFT JOIN FETCH t.posts WHERE t.id = :id")
     Optional<Tag> findByIdWithPosts(@Param("id") Integer id);
 

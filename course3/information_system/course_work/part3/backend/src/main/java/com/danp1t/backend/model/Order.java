@@ -46,7 +46,6 @@ public class Order {
     @Column(name = "notes")
     private String notes;
 
-    // JSON поле для хранения информации о товарах с ценами из ProductInfo
     @Column(name = "order_items_json", columnDefinition = "TEXT")
     private String orderItemsJson;
 

@@ -25,7 +25,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // AU02 - проверка активации аккаунта
         if (!account.isEnabled()) {
             throw new UsernameNotFoundException("Account is not activated");
         }

@@ -122,10 +122,6 @@ public class TournamentService {
                 .collect(Collectors.toList());
     }
 
-    public List<TournamentDTO> findByNameContaining(String name) {
-        return findByNameContaining(name, "name", "asc");
-    }
-
     public List<TournamentDTO> findByRangId(Integer rangId, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return tournamentRepository.findByRangId(rangId, sort).stream()
@@ -133,15 +129,11 @@ public class TournamentService {
                 .collect(Collectors.toList());
     }
 
-    public List<TournamentDTO> findByRangId(Integer rangId) {
-        return findByRangId(rangId, "startDate", "desc");
-    }
-
     @Scheduled(cron = "0 0 2 * * ?")
     public void archiveOldTournaments() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime seasonEnd;
-        if (now.getMonthValue() >= 9) { // если сейчас сентябрь или позже
+        if (now.getMonthValue() >= 9) {
             seasonEnd = LocalDateTime.of(now.getYear(), 8, 31, 23, 59, 59);
         } else {
             seasonEnd = LocalDateTime.of(now.getYear() - 1, 8, 31, 23, 59, 59);

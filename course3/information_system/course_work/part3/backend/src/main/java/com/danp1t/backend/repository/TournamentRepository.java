@@ -15,21 +15,13 @@ import java.util.Optional;
 
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Integer> {
-    List<Tournament> findByNameContainingIgnoreCase(String name);
-    List<Tournament> findByRangId(Integer rangId);
-
     List<Tournament> findAll(Sort sort);
     List<Tournament> findByNameContainingIgnoreCase(String name, Sort sort);
     List<Tournament> findByRangId(Integer rangId, Sort sort);
-
-    @Query("SELECT t FROM Tournament t WHERE t.finishDate < :seasonEnd AND t.archived = false")
-    List<Tournament> findTournamentsToArchive(@Param("seasonEnd") LocalDateTime seasonEnd);
 
     @Modifying
     @Transactional
     @Query("UPDATE Tournament t SET t.archived = true WHERE t.finishDate < :seasonEnd AND t.archived = false")
     void archiveOldTournaments(@Param("seasonEnd") LocalDateTime seasonEnd);
 
-    @Query("SELECT t FROM Tournament t LEFT JOIN FETCH t.rang WHERE t.id = :id")
-    Optional<Tournament> findByIdWithRang(@Param("id") Integer id);
 }
