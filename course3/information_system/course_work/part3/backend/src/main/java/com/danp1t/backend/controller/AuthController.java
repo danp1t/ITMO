@@ -35,13 +35,10 @@ public class AuthController {
     @Autowired
     private EmailService emailService;
 
-    // RG01, RG02, RG03, RG04 - регистрация
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
         try {
             AccountDTO account = accountService.register(request);
-
-            // Получаем verification code и отправляем email
             String verificationCode = accountService.getVerificationCode(account.getEmail());
             emailService.sendVerificationEmail(account.getEmail(), verificationCode);
 
@@ -55,7 +52,6 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         try {
             accountService.initiatePasswordReset(email);
-            // Получаем reset token и отправляем email
             String resetToken = accountService.getResetToken(email);
             emailService.sendPasswordResetEmail(email, resetToken);
             return ResponseEntity.ok("Password reset instructions sent to your email");
@@ -64,7 +60,6 @@ public class AuthController {
         }
     }
 
-    // RG03 - подтверждение email
     @PostMapping("/verify")
     public ResponseEntity<?> verifyEmail(@RequestParam String email, @RequestParam String code) {
         boolean verified = accountService.verifyEmail(email, code);
@@ -74,7 +69,6 @@ public class AuthController {
         return ResponseEntity.badRequest().body("Invalid verification code");
     }
 
-    // AU02 - вход
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         try {
@@ -98,14 +92,12 @@ public class AuthController {
         }
     }
 
-    // AU07 - выход
     @PostMapping("/logout")
     public ResponseEntity<?> logout() {
         SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logged out successfully");
     }
 
-    // AU05 - смена пароля
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         try {
@@ -119,7 +111,6 @@ public class AuthController {
         }
     }
 
-    // AU06 - сброс пароля
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         boolean reset = accountService.resetPassword(request.getToken(), request.getNewPassword());

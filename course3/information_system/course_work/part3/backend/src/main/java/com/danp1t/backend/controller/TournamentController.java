@@ -54,7 +54,6 @@ public class TournamentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // TT03: Редактирование с проверкой роли
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('OAPI:ROLE:EditTournament')")
     public ResponseEntity<TournamentDTO> updateTournament(@PathVariable Integer id, @RequestBody TournamentDTO tournamentDTO) {

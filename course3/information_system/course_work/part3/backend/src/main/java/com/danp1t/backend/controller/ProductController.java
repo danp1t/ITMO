@@ -22,7 +22,6 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    // IS01: Отображение товаров с фильтрацией и сортировкой
     @GetMapping("/filtered")
     public ResponseEntity<List<ProductDetailDTO>> getProductsWithFilters(
             @RequestParam(required = false) String category,
@@ -32,14 +31,12 @@ public class ProductController {
         return ResponseEntity.ok(productService.findAllWithFilters(category, size, sortBy, sortOrder));
     }
 
-    // IS12: Проверка наличия товара
     @GetMapping("/{id}/availability")
     public ResponseEntity<String> checkAvailability(@PathVariable Integer id) {
         String message = productService.getAvailabilityMessage(id);
         return ResponseEntity.ok(message);
     }
 
-    // IS12: Детальная проверка наличия
     @GetMapping("/{id}/available")
     public ResponseEntity<Boolean> isProductAvailable(
             @PathVariable Integer id,
@@ -49,16 +46,13 @@ public class ProductController {
         return ResponseEntity.ok(available);
     }
 
-    // IS14: Получение информации об остатках (для админов)
     @GetMapping("/stock")
     public ResponseEntity<List<ProductInfoDTO>> getStockInfo() {
         return ResponseEntity.ok(productService.getStockInfo());
     }
 
-    // IS02: Просмотр конкретного товара с увеличением популярности
     @GetMapping("/{id}/view")
     public ResponseEntity<ProductDetailDTO> viewProduct(@PathVariable Integer id) {
-        // Увеличиваем популярность при просмотре
         productService.incrementPopularity(id);
 
         return productService.findByIdWithProductInfos(id)
@@ -66,7 +60,6 @@ public class ProductController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Остальные методы остаются
     @GetMapping
     public ResponseEntity<List<ProductDTO>> getAllProducts() {
         return ResponseEntity.ok(productService.findAll());
@@ -91,7 +84,6 @@ public class ProductController {
         return ResponseEntity.ok(productService.findByNameContaining(name));
     }
 
-    // IS05: Добавление карточки товара (требуется роль OAPI:ROLE:PublishProduct)
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
         if (productService.existsByName(productDTO.getName())) {
@@ -101,7 +93,6 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // IS07: Редактирование карточки товара (требуется роль OAPI:ROLE:EditProduct)
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDTO) {
         try {
@@ -112,7 +103,6 @@ public class ProductController {
         }
     }
 
-    // IS06: Удаление карточки товара (требуется роль OAPI:ROLE:DeleteProduct)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         try {
@@ -123,7 +113,6 @@ public class ProductController {
         }
     }
 
-    // Новый метод для создания товара с изображениями через FormData
     @PostMapping(value = "/create-with-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductDTO> createProductWithImages(
             @RequestPart("product") String productJson,
@@ -139,7 +128,6 @@ public class ProductController {
         }
     }
 
-    // Загрузка дополнительных изображений для существующего товара
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadProductImage(
             @PathVariable Integer id,
@@ -147,7 +135,7 @@ public class ProductController {
         try {
             String imagePath = productService.uploadProductImage(image, id);
             productService.addImageToProduct(id, imagePath);
-            return ResponseEntity.ok(imagePath); // Возвращаем только путь, без префикса
+            return ResponseEntity.ok(imagePath);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Ошибка при загрузке изображения");
@@ -156,7 +144,6 @@ public class ProductController {
         }
     }
 
-    // Удаление изображения товара
     @DeleteMapping("/{id}/images")
     public ResponseEntity<Void> deleteProductImage(
             @PathVariable Integer id,
@@ -175,8 +162,6 @@ public class ProductController {
     public ResponseEntity<byte[]> getProductImage(@PathVariable String path) {
         try {
             byte[] image = productService.getProductImage(path);
-
-            // Определяем Content-Type по расширению файла
             String contentType = determineContentType(path);
 
             return ResponseEntity.ok()
@@ -198,6 +183,6 @@ public class ProductController {
         } else if (lowerPath.endsWith(".webp")) {
             return "image/webp";
         }
-        return "image/jpeg"; // по умолчанию
+        return "image/jpeg";
     }
 }

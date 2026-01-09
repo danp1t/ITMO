@@ -51,11 +51,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                        // Для AU01 - гостевой режим, разрешаем просмотр постов/комментариев
-                        .requestMatchers("/api/posts/**", "/api/comments/**").permitAll() // Разрешаем GET и другие методы для публичного доступа
+
+                        .requestMatchers("/api/posts/**", "/api/comments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/tournaments/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/tournaments").hasAuthority("OAPI:ROLE:PublishTournament") // TT02
-                        .requestMatchers(HttpMethod.PUT, "/api/tournaments/**").hasAuthority("OAPI:ROLE:EditTournament") // TT03
+                        .requestMatchers(HttpMethod.POST, "/api/tournaments").hasAuthority("OAPI:ROLE:PublishTournament")
+                        .requestMatchers(HttpMethod.PUT, "/api/tournaments/**").hasAuthority("OAPI:ROLE:EditTournament")
                         .requestMatchers(HttpMethod.DELETE, "/api/tournaments/**").hasAuthority("OAPI:ROLE:DeleteTournament")
                         .requestMatchers(HttpMethod.POST, "/api/posts/**").hasAuthority("OAPI:ROLE:PublishPost")
                         .requestMatchers(HttpMethod.PUT, "/api/posts/**").hasAuthority("OAPI:ROLE:EditPost")
@@ -63,27 +63,23 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/attachments/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/attachments/**").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll() // IS01, IS02
-                        .requestMatchers(HttpMethod.GET, "/api/products/filtered").permitAll() // IS03, IS04
-                        .requestMatchers(HttpMethod.GET, "/api/products/*/availability").permitAll() // IS12
-                        .requestMatchers(HttpMethod.GET, "/api/products/*/available").permitAll() // IS12
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/filtered").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/availability").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/*/available").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/order-statuses").permitAll()
 
-                                // Защищенные endpoints для товаров
-                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("OAPI:ROLE:PublishProduct") // IS05
-                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("OAPI:ROLE:EditProduct") // IS07
-                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("OAPI:ROLE:DeleteProduct") // IS06
+                        .requestMatchers(HttpMethod.POST, "/api/products/**").hasAuthority("OAPI:ROLE:PublishProduct")
+                        .requestMatchers(HttpMethod.PUT, "/api/products/**").hasAuthority("OAPI:ROLE:EditProduct")
+                        .requestMatchers(HttpMethod.DELETE, "/api/products/**").hasAuthority("OAPI:ROLE:DeleteProduct")
 
-                                // Защищенные endpoints для информации о товарах
-                        .requestMatchers(HttpMethod.GET, "/api/products/stock").hasAuthority("OAPI:ROLE:GetProductInfo") // IS14
-                        .requestMatchers(HttpMethod.POST, "/api/product-infos").hasAuthority("OAPI:ROLE:UpdateProductInfo") // IS11
-                        .requestMatchers(HttpMethod.PUT, "/api/product-infos/**").hasAuthority("OAPI:ROLE:UpdateProductInfo") // IS11
+                        .requestMatchers(HttpMethod.GET, "/api/products/stock").hasAuthority("OAPI:ROLE:GetProductInfo")
+                        .requestMatchers(HttpMethod.POST, "/api/product-infos").hasAuthority("OAPI:ROLE:UpdateProductInfo")
+                        .requestMatchers(HttpMethod.PUT, "/api/product-infos/**").hasAuthority("OAPI:ROLE:UpdateProductInfo")
 
-                                // Защищенные endpoints для заказов (корзины)
-                        .requestMatchers(HttpMethod.POST, "/api/orders").authenticated() // IS08, IS15
-                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").authenticated() // IS09
+                        .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/orders/**").authenticated()
 
-                                // Остальные настройки
                         .anyRequest().authenticated()
 
                 );
