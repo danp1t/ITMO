@@ -347,14 +347,14 @@ const productImages = computed(() => {
   if (product.value?.images && product.value.images.length > 0) {
     return product.value.images;
   }
-  return ['https://via.placeholder.com/800x600?text=Not_found'];
+  return ['https://placehold.co/800x600?text=Not_found'];
 });
 
 const mainImage = computed(() => {
   if (productImages.value.length > 0 && activeImageIndex.value < productImages.value.length) {
     return productImages.value[activeImageIndex.value]
   }
-  return 'https://via.placeholder.com/800x600?text=Not_found'
+  return 'https://placehold.co/800x600?text=Not_found'
 })
 
 const loadProduct = async () => {
@@ -383,7 +383,7 @@ const loadProduct = async () => {
 
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/800x600?text=Изображение+не+загружено'
+  img.src = 'https://placehold.co/800x600?text=%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5+%D0%BD%D0%B5+%D0%B7%D0%B0%D0%B3%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%BE'
 }
 
 const availableSizes = computed(() => {

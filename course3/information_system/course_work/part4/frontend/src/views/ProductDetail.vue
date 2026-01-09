@@ -304,7 +304,7 @@ const mainImageUrl = computed(() => {
   if (productImages.value.length > 0 && activeImageIndex.value < productImages.value.length) {
     return productImages.value[activeImageIndex.value]
   }
-  return 'https://via.placeholder.com/800x600?text=Нет+изображения'
+  return 'https://placehold.co/800x600?text=%D0%9D%D0%B5%D1%82+%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F'
 })
 
 const productImages = computed(() => {
@@ -316,7 +316,7 @@ const productImages = computed(() => {
       return `/api/products/images/${img}`
     })
   }
-  return ['https://via.placeholder.com/800x600?text=Нет+изображения']
+  return ['https://placehold.co/800x600?text=%D0%9D%D0%B5%D1%82+%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F']
 })
 
 const totalStock = computed(() => {
@@ -419,7 +419,7 @@ const getProductInfos = (id: number) => {
 
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
-  img.src = 'https://via.placeholder.com/800x600?text=Изображение+не+загружено'
+  img.src = 'https://placehold.co/800x600?text=%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5+%D0%BD%D0%B5+%D0%B7%D0%B0%D0%B3%D1%80%D1%83%D0%B6%D0%B5%D0%BD%D0%BE'
 }
 
 const changeMainImage = (index: number) => {
