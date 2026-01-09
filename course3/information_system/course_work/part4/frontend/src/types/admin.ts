@@ -3,7 +3,7 @@ export interface UserWithDetails {
   email: string
   name: string
   roles: string[]
-  isActive: boolean
+  enabled: boolean
   createdAt: string
   lastLoginAt?: string
   postCount?: number

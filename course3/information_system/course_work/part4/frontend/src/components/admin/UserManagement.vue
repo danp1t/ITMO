@@ -134,9 +134,9 @@
             <td>
                 <span
                   class="status-tag"
-                  :class="user.isActive ? 'active' : 'blocked'"
+                  :class="user.enabled ? 'active' : 'blocked'"
                 >
-                  {{ user.isActive ? 'Активен' : 'Заблокирован' }}
+                  {{ user.enabled ? 'Активен' : 'Заблокирован' }}
                 </span>
             </td>
             <td>
@@ -151,11 +151,11 @@
                 <button
                   v-if="authStore.canManageUsers && user.id !== authStore.user?.id"
                   class="button is-small"
-                  :class="user.isActive ? 'is-danger is-outlined' : 'is-success is-outlined'"
+                  :class="user.enabled ? 'is-danger is-outlined' : 'is-success is-outlined'"
                   @click="toggleUserStatus(user)"
-                  :title="user.isActive ? 'Заблокировать' : 'Разблокировать'"
+                  :title="user.enabled ? 'Заблокировать' : 'Разблокировать'"
                 >
-                  <i class="fas" :class="user.isActive ? 'fa-lock' : 'fa-unlock'"></i>
+                  <i class="fas" :class="user.enabled ? 'fa-lock' : 'fa-unlock'"></i>
                 </button>
               </div>
             </td>
@@ -235,9 +235,9 @@
                     <label class="label has-text-light">Статус аккаунта</label>
                     <span
                       class="status-tag"
-                      :class="selectedUser.isActive ? 'active' : 'blocked'"
+                      :class="selectedUser.enabled ? 'active' : 'blocked'"
                     >
-                      {{ selectedUser.isActive ? 'Активен' : 'Заблокирован' }}
+                      {{ selectedUser.enabled ? 'Активен' : 'Заблокирован' }}
                     </span>
                   </div>
                 </div>
@@ -377,7 +377,7 @@
             <button
               v-if="authStore.canManageUsers && selectedUser && selectedUser.id !== authStore.user?.id"
               class="button"
-              :class="selectedUser?.isActive ? 'is-danger' : 'is-success'"
+              :class="selectedUser?.enabled ? 'is-danger' : 'is-success'"
               @click="toggleUserStatus(selectedUser!)"
               :disabled="togglingStatus"
             >
@@ -385,9 +385,9 @@
                 <i class="fas fa-spinner fa-spin mr-2"></i>
               </span>
               <span v-else>
-                <i class="fas mr-2" :class="selectedUser?.isActive ? 'fa-lock' : 'fa-unlock'"></i>
+                <i class="fas mr-2" :class="selectedUser?.enabled ? 'fa-lock' : 'fa-unlock'"></i>
               </span>
-              {{ selectedUser?.isActive ? 'Заблокировать' : 'Разблокировать' }}
+              {{ selectedUser?.enabled ? 'Заблокировать' : 'Разблокировать' }}
             </button>
             <button class="button is-dark" @click="closeUserDetailsModal">
               Закрыть
@@ -493,7 +493,7 @@ const loadUsers = async () => {
         name: user.name || 'Без имени',
         email: user.email,
         roles: user.roles || [],
-        isActive: user.isActive !== false,
+        enabled: user.enabled !== false,
         createdAt: user.createdAt || new Date().toISOString(),
         updatedAt: user.updatedAt || user.createdAt || new Date().toISOString()
       }))
@@ -543,9 +543,9 @@ const filteredUsers = computed(() => {
   }
 
   if (statusFilter.value === 'active') {
-    filtered = filtered.filter(user => user.isActive)
+    filtered = filtered.filter(user => user.enabled)
   } else if (statusFilter.value === 'blocked') {
-    filtered = filtered.filter(user => !user.isActive)
+    filtered = filtered.filter(user => !user.enabled)
   }
 
   if (roleFilter.value !== 'all') {
@@ -593,15 +593,15 @@ const closeUserDetailsModal = () => {
 const toggleUserStatus = async (user: UserWithDetails) => {
   if (!authStore.canManageUsers || user.id === authStore.user?.id) return
 
-  if (!confirm(`Вы уверены, что хотите ${user.isActive ? 'заблокировать' : 'разблокировать'} пользователя ${user.name}?`)) {
+  if (!confirm(`Вы уверены, что хотите ${user.enabled ? 'заблокировать' : 'разблокировать'} пользователя ${user.name}?`)) {
     return
   }
 
   togglingStatus.value = true
   try {
-    const newStatus = !user.isActive
+    const newStatus = !user.enabled
     await adminAPI.toggleUserStatus(user.id, newStatus)
-    user.isActive = newStatus
+    user.enabled = newStatus
     await loadUsers()
   } catch (error) {
     console.error('Ошибка при изменении статуса:', error)
