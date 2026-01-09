@@ -91,13 +91,6 @@
                 </p>
               </div>
             </div>
-            <div class="level-right">
-              <button class="button is-text" @click="addToWishlist">
-                <span class="icon">
-                  <i :class="isInWishlist ? 'fas fa-heart has-text-danger' : 'far fa-heart'"></i>
-                </span>
-              </button>
-            </div>
           </div>
         </div>
 
@@ -479,14 +472,6 @@ const buyNow = () => {
       router.push('/shop/checkout')
     })
   }
-}
-
-const addToWishlist = () => {
-  isInWishlist.value = !isInWishlist.value
-  const message = isInWishlist.value
-    ? 'Товар добавлен в избранное'
-    : 'Товар удален из избранного'
-  alert(message)
 }
 
 const formatDate = (dateString: string) => {
