@@ -47,8 +47,7 @@
         </header>
 
         <div v-if="!isEditing" class="card-content">
-          <!-- Используем cleanHtml вместо post.text напрямую -->
-          <div class="post-content" v-html="cleanHtml(post.text)"></div>
+          <div class="post-content" v-html="post.text"></div>
 
           <TagList
             v-if="post.tags && post.tags.length > 0"
@@ -320,69 +319,6 @@ const editForm = ref({
   tagIds: [] as number[]
 })
 
-// Главная функция для исправления слипания текста
-const fixTextSpacing = (html: string): string => {
-  if (!html) return ''
-
-  let result = html
-
-  // 1. Добавляем пробелы перед открывающими тегами инлайнового форматирования
-  const openingTagRegex = /([а-яa-z\d])(<(\/?(strong|em|b|i|u|span|a)[^>]*)>)/gi
-  result = result.replace(openingTagRegex, '$1 $2')
-
-  // 2. Добавляем пробелы после закрывающих тегов инлайнового форматирования
-  const closingTagRegex = /(<(\/strong|\/em|\/b|\/i|\/u|\/span|\/a)>)([а-яa-z\d])/gi
-  result = result.replace(closingTagRegex, '$1 $3')
-
-  // 3. Исправляем ситуации, где есть знаки препинания без пробелов
-  result = result.replace(/([.,!?;:])(<(\/?(strong|em|b|i|u|span|a)[^>]*)>)/gi, '$1 $2')
-  result = result.replace(/(<(\/strong|\/em|\/b|\/i|\/u|\/span|\/a)>)([.,!?;:])/gi, '$1 $3')
-
-  // 4. Удаляем лишние пробелы, которые могли образоваться
-  result = result.replace(/\s+/g, ' ')
-
-  // 5. Удаляем пробелы перед знаками препинания
-  result = result.replace(/\s+([.,!?;:])/g, '$1')
-
-  // 6. Удаляем пробелы в начале/конце
-  result = result.trim()
-
-  return result
-}
-
-// Функция для очистки HTML от пустых элементов
-const cleanHtml = (html: string): string => {
-  if (!html) return ''
-
-  // Сначала исправляем слипание текста
-  let cleaned = fixTextSpacing(html)
-
-  // Удаляем полностью пустые элементы
-  cleaned = cleaned
-    .replace(/<ul>\s*<\/ul>/gi, '')
-    .replace(/<ol>\s*<\/ol>/gi, '')
-    .replace(/<li>\s*<\/li>/gi, '')
-    .replace(/<p>\s*<\/p>/gi, '')
-    .replace(/<h[1-6]>\s*<\/h[1-6]>/gi, '')
-    .replace(/<div>\s*<\/div>/gi, '')
-
-  // Удаляем пустые списки с пустыми элементами
-  cleaned = cleaned.replace(/<(ul|ol)>(\s*<li>\s*<\/li>\s*)+<\/\1>/gi, '')
-
-  // Удаляем множественные пустые строки
-  cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
-
-  // Удаляем лишние пробелы в начале/конце тегов
-  cleaned = cleaned.replace(/>\s+</g, '><')
-  cleaned = cleaned.replace(/\s+</g, '<')
-  cleaned = cleaned.replace(/>\s+/g, '>')
-
-  // Удаляем пустые параграфы в конце
-  cleaned = cleaned.replace(/(<p>\s*<\/p>\s*)+$/i, '')
-
-  return cleaned.trim()
-}
-
 const handleTagsChange = (tagIds: number[]) => {
   editForm.value.tagIds = tagIds
 }
@@ -624,7 +560,7 @@ onMounted(async () => {
 
 <style scoped>
 .comment-actions {
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #2d2d2d;
   padding-top: 10px;
   display: flex;
   justify-content: flex-end;
@@ -642,13 +578,14 @@ onMounted(async () => {
 }
 
 .comment-card {
-  border: 1px solid #f0f0f0;
+  border: 1px solid #2d2d2d;
   box-shadow: none;
+  background: #1a1a1a;
   transition: border-color 0.2s ease;
 }
 
 .comment-card:hover {
-  border-color: #e0e0e0;
+  border-color: #404040;
 }
 
 .button.is-text.has-text-danger:hover {
@@ -694,7 +631,7 @@ onMounted(async () => {
   overflow-wrap: break-word;
 }
 
-/* Важные CSS правила для предотвращения слипания текста */
+/* Исправляем слипание текста */
 .post-content {
   white-space: normal;
   word-spacing: normal;
@@ -707,35 +644,6 @@ onMounted(async () => {
   max-width: 100%;
   word-spacing: normal;
   white-space: normal;
-}
-
-/* Специальные правила для инлайновых элементов форматирования */
-.post-content :deep(strong),
-.post-content :deep(b),
-.post-content :deep(em),
-.post-content :deep(i),
-.post-content :deep(u) {
-  margin: 0 0.1em;
-  padding: 0 0.1em;
-}
-
-/* Правило для предотвращения слипания текста до и после тегов форматирования */
-.post-content :deep(:not(strong, b, em, i, u) + strong),
-.post-content :deep(:not(strong, b, em, i, u) + b),
-.post-content :deep(:not(strong, b, em, i, u) + em),
-.post-content :deep(:not(strong, b, em, i, u) + i),
-.post-content :deep(:not(strong, b, em, i, u) + u),
-.post-content :deep(strong + :not(strong, b, em, i, u)),
-.post-content :deep(b + :not(strong, b, em, i, u)),
-.post-content :deep(em + :not(strong, b, em, i, u)),
-.post-content :deep(i + :not(strong, b, em, i, u)),
-.post-content :deep(u + :not(strong, b, em, i, u)) {
-  letter-spacing: 0.01em;
-}
-
-/* Скрываем полностью пустые элементы */
-.post-content :deep(:empty) {
-  display: none !important;
 }
 
 /* Заголовки */
@@ -850,6 +758,7 @@ onMounted(async () => {
   border-radius: 8px;
   margin: 1.2em 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #404040;
 }
 
 /* Медиа-элементы */
@@ -862,6 +771,8 @@ onMounted(async () => {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid #404040;
+  background: #000;
 }
 
 /* Файлы */
@@ -958,7 +869,7 @@ onMounted(async () => {
 }
 
 .post-meta {
-  color: #6b7280;
+  color: #a5a5a5;
   font-size: 0.9em;
   padding-top: 16px;
   border-top: 1px solid #404040;
@@ -984,7 +895,7 @@ onMounted(async () => {
   padding: 12px;
   background: none;
   border: none;
-  color: #999;
+  color: #a5a5a5;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -1004,14 +915,15 @@ onMounted(async () => {
 }
 
 .comment-form .textarea {
-  background: #1a1a1a;
-  border-color: #333;
-  color: #ccc;
+  background: #252525;
+  border-color: #404040;
+  color: #cccccc;
 }
 
 .comment-form .textarea:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 0.125em rgba(59, 130, 246, 0.25);
+  background: #2d2d2d;
 }
 
 .comment-form .button.is-primary {
@@ -1026,23 +938,23 @@ onMounted(async () => {
 
 .notification.is-light {
   background: #252525;
-  color: #ccc;
-  border: 1px solid #333;
+  color: #cccccc;
+  border: 1px solid #404040;
 }
 
 .title.is-4 {
-  color: #fff;
+  color: #ffffff;
   margin-bottom: 20px;
   font-weight: 600;
 }
 
 .card-header {
   background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #404040;
 }
 
 .card-header-title {
-  color: #fff;
+  color: #ffffff;
   font-weight: 600;
   font-size: 1.2rem;
 }
@@ -1050,9 +962,9 @@ onMounted(async () => {
 .post-detail-card {
   background: #1a1a1a;
   border: 1px solid #2d2d2d;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .card-content {
@@ -1062,9 +974,10 @@ onMounted(async () => {
 
 .card-footer {
   background: #252525;
-  border-top: 1px solid #333;
+  border-top: 1px solid #404040;
 }
 
+/* Адаптивность */
 @media (max-width: 768px) {
   .post-content {
     font-size: 0.95em;
