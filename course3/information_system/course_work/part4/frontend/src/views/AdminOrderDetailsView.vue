@@ -14,13 +14,11 @@
       </div>
     </div>
 
-    <!-- Загрузка -->
     <div v-if="loading" class="has-text-centered py-6">
       <i class="fas fa-spinner fa-spin fa-2x"></i>
       <p class="mt-3">Загрузка информации о заказе...</p>
     </div>
 
-    <!-- Ошибка -->
     <div v-else-if="error" class="notification is-danger">
       {{ error }}
       <button class="button is-light ml-2" @click="loadOrder">
@@ -28,11 +26,8 @@
       </button>
     </div>
 
-    <!-- Информация о заказе -->
     <div v-else-if="order" class="columns">
-      <!-- Основная информация -->
       <div class="column is-8">
-        <!-- Форма редактирования -->
         <div class="box mb-4">
           <h3 class="title is-4 mb-4">Редактирование заказа</h3>
 
@@ -76,7 +71,6 @@
           </div>
         </div>
 
-        <!-- Товары в заказе -->
         <div class="box">
           <h3 class="title is-4 mb-4">Товары в заказе</h3>
 
@@ -92,7 +86,6 @@
               </tr>
               </thead>
               <tbody>
-              <!-- Используем orderProducts если они есть, иначе fallback на products -->
               <template v-if="order.orderProducts && order.orderProducts.length > 0">
                 <tr v-for="item in order.orderProducts" :key="`${item.productId}-${item.productInfoId}`">
                   <td>
@@ -110,7 +103,6 @@
                 </tr>
               </template>
               <template v-else>
-                <!-- Fallback для старых заказов без orderProducts -->
                 <tr v-for="product in order.products" :key="product.id">
                   <td>
                     <div class="product-info">
@@ -158,9 +150,7 @@
         </div>
       </div>
 
-      <!-- Боковая панель -->
       <div class="column is-4">
-        <!-- Информация о пользователе -->
         <div class="box mb-4">
           <h3 class="title is-5 mb-3">Информация о пользователе</h3>
           <div class="content">
@@ -185,7 +175,6 @@
           </div>
         </div>
 
-        <!-- Детали доставки и оплаты -->
         <div class="box mb-4">
           <h3 class="title is-5 mb-3">Детали доставки и оплаты</h3>
           <div class="content">
@@ -217,7 +206,6 @@ const loading = ref(false)
 const error = ref('')
 const saving = ref(false)
 
-// Форма редактирования
 const editForm = reactive({
   orderStatusId: 0,
   totalAmount: 0,
@@ -238,7 +226,6 @@ const deliveryCost = computed(() => {
   return order.value.totalAmount - productsSubtotal.value
 })
 
-// Вспомогательная функция для получения продукта по ID
 const getProductById = computed(() => {
   return (productId: number) => {
     if (!order.value?.products) return null
@@ -246,7 +233,6 @@ const getProductById = computed(() => {
   }
 })
 
-// Проверка изменений
 const hasChanges = computed(() => {
   if (!order.value) return false
   return editForm.orderStatusId !== order.value.orderStatusId ||
@@ -255,7 +241,6 @@ const hasChanges = computed(() => {
     editForm.address !== order.value.address
 })
 
-// Загрузка заказа
 const loadOrder = async () => {
   loading.value = true
   error.value = ''
@@ -264,11 +249,9 @@ const loadOrder = async () => {
     const response = await shopAPI.getOrderById(orderId.value)
     order.value = response.data
 
-    // Загружаем статусы заказов
     const statusesResponse = await shopAPI.getOrderStatuses()
     orderStatuses.value = statusesResponse.data
 
-    // Инициализируем форму
     if (order.value) {
       editForm.orderStatusId = order.value.orderStatusId
       editForm.totalAmount = order.value.totalAmount
@@ -283,9 +266,6 @@ const loadOrder = async () => {
   }
 }
 
-const authStore = useAuthStore()
-
-// Сохранение изменений
 const saveChanges = async () => {
   if (!order.value || !hasChanges.value) return
 
@@ -298,7 +278,6 @@ const saveChanges = async () => {
       address: editForm.address
     })
 
-    // Обновляем локальные данные
     if (order.value) {
       order.value.orderStatusId = editForm.orderStatusId
       order.value.totalAmount = editForm.totalAmount
@@ -307,42 +286,12 @@ const saveChanges = async () => {
     }
 
   } catch (err: any) {
-    const message = err.response?.data?.message || 'Не удалось сохранить изменения'
     console.error('Ошибка при сохранении:', err)
   } finally {
     saving.value = false
   }
 }
 
-// Отмена заказа
-const cancelOrder = async () => {
-  if (!order.value || !confirm('Вы уверены, что хотите отменить этот заказ?')) {
-    return
-  }
-
-  try {
-    await shopAPI.updateOrder(order.value.id, { orderStatusId: 5 })
-    order.value.orderStatusId = 5
-    editForm.orderStatusId = 5
-  } catch (err: any) {
-    const message = err.response?.data?.message || 'Не удалось отменить заказ'
-  }
-}
-
-// Экспорт заказа
-const exportOrder = () => {
-  // В реальном приложении здесь будет запрос на генерацию PDF
-  alert('Функция экспорта в разработке')
-}
-
-// Уведомление пользователя
-const sendNotification = () => {
-  if (!order.value) return
-  const message = `Статус вашего заказа #${order.value.id} изменен. Проверьте в личном кабинете.`
-  alert(`Уведомление отправлено пользователю:\n${message}`)
-}
-
-// Форматирование даты
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -353,13 +302,11 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Укорачивание описания
 const truncateDescription = (text: string, maxLength: number) => {
   if (!text || text.length <= maxLength) return text
   return text.substring(0, maxLength) + '...'
 }
 
-// Получение текста способа доставки
 const getDeliveryMethodText = (method: string) => {
   switch (method) {
     case 'courier': return 'Курьерская доставка'
@@ -368,7 +315,6 @@ const getDeliveryMethodText = (method: string) => {
   }
 }
 
-// Получение текста способа оплаты
 const getPaymentMethodText = (method: string) => {
   switch (method) {
     case 'card': return 'Банковская карта'
@@ -378,12 +324,10 @@ const getPaymentMethodText = (method: string) => {
   }
 }
 
-// Инициализация
 onMounted(() => {
   loadOrder()
 })
 
-// Отслеживаем изменения ID заказа в маршруте
 watch(() => route.params.id, (newId) => {
   orderId.value = parseInt(newId as string)
   loadOrder()
@@ -429,37 +373,4 @@ watch(() => route.params.id, (newId) => {
   border-bottom: 1px solid #333;
 }
 
-.timeline {
-  border-left: 2px solid #4a00e0;
-  padding-left: 20px;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -28px;
-  top: 0;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #4a00e0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.timeline-content {
-  padding-left: 10px;
-}
-
-.heading {
-  font-size: 0.875rem;
-  color: #aaa;
-  margin-bottom: 5px;
-}
 </style>

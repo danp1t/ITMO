@@ -10,7 +10,6 @@
       </div>
     </div>
 
-    <!-- Расширенный поиск -->
     <div class="search-filters box mb-4">
       <h3 class="title is-5 mb-3">Расширенный поиск</h3>
       <div class="columns is-multiline">
@@ -128,7 +127,6 @@
       </div>
     </div>
 
-    <!-- Статистика -->
     <div class="stats box mb-4">
       <div class="columns is-mobile is-multiline">
         <div class="column">
@@ -158,13 +156,11 @@
       </div>
     </div>
 
-    <!-- Загрузка -->
     <div v-if="loading" class="has-text-centered py-6">
       <i class="fas fa-spinner fa-spin fa-2x"></i>
       <p class="mt-3">Загрузка заказов...</p>
     </div>
 
-    <!-- Таблица заказов -->
     <div v-else class="box">
       <div class="table-header mb-3">
         <div class="level">
@@ -278,7 +274,6 @@
         </table>
       </div>
 
-      <!-- Пагинация -->
       <div v-if="totalPages > 1" class="pagination-container mt-4">
         <nav class="pagination is-centered" role="navigation" aria-label="pagination">
           <button class="pagination-previous"
@@ -322,7 +317,6 @@
         </nav>
       </div>
 
-      <!-- Нет заказов -->
       <div v-if="orders.length === 0" class="has-text-centered py-6">
         <i class="fas fa-box-open fa-3x has-text-grey-light"></i>
         <p class="title is-4 mt-4">Заказы не найдены</p>
@@ -350,9 +344,7 @@ import { shopAPI } from '@/api/shop'
 import type { Order, OrderStatus } from '@/types/shop'
 
 const authStore = useAuthStore()
-const router = useRouter()
 
-// Данные
 const orders = ref<Order[]>([])
 const orderStatuses = ref<OrderStatus[]>([])
 const loading = ref(false)
@@ -365,7 +357,6 @@ const dropdownOpen = reactive<Record<number, boolean>>({})
 const selectedStatus = reactive<Record<number, number>>({})
 const dateError = ref('')
 
-// Поиск
 const search = reactive({
   orderId: '',
   phone: '',
@@ -375,7 +366,6 @@ const search = reactive({
   email: ''
 })
 
-// Фильтры
 const filters = reactive({
   statusId: '',
   dateFrom: '',
@@ -383,7 +373,6 @@ const filters = reactive({
   minAmount: ''
 })
 
-// Загрузка данных
 const loadOrders = async () => {
   loading.value = true
   try {
@@ -411,7 +400,6 @@ const loadOrders = async () => {
   }
 }
 
-// Валидация дат
 const validateDates = () => {
   dateError.value = ''
 
@@ -428,7 +416,6 @@ const validateDates = () => {
   applyFilters()
 }
 
-// Статистика
 const totalOrders = computed(() => orders.value.length)
 
 const totalRevenue = computed(() => {
@@ -443,11 +430,9 @@ const deliveredOrdersCount = computed(() => {
   return orders.value.filter(order => order.orderStatusId === 4).length
 })
 
-// Отфильтрованные заказы
 const filteredOrders = computed(() => {
   let result = [...orders.value]
 
-  // Фильтрация по ID заказа
   if (search.orderId) {
     const orderId = parseInt(search.orderId)
     if (!isNaN(orderId)) {
@@ -455,7 +440,6 @@ const filteredOrders = computed(() => {
     }
   }
 
-  // Фильтрация по телефону
   if (search.phone) {
     const phoneQuery = search.phone.replace(/\D/g, '').toLowerCase()
     result = result.filter(order =>
@@ -463,7 +447,6 @@ const filteredOrders = computed(() => {
     )
   }
 
-  // Фильтрация по ID клиента
   if (search.accountId) {
     const accountId = parseInt(search.accountId)
     if (!isNaN(accountId)) {
@@ -471,7 +454,6 @@ const filteredOrders = computed(() => {
     }
   }
 
-  // Фильтрация по адресу
   if (search.address) {
     const addressQuery = search.address.toLowerCase()
     result = result.filter(order =>
@@ -479,7 +461,6 @@ const filteredOrders = computed(() => {
     )
   }
 
-  // Фильтрация по имени клиента
   if (search.customerName) {
     const nameQuery = search.customerName.toLowerCase()
     result = result.filter(order =>
@@ -487,7 +468,6 @@ const filteredOrders = computed(() => {
     )
   }
 
-  // Фильтрация по email
   if (search.email) {
     const emailQuery = search.email.toLowerCase()
     result = result.filter(order =>
@@ -495,7 +475,6 @@ const filteredOrders = computed(() => {
     )
   }
 
-  // Фильтрация по статусу
   if (filters.statusId) {
     const statusId = parseInt(filters.statusId)
     if (!isNaN(statusId)) {
@@ -503,7 +482,6 @@ const filteredOrders = computed(() => {
     }
   }
 
-  // Фильтрация по дате
   if (filters.dateFrom) {
     const fromDate = new Date(filters.dateFrom)
     fromDate.setHours(0, 0, 0, 0)
@@ -516,7 +494,6 @@ const filteredOrders = computed(() => {
     result = result.filter(order => new Date(order.createdAt) <= toDate)
   }
 
-  // Фильтрация по сумме
   if (filters.minAmount) {
     const minAmount = parseFloat(filters.minAmount)
     if (!isNaN(minAmount)) {
@@ -524,18 +501,15 @@ const filteredOrders = computed(() => {
     }
   }
 
-  // Сортировка по дате (новые сверху)
   return result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 })
 
-// Пагинированные заказы
 const paginatedOrders = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value
   const end = start + itemsPerPage.value
   return filteredOrders.value.slice(start, end)
 })
 
-// Пагинация
 const totalPages = computed(() => {
   return Math.ceil(filteredOrders.value.length / itemsPerPage.value)
 })
@@ -552,7 +526,6 @@ const visiblePages = computed(() => {
   return pages
 })
 
-// Статусы
 const getStatusName = (statusId: number): string => {
   const status = orderStatuses.value.find(s => s.id === statusId)
   return status ? status.name : `Статус #${statusId}`
@@ -569,79 +542,6 @@ const getStatusClass = (statusId: number): string => {
   }
 }
 
-// Редактирование статуса
-const startEditStatus = (order: Order) => {
-  if (!authStore.canManageRoles || order.orderStatusId === 5) return
-
-  // Закрываем все другие открытые dropdown
-  Object.keys(dropdownOpen).forEach(key => {
-    dropdownOpen[parseInt(key)] = false
-  })
-  Object.keys(editingStatus).forEach(key => {
-    editingStatus[parseInt(key)] = false
-  })
-
-  editingStatus[order.id] = true
-  selectedStatus[order.id] = order.orderStatusId
-  dropdownOpen[order.id] = true
-}
-
-const cancelEditStatus = (orderId: number) => {
-  editingStatus[orderId] = false
-  dropdownOpen[orderId] = false
-  delete selectedStatus[orderId]
-}
-
-const toggleDropdown = (orderId: number) => {
-  dropdownOpen[orderId] = !dropdownOpen[orderId]
-}
-
-const selectStatus = (orderId: number, statusId: number) => {
-  selectedStatus[orderId] = statusId
-  dropdownOpen[orderId] = false
-}
-
-const saveStatus = async (orderId: number) => {
-  const statusId = selectedStatus[orderId]
-  if (!statusId) return
-
-  updatingStatusId.value = orderId
-  try {
-    const currentOrder = orders.value.find(o => o.id === orderId)
-    if (!currentOrder) {
-      throw new Error('Заказ не найден')
-    }
-
-    const updateData = {
-      orderStatusId: statusId,
-      address: currentOrder.address,
-      phone: currentOrder.phone,
-      totalAmount: currentOrder.totalAmount,
-      accountId: currentOrder.accountId
-    }
-
-    await shopAPI.updateOrder(orderId, updateData)
-
-    // Обновляем локально
-    const orderIndex = orders.value.findIndex(o => o.id === orderId)
-    if (orderIndex !== -1) {
-      orders.value[orderIndex] = { ...orders.value[orderIndex], orderStatusId: statusId }
-    }
-
-    editingStatus[orderId] = false
-    dropdownOpen[orderId] = false
-    delete selectedStatus[orderId]
-
-  } catch (error: any) {
-    console.error('Ошибка при обновлении статуса:', error)
-    const message = error.response?.data?.message || error.message || 'Не удалось обновить статус заказа'
-    alert(`Ошибка: ${message}`)
-  } finally {
-    updatingStatusId.value = null
-  }
-}
-
-// Отмена заказа
 const cancelOrder = async (order: Order) => {
 
   cancellingOrderId.value = order.id
@@ -654,7 +554,6 @@ const cancelOrder = async (order: Order) => {
       accountId: order.accountId
     })
 
-    // Обновляем локально
     const orderIndex = orders.value.findIndex(o => o.id === order.id)
     if (orderIndex !== -1) {
       orders.value[orderIndex].orderStatusId = 5
@@ -669,7 +568,6 @@ const cancelOrder = async (order: Order) => {
   }
 }
 
-// Форматирование
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -706,7 +604,6 @@ const truncateText = (text: string, maxLength: number) => {
   return text.substring(0, maxLength) + '...'
 }
 
-// Фильтры
 const applyFilters = () => {
   currentPage.value = 1
 }
@@ -736,7 +633,6 @@ const goToPage = (page: number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// Закрытие dropdown при клике вне его
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
   if (!target.closest('.status-edit-mode') && !target.closest('.status-display')) {
@@ -749,7 +645,6 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
-// Инициализация
 onMounted(() => {
   loadOrders()
   document.addEventListener('click', handleClickOutside)
@@ -781,13 +676,11 @@ onMounted(() => {
   align-items: center;
 }
 
-/* Поиск и фильтры */
 .search-filters {
   background-color: #1a1a1a;
   border: 1px solid #333;
 }
 
-/* Статистика */
 .stats {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 }
@@ -816,7 +709,6 @@ onMounted(() => {
   color: #aaa;
 }
 
-/* Таблица */
 .table th {
   background-color: #1a1a1a;
   color: #fff;
@@ -834,7 +726,6 @@ onMounted(() => {
   background-color: #252525;
 }
 
-/* Ссылка на ID заказа */
 .order-id-link {
   color: #4a00e0;
   font-weight: bold;
@@ -846,7 +737,6 @@ onMounted(() => {
   color: #8e2de2;
 }
 
-/* Ячейки с данными */
 .address-cell {
   max-width: 200px;
   word-break: break-word;
@@ -859,20 +749,6 @@ onMounted(() => {
 
 .date-cell {
   min-width: 120px;
-}
-
-/* Стили для статусов */
-.status-cell {
-  min-width: 160px;
-  position: relative;
-}
-
-.status-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  width: fit-content;
 }
 
 .status-tag {
@@ -910,117 +786,6 @@ onMounted(() => {
   background-color: #6b7280;
 }
 
-.status-edit-btn {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.status-edit-btn:hover {
-  color: #fff;
-  background-color: #333;
-}
-
-/* Режим редактирования статуса */
-.status-edit-mode {
-  position: relative;
-  z-index: 100;
-}
-
-.dropdown-trigger {
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  background-color: #252525;
-  border: 1px solid #444;
-  width: fit-content;
-}
-
-.selected-status {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-width: 150px;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  margin-top: 4px;
-  min-width: 200px;
-  background-color: #252525;
-  border: 1px solid #444;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.dropdown-content {
-  padding: 8px 0;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.dropdown-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.dropdown-item:hover {
-  background-color: #333;
-}
-
-.dropdown-item.is-active {
-  background-color: #3a3a3a;
-}
-
-.status-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.status-indicator.is-info {
-  background-color: #3b82f6;
-}
-
-.status-indicator.is-warning {
-  background-color: #f59e0b;
-}
-
-.status-indicator.is-primary {
-  background-color: #8b5cf6;
-}
-
-.status-indicator.is-success {
-  background-color: #10b981;
-}
-
-.status-indicator.is-danger {
-  background-color: #ef4444;
-}
-
-.status-edit-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-/* Кнопки действий */
 .action-buttons {
   display: flex;
   gap: 6px;
@@ -1032,7 +797,6 @@ onMounted(() => {
   font-size: 0.85rem;
 }
 
-/* Пагинация */
 .pagination-container {
   background-color: #1a1a1a;
   padding: 20px;
@@ -1095,7 +859,6 @@ onMounted(() => {
   font-size: 0.9rem;
 }
 
-/* Адаптивность */
 @media (max-width: 1024px) {
   .content-header {
     flex-direction: column;
@@ -1128,10 +891,6 @@ onMounted(() => {
     font-size: 1.5rem;
   }
 
-  .status-cell {
-    min-width: 140px;
-  }
-
   .action-buttons {
     flex-direction: column;
     gap: 4px;
@@ -1149,14 +908,6 @@ onMounted(() => {
 
   .pagination-list {
     display: none;
-  }
-
-  .dropdown-menu {
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    max-width: 300px;
   }
 }
 </style>

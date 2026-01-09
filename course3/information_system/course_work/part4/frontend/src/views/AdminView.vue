@@ -1,7 +1,6 @@
 <template>
   <div class="admin-view dark-theme">
     <div class="columns">
-      <!-- Боковое меню -->
       <div class="column is-3 sidebar">
         <div class="admin-menu">
           <div class="menu-header">
@@ -36,7 +35,6 @@
                   <span>Роли</span>
                 </router-link>
               </li>
-              <!-- В AdminView.vue добавьте новый пункт меню после комментариев -->
               <li v-if="authStore.canManageRoles">
                 <router-link
                   to="/admin/orders"
@@ -59,7 +57,6 @@
         </div>
       </div>
 
-      <!-- Основной контент -->
       <div class="column is-9 main-content">
         <div class="content-wrapper">
           <router-view v-slot="{ Component }">
@@ -80,20 +77,6 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
-const pageTitle = computed(() => {
-  const titles: { [key: string]: string } = {
-    '/admin/roles': 'Управление ролями',
-    '/admin/posts': 'Модерация постов',
-    '/admin/comments': 'Модерация комментариев'
-  }
-
-  return titles[route.path] || 'Админ-панель'
-})
-
-const refreshPage = () => {
-  window.location.reload()
-}
-
 const goBack = () => {
   router.push('/')
 }
@@ -110,7 +93,6 @@ const goBack = () => {
   min-height: 100vh;
 }
 
-/* Боковое меню */
 .sidebar {
   background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
   border-right: 1px solid #333;
@@ -152,7 +134,6 @@ const goBack = () => {
   color: #aaa;
 }
 
-/* Навигационное меню */
 .menu {
   flex: 1;
   padding: 20px;
@@ -199,29 +180,14 @@ const goBack = () => {
   border-top: 1px solid #333;
 }
 
-/* Основной контент */
 .main-content {
   padding: 30px;
   background: #121212;
 }
 
 .content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #333;
-}
-
-.content-header .title {
   font-size: 1.8rem;
   margin: 0;
-}
-
-.content-actions {
-  display: flex;
-  gap: 10px;
 }
 
 .content-wrapper {
@@ -232,7 +198,6 @@ const goBack = () => {
   overflow: hidden;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .columns {
     flex-direction: column;
@@ -249,12 +214,6 @@ const goBack = () => {
   }
 
   .content-header {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-
-  .content-header .title {
     font-size: 1.5rem;
   }
 }

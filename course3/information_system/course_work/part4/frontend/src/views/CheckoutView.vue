@@ -1,7 +1,6 @@
 <template>
   <div class="checkout-view">
     <div class="container">
-      <!-- Заголовок -->
       <div class="has-text-centered mb-5">
         <h1 class="title is-2">Оформление заказа</h1>
         <p class="subtitle is-5 has-text-grey">
@@ -9,11 +8,8 @@
         </p>
       </div>
 
-      <!-- Основной контент -->
       <div class="columns">
-        <!-- Форма заказа -->
         <div class="column is-two-thirds">
-          <!-- Контактная информация -->
           <div class="box mb-4">
             <h3 class="title is-4 mb-4">Контактная информация</h3>
 
@@ -73,7 +69,6 @@
             </div>
           </div>
 
-          <!-- Адрес доставки -->
           <div class="box mb-4">
             <h3 class="title is-4 mb-4">Адрес доставки</h3>
 
@@ -213,7 +208,6 @@
             </div>
           </div>
 
-          <!-- Способ доставки -->
           <div class="box mb-4">
             <h3 class="title is-4 mb-4">Способ доставки</h3>
 
@@ -239,7 +233,6 @@
             </div>
           </div>
 
-          <!-- Способ оплаты -->
           <div class="box">
             <h3 class="title is-4 mb-4">Способ оплаты</h3>
 
@@ -266,9 +259,7 @@
           </div>
         </div>
 
-        <!-- Информация о заказе -->
         <div class="column">
-          <!-- Корзина -->
           <div class="box sticky-cart">
             <h3 class="title is-4 mb-4">Ваш заказ</h3>
 
@@ -277,7 +268,6 @@
             </div>
 
             <div v-else>
-              <!-- Товары -->
               <div class="cart-summary">
                 <div
                   v-for="item in cartStore.getCartItemsWithDetails"
@@ -298,7 +288,6 @@
                 </div>
               </div>
 
-              <!-- Итоги -->
               <div class="order-totals">
                 <div class="level is-mobile">
                   <div class="level-left">
@@ -330,7 +319,6 @@
                 </div>
               </div>
 
-              <!-- Кнопка оформления -->
               <button
                 class="button is-primary is-fullwidth is-large mt-4"
                 :class="{ 'is-loading': isSubmitting }"
@@ -344,7 +332,6 @@
                 Оплата производится при получении
               </p>
 
-              <!-- Ссылка на корзину -->
               <router-link
                 to="/shop"
                 class="button is-dark is-fullwidth mt-2"
@@ -371,7 +358,6 @@ const cartStore = useCartStore()
 const router = useRouter()
 const phoneInput = ref<HTMLInputElement>()
 
-// Форма заказа
 const form = reactive({
   name: '',
   phone: '',
@@ -388,16 +374,13 @@ const form = reactive({
   notes: ''
 })
 
-// Отображение телефона с маской
 const phoneDisplay = ref('+7 ')
 
-// Подсказки для городов
 const citySuggestions = ref([
   'Москва', 'Санкт-Петербург', 'Новосибирск', 'Екатеринбург', 'Казань',
   'Нижний Новгород', 'Челябинск', 'Самара', 'Омск', 'Ростов-на-Дону'
 ])
 
-// Ошибки валидации
 const errors = reactive({
   name: '',
   phone: '',
@@ -410,7 +393,6 @@ const errors = reactive({
 
 const isSubmitting = ref(false)
 
-// Computed свойства
 const deliveryCost = computed(() => {
   return form.deliveryMethod === 'courier' ? 300 : 0
 })
@@ -423,7 +405,6 @@ const paymentButtonText = computed(() => {
   return 'Оформить заказ'
 })
 
-// Маска для телефона
 const formatPhone = (event: Event) => {
   const input = event.target as HTMLInputElement
   let value = input.value.replace(/\D/g, '')
@@ -471,7 +452,6 @@ const validatePhone = () => {
   return true
 }
 
-// Форматирование почтового индекса
 const formatPostalCode = (event: Event) => {
   const input = event.target as HTMLInputElement
   let value = input.value.replace(/\D/g, '')
@@ -484,23 +464,14 @@ const formatPostalCode = (event: Event) => {
   errors.postalCode = value.length !== 6 && value.length > 0 ? 'Индекс должен содержать 6 цифр' : ''
 }
 
-// Автодополнение города
-const onCityInput = () => {
-  // В реальном приложении здесь будет запрос к API
-}
+const onCityInput = () => {}
+const onStreetInput = () => {}
 
-// Автодополнение улицы
-const onStreetInput = () => {
-  // В реальном приложении здесь будет запрос к API
-}
-
-// Заполнение формы данными пользователя
 const populateUserData = () => {
   if (authStore.user) {
     form.name = authStore.user.name
     form.email = authStore.user.email
 
-    // Если у пользователя есть сохраненные данные, можно подставить их
     const savedAddress = localStorage.getItem('user_address')
     if (savedAddress) {
       try {
@@ -513,7 +484,6 @@ const populateUserData = () => {
   }
 }
 
-// Сохранение адреса пользователя
 const saveUserAddress = () => {
   const addressData = {
     city: form.city,
@@ -528,27 +498,22 @@ const saveUserAddress = () => {
   localStorage.setItem('user_address', JSON.stringify(addressData))
 }
 
-// Валидация формы
 const validateForm = () => {
   let isValid = true
 
-  // Сброс ошибок
   Object.keys(errors).forEach(key => {
     errors[key as keyof typeof errors] = ''
   })
 
-  // Проверка имени
   if (!form.name.trim()) {
     errors.name = 'Имя обязательно'
     isValid = false
   }
 
-  // Проверка телефона
   if (!validatePhone()) {
     isValid = false
   }
 
-  // Проверка email
   if (!form.email.trim()) {
     errors.email = 'Email обязателен'
     isValid = false
@@ -557,19 +522,16 @@ const validateForm = () => {
     isValid = false
   }
 
-  // Проверка города
   if (!form.city.trim()) {
     errors.city = 'Город обязателен'
     isValid = false
   }
 
-  // Проверка улицы (только для доставки курьером)
   if (form.deliveryMethod === 'courier' && !form.street.trim()) {
     errors.street = 'Улица обязательна'
     isValid = false
   }
 
-  // Проверка дома (только для доставки курьером)
   if (form.deliveryMethod === 'courier' && !form.house.trim()) {
     errors.house = 'Номер дома обязателен'
     isValid = false
@@ -578,7 +540,6 @@ const validateForm = () => {
   return isValid
 }
 
-// Оформление заказа
 const submitOrder = async () => {
   if (!validateForm()) {
     return
@@ -592,13 +553,11 @@ const submitOrder = async () => {
   isSubmitting.value = true
 
   try {
-    // Собираем адрес из компонентов
     let address = `${form.city}, ${form.street}, д. ${form.house}`
     if (form.apartment) address += `, кв. ${form.apartment}`
     if (form.entrance) address += `, подъезд ${form.entrance}`
     if (form.floor) address += `, этаж ${form.floor}`
 
-    // Создаем массив товаров с информацией из ProductInfo
     const orderProducts = cartStore.items.map(item => ({
       productId: item.productId,
       productInfoId: item.productInfoId,
@@ -622,16 +581,9 @@ const submitOrder = async () => {
       orderProducts: orderProducts
     }
 
-    // Отправка заказа
     const response = await shopAPI.createOrder(orderData)
-
-    // Сохраняем адрес пользователя
     saveUserAddress()
-
-    // Очищаем корзину
     cartStore.clearCart()
-
-    // Перенаправляем на страницу подтверждения
     router.push(`/shop/orders/${response.data.id}`)
 
   } catch (error: any) {
@@ -643,7 +595,6 @@ const submitOrder = async () => {
   }
 }
 
-// Инициализация
 onMounted(() => {
   populateUserData()
 })
@@ -776,7 +727,6 @@ onMounted(() => {
   }
 }
 
-/* Прокрутка для корзины */
 .cart-summary::-webkit-scrollbar {
   width: 6px;
 }
@@ -795,7 +745,6 @@ onMounted(() => {
   background: #a8a8a8;
 }
 
-/* Анимация появления */
 .box {
   animation: slideUp 0.3s ease-out;
 }
