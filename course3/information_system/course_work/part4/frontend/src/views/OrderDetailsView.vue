@@ -79,8 +79,8 @@
               <div class="content">
                 <p><strong>Телефон:</strong> {{ order.phone }}</p>
                 <p><strong>Адрес доставки:</strong> {{ order.address }}</p>
-                <p v-if="order.orderStatus">
-                  <strong>Статус:</strong> {{ order.orderStatus.name }}
+                <p>
+                  <strong>Статус:</strong> {{ orderStatusText }}
                 </p>
               </div>
             </div>
@@ -193,30 +193,6 @@
             </button>
 
             <button
-              class="button is-light"
-              @click="repeatOrder"
-            >
-              <span class="icon">
-                <i class="fas fa-redo"></i>
-              </span>
-              <span>Повторить заказ</span>
-            </button>
-
-            <button
-              class="button is-primary is-light"
-              @click="downloadInvoice"
-              :disabled="downloadingInvoice"
-            >
-              <span class="icon" v-if="downloadingInvoice">
-                <i class="fas fa-spinner fa-spin"></i>
-              </span>
-              <span class="icon" v-else>
-                <i class="fas fa-file-invoice"></i>
-              </span>
-              <span>Скачать счет</span>
-            </button>
-
-            <button
               class="button is-info is-light"
               @click="contactSupport"
             >
@@ -225,26 +201,6 @@
               </span>
               <span>Связаться с поддержкой</span>
             </button>
-          </div>
-        </div>
-
-        <!-- История статусов -->
-        <div v-if="statusHistory.length > 0" class="box">
-          <h3 class="title is-5 mb-3">История статусов</h3>
-          <div class="timeline">
-            <div
-              v-for="(item, index) in statusHistory"
-              :key="index"
-              class="timeline-item"
-            >
-              <div class="timeline-marker" :class="getTimelineMarkerClass(item.status)">
-                <i :class="getTimelineIcon(item.status)"></i>
-              </div>
-              <div class="timeline-content">
-                <p class="heading">{{ formatDate(item.date) }}</p>
-                <p>{{ item.description }}</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -266,7 +222,6 @@ const order = ref<Order | null>(null)
 const loading = ref(false)
 const error = ref('')
 const cancelling = ref(false)
-const downloadingInvoice = ref(false)
 
 // Computed свойства для расчета сумм
 const productsSubtotal = computed(() => {
@@ -316,8 +271,22 @@ const deliverySteps = [
 
 // Статус заказа
 const orderStatusText = computed(() => {
-  if (!order.value?.orderStatus) return 'Неизвестно'
-  return order.value.orderStatus.name
+  if (!order.value) return 'Неизвестно'
+
+  // Используем orderStatusName из API
+  if (order.value.orderStatusName) {
+    return order.value.orderStatusName
+  }
+
+  // Если нет orderStatusName, используем orderStatusId для определения статуса
+  switch (order.value.orderStatusId) {
+    case 1: return 'Новый'
+    case 2: return 'В обработке'
+    case 3: return 'Отправлен'
+    case 4: return 'Доставлен'
+    case 5: return 'Отменен'
+    default: return 'Неизвестно'
+  }
 })
 
 const statusClass = computed(() => {
@@ -387,77 +356,9 @@ const cancelOrder = async () => {
   }
 }
 
-// Повторить заказ
-const repeatOrder = () => {
-  // В реальном приложении здесь можно было бы добавлять товары в корзину
-  alert('Функция "Повторить заказ" в разработке')
-  router.push('/shop')
-}
-
-// Скачать счет
-const downloadInvoice = async () => {
-  if (!order.value) return
-
-  downloadingInvoice.value = true
-
-  try {
-    // В реальном приложении здесь был бы запрос на генерацию PDF
-    alert('Счет будет сгенерирован и отправлен на ваш email')
-    // Имитация загрузки
-    await new Promise(resolve => setTimeout(resolve, 1000))
-  } catch (err) {
-    alert('Не удалось сгенерировать счет')
-  } finally {
-    downloadingInvoice.value = false
-  }
-}
-
 // Связаться с поддержкой
 const contactSupport = () => {
-  if (!order.value) return
-  const subject = `Вопрос по заказу #${order.value.id}`
-  const body = `Здравствуйте! У меня вопрос по заказу #${order.value.id}...`
-  window.location.href = `mailto:support@example.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-}
-
-// История статусов (в реальном приложении брать из API)
-const statusHistory = computed(() => {
-  if (!order.value) return []
-
-  const history = [
-    {
-      date: order.value.createdAt,
-      status: 1,
-      description: 'Заказ оформлен'
-    }
-  ]
-
-  if (order.value.updatedAt && order.value.updatedAt !== order.value.createdAt) {
-    history.push({
-      date: order.value.updatedAt,
-      status: order.value.orderStatusId,
-      description: 'Статус обновлен'
-    })
-  }
-
-  return history
-})
-
-// Стили для timeline
-const getTimelineMarkerClass = (statusId: number) => {
-  switch (statusId) {
-    case 1: return 'is-info'
-    case 5: return 'is-danger'
-    default: return 'is-primary'
-  }
-}
-
-const getTimelineIcon = (statusId: number) => {
-  switch (statusId) {
-    case 1: return 'fas fa-shopping-cart'
-    case 5: return 'fas fa-times'
-    default: return 'fas fa-sync'
-  }
+  window.open('http://t.me/danp1t', '_blank')
 }
 
 onMounted(() => {
@@ -610,60 +511,6 @@ onMounted(() => {
 
 .button.is-light {
   border: 1px solid #e5e7eb;
-}
-
-/* Timeline */
-.timeline {
-  position: relative;
-  padding-left: 2rem;
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: 7px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background-color: #e5e7eb;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 1.5rem;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -2rem;
-  top: 0;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: #667eea;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.75rem;
-}
-
-.timeline-marker.is-info {
-  background-color: #3b82f6;
-}
-
-.timeline-marker.is-danger {
-  background-color: #ef4444;
-}
-
-.timeline-content {
-  padding-left: 1rem;
-}
-
-.heading {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
 }
 
 @media (max-width: 768px) {
