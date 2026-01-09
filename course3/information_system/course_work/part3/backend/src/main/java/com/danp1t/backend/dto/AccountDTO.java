@@ -13,4 +13,5 @@ public class AccountDTO {
     private Integer id;
     private String name;
     private String email;
+    private boolean enabled;
 }

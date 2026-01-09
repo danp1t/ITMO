@@ -33,7 +33,7 @@ public class AccountService {
     private RoleService roleService;
 
     private AccountDTO toDTO(Account account) {
-        return new AccountDTO(account.getId(), account.getName(), account.getEmail());
+        return new AccountDTO(account.getId(), account.getName(), account.getEmail(), account.isEnabled());
     }
 
     private AccountDetailDTO toDetailDTO(Account account) {
@@ -49,7 +49,7 @@ public class AccountService {
                 .map(comment -> new CommentSimpleDTO(comment.getId(), comment.getCreatedAt(), comment.getUserComment(), account.getName()))
                 .collect(Collectors.toList());
 
-        return new AccountDetailDTO(account.getId(), account.getName(), account.getEmail(), roles, posts, comments);
+        return new AccountDetailDTO(account.getId(), account.getName(), account.getEmail(), account.isEnabled(), roles, posts, comments);
     }
 
     private Account toEntity(AccountDTO dto) {

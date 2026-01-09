@@ -14,6 +14,7 @@ public class AccountDetailDTO {
     private Integer id;
     private String name;
     private String email;
+    private boolean enabled;
     private List<RoleDTO> roles;
     private List<PostSimpleDTO> posts;
     private List<CommentSimpleDTO> comments;
