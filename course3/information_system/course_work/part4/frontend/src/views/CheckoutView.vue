@@ -237,24 +237,6 @@
                 </label>
               </div>
             </div>
-
-            <!-- Пункты самовывоза -->
-            <div v-if="form.deliveryMethod === 'pickup'" class="mt-4">
-              <div class="field">
-                <label class="label">Выберите пункт выдачи</label>
-                <div class="control">
-                  <div class="select is-fullwidth">
-                    <select v-model="form.pickupPointId">
-                      <option value="">Выберите пункт выдачи</option>
-                      <option v-for="point in pickupPoints" :key="point.id" :value="point.id">
-                        {{ point.address }} ({{ point.workHours }})
-                      </option>
-                    </select>
-                  </div>
-                </div>
-                <p v-if="errors.pickupPointId" class="help is-danger">{{ errors.pickupPointId }}</p>
-              </div>
-            </div>
           </div>
 
           <!-- Способ оплаты -->
@@ -269,7 +251,7 @@
                     type="radio"
                     value="card"
                   >
-                  <span class="ml-2">Банковская карта</span>
+                  <span class="ml-2">Оплата картой</span>
                 </label>
                 <label class="radio mr-4">
                   <input
@@ -279,64 +261,6 @@
                   >
                   <span class="ml-2">Наличные при получении</span>
                 </label>
-                <label class="radio">
-                  <input
-                    v-model="form.paymentMethod"
-                    type="radio"
-                    value="online"
-                  >
-                  <span class="ml-2">Онлайн оплата</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Карта для оплаты -->
-            <div v-if="form.paymentMethod === 'card'" class="mt-4">
-              <div class="field">
-                <label class="label">Номер карты</label>
-                <div class="control">
-                  <input
-                    v-model="form.cardNumber"
-                    type="text"
-                    class="input"
-                    placeholder="1234 5678 9012 3456"
-                    maxlength="19"
-                    @input="formatCardNumber"
-                  >
-                </div>
-              </div>
-
-              <div class="columns">
-                <div class="column">
-                  <div class="field">
-                    <label class="label">Срок действия (ММ/ГГ)</label>
-                    <div class="control">
-                      <input
-                        v-model="form.cardExpiry"
-                        type="text"
-                        class="input"
-                        placeholder="MM/YY"
-                        maxlength="5"
-                        @input="formatCardExpiry"
-                      >
-                    </div>
-                  </div>
-                </div>
-
-                <div class="column">
-                  <div class="field">
-                    <label class="label">CVV/CVC</label>
-                    <div class="control">
-                      <input
-                        v-model="form.cardCvv"
-                        type="password"
-                        class="input"
-                        placeholder="123"
-                        maxlength="3"
-                      >
-                    </div>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -423,7 +347,7 @@
               <!-- Ссылка на корзину -->
               <router-link
                 to="/shop"
-                class="button is-light is-fullwidth mt-2"
+                class="button is-dark is-fullwidth mt-2"
               >
                 Вернуться в магазин
               </router-link>
@@ -434,6 +358,7 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -459,11 +384,7 @@ const form = reactive({
   floor: '',
   postalCode: '',
   deliveryMethod: 'courier',
-  pickupPointId: '',
   paymentMethod: 'card',
-  cardNumber: '',
-  cardExpiry: '',
-  cardCvv: '',
   notes: ''
 })
 
@@ -476,13 +397,6 @@ const citySuggestions = ref([
   'Нижний Новгород', 'Челябинск', 'Самара', 'Омск', 'Ростов-на-Дону'
 ])
 
-// Пункты самовывоза
-const pickupPoints = ref([
-  { id: 1, address: 'ул. Тверская, 10', workHours: '10:00-22:00' },
-  { id: 2, address: 'пр. Мира, 25', workHours: '9:00-21:00' },
-  { id: 3, address: 'ул. Арбат, 15', workHours: '11:00-23:00' }
-])
-
 // Ошибки валидации
 const errors = reactive({
   name: '',
@@ -491,8 +405,7 @@ const errors = reactive({
   city: '',
   street: '',
   house: '',
-  postalCode: '',
-  pickupPointId: ''
+  postalCode: ''
 })
 
 const isSubmitting = ref(false)
@@ -507,9 +420,6 @@ const totalWithDelivery = computed(() => {
 })
 
 const paymentButtonText = computed(() => {
-  if (form.paymentMethod === 'card' || form.paymentMethod === 'online') {
-    return 'Оплатить заказ'
-  }
   return 'Оформить заказ'
 })
 
@@ -557,6 +467,7 @@ const validatePhone = () => {
     errors.phone = 'Введите полный номер телефона'
     return false
   }
+  errors.phone = ''
   return true
 }
 
@@ -570,43 +481,12 @@ const formatPostalCode = (event: Event) => {
   }
 
   form.postalCode = value
-}
-
-// Форматирование номера карты
-const formatCardNumber = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  let value = input.value.replace(/\D/g, '')
-
-  if (value.length > 16) {
-    value = value.substring(0, 16)
-  }
-
-  // Добавляем пробелы каждые 4 цифры
-  const formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ')
-  form.cardNumber = formatted
-}
-
-// Форматирование срока действия карты
-const formatCardExpiry = (event: Event) => {
-  const input = event.target as HTMLInputElement
-  let value = input.value.replace(/\D/g, '')
-
-  if (value.length > 4) {
-    value = value.substring(0, 4)
-  }
-
-  if (value.length >= 2) {
-    value = value.substring(0, 2) + '/' + value.substring(2)
-  }
-
-  form.cardExpiry = value
+  errors.postalCode = value.length !== 6 && value.length > 0 ? 'Индекс должен содержать 6 цифр' : ''
 }
 
 // Автодополнение города
 const onCityInput = () => {
   // В реальном приложении здесь будет запрос к API
-  const input = document.getElementById('citySuggestions') as HTMLDataListElement
-  // Можно добавить debounce и запрос к сервису подсказок
 }
 
 // Автодополнение улицы
@@ -695,12 +575,6 @@ const validateForm = () => {
     isValid = false
   }
 
-  // Проверка пункта самовывоза
-  if (form.deliveryMethod === 'pickup' && !form.pickupPointId) {
-    errors.pickupPointId = 'Выберите пункт выдачи'
-    isValid = false
-  }
-
   return isValid
 }
 
@@ -729,7 +603,7 @@ const submitOrder = async () => {
       productId: item.productId,
       productInfoId: item.productInfoId,
       quantity: item.quantity,
-      price: item.price, // Цена из ProductInfo, а не basePrice!
+      price: item.price,
       size: item.size,
       productName: item.productName
     }))
@@ -745,12 +619,7 @@ const submitOrder = async () => {
       postalCode: form.postalCode,
       notes: form.notes,
       accountId: authStore.user?.id || 0,
-      orderProducts: orderProducts // Передаем товары с ценами из ProductInfo
-    }
-
-    // Если выбран самовывоз, добавляем ID пункта
-    if (form.deliveryMethod === 'pickup') {
-      orderData.pickupPointId = form.pickupPointId
+      orderProducts: orderProducts
     }
 
     // Отправка заказа
@@ -779,103 +648,151 @@ onMounted(() => {
   populateUserData()
 })
 </script>
+
 <style scoped>
-/* Существующие стили остаются, добавляем новые */
-
-/* Маска телефона */
-input[type="tel"] {
-  font-family: 'Courier New', monospace;
-  font-size: 1.1em;
-  letter-spacing: 0.5px;
+.checkout-view {
+  padding: 2rem 1rem;
 }
 
-/* Анимация при фокусе */
-.input:focus, .textarea:focus {
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
+.container {
+  max-width: 1200px;
 }
 
-/* Стили для даталиста */
-datalist {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
+.box {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
-datalist option {
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+.sticky-cart {
+  position: sticky;
+  top: 2rem;
 }
 
-datalist option:hover {
-  background-color: #f3f4f6;
+.title {
+  color: #bac1c8;
 }
 
-/* Стили для карточки оплаты */
-.card-input-group {
-  position: relative;
+.subtitle {
+  color: #c4cad3;
 }
 
-.card-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  background-size: contain;
-  background-repeat: no-repeat;
+.field {
+  margin-bottom: 1.25rem;
 }
 
-/* Стили для пунктов самовывоза */
-.pickup-point {
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 1rem;
+.label {
+  font-weight: 600;
+  color: #8f949f;
   margin-bottom: 0.5rem;
-  cursor: pointer;
+}
+
+.input, .textarea, .select select {
+  border: 2px solid #394451;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
   transition: all 0.3s;
 }
 
-.pickup-point:hover {
+.input:focus, .textarea:focus, .select select:focus {
   border-color: #667eea;
-  background-color: #f8fafc;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  outline: none;
 }
 
-.pickup-point.selected {
-  border-color: #667eea;
-  background-color: #eff6ff;
+.input.is-danger, .textarea.is-danger {
+  border-color: #f56565;
 }
 
-.pickup-point-title {
-  font-weight: 600;
-  color: #1f2937;
+.help.is-danger {
+  color: #f56565;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
-.pickup-point-address {
-  color: #6b7280;
-  font-size: 0.9em;
+.radio {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-/* Адаптивность для мобильных устройств */
+.radio input {
+  margin-right: 0.5rem;
+}
+
+.cart-summary {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+  padding-right: 0.5rem;
+}
+
+.cart-item-summary {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.cart-item-summary:last-child {
+  border-bottom: none;
+}
+
+.order-totals {
+  background-color: #202022;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.order-totals .level {
+  margin-bottom: 0.75rem;
+}
+
+.order-totals hr {
+  margin: 1rem 0;
+  border-color: #e2e8f0;
+}
+
 @media (max-width: 768px) {
-  .columns.is-multiline-mobile {
-    flex-wrap: wrap;
+  .checkout-view {
+    padding: 1rem;
   }
 
-  .column.is-quarter-mobile {
-    flex: none;
-    width: 50%;
+  .columns {
+    flex-direction: column;
+  }
+
+  .column.is-two-thirds {
+    width: 100%;
   }
 
   .sticky-cart {
     position: static;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
   }
+
+  .radio {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Прокрутка для корзины */
+.cart-summary::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart-summary::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.cart-summary::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.cart-summary::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 /* Анимация появления */
@@ -892,40 +809,5 @@ datalist option:hover {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-/* Валидация в реальном времени */
-.input.is-danger {
-  animation: shake 0.5s;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-/* Подсказки для полей */
-.field-hint {
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-top: 0.25rem;
-}
-
-/* Иконки в полях ввода */
-.field-with-icon {
-  position: relative;
-}
-
-.field-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
-}
-
-.field-with-icon .input {
-  padding-left: 40px;
 }
 </style>

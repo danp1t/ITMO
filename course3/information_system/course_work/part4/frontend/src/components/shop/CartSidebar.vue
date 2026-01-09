@@ -280,7 +280,7 @@ const clearCart = () => {
 }
 
 .cart-item-price {
-  color: #2d3748;
+  color: #8d939f;
 }
 
 .cart-item-actions {
