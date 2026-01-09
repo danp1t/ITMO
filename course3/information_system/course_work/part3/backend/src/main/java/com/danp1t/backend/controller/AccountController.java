@@ -118,4 +118,18 @@ public class AccountController {
         dto.setEmail(account.getEmail());
         return dto;
     }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Void> banUser(@PathVariable Integer id) {
+        try {
+            System.out.printf("BANNING USER ID: %d\n", id);
+            accountService.banUser(id);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("не найден")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

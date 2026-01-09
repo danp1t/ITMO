@@ -1,7 +1,9 @@
 package com.danp1t.backend.repository;
 
 import com.danp1t.backend.model.Account;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -30,4 +32,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
 
     @Query("SELECT a FROM Account a JOIN a.roles r WHERE r.id = :roleId")
     List<Account> findByRoleId(@Param("roleId") Integer roleId);
+
+    @Modifying
+    @Query(value = "CALL ban_user(:accountId)", nativeQuery = true)
+    void banUser(@Param("accountId") Integer accountId);
 }

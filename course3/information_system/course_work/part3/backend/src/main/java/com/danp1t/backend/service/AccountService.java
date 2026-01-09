@@ -6,6 +6,7 @@ import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Role;
 import com.danp1t.backend.repository.AccountRepository;
 import com.danp1t.backend.repository.RoleRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -281,6 +282,23 @@ public class AccountService {
         account.getRoles().removeIf(role -> role.getName().equals(roleName));
 
         return accountRepository.save(account);
+    }
+
+    @Transactional
+    public void banUser(Integer accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new ResourceNotFoundException("Пользователь с ID " + accountId + " не найден");
+        }
+
+        accountRepository.banUser(accountId);
+
+        System.out.printf("Успех");
+
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        accountOpt.ifPresent(account -> {
+            account.setEnabled(false);
+            accountRepository.save(account);
+        });
     }
 
 
