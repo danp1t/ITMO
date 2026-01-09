@@ -336,41 +336,40 @@ const truncateDescription = (text: string, maxLength: number) => {
 
 // Отмена заказа
 const cancelOrder = async () => {
-  if (!order.value || !confirm('Вы уверены, что хотите отменить этот заказ?')) {
-    return
-  }
 
   cancelling.value = true
 
   try {
-    // Отправляем только нужные данные для обновления статуса
+    // Создаем полный объект с данными заказа для обновления
     const updateData = {
-      orderStatusId: 5, // ID статуса "Отменен"
-      orderStatusName: 'cancelled'
+      id: order.value.id,
+      address: order.value.address,
+      phone: order.value.phone,
+      email: order.value.email,
+      customerName: order.value.customerName,
+      totalAmount: order.value.totalAmount,
+      accountId: order.value.accountId,
+      orderStatusId: 5, // Изменяем статус на "Отменен"
+      orderStatusName: 'cancelled',
+      deliveryMethod: order.value.deliveryMethod,
+      paymentMethod: order.value.paymentMethod,
+      postalCode: order.value.postalCode,
+      notes: order.value.notes || ''
     }
 
-    console.log('Отправка данных для отмены заказа:', updateData)
+    console.log('Отправка данных для обновления заказа:', updateData)
 
-    // Обновляем статус заказа
-    await shopAPI.updateOrder(order.value.id, updateData)
+    // Используем updateOrder с полными данными
+    const response = await shopAPI.updateOrder(order.value.id, updateData)
+    console.log('Ответ от сервера:', response)
 
     // Перезагружаем данные заказа
     await loadOrder()
 
-    alert('Заказ успешно отменен')
   } catch (err: any) {
     console.error('Ошибка при отмене заказа:', err)
+    console.error('Полный ответ ошибки:', err.response)
 
-    // Проверяем, возможно, заказ уже был обновлен
-    if (err.response?.status === 404) {
-      // Попробуем загрузить заказ снова, возможно он уже был удален или изменен
-      await loadOrder()
-      alert('Заказ уже был обновлен. Статус обновлен.')
-      return
-    }
-
-    const message = err.response?.data?.message || 'Не удалось отменить заказ. Пожалуйста, свяжитесь с поддержкой.'
-    alert(message)
   } finally {
     cancelling.value = false
   }
