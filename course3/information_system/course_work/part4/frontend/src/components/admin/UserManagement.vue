@@ -593,10 +593,6 @@ const closeUserDetailsModal = () => {
 const toggleUserStatus = async (user: UserWithDetails) => {
   if (!authStore.canManageUsers || user.id === authStore.user?.id) return
 
-  if (!confirm(`Вы уверены, что хотите ${user.enabled ? 'заблокировать' : 'разблокировать'} пользователя ${user.name}?`)) {
-    return
-  }
-
   togglingStatus.value = true
   try {
     const newStatus = !user.enabled
