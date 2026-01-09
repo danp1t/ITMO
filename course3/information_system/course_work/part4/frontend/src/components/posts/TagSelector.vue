@@ -79,14 +79,12 @@ const emit = defineEmits<{
   'change': [tags: Tag[]]
 }>()
 
-// Реактивные состояния
 const allTags = ref<Tag[]>([])
 const selectedTags = ref<Tag[]>([])
 const searchQuery = ref('')
 const showDropdown = ref(false)
 const isLoading = ref(false)
 
-// Загрузка всех тегов
 const loadTags = async () => {
   try {
     const response = await tagsAPI.getAllTags()
@@ -96,17 +94,15 @@ const loadTags = async () => {
   }
 }
 
-// Загрузка тегов поста
 const loadPostTags = async () => {
   if (!props.postId) return
 
-  if (isLoading.value) return // Предотвращаем повторные запросы
+  if (isLoading.value) return
   isLoading.value = true
 
   try {
     const response = await tagsAPI.getPostTags(props.postId)
     selectedTags.value = response.data || []
-    // НЕ вызываем emit здесь, чтобы избежать бесконечного цикла
   } catch (error) {
     console.error('Ошибка при загрузке тегов поста:', error)
   } finally {
@@ -114,7 +110,6 @@ const loadPostTags = async () => {
   }
 }
 
-// Отфильтрованные теги для поиска
 const filteredTags = computed(() => {
   if (!searchQuery.value.trim()) {
     return allTags.value
@@ -131,23 +126,13 @@ const filteredTags = computed(() => {
     .slice(0, 10)
 })
 
-// Популярные теги (первые 8)
-const popularTags = computed(() => {
-  return allTags.value.slice(0, 8)
-})
-
-// Выбор тега
 const selectTag = async (tag: Tag) => {
   if (!selectedTags.value.some(t => t.id === tag.id)) {
     selectedTags.value.push(tag)
-
-    // Сначала обновляем локальное состояние
     const selectedIds = selectedTags.value.map(t => t.id)
 
-    // Используем nextTick для предотвращения циклов
     await nextTick()
 
-    // Затем эмитируем изменения
     emit('update:modelValue', selectedIds)
     emit('change', selectedTags.value)
 
@@ -156,22 +141,15 @@ const selectTag = async (tag: Tag) => {
   }
 }
 
-// Удаление тега
 const removeTag = async (tagId: number) => {
   selectedTags.value = selectedTags.value.filter(t => t.id !== tagId)
-
-  // Сначала обновляем локальное состояние
   const selectedIds = selectedTags.value.map(t => t.id)
-
-  // Используем nextTick для предотвращения циклов
   await nextTick()
 
-  // Затем эмитируем изменения
   emit('update:modelValue', selectedIds)
   emit('change', selectedTags.value)
 }
 
-// Стиль тега
 const getTagStyle = (tag: Tag) => {
   const hue = (tag.id * 137) % 360
   return {
@@ -181,36 +159,27 @@ const getTagStyle = (tag: Tag) => {
   }
 }
 
-// Обработчик поиска
 const onSearch = () => {
   showDropdown.value = true
 }
 
-// Обработчик потери фокуса
 const onBlur = () => {
   setTimeout(() => {
     showDropdown.value = false
   }, 200)
 }
 
-// Наблюдатель за изменениями postId
 watch(() => props.postId, (newPostId) => {
   if (newPostId) {
     loadPostTags()
   }
 }, { immediate: true })
 
-// Наблюдатель за внешними изменениями modelValue
-// Используем deep: false и только для случаев без postId
 watch(() => props.modelValue, (newIds) => {
-  // Если у нас есть postId, игнорируем внешние изменения modelValue
-  // потому что теги загружаются с сервера
   if (props.postId) {
     return
   }
 
-  // Только для новых постов синхронизируем с внешним значением
-  // Проверяем, действительно ли изменились ID
   const currentIds = selectedTags.value.map(t => t.id)
   if (JSON.stringify(currentIds.sort()) !== JSON.stringify(newIds.slice().sort())) {
     selectedTags.value = allTags.value.filter(tag => newIds.includes(tag.id))
@@ -220,9 +189,7 @@ watch(() => props.modelValue, (newIds) => {
 onMounted(async () => {
   await loadTags()
 
-  // Если нет postId, но есть начальные значения в modelValue
   if (!props.postId && props.modelValue?.length) {
-    // Выбираем теги по ID
     selectedTags.value = allTags.value.filter(tag => props.modelValue.includes(tag.id))
   }
 })
@@ -233,7 +200,6 @@ onMounted(async () => {
   position: relative;
 }
 
-/* Темное выпадающее меню */
 .dark-dropdown {
   position: absolute;
   top: 100%;
@@ -273,7 +239,6 @@ onMounted(async () => {
   color: #a0a0a0;
 }
 
-/* Поле ввода в темной теме */
 .input {
   background-color: #252525;
   border-color: #404040;
@@ -289,12 +254,10 @@ onMounted(async () => {
   color: #888;
 }
 
-/* Иконка поиска */
 .icon {
   color: #888;
 }
 
-/* Популярные теги */
 .popular-tags .tag {
   transition: all 0.2s;
   background-color: #2a2a2a;
@@ -309,7 +272,6 @@ onMounted(async () => {
   color: #fff;
 }
 
-/* Выбранные теги */
 .selected-tags .tag {
   display: inline-flex;
   align-items: center;
@@ -334,7 +296,6 @@ onMounted(async () => {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .dark-dropdown {
     max-height: 250px;

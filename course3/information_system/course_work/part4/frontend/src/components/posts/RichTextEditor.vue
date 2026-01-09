@@ -1,6 +1,5 @@
 <template>
   <div class="rich-text-editor">
-    <!-- Панель инструментов -->
     <div v-if="editor" class="editor-toolbar">
       <div class="toolbar-group">
         <button
@@ -114,7 +113,6 @@
         </button>
       </div>
 
-      <!-- Кнопка загрузки изображения -->
       <div class="toolbar-group">
         <button
           @click="uploadImage"
@@ -129,7 +127,6 @@
         </button>
       </div>
 
-      <!-- Новая группа для медиа -->
       <div class="toolbar-group">
         <button
           @click="uploadFile"
@@ -163,13 +160,11 @@
       </div>
     </div>
 
-    <!-- Индикатор временных файлов -->
     <div v-if="pendingFiles.length > 0 && isCreating" class="pending-files-notification">
       <i class="fas fa-info-circle"></i>
       <span>{{ pendingFiles.length }} файл(ов) будет загружен после создания поста</span>
     </div>
 
-    <!-- Блок тегов -->
     <div v-if="showTagSelector" class="tag-selector-wrapper mt-3 p-3">
       <label class="label is-size-6">Теги поста:</label>
       <TagSelector
@@ -179,14 +174,12 @@
       />
     </div>
 
-    <!-- Область редактирования -->
     <editor-content
       :editor="editor"
       class="editor-content"
       :class="{ 'is-disabled': disabled }"
     />
 
-    <!-- Модальное окно для вставки видео -->
     <div v-if="showVideoModal" class="modal-overlay" @click="closeVideoModal">
       <div class="modal-content" @click.stop>
         <div class="modal-header">
@@ -299,7 +292,6 @@ const emit = defineEmits<{
   'tags-change': [tagIds: number[]]
 }>()
 
-// Состояние для модального окна видео
 const showVideoModal = ref(false)
 const videoUrl = ref('')
 const videoSource = ref<'youtube' | 'rutube'>('youtube')
@@ -311,12 +303,10 @@ const onTagsChange = (tags: Tag[]) => {
   emit('tags-change', selectedTagIds.value)
 }
 
-// Состояния для загрузки
 const uploadingImage = ref(false)
 const uploadingFile = ref(false)
 const uploadingAudio = ref(false)
 
-// Хранилище временных файлов
 const pendingFiles = ref<Array<{
   file: File
   type: 'image' | 'file' | 'audio'
@@ -325,17 +315,14 @@ const pendingFiles = ref<Array<{
   mimeType?: string
 }>>([])
 
-// Можно ли загружать файлы немедленно
 const canUploadImmediately = computed(() => {
   return props.postId !== undefined && props.postId > 0
 })
 
-// Можно ли добавлять файлы (в том числе временные)
 const canAddFiles = computed(() => {
   return props.postId !== undefined || props.isCreating
 })
 
-// Определение расширения для Iframe (видео)
 const IframeExtension = Node.create({
   name: 'iframe',
   group: 'block',
@@ -401,7 +388,6 @@ const IframeExtension = Node.create({
   },
 })
 
-// Функция для определения иконки файла
 const getFileIcon = (mimeType: string): string => {
   if (!mimeType) return 'file'
 
@@ -418,7 +404,6 @@ const getFileIcon = (mimeType: string): string => {
   return 'file'
 }
 
-// Определение расширения для файлов
 const FileExtension = Node.create({
   name: 'file',
   group: 'inline',
@@ -490,7 +475,6 @@ const FileExtension = Node.create({
   },
 })
 
-// Определение расширения для аудио
 const AudioExtension = Node.create({
   name: 'audio',
   group: 'block',
@@ -556,7 +540,6 @@ const AudioExtension = Node.create({
   },
 })
 
-// Создаем редактор с новыми расширениями
 const editor = useEditor({
   content: props.modelValue || '',
   extensions: [
@@ -587,7 +570,6 @@ const editor = useEditor({
   },
 })
 
-// Получение embed URL для видео
 const videoEmbedUrl = computed(() => {
   if (!videoUrl.value) return null
 
@@ -614,7 +596,6 @@ const videoEmbedUrl = computed(() => {
   return null
 })
 
-// Добавление временного файла
 const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
   const placeholder = type === 'image'
     ? `[Загружаемое изображение: ${file.name}]`
@@ -622,7 +603,6 @@ const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
       ? `[Загружаемое аудио: ${file.name}]`
       : `[Загружаемый файл: ${file.name}]`
 
-  // Для изображений при создании поста не создаем временный URL
   let tempUrl: string | undefined
   if (type === 'image' && canUploadImmediately.value) {
     tempUrl = URL.createObjectURL(file)
@@ -636,16 +616,13 @@ const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
     mimeType: file.type
   })
 
-  // Вставляем плейсхолдер в редактор для всех типов при создании поста
   if (!canUploadImmediately.value || type !== 'image') {
-    // Для файлов, аудио и изображений при создании поста используем текстовый плейсхолдер
     editor.value
       ?.chain()
       .focus()
       .insertContent(`<p>${placeholder}</p>`)
       .run()
   } else {
-    // Только для изображений при редактировании поста вставляем сразу
     editor.value
       ?.chain()
       .focus()
@@ -653,11 +630,9 @@ const addTemporaryFile = (file: File, type: 'image' | 'file' | 'audio') => {
       .run()
   }
 
-  // Сообщаем родителю о новом файле
   emit('files-uploaded', pendingFiles.value.map(pf => ({ file: pf.file, type: pf.type })))
 }
 
-// Загрузка изображения
 const uploadImage = async () => {
   if (!editor.value || uploadingImage.value || !canAddFiles.value) {
     if (!canAddFiles.value) {
@@ -679,7 +654,6 @@ const uploadImage = async () => {
       return
     }
 
-    // Если можем загрузить сразу (редактирование существующего поста)
     if (canUploadImmediately.value && props.postId) {
       uploadingImage.value = true
       try {
@@ -712,7 +686,6 @@ const uploadImage = async () => {
         uploadingImage.value = false
       }
     } else {
-      // Сохраняем как временный файл (создание нового поста)
       addTemporaryFile(file, 'image')
     }
   }
@@ -720,7 +693,6 @@ const uploadImage = async () => {
   input.click()
 }
 
-// Общая функция загрузки файла
 const uploadFileHandler = async (type: 'file' | 'audio') => {
   if (!editor.value || !canAddFiles.value) {
     if (!canAddFiles.value) {
@@ -751,7 +723,6 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
       return
     }
 
-    // Если можем загрузить сразу
     if (canUploadImmediately.value && props.postId) {
       if (type === 'audio') uploadingAudio.value = true
       else uploadingFile.value = true
@@ -799,7 +770,6 @@ const uploadFileHandler = async (type: 'file' | 'audio') => {
         resetUploadState(type)
       }
     } else {
-      // Сохраняем как временный файл
       addTemporaryFile(file, type)
     }
   }
@@ -824,7 +794,6 @@ const resetUploadState = (type: 'file' | 'audio') => {
   }
 }
 
-// Форматирование размера файла
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return '0 B'
 
@@ -835,13 +804,11 @@ const formatFileSize = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
 }
 
-// Вставка видео
 const insertVideo = () => {
   showVideoModal.value = true
   videoUrl.value = ''
 }
 
-// Вставка видео из URL
 const insertVideoFromUrl = () => {
   if (!editor.value || !videoEmbedUrl.value) return
 
@@ -854,13 +821,11 @@ const insertVideoFromUrl = () => {
   closeVideoModal()
 }
 
-// Закрытие модального окна
 const closeVideoModal = () => {
   showVideoModal.value = false
   videoUrl.value = ''
 }
 
-// Загрузка всех временных файлов после создания поста
 const uploadPendingFiles = async (postId: number) => {
   const results = []
 
@@ -893,7 +858,6 @@ const uploadPendingFiles = async (postId: number) => {
           tempUrl: pendingFile.tempUrl
         })
 
-        // Освобождаем временный URL
         if (pendingFile.tempUrl) {
           URL.revokeObjectURL(pendingFile.tempUrl)
         }
@@ -906,9 +870,7 @@ const uploadPendingFiles = async (postId: number) => {
   return results
 }
 
-// Очистка временных файлов
 const clearPendingFiles = () => {
-  // Освобождаем все временные URL
   pendingFiles.value.forEach(pf => {
     if (pf.tempUrl) {
       URL.revokeObjectURL(pf.tempUrl)
@@ -917,13 +879,11 @@ const clearPendingFiles = () => {
   pendingFiles.value = []
 }
 
-// Замена плейсхолдеров в контенте
 const replacePlaceholdersInContent = (content: string, uploadedFiles: Array<any>): string => {
   let updatedContent = content
 
   for (const file of uploadedFiles) {
     if (file.type === 'image') {
-      // Заменяем плейсхолдер на изображение
       updatedContent = updatedContent.replace(
         file.placeholder,
         `<img src="${file.url}" alt="${file.name}" class="editor-image" />`
@@ -944,14 +904,12 @@ const replacePlaceholdersInContent = (content: string, uploadedFiles: Array<any>
   return updatedContent
 }
 
-// Наблюдаем за изменением modelValue
 watch(() => props.modelValue, (newValue) => {
   if (editor.value && newValue !== editor.value.getHTML()) {
     editor.value.commands.setContent(newValue || '', false)
   }
 })
 
-// Наблюдаем за disabled
 watch(() => props.disabled, (newValue) => {
   if (editor.value) {
     editor.value.setEditable(!newValue)
@@ -959,12 +917,10 @@ watch(() => props.disabled, (newValue) => {
 })
 
 onBeforeUnmount(() => {
-  // Освобождаем все временные URL при уничтожении компонента
   clearPendingFiles()
   editor.value?.destroy()
 })
 
-// Экспортируем методы для использования извне
 defineExpose({
   editor,
   clear: () => editor.value?.commands.clearContent(),
@@ -1077,17 +1033,6 @@ defineExpose({
   cursor: not-allowed;
 }
 
-.character-counter {
-  padding: 8px 15px;
-  border-top: 1px solid #dbdbdb;
-  background-color: #302c2c;
-  text-align: right;
-  font-size: 0.8rem;
-  color: #d8d8d8;
-  border-radius: 0 0 4px 4px;
-}
-
-/* Модальное окно */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1188,7 +1133,7 @@ defineExpose({
 
 .video-embed {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+  padding-bottom: 56.25%;
   height: 0;
 }
 
@@ -1232,7 +1177,6 @@ defineExpose({
   color: #333;
 }
 
-/* Стили для медиа-элементов в редакторе */
 :deep(.editor-image) {
   max-width: 100%;
   height: auto;
@@ -1269,14 +1213,6 @@ defineExpose({
   color: #666;
 }
 
-:deep(.editor-iframe) {
-  width: 100%;
-  max-width: 100%;
-  margin: 20px 0;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
 
 :deep(.editor-iframe iframe) {
   width: 100%;
@@ -1284,9 +1220,6 @@ defineExpose({
   border: none;
 }
 
-:deep(.ProseMirror:focus) {
-  outline: none;
-}
 
 :deep(.ProseMirror p.is-editor-empty:first-child::before) {
   content: attr(data-placeholder);
@@ -1296,7 +1229,6 @@ defineExpose({
   height: 0;
 }
 
-/* Стили для различных элементов редактора */
 :deep(.ProseMirror h1) {
   font-size: 2em;
   font-weight: 600;

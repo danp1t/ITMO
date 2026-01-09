@@ -46,7 +46,6 @@ defineEmits<{
   'clear': []
 }>()
 
-// Стиль тега
 const getTagStyle = (tag: Tag) => {
   const hue = (tag.id * 137) % 360
   return {

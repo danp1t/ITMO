@@ -1,6 +1,5 @@
 <template>
   <article class="post-card card">
-    <!-- Заголовок поста -->
     <header class="card-header">
       <p class="card-header-title">
         {{ post.title }}
@@ -33,7 +32,6 @@
       </div>
     </header>
 
-    <!-- Превью изображение -->
     <div v-if="postImage && !isExpanded" class="post-image-preview" @click="viewPost">
       <img :src="postImage" :alt="post.title" class="preview-image" />
       <div class="image-overlay">
@@ -41,9 +39,7 @@
       </div>
     </div>
 
-    <!-- Содержимое поста -->
     <div class="card-content">
-      <!-- HTML контент -->
       <div class="post-content-wrapper">
         <div
           class="post-content-preview"
@@ -51,11 +47,9 @@
           v-html="processedHtml"
         ></div>
 
-        <!-- Градиент для превью -->
         <div v-if="!isExpanded && shouldShowGradient" class="content-gradient"></div>
       </div>
 
-      <!-- Кнопка "Читать далее" если контент длинный -->
       <div v-if="hasLongContent" class="content-expand-buttons">
         <button
           v-if="!isExpanded"
@@ -75,7 +69,6 @@
         </button>
       </div>
 
-      <!-- Мета-информация -->
       <div class="post-meta">
         <div class="tags" v-if="post.tags && post.tags.length > 0">
           <span
@@ -109,8 +102,6 @@
       </div>
     </div>
 
-
-    <!-- Футер с действиями -->
     <footer class="card-footer">
       <button
         class="card-footer-item like-button"
@@ -148,7 +139,6 @@
       </button>
     </footer>
 
-    <!-- Модальное окно для общего доступа -->
     <div class="modal" :class="{ 'is-active': showShareModal }">
       <div class="modal-background" @click="showShareModal = false"></div>
       <div class="modal-card">
@@ -184,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch} from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { postsAPI } from '@/api/posts'
@@ -203,7 +193,6 @@ const emit = defineEmits<{
 const router = useRouter()
 const authStore = useAuthStore()
 
-// Реактивные состояния
 const isExpanded = ref(false)
 const isLikedByCurrentUser = ref(false)
 const isLiking = ref(false)
@@ -211,10 +200,8 @@ const isDeleting = ref(false)
 const currentLikeCount = ref(props.post.countLike || 0)
 const showShareModal = ref(false)
 
-// Функция для безопасного извлечения первой картинки
 const extractFirstImage = (html: string): string | null => {
   try {
-    // Простой поиск первого тега img
     const imgMatch = html.match(/<img[^>]+src="([^">]+)"/i)
     return imgMatch ? imgMatch[1] : null
   } catch (error) {
@@ -223,32 +210,20 @@ const extractFirstImage = (html: string): string | null => {
   }
 }
 
-// Получаем первое изображение из HTML контента
 const postImage = computed(() => {
   const content = props.post.text || ''
   return extractFirstImage(content)
 })
 
-// Обработка HTML для отображения
 const processedHtml = computed(() => {
   let html = props.post.text || ''
 
   if (!isExpanded.value) {
-    // В превью режиме:
-
-    // 1. Удаляем все изображения (они показываются отдельно или не показываются в превью)
     html = html.replace(/<img[^>]*>/gi, '')
-
-    // 2. Удаляем видео и аудио
     html = html.replace(/<(iframe|video|audio)[^>]*>.*?<\/\1>/gis, '')
-
-    // 3. Удаляем файлы
     html = html.replace(/<a[^>]*class="editor-file"[^>]*>.*?<\/a>/gi, '')
-
-    // 4. Ограничиваем длину текста
     const textOnly = html.replace(/<[^>]*>/g, '')
     if (textOnly.length > 500) {
-      // Безопасная обрезка
       return html.substring(0, 500) + '...'
     }
   }
@@ -256,7 +231,6 @@ const processedHtml = computed(() => {
   return html
 })
 
-// Проверяем, длинный ли контент
 const hasLongContent = computed(() => {
   const text = props.post.text || ''
   const textOnly = text.replace(/<[^>]*>/g, '')
@@ -265,7 +239,6 @@ const hasLongContent = computed(() => {
   return textOnly.length > 500 || hasMedia
 })
 
-// Проверяем, нужно ли показывать градиент
 const shouldShowGradient = computed(() => {
   if (!isExpanded.value) {
     const text = props.post.text || ''
@@ -275,20 +248,16 @@ const shouldShowGradient = computed(() => {
   return false
 })
 
-// URL для шаринга
 const postUrl = computed(() => {
   return `${window.location.origin}/posts/${props.post.id}`
 })
 
-// Получаем ссылку на input для копирования
 const shareUrlInput = ref<HTMLInputElement>()
 
-// Проверяем, лайкал ли пользователь этот пост
 const checkIfLiked = () => {
   isLikedByCurrentUser.value = false
 }
 
-// Форматирование даты
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
   const now = new Date()
@@ -309,7 +278,6 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Лайк поста
 const toggleLike = async () => {
   if (!authStore.isAuthenticated) {
     alert('Для оценки постов необходимо войти в систему')
@@ -343,7 +311,6 @@ const toggleLike = async () => {
   }
 }
 
-// Удаление поста
 const deletePost = async () => {
   if (!authStore.isAuthenticated || !authStore.canDeletePost(props.post.ownerId)) {
     return
@@ -363,17 +330,14 @@ const deletePost = async () => {
   }
 }
 
-// Переход к просмотру поста
 const viewPost = () => {
   router.push(`/posts/${props.post.id}`)
 }
 
-// Поделиться постом
 const sharePost = () => {
   showShareModal.value = true
 }
 
-// Копировать ссылку в буфер обмена
 const copyToClipboard = async () => {
   if (shareUrlInput.value) {
     shareUrlInput.value.select()
@@ -389,28 +353,12 @@ const copyToClipboard = async () => {
   }
 }
 
-const filterByTag = (tagId: number) => {
-  router.push({ path: '/posts', query: { tag: tagId } })
-}
-
-// Стиль тега
-const getTagStyle = (tag: Tag) => {
-  const hue = (tag.id * 137) % 360
-  return {
-    backgroundColor: `hsl(${hue}, 70%, 95%)`,
-    color: `hsl(${hue}, 50%, 30%)`,
-    border: `1px solid hsl(${hue}, 60%, 85%)`
-  }
-}
-
-// Выделить URL при клике
 const selectShareUrl = () => {
   if (shareUrlInput.value) {
     shareUrlInput.value.select()
   }
 }
 
-// Наблюдатели
 watch(() => props.post.countLike, (newCount) => {
   currentLikeCount.value = newCount
 })
@@ -419,7 +367,6 @@ watch(() => authStore.user, () => {
   checkIfLiked()
 })
 
-// Инициализация при монтировании
 onMounted(() => {
   checkIfLiked()
 })
@@ -442,32 +389,10 @@ onMounted(() => {
   border-color: #404040;
 }
 
-/* Заголовок карточки */
 .card-header {
   background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
   padding: 16px 20px;
   border-bottom: 1px solid #333;
-}
-
-.card-header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.card-title {
-  color: #ffffff;
-  margin: 0;
-  font-weight: 600;
-  font-size: 1.25rem;
-  line-height: 1.4;
-  flex-grow: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
 }
 
 .card-header-icons {
@@ -503,7 +428,6 @@ onMounted(() => {
   margin-left: 4px;
 }
 
-/* Превью изображения */
 .post-image-preview {
   position: relative;
   height: 500px;
@@ -547,7 +471,6 @@ onMounted(() => {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Контент поста */
 .card-content {
   padding: 20px;
 }
@@ -582,7 +505,6 @@ onMounted(() => {
   pointer-events: none;
 }
 
-/* Стили для HTML контента внутри превью */
 :deep(.post-content-preview) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
@@ -645,7 +567,7 @@ onMounted(() => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-:deep(.post-content-preview .editor-iframe) {
+:deep(.post-content-preview) {
   margin: 1.5em 0;
   border-radius: 8px;
   overflow: hidden;
@@ -656,14 +578,14 @@ onMounted(() => {
   border-radius: 8px;
 }
 
-:deep(.post-content-preview .editor-audio) {
+:deep(.post-content-preview) {
   width: 100%;
   margin: 1em 0;
   border-radius: 8px;
   background: #252525;
 }
 
-:deep(.post-content-preview .editor-file) {
+:deep(.post-content-preview) {
   display: inline-flex;
   align-items: center;
   padding: 8px 12px;
@@ -676,12 +598,11 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-:deep(.post-content-preview .editor-file:hover) {
+:deep(.post-content-preview) {
   background: #303030;
   border-color: #404040;
 }
 
-/* Кнопки раскрытия контента */
 .content-expand-buttons {
   display: flex;
   justify-content: center;
@@ -714,7 +635,6 @@ onMounted(() => {
   font-size: 0.9em;
 }
 
-/* Мета-информация */
 .post-meta {
   margin-top: 20px;
   padding-top: 20px;
@@ -767,7 +687,6 @@ onMounted(() => {
   color: #ccc;
 }
 
-/* Футер поста */
 .card-footer {
   border-top: 1px solid #333;
   background: #252525;
@@ -842,7 +761,6 @@ onMounted(() => {
   color: #3b82f6;
 }
 
-/* Модальное окно шаринга */
 .modal-card {
   border-radius: 12px;
   overflow: hidden;
@@ -887,13 +805,7 @@ onMounted(() => {
   background: #2563eb;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
-  .card-title {
-    font-size: 1.1rem;
-    -webkit-line-clamp: 2;
-  }
-
   .post-image-preview {
     height: 200px;
   }
@@ -930,7 +842,6 @@ onMounted(() => {
   }
 }
 
-/* Анимации */
 @keyframes fadeIn {
   from {
     opacity: 0;

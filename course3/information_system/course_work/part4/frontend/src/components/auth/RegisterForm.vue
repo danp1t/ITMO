@@ -7,7 +7,6 @@
 
       <div class="card-content">
         <form @submit.prevent="handleSubmit">
-          <!-- Имя -->
           <div class="field">
             <label class="label">Имя</label>
             <div class="control has-icons-left">
@@ -26,7 +25,6 @@
             <p v-if="errors.name" class="help is-danger">{{ errors.name }}</p>
           </div>
 
-          <!-- Email -->
           <div class="field">
             <label class="label">Email</label>
             <div class="control has-icons-left">
@@ -45,7 +43,6 @@
             <p v-if="errors.email" class="help is-danger">{{ errors.email }}</p>
           </div>
 
-          <!-- Пароль -->
           <div class="field">
             <label class="label">Пароль</label>
             <div class="control has-icons-left">
@@ -64,7 +61,6 @@
             <p v-if="errors.password" class="help is-danger">{{ errors.password }}</p>
           </div>
 
-          <!-- Подтверждение пароля -->
           <div class="field">
             <label class="label">Подтверждение пароля</label>
             <div class="control has-icons-left">
@@ -83,12 +79,10 @@
             <p v-if="errors.confirmPassword" class="help is-danger">{{ errors.confirmPassword }}</p>
           </div>
 
-          <!-- Ошибка сервера -->
           <div v-if="serverError" class="notification is-danger is-light">
             {{ serverError }}
           </div>
 
-          <!-- Успешная регистрация -->
           <div v-if="successMessage" class="notification is-success is-light">
             {{ successMessage }}
             <p v-if="showVerificationPrompt" class="mt-2">
@@ -96,7 +90,6 @@
             </p>
           </div>
 
-          <!-- Кнопка регистрации -->
           <div class="field">
             <div class="control">
               <button
@@ -110,7 +103,6 @@
             </div>
           </div>
 
-          <!-- Ссылки -->
           <div class="field">
             <div class="is-flex is-justify-content-space-between">
               <router-link to="/login" class="is-size-7">
@@ -129,10 +121,8 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../../stores/auth'
+import { useAuthStore } from '@/stores/auth.ts'
 
-const router = useRouter()
 const authStore = useAuthStore()
 
 const form = reactive({
@@ -157,13 +147,11 @@ const showVerificationPrompt = ref(false)
 const validateForm = () => {
   let isValid = true
 
-  // Сброс ошибок
   errors.name = ''
   errors.email = ''
   errors.password = ''
   errors.confirmPassword = ''
 
-  // Валидация имени
   if (!form.name.trim()) {
     errors.name = 'Имя обязательно'
     isValid = false
@@ -172,7 +160,6 @@ const validateForm = () => {
     isValid = false
   }
 
-  // Валидация email
   if (!form.email) {
     errors.email = 'Email обязателен'
     isValid = false
@@ -181,7 +168,6 @@ const validateForm = () => {
     isValid = false
   }
 
-  // Валидация пароля
   if (!form.password) {
     errors.password = 'Пароль обязателен'
     isValid = false
@@ -190,7 +176,6 @@ const validateForm = () => {
     isValid = false
   }
 
-  // Подтверждение пароля
   if (!form.confirmPassword) {
     errors.confirmPassword = 'Подтверждение пароля обязательно'
     isValid = false
@@ -219,7 +204,6 @@ const handleSubmit = async () => {
       successMessage.value = 'Регистрация успешна! Код подтверждения отправлен на ваш email.'
       showVerificationPrompt.value = true
 
-      // Очищаем форму
       form.name = ''
       form.email = ''
       form.password = ''

@@ -7,7 +7,6 @@
 
       <div class="card-content">
         <form @submit.prevent="handleSubmit">
-          <!-- Email -->
           <div class="field">
             <label class="label">Email</label>
             <div class="control has-icons-left">
@@ -26,7 +25,6 @@
             <p v-if="errors.email" class="help is-danger">{{ errors.email }}</p>
           </div>
 
-          <!-- Пароль -->
           <div class="field">
             <label class="label">Пароль</label>
             <div class="control has-icons-left">
@@ -45,12 +43,10 @@
             <p v-if="errors.password" class="help is-danger">{{ errors.password }}</p>
           </div>
 
-          <!-- Ошибка сервера -->
           <div v-if="serverError" class="notification is-danger is-light">
             {{ serverError }}
           </div>
 
-          <!-- Кнопки -->
           <div class="field">
             <div class="control">
               <button
@@ -65,7 +61,6 @@
             </div>
           </div>
 
-          <!-- Ссылки -->
           <div class="field">
             <div class="is-flex is-justify-content-space-between">
               <router-link to="/register" class="is-size-7">
@@ -106,11 +101,9 @@ const isLoading = ref(false)
 const validateForm = () => {
   let isValid = true
 
-  // Сброс ошибок
   errors.email = ''
   errors.password = ''
 
-  // Валидация email
   if (!form.email) {
     errors.email = 'Email обязателен'
     isValid = false
@@ -142,7 +135,6 @@ const handleSubmit = async () => {
     const result = await authStore.login(form.email, form.password)
 
     if (result.success) {
-      // Перенаправляем на главную страницу
       router.push('/')
     } else {
       serverError.value = result.error || 'Ошибка входа'
