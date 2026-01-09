@@ -174,7 +174,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch} from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { postsAPI } from '@/api/posts'
@@ -200,9 +200,40 @@ const isDeleting = ref(false)
 const currentLikeCount = ref(props.post.countLike || 0)
 const showShareModal = ref(false)
 
+// Функция для очистки HTML от пустых элементов
+const cleanHtml = (html: string): string => {
+  if (!html) return ''
+
+  // Удаляем полностью пустые элементы
+  let cleaned = html
+    .replace(/<ul>\s*<\/ul>/gi, '')
+    .replace(/<ol>\s*<\/ol>/gi, '')
+    .replace(/<li>\s*<\/li>/gi, '')
+    .replace(/<p>\s*<\/p>/gi, '')
+    .replace(/<h[1-6]>\s*<\/h[1-6]>/gi, '')
+    .replace(/<div>\s*<\/div>/gi, '')
+
+  // Удаляем пустые списки с пустыми элементами
+  cleaned = cleaned.replace(/<(ul|ol)>(\s*<li>\s*<\/li>\s*)+<\/\1>/gi, '')
+
+  // Удаляем множественные пустые строки и пробелы
+  cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
+
+  // Удаляем лишние пробелы в начале/конце тегов
+  cleaned = cleaned.replace(/>\s+</g, '><')
+  cleaned = cleaned.replace(/\s+</g, '<')
+  cleaned = cleaned.replace(/>\s+/g, '>')
+
+  // Удаляем пустые параграфы в конце
+  cleaned = cleaned.replace(/(<p>\s*<\/p>\s*)+$/i, '')
+
+  return cleaned.trim()
+}
+
 const extractFirstImage = (html: string): string | null => {
   try {
-    const imgMatch = html.match(/<img[^>]+src="([^">]+)"/i)
+    const cleaned = cleanHtml(html)
+    const imgMatch = cleaned.match(/<img[^>]+src="([^">]+)"/i)
     return imgMatch ? imgMatch[1] : null
   } catch (error) {
     console.error('Ошибка при извлечении изображения:', error)
@@ -215,34 +246,116 @@ const postImage = computed(() => {
   return extractFirstImage(content)
 })
 
-const processedHtml = computed(() => {
-  let html = props.post.text || ''
+// Функция для создания предпросмотра с форматированием
+const createPreviewHtml = (html: string): string => {
+  if (!html) return ''
 
-  if (!isExpanded.value) {
-    html = html.replace(/<img[^>]*>/gi, '')
-    html = html.replace(/<(iframe|video|audio)[^>]*>.*?<\/\1>/gis, '')
-    html = html.replace(/<a[^>]*class="editor-file"[^>]*>.*?<\/a>/gi, '')
-    const textOnly = html.replace(/<[^>]*>/g, '')
-    if (textOnly.length > 500) {
-      return html.substring(0, 500) + '...'
+  // Очищаем от пустых элементов
+  let cleaned = cleanHtml(html)
+
+  // Удаляем только медиа-элементы для предпросмотра
+  cleaned = cleaned.replace(/<img[^>]*>/gi, '')
+  cleaned = cleaned.replace(/<(iframe|video|audio)[^>]*>.*?<\/\1>/gis, '')
+  cleaned = cleaned.replace(/<a[^>]*class="editor-file"[^>]*>.*?<\/a>/gi, '')
+
+  // Получаем чистый текст для проверки длины
+  const textOnly = cleaned.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+
+  // Если текст короткий, возвращаем как есть
+  if (textOnly.length <= 500) {
+    return cleaned
+  }
+
+  // Для длинного текста находим, где обрезать, сохраняя теги
+  let textLength = 0
+  let result = ''
+  let tagStack: string[] = []
+  let inTag = false
+  let tagContent = ''
+
+  for (let i = 0; i < cleaned.length; i++) {
+    const char = cleaned[i]
+
+    if (char === '<') {
+      inTag = true
+      tagContent = char
+    } else if (inTag) {
+      tagContent += char
+      if (char === '>') {
+        inTag = false
+        const tag = tagContent
+
+        // Определяем, открывающий или закрывающий тег
+        const tagMatch = tag.match(/<\/?([a-zA-Z][a-zA-Z0-9]*)/)
+        if (tagMatch) {
+          const tagName = tagMatch[1].toLowerCase()
+          const isClosing = tag.startsWith('</')
+
+          if (!isClosing && !['img', 'br', 'hr', 'meta', 'link', 'input'].includes(tagName)) {
+            tagStack.push(tagName)
+          } else if (isClosing) {
+            const lastTag = tagStack[tagStack.length - 1]
+            if (lastTag === tagName) {
+              tagStack.pop()
+            }
+          }
+        }
+
+        result += tag
+        tagContent = ''
+      }
+    } else {
+      if (textLength < 500) {
+        result += char
+        if (char.trim()) {
+          textLength++
+        }
+      } else {
+        // Достигли лимита, добавляем многоточие
+        result += '...'
+        break
+      }
     }
   }
 
-  return html
+  // Закрываем все открытые теги
+  for (let i = tagStack.length - 1; i >= 0; i--) {
+    result += `</${tagStack[i]}>`
+  }
+
+  return result
+}
+
+// Функция для получения полного HTML
+const getFullHtml = (html: string): string => {
+  if (!html) return ''
+  return cleanHtml(html)
+}
+
+const processedHtml = computed(() => {
+  const html = props.post.text || ''
+
+  if (isExpanded.value) {
+    return getFullHtml(html)
+  } else {
+    return createPreviewHtml(html)
+  }
 })
 
 const hasLongContent = computed(() => {
   const text = props.post.text || ''
-  const textOnly = text.replace(/<[^>]*>/g, '')
-  const hasMedia = text.includes('<img') || text.includes('<iframe') ||
-    text.includes('<video') || text.includes('<audio')
+  const cleanedText = cleanHtml(text)
+  const textOnly = cleanedText.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+  const hasMedia = cleanedText.includes('<img') || cleanedText.includes('<iframe') ||
+    cleanedText.includes('<video') || cleanedText.includes('<audio')
   return textOnly.length > 500 || hasMedia
 })
 
 const shouldShowGradient = computed(() => {
   if (!isExpanded.value) {
     const text = props.post.text || ''
-    const textOnly = text.replace(/<[^>]*>/g, '')
+    const cleanedText = cleanHtml(text)
+    const textOnly = cleanedText.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
     return textOnly.length > 500
   }
   return false
@@ -367,6 +480,11 @@ watch(() => authStore.user, () => {
   checkIfLiked()
 })
 
+// Сбрасываем состояние развертывания при изменении поста
+watch(() => props.post.id, () => {
+  isExpanded.value = false
+})
+
 onMounted(() => {
   checkIfLiked()
 })
@@ -485,7 +603,7 @@ onMounted(() => {
   line-height: 1.6;
   color: #cccccc;
   position: relative;
-  max-height: 120px;
+  max-height: 200px;
   overflow: hidden;
   transition: max-height 0.4s ease;
 }
@@ -505,87 +623,137 @@ onMounted(() => {
   pointer-events: none;
 }
 
+/* Стили для форматированного текста */
 :deep(.post-content-preview) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
+:deep(.post-content-preview *) {
+  max-width: 100%;
+}
+
+:deep(.post-content-preview :empty) {
+  display: none !important;
+}
+
+/* Заголовки */
 :deep(.post-content-preview h1),
 :deep(.post-content-preview h2),
-:deep(.post-content-preview h3) {
+:deep(.post-content-preview h3),
+:deep(.post-content-preview h4),
+:deep(.post-content-preview h5),
+:deep(.post-content-preview h6) {
   color: #ffffff;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
   font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
   line-height: 1.3;
 }
 
 :deep(.post-content-preview h1) {
-  font-size: 1.5em;
+  font-size: 1.6em;
   border-bottom: 2px solid #333;
   padding-bottom: 0.3em;
+  margin-top: 0;
 }
 
 :deep(.post-content-preview h2) {
-  font-size: 1.25em;
+  font-size: 1.4em;
 }
 
 :deep(.post-content-preview h3) {
+  font-size: 1.2em;
+}
+
+:deep(.post-content-preview h4) {
   font-size: 1.1em;
 }
 
+/* Параграфы */
 :deep(.post-content-preview p) {
   margin-bottom: 1em;
+  line-height: 1.6;
   text-align: justify;
 }
 
+/* Списки */
 :deep(.post-content-preview ul),
 :deep(.post-content-preview ol) {
   padding-left: 1.5em;
   margin-bottom: 1em;
+  margin-top: 0.5em;
 }
 
 :deep(.post-content-preview li) {
   margin-bottom: 0.5em;
+  padding-left: 0.5em;
 }
 
+:deep(.post-content-preview li:empty) {
+  display: none;
+}
+
+/* Цитаты */
 :deep(.post-content-preview blockquote) {
   border-left: 3px solid #404040;
   padding-left: 1em;
-  margin: 1em 0;
+  margin: 1.2em 0;
   color: #999;
   font-style: italic;
   background: #252525;
   padding: 1em;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
-:deep(.post-content-preview img) {
+/* Жирный и курсив */
+:deep(.post-content-preview strong),
+:deep(.post-content-preview b) {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+:deep(.post-content-preview em),
+:deep(.post-content-preview i) {
+  font-style: italic;
+}
+
+/* Ссылки */
+:deep(.post-content-preview a:not(.editor-file)) {
+  color: #3b82f6;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+:deep(.post-content-preview a:not(.editor-file):hover) {
+  border-bottom-color: #3b82f6;
+}
+
+/* Изображения (только в развернутом виде) */
+:deep(.post-content-preview.expanded img) {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 1em 0;
+  margin: 1.2em 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-:deep(.post-content-preview) {
+/* Медиа-элементы (только в развернутом виде) */
+:deep(.post-content-preview.expanded iframe),
+:deep(.post-content-preview.expanded video),
+:deep(.post-content-preview.expanded audio) {
+  width: 100%;
+  max-width: 100%;
   margin: 1.5em 0;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-:deep(.post-content-preview .editor-iframe iframe) {
-  border-radius: 8px;
-}
-
-:deep(.post-content-preview) {
-  width: 100%;
-  margin: 1em 0;
-  border-radius: 8px;
-  background: #252525;
-}
-
-:deep(.post-content-preview) {
+/* Файлы */
+:deep(.post-content-preview a.editor-file) {
   display: inline-flex;
   align-items: center;
   padding: 8px 12px;
@@ -598,9 +766,15 @@ onMounted(() => {
   transition: all 0.2s;
 }
 
-:deep(.post-content-preview) {
+:deep(.post-content-preview a.editor-file:hover) {
   background: #303030;
   border-color: #404040;
+}
+
+/* Многоточие в конце предпросмотра */
+:deep(.post-content-preview:not(.expanded))::after {
+  content: '...';
+  color: #666;
 }
 
 .content-expand-buttons {
@@ -827,6 +1001,7 @@ onMounted(() => {
 
   .post-content-preview {
     font-size: 0.95em;
+    max-height: 150px;
   }
 
   :deep(.post-content-preview h1) {
@@ -839,6 +1014,15 @@ onMounted(() => {
 
   :deep(.post-content-preview h3) {
     font-size: 1em;
+  }
+
+  :deep(.post-content-preview h4) {
+    font-size: 0.95em;
+  }
+
+  :deep(.post-content-preview ul),
+  :deep(.post-content-preview ol) {
+    padding-left: 1.2em;
   }
 }
 
