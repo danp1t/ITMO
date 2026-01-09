@@ -253,9 +253,6 @@ const cleanHtml = (html: string): string => {
   cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
 
   // Удаляем лишние пробелы в начале/конце тегов
-  cleaned = cleaned.replace(/>\s+</g, '><')
-  cleaned = cleaned.replace(/\s+</g, '<')
-  cleaned = cleaned.replace(/>\s+/g, '>')
 
   // Удаляем пустые параграфы в конце
   cleaned = cleaned.replace(/(<p>\s*<\/p>\s*)+$/i, '')
