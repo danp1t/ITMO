@@ -1,6 +1,5 @@
 <template>
   <div class="product-card card">
-    <!-- Изображение товара -->
     <div class="card-image">
       <figure class="image is-4by3">
         <img
@@ -15,18 +14,13 @@
     </div>
 
     <div class="card-content">
-      <!-- Категория -->
       <div class="tags has-addons mb-2">
         <span class="tag is-light">{{ product.category }}</span>
       </div>
 
-      <!-- Название товара -->
       <h3 class="title is-5 mb-2">{{ product.name }}</h3>
-
-      <!-- Описание -->
       <p class="description mb-3">{{ truncateDescription(product.description) }}</p>
 
-      <!-- Цена и наличие -->
       <div class="level is-mobile mb-3">
         <div class="level-left">
           <div class="price-info">
@@ -51,7 +45,6 @@
         </div>
       </div>
 
-      <!-- Выбор размера (если есть) -->
       <div v-if="availableSizes.length > 0" class="field">
         <label class="label is-size-7">Размер:</label>
         <div class="control">
@@ -71,7 +64,6 @@
         </div>
       </div>
 
-      <!-- Кнопки действий -->
       <div class="buttons">
         <button
           class="button is-primary is-fullwidth"
@@ -98,7 +90,6 @@
         </router-link>
       </div>
 
-      <!-- Кнопки администрирования (внизу карточки) -->
       <div v-if="authStore.canEditProducts() || authStore.canDeleteProducts()"
            class="product-admin-actions mt-3">
         <div class="admin-buttons">
@@ -156,7 +147,6 @@ const isAddingToCart = ref(false)
 const isEditing = ref(false)
 const isDeleting = ref(false)
 
-// Изображения товаров
 const getProductImageUrl = () => {
   if (props.product.images && props.product.images.length > 0) {
     const firstImage = props.product.images[0];
@@ -177,19 +167,16 @@ const handleImageError = (e: Event) => {
   img.src = 'https://via.placeholder.com/400x300?text=Изображение+товара'
 }
 
-// Общее количество на складе
 const totalStock = computed(() => {
   if (!props.productInfos || props.productInfos.length === 0) return 0
   return props.productInfos.reduce((total, info) => total + info.countItems, 0)
 })
 
-// Доступные размеры
 const availableSizes = computed(() => {
   if (!props.productInfos) return []
   return props.productInfos.filter(info => info.countItems > 0)
 })
 
-// Минимальная цена
 const minPrice = computed(() => {
   if (!props.productInfos || props.productInfos.length === 0) {
     return props.product.basePrice
@@ -197,17 +184,14 @@ const minPrice = computed(() => {
   return Math.min(...props.productInfos.map(info => info.price))
 })
 
-// Есть ли несколько цен
 const hasMultiplePrices = computed(() => {
   if (!props.productInfos || props.productInfos.length <= 1) return false
   const prices = props.productInfos.map(info => info.price)
   return new Set(prices).size > 1
 })
 
-// Товар отсутствует
 const isOutOfStock = computed(() => totalStock.value === 0)
 
-// Можно ли добавить в корзину
 const canAddToCart = computed(() => {
   if (isOutOfStock.value) return false
   if (availableSizes.value.length > 0) {
@@ -216,7 +200,6 @@ const canAddToCart = computed(() => {
   return true
 })
 
-// Текст для кнопки добавления в корзину
 const addToCartText = computed(() => {
   if (isOutOfStock.value) return 'Нет в наличии'
   if (availableSizes.value.length > 0 && !selectedSize.value) {
@@ -225,7 +208,6 @@ const addToCartText = computed(() => {
   return 'В корзину'
 })
 
-// Укорачиваем описание
 const truncateDescription = (description: string) => {
   if (description.length > 100) {
     return description.substring(0, 100) + '...'
@@ -233,12 +215,9 @@ const truncateDescription = (description: string) => {
   return description
 }
 
-// При изменении размера
 const onSizeChange = () => {
-  // Можно добавить дополнительную логику
 }
 
-// Добавление в корзину
 const addToCart = async () => {
   if (!canAddToCart.value) return
 
@@ -248,7 +227,6 @@ const addToCart = async () => {
     if (availableSizes.value.length > 0 && selectedSize.value) {
       cartStore.addItem(props.product, selectedSize.value, 1)
     } else {
-      // Если нет размеров, создаем фиктивную ProductInfo
       const productInfo: ProductInfo = {
         id: props.product.id,
         productId: props.product.id,
@@ -267,12 +245,10 @@ const addToCart = async () => {
   }
 }
 
-// Редактирование товара
 const handleEdit = () => {
   emit('edit', props.product.id)
 }
 
-// Удаление товара
 const handleDelete = async () => {
   isDeleting.value = true
   try {
@@ -285,7 +261,6 @@ const handleDelete = async () => {
   }
 }
 
-// Автоматически выбираем первый доступный размер
 if (availableSizes.value.length > 0) {
   selectedSize.value = availableSizes.value[0]
 }
@@ -309,7 +284,7 @@ if (availableSizes.value.length > 0) {
 .card-image {
   position: relative;
   overflow: hidden;
-  height: 200px; /* Фиксированная высота для изображения */
+  height: 200px;
 }
 
 .image.is-4by3 {
@@ -318,15 +293,7 @@ if (availableSizes.value.length > 0) {
   width: 100%;
 }
 
-.product-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top; /* Показываем верхнюю часть изображения */
-  transition: transform 0.3s;
-}
-
-.product-card:hover .product-image {
+.product-card:hover {
   transform: scale(1.05);
 }
 
@@ -401,7 +368,6 @@ if (availableSizes.value.length > 0) {
   border: 1px solid #e5e7eb;
 }
 
-/* Кнопки администрирования внизу карточки */
 .product-admin-actions {
   border-top: 1px solid #f0f0f0;
   padding-top: 1rem;

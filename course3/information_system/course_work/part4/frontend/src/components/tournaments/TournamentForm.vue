@@ -3,7 +3,6 @@
     <form @submit.prevent="handleSubmit">
       <div class="columns">
         <div class="column">
-          <!-- Название -->
           <div class="field">
             <label class="label">Название турнира *</label>
             <div class="control">
@@ -21,7 +20,6 @@
             <p class="help has-text-grey-light">{{ form.name.length }}/100 символов</p>
           </div>
 
-          <!-- Даты -->
           <div class="columns">
             <div class="column">
               <div class="field">
@@ -60,7 +58,6 @@
             </div>
           </div>
 
-          <!-- Адрес -->
           <div class="field">
             <label class="label">Адрес проведения *</label>
             <div class="control">
@@ -78,7 +75,6 @@
             <p class="help has-text-grey-light">{{ form.address.length }}/200 символов</p>
           </div>
 
-          <!-- Ссылка -->
           <div class="field">
             <label class="label">Ссылка на турнир</label>
             <div class="control">
@@ -97,7 +93,6 @@
         </div>
 
         <div class="column">
-          <!-- Ранг -->
           <div class="field">
             <label class="label">Ранг турнира *</label>
             <div class="control">
@@ -122,7 +117,6 @@
             <p v-if="errors.rangId" class="help is-danger">{{ errors.rangId }}</p>
           </div>
 
-          <!-- Минимальный возраст -->
           <div class="field">
             <label class="label">Минимальный возраст *</label>
             <div class="control">
@@ -140,7 +134,6 @@
             <p v-if="errors.minimalAge" class="help is-danger">{{ errors.minimalAge }}</p>
           </div>
 
-          <!-- Статус архивности -->
           <div class="field">
             <div class="control">
               <label class="checkbox">
@@ -156,13 +149,11 @@
         </div>
       </div>
 
-      <!-- Уведомление -->
       <AppNotification
         :notification="notification"
         @hide="hideNotification"
       />
 
-      <!-- Кнопки -->
       <div class="field is-grouped is-grouped-right">
         <div class="control">
           <button
@@ -207,7 +198,6 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-// Ограничения по годам
 const MIN_YEAR = 1900
 const MAX_YEAR = new Date().getFullYear() + 100
 
@@ -268,7 +258,6 @@ const formatDateTimeLocal = (dateString: string) => {
     }
 
     const year = date.getFullYear()
-    // Проверяем, что год в допустимом диапазоне
     if (year < MIN_YEAR || year > MAX_YEAR) {
       return ''
     }
@@ -284,7 +273,6 @@ const formatDateTimeLocal = (dateString: string) => {
   }
 }
 
-// Заполняем форму при редактировании
 watch(() => props.tournament, (tournament) => {
   if (tournament) {
     form.name = tournament.name
@@ -296,7 +284,6 @@ watch(() => props.tournament, (tournament) => {
     form.minimalAge = tournament.minimalAge.toString()
     form.archived = tournament.archived
   } else {
-    // Сброс формы при создании нового турнира
     Object.assign(form, {
       name: '',
       startDate: '',
@@ -314,7 +301,6 @@ const parseDateTimeLocal = (dateTimeString: string): Date | null => {
   if (!dateTimeString) return null
 
   try {
-    // Формат datetime-local: YYYY-MM-DDTHH:mm
     const [datePart, timePart] = dateTimeString.split('T')
     const [yearStr, monthStr, dayStr] = datePart.split('-').map(Number)
     const [hoursStr, minutesStr] = (timePart || '').split(':').map(Number)
@@ -325,12 +311,10 @@ const parseDateTimeLocal = (dateTimeString: string): Date | null => {
     const hours = hoursStr || 0
     const minutes = minutesStr || 0
 
-    // Проверка года
     if (year < MIN_YEAR || year > MAX_YEAR) {
       return null
     }
 
-    // Проверка месяцев и дней
     if (month < 0 || month > 11) return null
     if (day < 1 || day > 31) return null
     if (hours < 0 || hours > 23) return null
@@ -338,12 +322,10 @@ const parseDateTimeLocal = (dateTimeString: string): Date | null => {
 
     const date = new Date(year, month, day, hours, minutes)
 
-    // Проверяем, что дата корректна
     if (isNaN(date.getTime())) {
       return null
     }
 
-    // Проверяем, что компоненты совпадают (на случай вроде 31 февраля)
     if (date.getFullYear() !== year ||
       date.getMonth() !== month ||
       date.getDate() !== day ||
@@ -395,7 +377,6 @@ const validateForm = () => {
     }
     else {
       const now = new Date()
-      // Проверка на будущую дату (можно редактировать архивные)
       if (!form.archived && finishDate < now) {
         errors.finishDate = 'Дата конца не может быть в прошлом для активного турнира'
         isValid = false
@@ -461,7 +442,6 @@ const handleSubmit = async () => {
   isLoading.value = true
 
   try {
-    // Парсим даты с помощью нашей функции
     const startDate = parseDateTimeLocal(form.startDate)
     const finishDate = parseDateTimeLocal(form.finishDate)
 
@@ -510,9 +490,9 @@ const handleSubmit = async () => {
 }
 
 .select {
-  height: 3.5rem; /* Увеличиваем высоту */
-  font-size: 1.1rem; /* Увеличиваем размер шрифта */
-  line-height: 1.5; /* Увеличиваем межстрочный интервал */
+  height: 3.5rem;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .label {

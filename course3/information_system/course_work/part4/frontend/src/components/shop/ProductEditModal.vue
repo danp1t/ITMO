@@ -10,7 +10,6 @@
 
       <section class="modal-card-body">
         <form @submit.prevent="submitForm">
-          <!-- Основная информация -->
           <div class="field">
             <label class="label">Название товара *</label>
             <div class="control">
@@ -79,7 +78,6 @@
             </div>
           </div>
 
-          <!-- Существующие изображения -->
           <div class="field" v-if="existingImages.length > 0">
             <label class="label">Текущие изображения</label>
             <div class="existing-images">
@@ -103,7 +101,6 @@
             </div>
           </div>
 
-          <!-- Новые изображения -->
           <div class="field">
             <label class="label">Добавить изображения</label>
             <div class="image-upload-section">
@@ -147,7 +144,6 @@
             </div>
           </div>
 
-          <!-- Размеры и цены -->
           <div class="field">
             <label class="label">Размеры и цены</label>
 
@@ -276,9 +272,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
-import { shopAPI } from '../../api/shop'
-import type { Product, ProductDetail } from '../../types/shop'
+import { ref, computed, watch } from 'vue'
+import { shopAPI } from '@/api/shop.ts'
 
 interface Props {
   isVisible: boolean
@@ -297,7 +292,6 @@ const emit = defineEmits<Emits>()
 const fileInput = ref<HTMLInputElement | null>(null)
 const isSubmitting = ref(false)
 
-// Данные формы
 const formData = ref({
   id: 0,
   name: '',
@@ -313,12 +307,10 @@ const formData = ref({
   }>
 })
 
-// Изображения
 const existingImages = ref<string[]>([])
 const newImages = ref<File[]>([])
 const imagesToDelete = ref<string[]>([])
 
-// Валидация формы
 const isFormValid = computed(() => {
   return formData.value.name.trim() !== '' &&
     formData.value.description.trim() !== '' &&
@@ -331,7 +323,6 @@ const isFormValid = computed(() => {
     )
 })
 
-// Получение URL для изображения
 const getImageUrl = (imagePath: string) => {
   if (imagePath.startsWith('http') || imagePath.startsWith('/')) {
     return imagePath
@@ -343,7 +334,6 @@ const getNewImageUrl = (file: File) => {
   return URL.createObjectURL(file)
 }
 
-// Закрытие модального окна
 const closeModal = () => {
   if (!isSubmitting.value) {
     resetForm()
@@ -351,7 +341,6 @@ const closeModal = () => {
   }
 }
 
-// Загрузка данных товара
 const loadProduct = async () => {
   try {
     const response = await shopAPI.getProductForEdit(props.productId)
@@ -375,7 +364,6 @@ const loadProduct = async () => {
   }
 }
 
-// Управление изображениями
 const triggerFileInput = (event: Event) => {
   event.preventDefault()
   event.stopPropagation()
@@ -390,7 +378,6 @@ const handleImageSelect = (event: Event) => {
   if (input.files && !isSubmitting.value) {
     const files = Array.from(input.files)
 
-    // Проверка размера файлов (5MB)
     const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
       alert('Некоторые файлы превышают максимальный размер 5MB')
@@ -398,7 +385,6 @@ const handleImageSelect = (event: Event) => {
       return
     }
 
-    // Проверка типа файлов
     const invalidFiles = files.filter(file => !file.type.startsWith('image/'))
     if (invalidFiles.length > 0) {
       alert('Можно загружать только изображения (JPG, PNG, GIF)')
@@ -427,7 +413,6 @@ const removeNewImage = (index: number) => {
   }
 }
 
-// Управление размерами
 const addSize = () => {
   if (!isSubmitting.value) {
     formData.value.productInfos.push({
@@ -444,14 +429,12 @@ const removeSize = (index: number) => {
   }
 }
 
-// Отправка формы
 const submitForm = async () => {
   if (isSubmitting.value || !isFormValid.value) return
 
   isSubmitting.value = true
 
   try {
-    // 1. Обновляем основные данные товара
     const productData = {
       name: formData.value.name.trim(),
       description: formData.value.description.trim(),
@@ -462,7 +445,6 @@ const submitForm = async () => {
 
     await shopAPI.updateProduct(props.productId, productData)
 
-    // 2. Удаляем отмеченные изображения
     for (const imagePath of imagesToDelete.value) {
       try {
         await shopAPI.deleteProductImage(props.productId, imagePath)
@@ -471,7 +453,6 @@ const submitForm = async () => {
       }
     }
 
-    // 3. Добавляем новые изображения
     for (const imageFile of newImages.value) {
       try {
         const imageFormData = new FormData()
@@ -482,18 +463,15 @@ const submitForm = async () => {
       }
     }
 
-    // 4. Обновляем информацию о размерах
     for (const size of formData.value.productInfos) {
       try {
         if (size.id) {
-          // Обновить существующую запись
           await shopAPI.updateProductInfo(size.id, {
             sizeName: size.sizeName,
             price: size.price,
             countItems: size.countItems
           })
         } else {
-          // Создать новую запись
           await shopAPI.createProductInfo({
             productId: props.productId,
             sizeName: size.sizeName,
@@ -508,7 +486,6 @@ const submitForm = async () => {
 
     emit('product-updated')
 
-    // ЗАКРЫВАЕМ МОДАЛЬНОЕ ОКНО ПРИ УСПЕШНОМ ОБНОВЛЕНИИ
     setTimeout(() => {
       isSubmitting.value = false
       closeModal()
@@ -527,13 +504,8 @@ const submitForm = async () => {
   }
 }
 
-// Удаление товара
 const deleteProduct = async () => {
   if (isSubmitting.value) return
-
-  if (!confirm('Вы уверены, что хотите удалить этот товар? Это действие нельзя отменить.')) {
-    return
-  }
 
   isSubmitting.value = true
 
@@ -555,7 +527,6 @@ const deleteProduct = async () => {
   }
 }
 
-// Сброс формы
 const resetForm = () => {
   formData.value = {
     id: 0,
@@ -567,7 +538,6 @@ const resetForm = () => {
     productInfos: []
   }
 
-  // Освобождаем URL объектов
   newImages.value.forEach(image => {
     URL.revokeObjectURL(getNewImageUrl(image))
   })
@@ -576,14 +546,12 @@ const resetForm = () => {
   existingImages.value = []
 }
 
-// Загрузка данных при изменении productId
 watch(() => props.productId, (newId) => {
   if (newId) {
     loadProduct()
   }
 }, { immediate: true })
 
-// Загрузка данных при открытии модального окна
 watch(() => props.isVisible, (newValue) => {
   if (newValue && props.productId) {
     loadProduct()

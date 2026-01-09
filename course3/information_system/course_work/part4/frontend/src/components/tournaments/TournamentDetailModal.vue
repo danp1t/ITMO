@@ -92,8 +92,8 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useAuthStore } from '../../stores/auth'
-import type { Tournament, Rang } from '../../types/tournaments'
+import { useAuthStore } from '@/stores/auth.ts'
+import type { Tournament, Rang } from '@/types/tournaments.ts'
 
 interface Props {
   tournament: Tournament | null
@@ -107,7 +107,6 @@ interface Emits {
 }
 
 const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
 
 const authStore = useAuthStore()
 
@@ -142,7 +141,6 @@ const showEditButton = computed(() => {
 </script>
 
 <style scoped>
-/* Улучшаем отступы между кнопками в футере модального окна */
 .modal-card-foot {
   display: flex;
   justify-content: flex-end;
@@ -151,7 +149,7 @@ const showEditButton = computed(() => {
 }
 
 .buttons {
-  gap: 1rem; /* Добавляем расстояние между кнопками */
+  gap: 1rem;
   width: 100%;
   justify-content: flex-end;
 }
@@ -162,7 +160,6 @@ const showEditButton = computed(() => {
   padding-right: 1.5rem;
 }
 
-/* Делаем кнопки более выразительными */
 .modal-card-foot .button {
   border-radius: 8px;
   font-weight: 600;
@@ -175,7 +172,6 @@ const showEditButton = computed(() => {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Улучшаем внешний вид кнопки закрыть */
 .modal-card-foot .button:first-child {
   background-color: #f5f5f5;
   border-color: #dbdbdb;
@@ -187,7 +183,6 @@ const showEditButton = computed(() => {
   border-color: #c5c5c5;
 }
 
-/* Улучшаем внешний вид кнопки редактировать */
 .modal-card-foot .button.is-primary {
   background-color: #3273dc;
   border-color: #3273dc;
@@ -199,7 +194,6 @@ const showEditButton = computed(() => {
   border-color: #276cda;
 }
 
-/* Для мобильных устройств делаем кнопки более доступными */
 @media (max-width: 768px) {
   .modal-card-foot {
     padding: 1rem;

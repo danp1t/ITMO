@@ -1,19 +1,13 @@
 <template>
   <div class="cart-sidebar" :class="{ 'is-active': isVisible }">
-    <!-- Оверлей -->
     <div class="sidebar-overlay" @click="$emit('close')"></div>
-
-    <!-- Сайдбар -->
     <div class="sidebar-content">
-      <!-- Заголовок -->
       <div class="sidebar-header">
         <h3 class="title is-4">Корзина</h3>
         <button class="delete" @click="$emit('close')"></button>
       </div>
 
-      <!-- Содержимое корзины -->
       <div class="sidebar-body">
-        <!-- Пустая корзина -->
         <div v-if="cartStore.isEmpty" class="empty-cart">
           <div class="empty-cart-icon">
             <i class="fas fa-shopping-cart fa-3x has-text-grey-light"></i>
@@ -24,7 +18,6 @@
           </button>
         </div>
 
-        <!-- Товары в корзине -->
         <div v-else>
           <div class="cart-items">
             <div
@@ -92,7 +85,6 @@
             </div>
           </div>
 
-          <!-- Итоговая сумма -->
           <div class="cart-total">
             <div class="level is-mobile">
               <div class="level-left">
@@ -104,7 +96,6 @@
             </div>
           </div>
 
-          <!-- Кнопки действий -->
           <div class="cart-actions">
             <button class="button is-danger is-light is-fullwidth" @click="clearCart">
               Очистить корзину
@@ -127,8 +118,8 @@
 </template>
 
 <script setup lang="ts">
-import { useCartStore } from '../../stores/cart'
-import type { CartItem } from '../../types/shop'
+import { useCartStore } from '@/stores/cart.ts'
+import type { CartItem } from '@/types/shop.ts'
 
 interface Props {
   isVisible: boolean
@@ -137,9 +128,6 @@ interface Props {
 interface Emits {
   (e: 'close'): void
 }
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
 
 const cartStore = useCartStore()
 

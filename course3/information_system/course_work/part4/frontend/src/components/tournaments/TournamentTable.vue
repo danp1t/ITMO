@@ -1,6 +1,5 @@
 <template>
   <div class="tournament-table">
-    <!-- Фильтры и поиск -->
     <div class="level mb-4">
       <div class="level-left">
         <div class="level-item">
@@ -60,7 +59,6 @@
       </div>
     </div>
 
-    <!-- Таблица -->
     <div class="table-container">
       <table class="table is-fullwidth is-striped is-hoverable">
         <thead>
@@ -181,7 +179,6 @@
       </table>
     </div>
 
-    <!-- Пагинация -->
     <nav v-if="totalPages > 1" class="pagination is-centered mt-4" role="navigation">
       <ul class="pagination-list">
         <li>
@@ -294,7 +291,6 @@ const getRangColor = (rangId: number) => {
   return colors[rangId % colors.length]
 }
 
-// Функция для обрезки текста
 const truncateText = (text: string, maxLength: number): string => {
   if (!text) return ''
   if (text.length <= maxLength) return text
@@ -357,7 +353,6 @@ const onEditClick = (tournament: Tournament) => {
   emit('edit', tournament)
 }
 
-// Сброс при смене данных
 onMounted(() => {
   if (props.currentPage === 1) {
     currentPage.value = 1
@@ -429,7 +424,6 @@ onMounted(() => {
   color: #667eea;
 }
 
-/* Tooltip для полного текста */
 td strong:hover,
 td:hover {
   position: relative;

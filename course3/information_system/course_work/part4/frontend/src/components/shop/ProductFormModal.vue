@@ -10,7 +10,6 @@
 
       <section class="modal-card-body">
         <form @submit.prevent="submitForm">
-          <!-- Основная информация -->
           <div class="field">
             <label class="label">Название товара *</label>
             <div class="control">
@@ -79,11 +78,9 @@
             </div>
           </div>
 
-          <!-- Изображения товара -->
           <div class="field">
             <label class="label">Изображения товара</label>
             <div class="image-upload-section">
-              <!-- Предпросмотр выбранных изображений -->
               <div v-if="selectedImages.length > 0" class="image-preview-grid">
                 <div
                   v-for="(image, index) in selectedImages"
@@ -102,7 +99,6 @@
                 </div>
               </div>
 
-              <!-- Кнопка загрузки -->
               <div class="file is-boxed" :class="{ 'is-disabled': isSubmitting }">
                 <label class="file-label" :class="{ 'is-disabled': isSubmitting }">
                   <input
@@ -132,7 +128,6 @@
             </div>
           </div>
 
-          <!-- Размеры и цены -->
           <div class="field">
             <label class="label">Размеры и цены</label>
 
@@ -254,8 +249,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { shopAPI } from '../../api/shop'
-import type { CreateProductData } from '../../types/shop'
+import { shopAPI } from '@/api/shop.ts'
 
 interface Props {
   isVisible: boolean
@@ -272,10 +266,8 @@ const emit = defineEmits<Emits>()
 const fileInput = ref<HTMLInputElement | null>(null)
 const isSubmitting = ref(false)
 
-// Выбранные изображения
 const selectedImages = ref<File[]>([])
 
-// Данные формы
 const formData = ref({
   name: '',
   description: '',
@@ -291,7 +283,6 @@ const formData = ref({
   ]
 })
 
-// Валидация формы
 const isFormValid = computed(() => {
   return formData.value.name.trim() !== '' &&
     formData.value.description.trim() !== '' &&
@@ -304,12 +295,10 @@ const isFormValid = computed(() => {
     )
 })
 
-// Получение URL для предпросмотра
 const getImageUrl = (image: File) => {
   return URL.createObjectURL(image)
 }
 
-// Вызов клика по скрытому input
 const triggerFileInput = (event: Event) => {
   event.preventDefault()
   event.stopPropagation()
@@ -319,13 +308,11 @@ const triggerFileInput = (event: Event) => {
   }
 }
 
-// Обработка выбора файлов
 const handleImageSelect = (event: Event) => {
   const input = event.target as HTMLInputElement
   if (input.files && !isSubmitting.value) {
     const files = Array.from(input.files)
 
-    // Проверка размера файлов (5MB)
     const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
       alert('Некоторые файлы превышают максимальный размер 5MB')
@@ -333,7 +320,6 @@ const handleImageSelect = (event: Event) => {
       return
     }
 
-    // Проверка типа файлов (только изображения)
     const invalidFiles = files.filter(file => !file.type.startsWith('image/'))
     if (invalidFiles.length > 0) {
       alert('Можно загружать только изображения (JPG, PNG, GIF)')
@@ -341,25 +327,19 @@ const handleImageSelect = (event: Event) => {
       return
     }
 
-    // Добавляем новые файлы
     selectedImages.value.push(...files)
-
-    // Сбрасываем input
     input.value = ''
   }
 }
 
-// Удаление изображения из предпросмотра
 const removeImage = (index: number) => {
   if (!isSubmitting.value) {
     const removedImage = selectedImages.value[index]
     selectedImages.value.splice(index, 1)
-    // Освобождаем URL объекта
     URL.revokeObjectURL(URL.createObjectURL(removedImage))
   }
 }
 
-// Добавить размер
 const addSize = () => {
   if (!isSubmitting.value) {
     formData.value.sizes.push({
@@ -370,24 +350,20 @@ const addSize = () => {
   }
 }
 
-// Удалить размер
 const removeSize = (index: number) => {
   if (formData.value.sizes.length > 1 && !isSubmitting.value) {
     formData.value.sizes.splice(index, 1)
   }
 }
 
-// Отправка формы с использованием нового метода API
 const submitForm = async () => {
   if (isSubmitting.value || !isFormValid.value) return
 
   isSubmitting.value = true
 
   try {
-    // 1. Создаем FormData
     const formDataToSend = new FormData()
 
-    // 2. Подготавливаем данные товара как JSON строку
     const productData = {
       name: formData.value.name.trim(),
       description: formData.value.description.trim(),
@@ -396,10 +372,8 @@ const submitForm = async () => {
       popularity: 0
     }
 
-    // Добавляем product как JSON строку
     formDataToSend.append('product', JSON.stringify(productData))
 
-    // 3. Подготавливаем данные размеров как JSON строку
     const sizesData = formData.value.sizes
       .filter(size => size.sizeName.trim() !== '' && size.price >= 0 && size.countItems >= 0)
       .map(size => ({
@@ -408,19 +382,15 @@ const submitForm = async () => {
         countItems: size.countItems
       }))
 
-    // Добавляем sizes как JSON строку
     formDataToSend.append('sizes', JSON.stringify(sizesData))
 
-    // 4. Добавляем изображения
     selectedImages.value.forEach((image, index) => {
       formDataToSend.append('images', image)
     })
 
-    // 5. Отправляем ОДИН запрос с FormData
     const response = await shopAPI.createProductWithImages(formDataToSend)
     const productId = response.data.id
 
-    // Оповещаем об успешном добавлении
     emit('product-added')
     emit('close')
 
@@ -446,7 +416,6 @@ const submitForm = async () => {
   }
 }
 
-// Сброс формы
 const resetForm = () => {
   formData.value = {
     name: '',
@@ -463,14 +432,12 @@ const resetForm = () => {
     ]
   }
 
-  // Освобождаем URL объектов выбранных изображений
   selectedImages.value.forEach(image => {
     URL.revokeObjectURL(URL.createObjectURL(image))
   })
   selectedImages.value = []
 }
 
-// Очистка при закрытии
 watch(() => props.isVisible, (newValue) => {
   if (!newValue) {
     resetForm()
@@ -551,7 +518,6 @@ defineExpose({
   padding: 0.25rem 0.5rem;
 }
 
-/* Стили для загрузки изображений */
 .image-upload-section {
   border: 2px dashed #ddd;
   border-radius: 8px;
@@ -653,7 +619,6 @@ defineExpose({
   background-color: #f0f0f0;
 }
 
-/* Стили для полей формы при disabled */
 .input:disabled,
 .textarea:disabled,
 .select select:disabled {
@@ -662,7 +627,6 @@ defineExpose({
   opacity: 0.7;
 }
 
-/* Стили для сетки размеров */
 .columns {
   margin-left: -0.75rem;
   margin-right: -0.75rem;
@@ -673,7 +637,6 @@ defineExpose({
   padding: 0.75rem;
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .modal-card {
     width: 95%;
