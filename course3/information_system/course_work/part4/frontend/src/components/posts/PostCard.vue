@@ -200,12 +200,45 @@ const isDeleting = ref(false)
 const currentLikeCount = ref(props.post.countLike || 0)
 const showShareModal = ref(false)
 
+// Главная функция для исправления слипания текста
+const fixTextSpacing = (html: string): string => {
+  if (!html) return ''
+
+  let result = html
+
+  // 1. Добавляем пробелы перед открывающими тегами инлайнового форматирования
+  const openingTagRegex = /([а-яa-z\d])(<(\/?(strong|em|b|i|u|span|a)[^>]*)>)/gi
+  result = result.replace(openingTagRegex, '$1 $2')
+
+  // 2. Добавляем пробелы после закрывающих тегов инлайнового форматирования
+  const closingTagRegex = /(<(\/strong|\/em|\/b|\/i|\/u|\/span|\/a)>)([а-яa-z\d])/gi
+  result = result.replace(closingTagRegex, '$1 $3')
+
+  // 3. Исправляем ситуации, где есть знаки препинания без пробелов
+  result = result.replace(/([.,!?;:])(<(\/?(strong|em|b|i|u|span|a)[^>]*)>)/gi, '$1 $2')
+  result = result.replace(/(<(\/strong|\/em|\/b|\/i|\/u|\/span|\/a)>)([.,!?;:])/gi, '$1 $3')
+
+  // 4. Удаляем лишние пробелы, которые могли образоваться
+  result = result.replace(/\s+/g, ' ')
+
+  // 5. Удаляем пробелы перед знаками препинания
+  result = result.replace(/\s+([.,!?;:])/g, '$1')
+
+  // 6. Удаляем пробелы в начале/конце
+  result = result.trim()
+
+  return result
+}
+
 // Функция для очистки HTML от пустых элементов
 const cleanHtml = (html: string): string => {
   if (!html) return ''
 
+  // Сначала исправляем слипание текста
+  let cleaned = fixTextSpacing(html)
+
   // Удаляем полностью пустые элементы
-  let cleaned = html
+  cleaned = cleaned
     .replace(/<ul>\s*<\/ul>/gi, '')
     .replace(/<ol>\s*<\/ol>/gi, '')
     .replace(/<li>\s*<\/li>/gi, '')
@@ -216,7 +249,7 @@ const cleanHtml = (html: string): string => {
   // Удаляем пустые списки с пустыми элементами
   cleaned = cleaned.replace(/<(ul|ol)>(\s*<li>\s*<\/li>\s*)+<\/\1>/gi, '')
 
-  // Удаляем множественные пустые строки и пробелы
+  // Удаляем множественные пустые строки
   cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
 
   // Удаляем лишние пробелы в начале/конце тегов
@@ -250,7 +283,7 @@ const postImage = computed(() => {
 const createPreviewHtml = (html: string): string => {
   if (!html) return ''
 
-  // Очищаем от пустых элементов
+  // Очищаем от пустых элементов и исправляем пробелы
   let cleaned = cleanHtml(html)
 
   // Удаляем только медиа-элементы для предпросмотра
@@ -623,14 +656,41 @@ onMounted(() => {
   pointer-events: none;
 }
 
-/* Стили для форматированного текста */
+/* Важное исправление для слипания текста */
 :deep(.post-content-preview) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  white-space: normal;
+  word-spacing: normal;
+  text-rendering: optimizeLegibility;
 }
 
-:deep(.post-content-preview *) {
+/* Обеспечиваем пробелы вокруг инлайновых элементов */
+:deep(.post-content-preview) strong,
+:deep(.post-content-preview) b,
+:deep(.post-content-preview) em,
+:deep(.post-content-preview) i,
+:deep(.post-content-preview) u {
+  margin: 0 0.1em;
+  padding: 0 0.1em;
+}
+
+/* Специальное правило для предотвращения слипания */
+:deep(.post-content-preview) :not(strong, b, em, i, u) + strong,
+:deep(.post-content-preview) :not(strong, b, em, i, u) + b,
+:deep(.post-content-preview) :not(strong, b, em, i, u) + em,
+:deep(.post-content-preview) :not(strong, b, em, i, u) + i,
+:deep(.post-content-preview) :not(strong, b, em, i, u) + u,
+:deep(.post-content-preview) strong + :not(strong, b, em, i, u),
+:deep(.post-content-preview) b + :not(strong, b, em, i, u),
+:deep(.post-content-preview) em + :not(strong, b, em, i, u),
+:deep(.post-content-preview) i + :not(strong, b, em, i, u),
+:deep(.post-content-preview) u + :not(strong, b, em, i, u) {
+  letter-spacing: 0.01em;
+}
+
+:deep(.post-content-preview) * {
   max-width: 100%;
 }
 

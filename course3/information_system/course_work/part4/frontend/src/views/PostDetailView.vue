@@ -320,31 +320,56 @@ const editForm = ref({
   tagIds: [] as number[]
 })
 
-// Исправленная функция для очистки HTML
+// Главная функция для исправления слипания текста
+const fixTextSpacing = (html: string): string => {
+  if (!html) return ''
+
+  let result = html
+
+  // 1. Добавляем пробелы перед открывающими тегами инлайнового форматирования
+  const openingTagRegex = /([а-яa-z\d])(<(\/?(strong|em|b|i|u|span|a)[^>]*)>)/gi
+  result = result.replace(openingTagRegex, '$1 $2')
+
+  // 2. Добавляем пробелы после закрывающих тегов инлайнового форматирования
+  const closingTagRegex = /(<(\/strong|\/em|\/b|\/i|\/u|\/span|\/a)>)([а-яa-z\d])/gi
+  result = result.replace(closingTagRegex, '$1 $3')
+
+  // 3. Исправляем ситуации, где есть знаки препинания без пробелов
+  result = result.replace(/([.,!?;:])(<(\/?(strong|em|b|i|u|span|a)[^>]*)>)/gi, '$1 $2')
+  result = result.replace(/(<(\/strong|\/em|\/b|\/i|\/u|\/span|\/a)>)([.,!?;:])/gi, '$1 $3')
+
+  // 4. Удаляем лишние пробелы, которые могли образоваться
+  result = result.replace(/\s+/g, ' ')
+
+  // 5. Удаляем пробелы перед знаками препинания
+  result = result.replace(/\s+([.,!?;:])/g, '$1')
+
+  // 6. Удаляем пробелы в начале/конце
+  result = result.trim()
+
+  return result
+}
+
+// Функция для очистки HTML от пустых элементов
 const cleanHtml = (html: string): string => {
   if (!html) return ''
 
-  // Очищаем только от пустых элементов, НЕ удаляем теги форматирования
-  let cleaned = html
+  // Сначала исправляем слипание текста
+  let cleaned = fixTextSpacing(html)
 
-  // Удаляем полностью пустые элементы (те, что не содержат текста или других элементов)
-  cleaned = cleaned.replace(/<ul>\s*<\/ul>/gi, '')
-  cleaned = cleaned.replace(/<ol>\s*<\/ol>/gi, '')
-  cleaned = cleaned.replace(/<li>\s*<\/li>/gi, '')
-  cleaned = cleaned.replace(/<p>\s*<\/p>/gi, '')
-  cleaned = cleaned.replace(/<h[1-6]>\s*<\/h[1-6]>/gi, '')
-  cleaned = cleaned.replace(/<div>\s*<\/div>/gi, '')
-  cleaned = cleaned.replace(/<blockquote>\s*<\/blockquote>/gi, '')
-  cleaned = cleaned.replace(/<strong>\s*<\/strong>/gi, '')
-  cleaned = cleaned.replace(/<em>\s*<\/em>/gi, '')
-  cleaned = cleaned.replace(/<b>\s*<\/b>/gi, '')
-  cleaned = cleaned.replace(/<i>\s*<\/i>/gi, '')
-  cleaned = cleaned.replace(/<span>\s*<\/span>/gi, '')
+  // Удаляем полностью пустые элементы
+  cleaned = cleaned
+    .replace(/<ul>\s*<\/ul>/gi, '')
+    .replace(/<ol>\s*<\/ol>/gi, '')
+    .replace(/<li>\s*<\/li>/gi, '')
+    .replace(/<p>\s*<\/p>/gi, '')
+    .replace(/<h[1-6]>\s*<\/h[1-6]>/gi, '')
+    .replace(/<div>\s*<\/div>/gi, '')
 
   // Удаляем пустые списки с пустыми элементами
   cleaned = cleaned.replace(/<(ul|ol)>(\s*<li>\s*<\/li>\s*)+<\/\1>/gi, '')
 
-  // Удаляем множественные пустые строки и пробелы
+  // Удаляем множественные пустые строки
   cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
 
   // Удаляем лишние пробелы в начале/конце тегов
@@ -355,7 +380,6 @@ const cleanHtml = (html: string): string => {
   // Удаляем пустые параграфы в конце
   cleaned = cleaned.replace(/(<p>\s*<\/p>\s*)+$/i, '')
 
-  // Важно: НЕ удаляем теги форматирования!
   return cleaned.trim()
 }
 
@@ -670,9 +694,43 @@ onMounted(async () => {
   overflow-wrap: break-word;
 }
 
+/* Важные CSS правила для предотвращения слипания текста */
+.post-content {
+  white-space: normal;
+  word-spacing: normal;
+  text-rendering: optimizeLegibility;
+  font-kerning: normal;
+}
+
 /* Глобальные стили для всех элементов внутри .post-content */
 .post-content :deep(*) {
   max-width: 100%;
+  word-spacing: normal;
+  white-space: normal;
+}
+
+/* Специальные правила для инлайновых элементов форматирования */
+.post-content :deep(strong),
+.post-content :deep(b),
+.post-content :deep(em),
+.post-content :deep(i),
+.post-content :deep(u) {
+  margin: 0 0.1em;
+  padding: 0 0.1em;
+}
+
+/* Правило для предотвращения слипания текста до и после тегов форматирования */
+.post-content :deep(:not(strong, b, em, i, u) + strong),
+.post-content :deep(:not(strong, b, em, i, u) + b),
+.post-content :deep(:not(strong, b, em, i, u) + em),
+.post-content :deep(:not(strong, b, em, i, u) + i),
+.post-content :deep(:not(strong, b, em, i, u) + u),
+.post-content :deep(strong + :not(strong, b, em, i, u)),
+.post-content :deep(b + :not(strong, b, em, i, u)),
+.post-content :deep(em + :not(strong, b, em, i, u)),
+.post-content :deep(i + :not(strong, b, em, i, u)),
+.post-content :deep(u + :not(strong, b, em, i, u)) {
+  letter-spacing: 0.01em;
 }
 
 /* Скрываем полностью пустые элементы */
