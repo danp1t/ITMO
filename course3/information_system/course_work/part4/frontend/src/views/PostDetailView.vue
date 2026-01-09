@@ -47,7 +47,8 @@
         </header>
 
         <div v-if="!isEditing" class="card-content">
-          <div class="post-content" v-html="post.text"></div>
+          <!-- Используем cleanHtml вместо post.text напрямую -->
+          <div class="post-content" v-html="cleanHtml(post.text)"></div>
 
           <TagList
             v-if="post.tags && post.tags.length > 0"
@@ -318,6 +319,45 @@ const editForm = ref({
   content: '',
   tagIds: [] as number[]
 })
+
+// Исправленная функция для очистки HTML
+const cleanHtml = (html: string): string => {
+  if (!html) return ''
+
+  // Очищаем только от пустых элементов, НЕ удаляем теги форматирования
+  let cleaned = html
+
+  // Удаляем полностью пустые элементы (те, что не содержат текста или других элементов)
+  cleaned = cleaned.replace(/<ul>\s*<\/ul>/gi, '')
+  cleaned = cleaned.replace(/<ol>\s*<\/ol>/gi, '')
+  cleaned = cleaned.replace(/<li>\s*<\/li>/gi, '')
+  cleaned = cleaned.replace(/<p>\s*<\/p>/gi, '')
+  cleaned = cleaned.replace(/<h[1-6]>\s*<\/h[1-6]>/gi, '')
+  cleaned = cleaned.replace(/<div>\s*<\/div>/gi, '')
+  cleaned = cleaned.replace(/<blockquote>\s*<\/blockquote>/gi, '')
+  cleaned = cleaned.replace(/<strong>\s*<\/strong>/gi, '')
+  cleaned = cleaned.replace(/<em>\s*<\/em>/gi, '')
+  cleaned = cleaned.replace(/<b>\s*<\/b>/gi, '')
+  cleaned = cleaned.replace(/<i>\s*<\/i>/gi, '')
+  cleaned = cleaned.replace(/<span>\s*<\/span>/gi, '')
+
+  // Удаляем пустые списки с пустыми элементами
+  cleaned = cleaned.replace(/<(ul|ol)>(\s*<li>\s*<\/li>\s*)+<\/\1>/gi, '')
+
+  // Удаляем множественные пустые строки и пробелы
+  cleaned = cleaned.replace(/\n\s*\n\s*\n/g, '\n\n')
+
+  // Удаляем лишние пробелы в начале/конце тегов
+  cleaned = cleaned.replace(/>\s+</g, '><')
+  cleaned = cleaned.replace(/\s+</g, '<')
+  cleaned = cleaned.replace(/>\s+/g, '>')
+
+  // Удаляем пустые параграфы в конце
+  cleaned = cleaned.replace(/(<p>\s*<\/p>\s*)+$/i, '')
+
+  // Важно: НЕ удаляем теги форматирования!
+  return cleaned.trim()
+}
 
 const handleTagsChange = (tagIds: number[]) => {
   editForm.value.tagIds = tagIds
@@ -620,102 +660,386 @@ onMounted(async () => {
   cursor: not-allowed;
 }
 
+/* Основные стили для контейнера с контентом */
 .post-content {
   font-size: 1rem;
   line-height: 1.6;
-  color: #d5d2d2;
+  color: #cccccc;
   margin-bottom: 20px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-.post-content h1 {
+/* Глобальные стили для всех элементов внутри .post-content */
+.post-content :deep(*) {
+  max-width: 100%;
+}
+
+/* Скрываем полностью пустые элементы */
+.post-content :deep(:empty) {
+  display: none !important;
+}
+
+/* Заголовки */
+.post-content :deep(h1),
+.post-content :deep(h2),
+.post-content :deep(h3),
+.post-content :deep(h4),
+.post-content :deep(h5),
+.post-content :deep(h6) {
+  color: #ffffff;
+  font-weight: 600;
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  line-height: 1.3;
+}
+
+.post-content :deep(h1) {
   font-size: 1.8em;
-  font-weight: 600;
-  margin: 1.2em 0 0.8em;
-  color: #111827;
+  border-bottom: 2px solid #404040;
+  padding-bottom: 0.3em;
+  margin-top: 0;
 }
 
-.post-content h2 {
+.post-content :deep(h2) {
   font-size: 1.5em;
-  font-weight: 600;
-  margin: 1em 0 0.6em;
-  color: #111827;
+  border-left: 4px solid #3b82f6;
+  padding-left: 10px;
 }
 
-.post-content h3 {
+.post-content :deep(h3) {
+  font-size: 1.3em;
+}
+
+.post-content :deep(h4) {
   font-size: 1.2em;
-  font-weight: 600;
-  margin: 0.8em 0 0.4em;
-  color: #111827;
+  color: #a5a5a5;
 }
 
-.post-content p {
-  margin: 0 0 1em;
+/* Параграфы */
+.post-content :deep(p) {
+  margin-bottom: 1em;
+  line-height: 1.6;
+  text-align: justify;
 }
 
-.post-content strong {
-  font-weight: 700;
-}
-
-.post-content em {
-  font-style: italic;
-}
-
-.post-content ul,
-.post-content ol {
+/* Списки */
+.post-content :deep(ul),
+.post-content :deep(ol) {
   padding-left: 1.5em;
-  margin: 1em 0;
+  margin-bottom: 1em;
+  margin-top: 0.5em;
 }
 
-.post-content ul li {
+.post-content :deep(li) {
+  margin-bottom: 0.5em;
+  padding-left: 0.5em;
+}
+
+.post-content :deep(ul li) {
   list-style-type: disc;
-  margin-bottom: 0.5em;
 }
 
-.post-content ol li {
+.post-content :deep(ol li) {
   list-style-type: decimal;
-  margin-bottom: 0.5em;
 }
 
-.post-content blockquote {
-  border-left: 3px solid #dbdbdb;
+/* Цитаты */
+.post-content :deep(blockquote) {
+  border-left: 4px solid #404040;
   padding-left: 1em;
-  margin: 1em 0;
-  color: #666;
+  margin: 1.5em 0;
+  color: #a5a5a5;
+  font-style: italic;
+  background: #252525;
+  padding: 1em;
+  border-radius: 6px;
+}
+
+.post-content :deep(blockquote p) {
+  margin-bottom: 0;
+}
+
+/* Жирный и курсив */
+.post-content :deep(strong),
+.post-content :deep(b) {
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.post-content :deep(em),
+.post-content :deep(i) {
   font-style: italic;
 }
 
-.post-content img {
+/* Ссылки */
+.post-content :deep(a:not(.editor-file)) {
+  color: #3b82f6;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.post-content :deep(a:not(.editor-file):hover) {
+  border-bottom-color: #3b82f6;
+  color: #60a5fa;
+}
+
+/* Изображения */
+.post-content :deep(img) {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  margin: 1em 0;
+  margin: 1.2em 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.post-content hr {
+/* Медиа-элементы */
+.post-content :deep(iframe),
+.post-content :deep(video),
+.post-content :deep(audio) {
+  width: 100%;
+  max-width: 100%;
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Файлы */
+.post-content :deep(a.editor-file) {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #252525;
+  border-radius: 6px;
+  color: #ccc;
+  text-decoration: none;
+  border: 1px solid #333;
+  margin: 0.5em 0;
+  transition: all 0.2s;
+}
+
+.post-content :deep(a.editor-file:hover) {
+  background: #303030;
+  border-color: #404040;
+}
+
+/* Линии */
+.post-content :deep(hr) {
   border: none;
-  border-top: 1px solid #dbdbdb;
+  border-top: 2px solid #404040;
   margin: 2em 0;
 }
 
-.post-content a {
-  color: #3273dc;
+/* Код */
+.post-content :deep(code) {
+  font-family: 'Courier New', Courier, monospace;
+  background: #252525;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #f0f0f0;
+  font-size: 0.9em;
+}
+
+.post-content :deep(pre) {
+  background: #1a1a1a;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.2em 0;
+  border: 1px solid #333;
+}
+
+.post-content :deep(pre code) {
+  background: none;
+  padding: 0;
+  color: #f0f0f0;
+  font-size: 0.9em;
+  white-space: pre-wrap;
+}
+
+/* Таблицы */
+.post-content :deep(table) {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  background: #252525;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.post-content :deep(th),
+.post-content :deep(td) {
+  padding: 10px;
+  border: 1px solid #404040;
+  text-align: left;
+}
+
+.post-content :deep(th) {
+  background: #2d2d2d;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Подчеркивание и зачеркивание */
+.post-content :deep(u) {
   text-decoration: underline;
 }
 
-.post-content a:hover {
-  color: #363636;
+.post-content :deep(s) {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* Маркировка */
+.post-content :deep(mark) {
+  background: rgba(255, 255, 0, 0.2);
+  color: #ffffff;
+  padding: 2px 4px;
 }
 
 .post-meta {
   color: #6b7280;
   font-size: 0.9em;
   padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #404040;
 }
 
 .icon-text {
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-right: 16px;
+}
+
+.icon-text:last-child {
+  margin-right: 0;
+}
+
+.like-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.like-button:hover:not(:disabled) {
+  background: #252525;
+  color: #ef4444;
+}
+
+.like-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.like-button .has-text-danger {
+  color: #ef4444;
+}
+
+.comment-form .textarea {
+  background: #1a1a1a;
+  border-color: #333;
+  color: #ccc;
+}
+
+.comment-form .textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 0.125em rgba(59, 130, 246, 0.25);
+}
+
+.comment-form .button.is-primary {
+  background: #3b82f6;
+  border-color: transparent;
+  color: #fff;
+}
+
+.comment-form .button.is-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.notification.is-light {
+  background: #252525;
+  color: #ccc;
+  border: 1px solid #333;
+}
+
+.title.is-4 {
+  color: #fff;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.card-header {
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border-bottom: 1px solid #333;
+}
+
+.card-header-title {
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.post-detail-card {
+  background: #1a1a1a;
+  border: 1px solid #2d2d2d;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-content {
+  padding: 24px;
+  background: #1a1a1a;
+}
+
+.card-footer {
+  background: #252525;
+  border-top: 1px solid #333;
+}
+
+@media (max-width: 768px) {
+  .post-content {
+    font-size: 0.95em;
+  }
+
+  .post-content :deep(h1) {
+    font-size: 1.5em;
+  }
+
+  .post-content :deep(h2) {
+    font-size: 1.3em;
+  }
+
+  .post-content :deep(h3) {
+    font-size: 1.2em;
+  }
+
+  .post-content :deep(ul),
+  .post-content :deep(ol) {
+    padding-left: 1.2em;
+  }
+
+  .card-content {
+    padding: 16px;
+  }
+
+  .icon-text {
+    margin-right: 12px;
+    font-size: 0.85em;
+  }
+
+  .comment-form .textarea {
+    font-size: 0.95em;
+  }
 }
 </style>
