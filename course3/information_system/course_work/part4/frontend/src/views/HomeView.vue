@@ -1,6 +1,5 @@
 <template>
   <div class="home dark-theme">
-    <!-- Герой-секция -->
     <section class="hero-section">
       <div class="hero-background">
         <div class="hero-overlay"></div>
@@ -30,9 +29,7 @@
       </div>
     </section>
 
-    <!-- Основной контент -->
     <div class="container">
-      <!-- Быстрые ссылки -->
       <section class="section quick-links">
         <h2 class="title is-3 has-text-centered section-title">Быстрый доступ</h2>
         <div class="columns is-centered">
@@ -73,7 +70,6 @@
         </div>
       </section>
 
-      <!-- Статистика -->
       <section v-if="stats" class="section stats-section">
         <h2 class="title is-3 has-text-centered section-title">Статистика сообщества</h2>
         <div class="columns is-centered">
@@ -116,10 +112,8 @@
         </div>
       </section>
 
-      <!-- Ближайшие события -->
       <section v-if="upcomingTournaments.length > 0" class="section events-section">
         <div class="section-header">
-          <!-- Используем кастомную flex-структуру вместо Bulma level -->
           <div class="header-container">
             <div class="header-content">
               <h2 class="title is-3 section-title">Ближайшие события</h2>
@@ -173,7 +167,6 @@
         </div>
       </section>
 
-      <!-- Призыв к действию -->
       <section v-if="!authStore.isAuthenticated" class="section cta-section">
         <div class="cta-card">
           <div class="cta-icon">
@@ -206,10 +199,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth'
-import { tournamentsAPI } from '../api/tournaments'
-import type { Tournament, Rang } from '../types/tournaments'
+import {onMounted, ref} from 'vue'
+import {useAuthStore} from '../stores/auth'
+import {tournamentsAPI} from '../api/tournaments'
+import type {Rang, Tournament} from '../types/tournaments'
 
 const authStore = useAuthStore()
 const upcomingTournaments = ref<Tournament[]>([])
@@ -225,12 +218,10 @@ const loadUpcomingTournaments = async () => {
   try {
     const result = await tournamentsAPI.getTournaments()
     const now = new Date()
-    const upcoming = result.data.filter((t: Tournament) => {
+    upcomingTournaments.value = result.data.filter((t: Tournament) => {
       const startDate = new Date(t.startDate)
       return startDate > now && !t.archived
     }).slice(0, 3)
-
-    upcomingTournaments.value = upcoming
     stats.value.tournaments = result.data.length
   } catch (error) {
     console.error('Ошибка при загрузке турниров:', error)
@@ -285,7 +276,6 @@ const getRangClass = (rangId: number) => {
   const rang = rangs.value.find(r => r.id === rangId)
   if (!rang) return 'rang-default'
 
-  // Определяем класс в зависимости от уровня соревнования
   switch (rang.name.toLowerCase()) {
     case 'международный':
       return 'rang-international'
@@ -301,7 +291,6 @@ const getRangClass = (rangId: number) => {
 }
 
 const loadStats = async () => {
-  // Заглушка для статистики
   stats.value = {
     tournaments: 24,
     posts: 156,
@@ -327,7 +316,6 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-/* Герой-секция */
 .hero-section {
   position: relative;
   min-height: 80vh;
@@ -423,7 +411,6 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-/* Кнопки */
 .sport-button {
   background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
   border: none;
@@ -459,7 +446,6 @@ onMounted(() => {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* Общие стили секций */
 .section {
   padding: 4rem 0;
 }
@@ -471,7 +457,6 @@ onMounted(() => {
   padding-bottom: 1rem;
 }
 
-/* Стили для центровки заголовка */
 .header-container {
   display: flex;
   flex-direction: column;
@@ -508,12 +493,10 @@ onMounted(() => {
   border-radius: 2px;
 }
 
-/* Центровка колонок */
 .columns.is-centered {
   justify-content: center;
 }
 
-/* Адаптивность для мобильных */
 @media (max-width: 768px) {
   .header-container {
     padding: 0 1rem;
@@ -558,7 +541,6 @@ onMounted(() => {
   border-radius: 2px;
 }
 
-/* Быстрые ссылки */
 .quick-links {
   margin-top: -4rem;
   position: relative;
@@ -655,7 +637,6 @@ onMounted(() => {
   line-height: 1.6;
 }
 
-/* Статистика */
 .stats-section {
   background: rgba(15, 23, 42, 0.5);
   border-radius: 24px;
@@ -734,7 +715,6 @@ onMounted(() => {
   font-size: 1.5rem;
 }
 
-/* События */
 .events-section {
   margin: 4rem 0;
 }
@@ -823,35 +803,6 @@ onMounted(() => {
   margin-bottom: 1rem;
 }
 
-.rang-international {
-  background: rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.rang-national {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.rang-regional {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.rang-city {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.rang-default {
-  background: rgba(100, 116, 139, 0.2);
-  color: #cbd5e1;
-  border: 1px solid rgba(100, 116, 139, 0.3);
-}
 
 .event-title {
   font-size: 1.25rem;
@@ -894,23 +845,6 @@ onMounted(() => {
   width: 16px;
 }
 
-.event-button {
-  background: rgba(14, 165, 233, 0.1);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  color: #38bdf8;
-  font-weight: 500;
-  width: 100%;
-  transition: all 0.3s;
-}
-
-.event-button:hover {
-  background: rgba(14, 165, 233, 0.2);
-  border-color: rgba(14, 165, 233, 0.5);
-  color: #0ea5e9;
-  transform: translateX(5px);
-}
-
-/* Призыв к действию */
 .cta-section {
   margin: 4rem 0;
 }
@@ -972,7 +906,6 @@ onMounted(() => {
   flex-wrap: wrap;
 }
 
-/* Адаптивность */
 @media (max-width: 1024px) {
   .hero-title {
     font-size: 2.8rem;

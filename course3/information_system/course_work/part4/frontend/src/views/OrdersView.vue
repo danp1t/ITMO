@@ -1,7 +1,6 @@
 <template>
   <div class="orders-view">
     <div class="container">
-      <!-- Заголовок -->
       <div class="has-text-centered mb-5">
         <h1 class="title is-2">Мои заказы</h1>
         <p class="subtitle is-5 has-text-grey">
@@ -9,13 +8,11 @@
         </p>
       </div>
 
-      <!-- Загрузка -->
       <div v-if="loading" class="has-text-centered py-6">
         <i class="fas fa-spinner fa-spin fa-2x"></i>
         <p class="mt-3">Загрузка заказов...</p>
       </div>
 
-      <!-- Заказы -->
       <div v-else-if="filteredOrders.length > 0">
         <div class="orders-list">
           <div
@@ -23,7 +20,6 @@
             :key="order.id"
             class="order-card box mb-4"
           >
-            <!-- Заголовок заказа -->
             <div class="order-header mb-4">
               <div class="level is-mobile">
                 <div class="level-left">
@@ -47,7 +43,6 @@
               </div>
             </div>
 
-            <!-- Информация о заказе -->
             <div class="order-info mb-4">
               <div class="columns">
                 <div class="column">
@@ -65,7 +60,6 @@
               </div>
             </div>
 
-            <!-- Товары в заказе -->
             <div class="order-products">
               <h4 class="title is-5 mb-3">Товары:</h4>
               <div class="table-container">
@@ -80,7 +74,6 @@
                   </tr>
                   </thead>
                   <tbody>
-                  <!-- Используем orderProducts если они есть, иначе fallback на products -->
                   <template v-if="order.orderProducts && order.orderProducts.length > 0">
                     <tr v-for="item in order.orderProducts" :key="`${item.productId}-${item.productInfoId}`">
                       <td>{{ item.productName }}</td>
@@ -91,7 +84,6 @@
                     </tr>
                   </template>
                   <template v-else>
-                    <!-- Fallback для старых заказов без orderProducts -->
                     <tr v-for="product in order.products" :key="product.id">
                       <td>{{ product.name }}</td>
                       <td>-</td>
@@ -131,7 +123,6 @@
               </div>
             </div>
 
-            <!-- Действия -->
             <div class="order-actions mt-4">
               <div class="buttons">
                 <button
@@ -163,7 +154,6 @@
         </div>
       </div>
 
-      <!-- Нет заказов -->
       <div v-else class="empty-orders has-text-centered py-6">
         <div class="empty-state">
           <i class="fas fa-box-open fa-3x has-text-grey-light"></i>
@@ -177,7 +167,6 @@
         </div>
       </div>
 
-      <!-- Фильтры -->
       <div class="box mb-4">
         <h3 class="title is-5 mb-3">Фильтры заказов</h3>
         <div class="field is-grouped is-grouped-multiline">
@@ -222,16 +211,13 @@ import type { Order, OrderStatus } from '../types/shop'
 const authStore = useAuthStore()
 const router = useRouter()
 
-// Данные
 const orders = ref<Order[]>([])
 const orderStatuses = ref<OrderStatus[]>([])
 const loading = ref(false)
 const cancellingOrderId = ref<number | null>(null)
 
-// Фильтры
 const selectedStatus = ref<number | null>(null)
 
-// Загрузка заказов
 const loadOrders = async () => {
   loading.value = true
 
@@ -240,11 +226,9 @@ const loadOrders = async () => {
       throw new Error('Пользователь не авторизован')
     }
 
-    // Загружаем заказы пользователя
     const ordersResponse = await shopAPI.getOrdersByAccount(authStore.user.id)
     orders.value = ordersResponse.data
 
-    // Загружаем статусы заказов
     const statusesResponse = await shopAPI.getOrderStatuses()
     orderStatuses.value = statusesResponse.data
 
@@ -255,7 +239,6 @@ const loadOrders = async () => {
   }
 }
 
-// Отфильтрованные заказы
 const filteredOrders = computed(() => {
   if (selectedStatus.value === null) {
     return orders.value
@@ -263,26 +246,22 @@ const filteredOrders = computed(() => {
   return orders.value.filter(order => order.orderStatusId === selectedStatus.value)
 })
 
-// Расчет суммы товаров
 const getProductsSubtotal = (order: Order) => {
   if (order.orderProducts && order.orderProducts.length > 0) {
     return order.orderProducts.reduce((total, item) => {
       return total + (item.price * item.quantity)
     }, 0)
   } else {
-    // Fallback для старых заказов
     return order.products.reduce((total, product) => {
       return total + product.basePrice
     }, 0)
   }
 }
 
-// Расчет стоимости доставки
 const getDeliveryCost = (order: Order) => {
   return order.totalAmount - getProductsSubtotal(order)
 }
 
-// Форматирование даты
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -293,37 +272,31 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Получение текста статуса
 const getStatusText = (statusId: number) => {
   const status = orderStatuses.value.find(s => s.id === statusId)
   return status ? status.name : 'Неизвестно'
 }
 
-// Получение класса для статуса
 const getStatusClass = (statusId: number) => {
   switch (statusId) {
-    case 1: return 'is-info' // Новый
-    case 2: return 'is-warning' // В обработке
-    case 3: return 'is-primary' // Отправлен
-    case 4: return 'is-success' // Доставлен
-    case 5: return 'is-danger' // Отменен
+    case 1: return 'is-info'
+    case 2: return 'is-warning'
+    case 3: return 'is-primary'
+    case 4: return 'is-success'
+    case 5: return 'is-danger'
     default: return 'is-light'
   }
 }
 
-// Можно ли отменить заказ
 const canCancelOrder = (order: Order) => {
-  // Можно отменять только заказы со статусом "pending" (Ожидает обработки)
   return order.orderStatusId === 1
 }
 
-// Отмена заказа
 const cancelOrder = async (order: Order) => {
 
   cancellingOrderId.value = order.id
 
   try {
-    // Создаем полный объект с данными заказа для обновления
     const updateData = {
       id: order.id,
       address: order.address,
@@ -342,11 +315,9 @@ const cancelOrder = async (order: Order) => {
 
     console.log('Отправка данных для обновления заказа:', updateData)
 
-    // Используем updateOrder с полными данными
     const response = await shopAPI.updateOrder(order.id, updateData)
     console.log('Ответ от сервера:', response)
 
-    // Обновляем статус заказа локально
     const orderIndex = orders.value.findIndex(o => o.id === order.id)
     if (orderIndex !== -1) {
       orders.value[orderIndex].orderStatusId = 5
@@ -363,17 +334,14 @@ const cancelOrder = async (order: Order) => {
   }
 }
 
-// Просмотр деталей заказа
 const viewOrderDetails = (order: Order) => {
   router.push(`/shop/orders/${order.id}`)
 }
 
-// Фильтрация по статусу
 const filterByStatus = (statusId: number | null) => {
   selectedStatus.value = statusId
 }
 
-// Инициализация
 onMounted(() => {
   loadOrders()
 })

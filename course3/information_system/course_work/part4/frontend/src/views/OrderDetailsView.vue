@@ -1,7 +1,6 @@
 <template>
   <div class="order-details-view">
     <div class="container">
-      <!-- Навигация назад -->
       <div class="mb-4">
         <router-link to="/shop/orders" class="button is-light">
           <span class="icon">
@@ -11,7 +10,6 @@
         </router-link>
       </div>
 
-      <!-- Заголовок -->
       <div class="has-text-centered mb-5">
         <h1 class="title is-2">Заказ #{{ orderId }}</h1>
         <p class="subtitle is-5 has-text-grey">
@@ -19,13 +17,11 @@
         </p>
       </div>
 
-      <!-- Загрузка -->
       <div v-if="loading" class="has-text-centered py-6">
         <i class="fas fa-spinner fa-spin fa-2x"></i>
         <p class="mt-3">Загрузка информации о заказе...</p>
       </div>
 
-      <!-- Ошибка -->
       <div v-else-if="error" class="notification is-danger">
         {{ error }}
         <router-link to="/shop/orders" class="button is-light ml-2">
@@ -33,9 +29,7 @@
         </router-link>
       </div>
 
-      <!-- Информация о заказе -->
       <div v-else-if="order" class="order-details">
-        <!-- Статус заказа -->
         <div class="box mb-4">
           <div class="level">
             <div class="level-left">
@@ -53,7 +47,6 @@
             </div>
           </div>
 
-          <!-- Прогресс доставки (только для активных заказов) -->
           <div v-if="order.orderStatusName !== 'cancelled'" class="progress-container mt-4">
             <div class="progress-steps">
               <div
@@ -74,7 +67,6 @@
           </div>
         </div>
 
-        <!-- Контактная информация -->
         <div class="columns mb-4">
           <div class="column">
             <div class="box">
@@ -114,7 +106,6 @@
           </div>
         </div>
 
-        <!-- Товары в заказе -->
         <div class="box">
           <h3 class="title is-4 mb-4">Товары в заказе</h3>
 
@@ -130,7 +121,6 @@
               </tr>
               </thead>
               <tbody>
-              <!-- Используем orderProducts вместо products -->
               <tr v-for="item in order.orderProducts" :key="`${item.productId}-${item.productInfoId}`">
                 <td>
                   <div class="product-info">
@@ -176,7 +166,6 @@
           </div>
         </div>
 
-        <!-- Действия -->
         <div class="box">
           <h3 class="title is-5 mb-3">Действия с заказом</h3>
           <div class="buttons">
@@ -213,12 +202,11 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { shopAPI } from '../api/shop'
-import type { Order, OrderProduct, Product } from '../types/shop'
+import type { Order, OrderProduct} from '../types/shop'
 
 const route = useRoute()
-const router = useRouter()
 
 const orderId = ref(parseInt(route.params.id as string))
 const order = ref<Order | null>(null)
@@ -226,7 +214,6 @@ const loading = ref(false)
 const error = ref('')
 const cancelling = ref(false)
 
-// Карта статусов
 const statusMap = {
   'pending': { id: 1, text: 'Ожидает обработки', class: 'is-info', icon: 'fas fa-clock' },
   'processing': { id: 2, text: 'В обработке', class: 'is-warning', icon: 'fas fa-cog' },
@@ -235,7 +222,6 @@ const statusMap = {
   'cancelled': { id: 5, text: 'Отменен', class: 'is-danger', icon: 'fas fa-times-circle' }
 }
 
-// Шаги доставки (только для активных заказов)
 const deliverySteps = [
   { id: 1, statusName: 'pending', label: 'Ожидает обработки', icon: 'fas fa-clock' },
   { id: 2, statusName: 'processing', label: 'В обработке', icon: 'fas fa-cog' },
@@ -243,7 +229,6 @@ const deliverySteps = [
   { id: 4, statusName: 'delivered', label: 'Доставлен', icon: 'fas fa-check-circle' }
 ]
 
-// Computed свойства для расчета сумм
 const productsSubtotal = computed(() => {
   if (!order.value?.orderProducts) return 0
   return order.value.orderProducts.reduce((total, item) => {
@@ -256,7 +241,6 @@ const deliveryCost = computed(() => {
   return order.value.totalAmount - productsSubtotal.value
 })
 
-// Вспомогательная функция для получения продукта по ID
 const getProductById = computed(() => {
   return (productId: number) => {
     if (!order.value?.products) return null
@@ -264,7 +248,6 @@ const getProductById = computed(() => {
   }
 })
 
-// Загрузка заказа
 const loadOrder = async () => {
   loading.value = true
   error.value = ''
@@ -280,20 +263,17 @@ const loadOrder = async () => {
   }
 }
 
-// Получение текста статуса
 const getStatusText = (statusName: string) => {
   const status = statusMap[statusName as keyof typeof statusMap]
   return status ? status.text : 'Неизвестно'
 }
 
-// Получение класса для статуса
 const statusClass = computed(() => {
   if (!order.value) return 'is-light'
   const status = statusMap[order.value.orderStatusName as keyof typeof statusMap]
   return status ? status.class : 'is-light'
 })
 
-// Активность шагов доставки
 const isStepActive = (statusName: string) => {
   if (!order.value || order.value.orderStatusName === 'cancelled') return false
   return order.value.orderStatusName === statusName
@@ -310,14 +290,11 @@ const isStepCompleted = (statusName: string) => {
   return currentStep.id > targetStep.id
 }
 
-// Можно ли отменить заказ
 const canCancelOrder = computed(() => {
   if (!order.value) return false
-  // Можно отменять только заказы со статусом "pending" (Ожидает обработки)
   return order.value.orderStatusName === 'pending'
 })
 
-// Форматирование даты
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU', {
     day: 'numeric',
@@ -328,19 +305,16 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Укорачивание описания
 const truncateDescription = (text: string, maxLength: number) => {
   if (text.length <= maxLength) return text
   return text.substring(0, maxLength) + '...'
 }
 
-// Отмена заказа
 const cancelOrder = async () => {
 
   cancelling.value = true
 
   try {
-    // Создаем полный объект с данными заказа для обновления
     const updateData = {
       id: order.value.id,
       address: order.value.address,
@@ -349,7 +323,7 @@ const cancelOrder = async () => {
       customerName: order.value.customerName,
       totalAmount: order.value.totalAmount,
       accountId: order.value.accountId,
-      orderStatusId: 5, // Изменяем статус на "Отменен"
+      orderStatusId: 5,
       orderStatusName: 'cancelled',
       deliveryMethod: order.value.deliveryMethod,
       paymentMethod: order.value.paymentMethod,
@@ -359,11 +333,9 @@ const cancelOrder = async () => {
 
     console.log('Отправка данных для обновления заказа:', updateData)
 
-    // Используем updateOrder с полными данными
     const response = await shopAPI.updateOrder(order.value.id, updateData)
     console.log('Ответ от сервера:', response)
 
-    // Перезагружаем данные заказа
     await loadOrder()
 
   } catch (err: any) {
@@ -375,7 +347,6 @@ const cancelOrder = async () => {
   }
 }
 
-// Связаться с поддержкой
 const contactSupport = () => {
   window.open('http://t.me/danp1t', '_blank')
 }
@@ -405,7 +376,6 @@ onMounted(() => {
   padding: 0.75rem 1.25rem;
 }
 
-/* Прогресс доставки */
 .progress-container {
   padding: 1rem 0;
 }
@@ -471,7 +441,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* Таблица */
 .table-container {
   overflow-x: auto;
 }
@@ -501,22 +470,10 @@ onMounted(() => {
   margin-bottom: 0.25rem;
 }
 
-/* Кнопки */
 .buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-}
-
-.button.is-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  font-weight: 600;
-}
-
-.button.is-primary:hover {
-  opacity: 0.9;
 }
 
 .button.is-danger {
