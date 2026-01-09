@@ -128,17 +128,14 @@ const router = createRouter({
   routes,
 })
 
-// Навигационный guard
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
-  // Проверка на необходимость аутентификации
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
     return
   }
 
-  // Проверка, что только гости могут зайти
   if (to.meta.guestOnly && authStore.isAuthenticated) {
     next('/')
     return

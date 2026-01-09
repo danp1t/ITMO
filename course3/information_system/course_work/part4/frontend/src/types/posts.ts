@@ -6,9 +6,9 @@ export interface Post {
   ownerName: string
   createdAt: string
   updatedAt: string
-  countLike: number  // Изменено с likesCount на countLike
-  commentsCount?: number  // Оставляем опциональным, так как в ответе его нет
-  tags?: Tag[]     // Оставляем опциональным
+  countLike: number
+  commentsCount?: number
+  tags?: Tag[]
 }
 
 export interface Tag {
@@ -28,19 +28,6 @@ export interface Comment {
   updatedAt?: string
   canEdit?: boolean
   canDelete?: boolean
-}
-
-export interface CreatePostData {
-  title: string
-  text: string
-  ownerId: number
-  tagIds?: number[]
-}
-
-export interface CreateCommentData {
-  userComment: string
-  postId: number
-  accountId: number
 }
 
 export interface UpdatePostRequest {

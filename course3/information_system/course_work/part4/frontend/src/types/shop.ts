@@ -16,7 +16,7 @@ export interface ProductInfo {
   sizeName: string
   countItems: number
   price: number
-  product?: Product // Вложенный продукт для удобства
+  product?: Product
 }
 
 export interface ProductDetail extends Product {
@@ -43,7 +43,7 @@ export interface Order {
   createdAt: string
   updatedAt?: string
   products: Product[]
-  productInfos?: ProductInfo[] // Детали по размерам и количеству
+  productInfos?: ProductInfo[]
 }
 
 export interface OrderStatus {

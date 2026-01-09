@@ -16,12 +16,6 @@ export interface Role {
   description: string
 }
 
-export interface UpdateUserData {
-  userId: number
-  roles: string[]
-  isActive: boolean
-}
-
 export interface CreateRoleData {
   name: string
   description: string

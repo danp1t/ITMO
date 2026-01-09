@@ -4,56 +4,43 @@ import { authAPI } from '../api/auth'
 import type { User } from '../types/user'
 
 export const useAuthStore = defineStore('auth', () => {
-  // Загружаем данные из localStorage при инициализации
   const token = ref<string | null>(localStorage.getItem('auth_token'))
   const userStr = localStorage.getItem('auth_user')
   const user = ref<User | null>(userStr ? JSON.parse(userStr) : null)
 
   const isAuthenticated = computed(() => !!token.value && !!user.value)
 
-  // Computed свойство для получения ролей
   const roles = computed(() => {
     return user.value?.roles || []
   })
 
-  // Computed свойство для получения ID пользователя
   const userId = computed(() => {
     if (!user.value) return null
     return user.value.id
   })
 
-  // Проверка наличия конкретной роли
   const hasRole = (roleName: string): boolean => {
     return roles.value.includes(roleName)
   }
 
-  // Проверка наличия хотя бы одной роли из списка
   const hasAnyRole = (roleNames: string[]): boolean => {
     return roleNames.some(role => roles.value.includes(role))
   }
 
-  // Проверка наличия всех ролей из списка
   const hasAllRoles = (roleNames: string[]): boolean => {
     return roleNames.every(role => roles.value.includes(role))
   }
 
-  // Проверка конкретной разрешающей роли для публикации постов
   const canPublishPosts = (): boolean => {
-    // Проверяем наличие роли для публикации постов
     return hasRole('OAPI:ROLE:PublishPost')
   }
 
-  // Проверка для редактирования постов (своих или если есть роль модератора)
   const canEditPost = (postOwnerId: number): boolean => {
     if (!user.value) return false
 
-    // Может редактировать, если:
-    // 1. Это его собственный пост
-    // 2. ИЛИ у него есть роль для редактирования любых постов
     return user.value.id === postOwnerId || hasRole('OAPI:ROLE:EditPost')
   }
 
-  // Проверка для удаления постов
   const canDeletePost = (postOwnerId: number): boolean => {
     if (!user.value) return false
 
@@ -72,22 +59,18 @@ export const useAuthStore = defineStore('auth', () => {
     return user.value.id === postOwnerId || hasRole('OAPI:ROLE:DeletePost')
   }
 
-  // Проверка для публикации турниров
   const canPublishTournaments = (): boolean => {
     return hasRole('OAPI:ROLE:PublishTournament')
   }
 
-  // Проверка для редактирования турниров
   const canEditTournaments = (): boolean => {
     return hasRole('OAPI:ROLE:EditTournament')
   }
 
-  // Проверка для удаления турниров
   const canDeleteTournaments = (): boolean => {
     return hasRole('OAPI:ROLE:DeleteTournament')
   }
 
-  // Проверка для управления товарами
   const canPublishProducts = (): boolean => {
     return hasRole('OAPI:ROLE:PublishProduct')
   }
@@ -100,26 +83,22 @@ export const useAuthStore = defineStore('auth', () => {
     return hasRole('OAPI:ROLE:DeleteProduct')
   }
 
-  // Сохранение токена
   const setToken = (newToken: string) => {
     token.value = newToken
     localStorage.setItem('auth_token', newToken)
   }
 
-  // Сохранение пользователя (с ролями)
   const setUser = (userData: User) => {
     user.value = userData
     localStorage.setItem('auth_user', JSON.stringify(userData))
     console.log('Пользователь сохранен с ролями:', userData.roles)
   }
 
-  // Установка всех данных аутентификации
   const setAuthData = (authData: { user: User; token: string }) => {
     setToken(authData.token)
     setUser(authData.user)
   }
 
-  // Очистка данных
   const clearAuth = () => {
     token.value = null
     user.value = null
@@ -127,7 +106,6 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('auth_user')
   }
 
-  // Вход - исправленная версия
   const login = async (email: string, password: string) => {
     try {
       const response = await authAPI.login({ email, password })
@@ -135,14 +113,12 @@ export const useAuthStore = defineStore('auth', () => {
 
       console.log('Ответ от сервера при входе (роли):', roles)
 
-      // Создаем объект пользователя из данных ответа
       const userData: User = {
         id,
         email: userEmail,
         name,
-        roles: roles || [] // Убедимся, что roles всегда массив
+        roles: roles || []
       }
-
       setAuthData({ token: authToken, user: userData })
 
       return { success: true }
@@ -153,20 +129,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Проверка аутентификации при загрузке приложения
   const checkAuth = async () => {
     if (!token.value) return false
 
     try {
-      // Пытаемся получить данные пользователя по токену
-      // Если у вас есть endpoint для получения текущего пользователя
       if (!user.value && token.value) {
-        // Можно попробовать декодировать JWT токен
         const payload = decodeJWT(token.value)
         if (payload && payload.sub) {
-          // Если в токене есть email, можем использовать его
           console.log('Данные из JWT токена:', payload)
-          // Запросить данные пользователя с сервера, если нужно
         }
       }
       return true
@@ -177,7 +147,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Декодирование JWT токена
   const decodeJWT = (token: string) => {
     try {
       const base64Url = token.split('.')[1]
@@ -195,7 +164,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Выход
   const logout = async () => {
     try {
       if (token.value) {
@@ -208,7 +176,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Регистрация
   const register = async (name: string, email: string, password: string) => {
     try {
       const response = await authAPI.register({ name, email, password })
@@ -223,7 +190,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Подтверждение email
   const verifyEmail = async (email: string, code: string) => {
     try {
       const response = await authAPI.verifyEmail(email, code)
@@ -237,7 +203,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Запрос сброса пароля
   const forgotPassword = async (email: string) => {
     try {
       await authAPI.forgotPassword(email)
@@ -248,7 +213,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Сброс пароля
   const resetPassword = async (token: string, newPassword: string) => {
     try {
       await authAPI.resetPassword(token, newPassword)
@@ -263,12 +227,10 @@ export const useAuthStore = defineStore('auth', () => {
     return hasRole('OAPI:ROLE:BlockAccount') || hasRole('OAPI:ROLE:ManageUsers')
   })
 
-// Проверка на право управления пользователями
   const canManageUsers = computed(() => {
     return hasRole('OAPI:ROLE:BlockAccount') || hasRole('OAPI:ROLE:ManageUsers')
   })
 
-// Проверка на право управления ролями
   const canManageRoles = computed(() => {
     return hasRole('OAPI:ROLE:BlockAccount') || hasRole('OAPI:ROLE:ManageRoles')
   })
