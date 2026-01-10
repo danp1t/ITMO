@@ -70,48 +70,6 @@
         </div>
       </section>
 
-      <section v-if="stats" class="section stats-section">
-        <h2 class="title is-3 has-text-centered section-title">Статистика сообщества</h2>
-        <div class="columns is-centered">
-          <div class="column is-3">
-            <div class="stat-card">
-              <div class="stat-number">{{ stats.tournaments || 0 }}</div>
-              <div class="stat-label">Соревнований</div>
-              <div class="stat-icon">
-                <i class="fas fa-trophy"></i>
-              </div>
-            </div>
-          </div>
-          <div class="column is-3">
-            <div class="stat-card">
-              <div class="stat-number">{{ stats.posts || 0 }}</div>
-              <div class="stat-label">Постов</div>
-              <div class="stat-icon">
-                <i class="fas fa-newspaper"></i>
-              </div>
-            </div>
-          </div>
-          <div class="column is-3">
-            <div class="stat-card">
-              <div class="stat-number">{{ stats.products || 0 }}</div>
-              <div class="stat-label">Товаров</div>
-              <div class="stat-icon">
-                <i class="fas fa-shopping-bag"></i>
-              </div>
-            </div>
-          </div>
-          <div class="column is-3">
-            <div class="stat-card">
-              <div class="stat-number">{{ stats.users || 0 }}</div>
-              <div class="stat-label">Пользователей</div>
-              <div class="stat-icon">
-                <i class="fas fa-users"></i>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section v-if="upcomingTournaments.length > 0" class="section events-section">
         <div class="section-header">
           <div class="header-container">
