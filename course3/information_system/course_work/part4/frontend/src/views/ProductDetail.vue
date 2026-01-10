@@ -285,7 +285,7 @@ const selectedSize = ref<ProductInfo | null>(null)
 const quantity = ref(1)
 const isAddingToCart = ref(false)
 const showNotification = ref(false)
-const isInWishlist = ref(false)
+const relatedProductsInfos = ref<Map<number, ProductInfo[]>>(new Map())
 const relatedProducts = ref<Product[]>([])
 
 const productId = computed(() => {
@@ -397,17 +397,40 @@ const loadRelatedProducts = async () => {
   try {
     const response = await shopAPI.getProducts()
     if (product.value) {
-      relatedProducts.value = response.data
+      // Фильтруем товары по категории
+      const filteredProducts = response.data
         .filter(p => p.category === product.value!.category && p.id !== productId.value)
         .slice(0, 4)
+
+      // Сохраняем товары
+      relatedProducts.value = filteredProducts
+
+      // Загружаем productInfos для каждого товара
+      await loadProductInfosForRelatedProducts(filteredProducts)
     }
   } catch (err) {
     console.error('Ошибка при загрузке похожих товаров:', err)
   }
 }
 
-const getProductInfos = (id: number) => {
-  return productInfos.value.filter(info => info.productId === id)
+const loadProductInfosForRelatedProducts = async (products: Product[]) => {
+  // Очищаем предыдущие данные
+  relatedProductsInfos.value.clear()
+
+  // Для каждого товара загружаем его productInfos
+  for (const product of products) {
+    try {
+      const infosResponse = await shopAPI.getProductInfoByProduct(product.id)
+      relatedProductsInfos.value.set(product.id, infosResponse.data)
+    } catch (err) {
+      console.error(`Ошибка при загрузке информации для товара ${product.id}:`, err)
+      relatedProductsInfos.value.set(product.id, [])
+    }
+  }
+}
+
+const getProductInfos = (productId: number): ProductInfo[] => {
+  return relatedProductsInfos.value.get(productId) || []
 }
 
 const handleImageError = (e: Event) => {
