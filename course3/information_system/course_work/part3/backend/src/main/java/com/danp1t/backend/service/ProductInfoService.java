@@ -8,13 +8,14 @@ import com.danp1t.backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class ProductInfoService {
 
     @Autowired
@@ -34,28 +35,33 @@ public class ProductInfoService {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<ProductInfoDTO> findAll() {
         return productInfoRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<ProductInfoDTO> findById(Integer id) {
         return productInfoRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductInfoDTO> findByProductId(Integer productId) {
         return productInfoRepository.findByProductId(productId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<ProductInfoDTO> findBySizeName(String sizeName) {
         return productInfoRepository.findBySizeName(sizeName).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ProductInfoDTO save(ProductInfoDTO productInfoDTO) {
         ProductInfo productInfo = new ProductInfo();
         productInfo.setSizeName(productInfoDTO.getSizeName());
@@ -70,6 +76,7 @@ public class ProductInfoService {
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ProductInfoDTO update(Integer id, ProductInfoDTO productInfoDTO) {
         ProductInfo existingProductInfo = productInfoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ProductInfo not found with id: " + id));
@@ -81,6 +88,7 @@ public class ProductInfoService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteById(Integer id) {
         if (!productInfoRepository.existsById(id)) {
             throw new RuntimeException("ProductInfo not found with id: " + id);

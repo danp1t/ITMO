@@ -7,6 +7,9 @@ import com.danp1t.backend.model.Tag;
 import com.danp1t.backend.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -42,26 +45,31 @@ public class TagService {
         return tag;
     }
 
+    @Transactional(readOnly = true)
     public List<TagDTO> findAll() {
         return tagRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<TagDTO> findById(Integer id) {
         return tagRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Optional<TagDetailDTO> findByIdWithPosts(Integer id) {
         return tagRepository.findByIdWithPosts(id).map(this::toDetailDTO);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public TagDTO save(TagDTO tagDTO) {
         Tag tag = toEntity(tagDTO);
         Tag saved = tagRepository.save(tag);
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public TagDTO update(Integer id, TagDTO tagDTO) {
         if (!tagRepository.existsById(id)) {
             throw new RuntimeException("Tag not found with id: " + id);
@@ -72,6 +80,7 @@ public class TagService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteById(Integer id) {
         if (!tagRepository.existsById(id)) {
             throw new RuntimeException("Tag not found with id: " + id);
@@ -79,16 +88,19 @@ public class TagService {
         tagRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<TagDTO> findByNameContaining(String name) {
         return tagRepository.findByNameContainingIgnoreCase(name).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByName(String name) {
         return tagRepository.existsByName(name);
     }
 
+    @Transactional(readOnly = true)
     public List<TagDTO> findByPostId(Integer postId) {
         return tagRepository.findByPostId(postId).stream()
                 .map(this::toDTO)

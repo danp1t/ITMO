@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -126,6 +127,7 @@ public class PostService {
         return Sort.by(direction, sortBy);
     }
 
+    @Transactional(readOnly = true)
     public List<PostDTO> findAll(String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findAllWithOwnerAndTags(sort).stream()
@@ -133,18 +135,22 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PostDTO> findAll() {
         return findAll(SORT_BY_CREATED_AT, "desc");
     }
 
+    @Transactional(readOnly = true)
     public Optional<PostDTO> findById(Integer id) {
         return postRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Optional<PostDetailDTO> findByIdWithDetails(Integer id) {
         return postRepository.findByIdWithDetails(id).map(this::toDetailDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<PostDTO> findByOwnerId(Integer ownerId, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByOwnerId(ownerId, sort).stream()
@@ -152,6 +158,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PostDTO> findByTitleContaining(String title, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByTitleContainingIgnoreCase(title, sort).stream()
@@ -159,7 +166,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public PostDTO save(PostDTO postDTO, String currentUserEmail) {
         Account currentUser = accountRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -187,7 +194,7 @@ public class PostService {
         return toDTO(saved);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public PostDTO update(Integer id, PostDTO postDTO, String currentUserEmail) {
         Post existingPost = postRepository.findByIdWithOwner(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
@@ -219,7 +226,7 @@ public class PostService {
         return toDTO(updated);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteById(Integer id, String currentUserEmail) {
         Post existingPost = postRepository.findByIdWithOwner(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
@@ -238,7 +245,7 @@ public class PostService {
         postRepository.deleteById(id);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void likePost(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -246,7 +253,7 @@ public class PostService {
         postRepository.save(post);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void unlikePost(Integer postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -256,6 +263,7 @@ public class PostService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<PostDTO> findByTagId(Integer tagId, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByTagId(tagId, sort).stream()
@@ -263,6 +271,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<PostDTO> findByTagName(String tagName, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return postRepository.findByTagName(tagName, sort).stream()
@@ -270,7 +279,7 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void addTagToPost(Integer postId, Integer tagId, String currentUserEmail) {
         Post post = postRepository.findByIdWithOwner(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -295,7 +304,7 @@ public class PostService {
         }
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void removeTagFromPost(Integer postId, Integer tagId, String currentUserEmail) {
         Post post = postRepository.findByIdWithOwner(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -318,6 +327,7 @@ public class PostService {
         postRepository.save(post);
     }
 
+    @Transactional(readOnly = true)
     public List<TagDTO> getPostTags(Integer postId) {
         Post post = postRepository.findByIdWithTags(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));

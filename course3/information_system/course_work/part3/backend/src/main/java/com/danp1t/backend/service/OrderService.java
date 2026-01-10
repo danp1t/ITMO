@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +18,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class OrderService {
 
     @Autowired
@@ -92,6 +93,7 @@ public class OrderService {
         return dto;
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public OrderDTO createOrder(OrderDTO orderDTO) {
         Order order = new Order();
         order.setAddress(orderDTO.getAddress());
@@ -147,7 +149,8 @@ public class OrderService {
         return toDTO(loadedOrder);
     }
 
-    private void updateProductStock(List<OrderItemDTO> orderItems) {
+    @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.REPEATABLE_READ)
+    protected void updateProductStock(List<OrderItemDTO> orderItems) {
         for (OrderItemDTO orderItem : orderItems) {
             ProductInfo productInfo = productInfoRepository.findById(orderItem.getProductInfoId())
                     .orElseThrow(() -> new RuntimeException("ProductInfo not found with id: " + orderItem.getProductInfoId()));
@@ -162,28 +165,33 @@ public class OrderService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDTO> findAll() {
         return orderRepository.findAllWithDetails().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<OrderDTO> findById(Integer id) {
         return orderRepository.findByIdWithDetails(id).map(this::toDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDTO> findByAccountId(Integer accountId) {
         return orderRepository.findByAccountId(accountId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDTO> findByOrderStatusId(Integer orderStatusId) {
         return orderRepository.findByOrderStatusId(orderStatusId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public OrderDTO update(Integer id, OrderDTO orderDTO) {
         Order existingOrder = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -208,6 +216,7 @@ public class OrderService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteById(Integer id) {
         if (!orderRepository.existsById(id)) {
             throw new RuntimeException("Order not found");

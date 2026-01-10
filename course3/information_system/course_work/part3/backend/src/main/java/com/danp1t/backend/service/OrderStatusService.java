@@ -5,6 +5,9 @@ import com.danp1t.backend.model.OrderStatus;
 import com.danp1t.backend.repository.OrderStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -27,20 +30,24 @@ public class OrderStatusService {
         return orderStatus;
     }
 
+    @Transactional(readOnly = true)
     public List<OrderStatusDTO> findAll() {
         return orderStatusRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<OrderStatusDTO> findById(Integer id) {
         return orderStatusRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public OrderStatusDTO save(OrderStatusDTO orderStatusDTO) {
         OrderStatus orderStatus = toEntity(orderStatusDTO);
         OrderStatus saved = orderStatusRepository.save(orderStatus);
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public OrderStatusDTO update(Integer id, OrderStatusDTO orderStatusDTO) {
         if (!orderStatusRepository.existsById(id)) {
             throw new RuntimeException("OrderStatus not found with id: " + id);
@@ -51,6 +58,7 @@ public class OrderStatusService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void deleteById(Integer id) {
         if (!orderStatusRepository.existsById(id)) {
             throw new RuntimeException("OrderStatus not found with id: " + id);
@@ -58,6 +66,7 @@ public class OrderStatusService {
         orderStatusRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByName(String name) {
         return orderStatusRepository.existsByName(name);
     }

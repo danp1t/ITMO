@@ -6,10 +6,11 @@ import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Role;
 import com.danp1t.backend.repository.AccountRepository;
 import com.danp1t.backend.repository.RoleRepository;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,20 +61,24 @@ public class AccountService {
         return account;
     }
 
+    @Transactional(readOnly = true)
     public List<AccountDTO> findAll() {
         return accountRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<AccountDTO> findById(Integer id) {
         return accountRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountDTO save(AccountDTO accountDTO) {
         Account account = toEntity(accountDTO);
         Account saved = accountRepository.save(account);
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AccountDTO update(Integer id, AccountDTO accountDTO) {
         Account existingAccount = accountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
@@ -89,6 +94,7 @@ public class AccountService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteById(Integer id) {
         if (!accountRepository.existsById(id)) {
             throw new RuntimeException("Account not found with id: " + id);
@@ -96,14 +102,17 @@ public class AccountService {
         accountRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByEmail(String email) {
         return accountRepository.existsByEmail(email);
     }
 
+    @Transactional(readOnly = true)
     public Optional<AccountDTO> findByEmail(String email) {
         return accountRepository.findByEmail(email).map(this::toDTO);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public AccountDTO register(RegisterRequest request) {
         if (existsByEmail(request.getEmail())) {
             throw new RuntimeException("Пользователь с такой почтой уже существует");
@@ -128,6 +137,7 @@ public class AccountService {
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean verifyEmail(String email, String code) {
         Optional<Account> accountOpt = accountRepository.findByEmail(email);
         if (accountOpt.isPresent()) {
@@ -144,6 +154,7 @@ public class AccountService {
         return false;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void changePassword(String email, String oldPassword, String newPassword) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -156,6 +167,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void initiatePasswordReset(String email) {
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -166,6 +178,7 @@ public class AccountService {
         accountRepository.save(account);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public boolean resetPassword(String token, String newPassword) {
         Optional<Account> accountOpt = accountRepository.findByResetPasswordToken(token);
         if (accountOpt.isPresent()) {
@@ -185,18 +198,21 @@ public class AccountService {
         return String.valueOf(100000 + (int) (Math.random() * 900000));
     }
 
+    @Transactional(readOnly = true)
     public String getVerificationCode(String email) {
         return accountRepository.findByEmail(email)
                 .map(Account::getVerificationCode)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @Transactional(readOnly = true)
     public String getResetToken(String email) {
         return accountRepository.findByEmail(email)
                 .map(Account::getResetPasswordToken)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Optional<AccountDetailDTO> findByIdWithDetails(Integer id) {
         Optional<Account> accountOpt = accountRepository.findByIdWithRoles(id);
 
@@ -215,11 +231,13 @@ public class AccountService {
         return Optional.empty();
     }
 
+    @Transactional(readOnly = true)
     public RoleUserCountDTO countUsersByRole(Integer roleId) {
         Long count = accountRepository.countByRoleId(roleId);
         return new RoleUserCountDTO(count != null ? count : 0L);
     }
 
+    @Transactional(readOnly = true)
     public List<AccountDTO> getUsersByRole(Integer roleId) {
         List<Account> accounts = accountRepository.findByRoleId(roleId);
         return accounts.stream()
@@ -227,6 +245,7 @@ public class AccountService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Account addRoleToAccount(Integer accountId, Integer roleId) {
         Account account = accountRepository.findByIdWithRoles(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
@@ -245,6 +264,7 @@ public class AccountService {
         return account;
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Account removeRoleFromAccount(Integer accountId, Integer roleId) {
         Account account = accountRepository.findByIdWithRoles(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
@@ -254,6 +274,7 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Account addRoleToAccountByName(Integer accountId, String roleName) {
         Account account = accountRepository.findByIdWithRoles(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
@@ -274,7 +295,7 @@ public class AccountService {
         return account;
     }
 
-
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public Account removeRoleFromAccountByName(Integer accountId, String roleName) {
         Account account = accountRepository.findByIdWithRoles(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
@@ -284,7 +305,7 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void banUser(Integer accountId) {
         if (!accountRepository.existsById(accountId)) {
             throw new ResourceNotFoundException("Пользователь с ID " + accountId + " не найден");
@@ -297,7 +318,7 @@ public class AccountService {
         });
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void unbanUser(Integer accountId) {
         if (!accountRepository.existsById(accountId)) {
             throw new ResourceNotFoundException("Пользователь с ID " + accountId + " не найден");
@@ -308,6 +329,4 @@ public class AccountService {
             accountRepository.save(account);
         });
     }
-
-
 }

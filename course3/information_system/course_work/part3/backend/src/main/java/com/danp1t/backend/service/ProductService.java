@@ -11,10 +11,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
 public class ProductService {
 
     @Autowired
@@ -119,7 +118,6 @@ public class ProductService {
         return "/api/products/images/" + normalizedPath;
     }
 
-
     private Product toEntity(ProductDTO dto) {
         Product product = new Product();
         product.setId(dto.getId());
@@ -153,7 +151,7 @@ public class ProductService {
         return imageUrl;
     }
 
-
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public String uploadProductImage(MultipartFile file, Integer productId) throws IOException {
         if (file.isEmpty()) {
             throw new RuntimeException("Файл пустой");
@@ -172,7 +170,7 @@ public class ProductService {
         return fileStorageService.storeFile(file, subDirectory);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void removeImageFromProduct(Integer productId, String imagePath) throws IOException {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Товар не найден"));
@@ -188,7 +186,7 @@ public class ProductService {
         }
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public ProductDTO createProductWithImages(String productJson, List<MultipartFile> images, String sizesJson) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         ProductDTO productDTO = objectMapper.readValue(productJson, ProductDTO.class);
@@ -234,6 +232,7 @@ public class ProductService {
         return toDTO(savedProduct);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDetailDTO> findAllWithFilters(String category, String size, String sortBy, String sortOrder) {
         List<Product> products = productRepository.findAll();
 
@@ -280,6 +279,7 @@ public class ProductService {
         }
     }
 
+    @Transactional(readOnly = true)
     public boolean isProductAvailable(Integer productId, String size, Integer quantity) {
         return productRepository.findById(productId)
                 .map(product -> product.getProductInfos().stream()
@@ -288,6 +288,7 @@ public class ProductService {
                 .orElse(false);
     }
 
+    @Transactional(readOnly = true)
     public String getAvailabilityMessage(Integer productId) {
         return productRepository.findById(productId)
                 .map(product -> {
@@ -304,6 +305,7 @@ public class ProductService {
                 .orElse("Товар не найден");
     }
 
+    @Transactional(readOnly = true)
     public List<ProductInfoDTO> getStockInfo() {
         return productRepository.findAll().stream()
                 .flatMap(product -> product.getProductInfos().stream()
@@ -318,6 +320,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void incrementPopularity(Integer productId) {
         productRepository.findById(productId)
                 .ifPresent(product -> {
@@ -326,6 +329,7 @@ public class ProductService {
                 });
     }
 
+    @Transactional(readOnly = true)
     public byte[] getProductImage(String path) throws IOException {
         System.out.println("Получение изображения по пути: " + path);
 
@@ -348,22 +352,26 @@ public class ProductService {
         return data;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> findAll() {
         return productRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<ProductDTO> findById(Integer id) {
         return productRepository.findById(id)
                 .map(this::toDTO);
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Optional<ProductDetailDTO> findByIdWithProductInfos(Integer id) {
         return productRepository.findByIdWithProductInfos(id)
                 .map(this::toDetailDTO);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ProductDTO save(ProductDTO productDTO) {
         Product product = toEntity(productDTO);
         product.setId(null);
@@ -371,6 +379,7 @@ public class ProductService {
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ProductDTO update(Integer id, ProductDTO productDTO) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
@@ -408,6 +417,7 @@ public class ProductService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteById(Integer id) {
         if (!productRepository.existsById(id)) {
             throw new RuntimeException("Product not found with id: " + id);
@@ -415,17 +425,19 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByName(String name) {
         return productRepository.existsByName(name);
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> findByNameContaining(String name) {
         return productRepository.findByNameContainingIgnoreCase(name).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void addImageToProduct(Integer productId, String imagePath) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Товар не найден с id: " + productId));

@@ -9,6 +9,8 @@ import com.danp1t.backend.repository.PostRepository;
 import com.danp1t.backend.repository.TypeAttachmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -67,34 +69,40 @@ public class AttachmentService {
         return attachment;
     }
 
+    @Transactional(readOnly = true)
     public List<AttachmentDTO> findAll() {
         return attachmentRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<AttachmentDTO> findById(Integer id) {
         return attachmentRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<AttachmentDTO> findByPostId(Integer postId) {
         return attachmentRepository.findByPostId(postId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<AttachmentDTO> findByTypeAttachmentId(Integer typeAttachmentId) {
         return attachmentRepository.findByTypeAttachmentId(typeAttachmentId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AttachmentDTO save(AttachmentDTO attachmentDTO) {
         Attachment attachment = toEntity(attachmentDTO);
         Attachment saved = attachmentRepository.save(attachment);
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AttachmentDTO update(Integer id, AttachmentDTO attachmentDTO) {
         if (!attachmentRepository.existsById(id)) {
             throw new RuntimeException("Attachment not found with id: " + id);
@@ -105,6 +113,7 @@ public class AttachmentService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteById(Integer id) {
         if (!attachmentRepository.existsById(id)) {
             throw new RuntimeException("Attachment not found with id: " + id);
@@ -112,6 +121,7 @@ public class AttachmentService {
         attachmentRepository.deleteById(id);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public AttachmentDTO uploadFile(MultipartFile file, Integer postId, Integer typeAttachmentId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
@@ -120,6 +130,7 @@ public class AttachmentService {
         TypeAttachment typeAttachment = typeAttachmentRepository.findById(typeAttachmentId)
                 .orElseThrow(() -> new RuntimeException("TypeAttachment not found with id: " + typeAttachmentId));
         System.out.printf("Uploading file: %s\n", typeAttachment.getName());
+
         String filePath;
         try {
             String subDirectory = "post_" + postId;
@@ -138,13 +149,18 @@ public class AttachmentService {
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteAttachmentFile(Integer attachmentId) {
         Attachment attachment = attachmentRepository.findById(attachmentId)
                 .orElseThrow(() -> new RuntimeException("Attachment not found with id: " + attachmentId));
 
-        boolean deleted = fileStorageService.deleteFile(attachment.getPath());
-        if (!deleted) {
-            System.err.println("Warning: Could not delete file at path: " + attachment.getPath());
+        try {
+            boolean deleted = fileStorageService.deleteFile(attachment.getPath());
+            if (!deleted) {
+                System.err.println("Warning: Could not delete file at path: " + attachment.getPath());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete file: " + e.getMessage());
         }
 
         attachmentRepository.delete(attachment);

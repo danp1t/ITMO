@@ -22,7 +22,6 @@ public class FileStorageService {
         String fileName = UUID.randomUUID() + fileExtension;
 
         Path targetLocation = Paths.get(uploadDir, subDirectory).toAbsolutePath().normalize();
-        System.out.printf("Storing file: %s\n", targetLocation);
         Files.createDirectories(targetLocation);
         targetLocation = targetLocation.resolve(fileName);
 

@@ -10,6 +10,8 @@ import com.danp1t.backend.model.Post;
 import com.danp1t.backend.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -77,38 +79,45 @@ public class CommentService {
         return comment;
     }
 
+    @Transactional(readOnly = true)
     public List<CommentDTO> findAll() {
         return commentRepository.findAll().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public Optional<CommentDTO> findById(Integer id) {
         return commentRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Optional<CommentDetailDTO> findByIdWithDetails(Integer id) {
         return commentRepository.findByIdWithDetails(id).map(this::toDetailDTO);
     }
 
+    @Transactional(readOnly = true)
     public List<CommentDTO> findByPostId(Integer postId) {
         return commentRepository.findByPostIdWithAccount(postId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<CommentDTO> findByAccountId(Integer accountId) {
         return commentRepository.findByAccountId(accountId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public CommentDTO save(CommentDTO commentDTO) {
         Comment comment = toEntity(commentDTO);
         Comment saved = commentRepository.save(comment);
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public CommentDTO update(Integer id, CommentDTO commentDTO) {
         if (!commentRepository.existsById(id)) {
             throw new RuntimeException("Comment not found with id: " + id);
@@ -119,6 +128,7 @@ public class CommentService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void deleteById(Integer id) {
         if (!commentRepository.existsById(id)) {
             throw new RuntimeException("Comment not found with id: " + id);

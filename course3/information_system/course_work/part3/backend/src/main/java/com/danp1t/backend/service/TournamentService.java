@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Isolation;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +53,7 @@ public class TournamentService {
         return tournament;
     }
 
+    @Transactional(readOnly = true)
     public List<TournamentDTO> findAll(String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return tournamentRepository.findAll(sort).stream()
@@ -57,14 +61,17 @@ public class TournamentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<TournamentDTO> findAll() {
         return findAll("startDate", "desc");
     }
 
+    @Transactional(readOnly = true)
     public Optional<TournamentDTO> findById(Integer id) {
         return tournamentRepository.findById(id).map(this::toDTO);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public TournamentDTO save(TournamentDTO tournamentDTO) {
         Tournament tournament = toEntity(tournamentDTO);
         rangRepository.findById(tournamentDTO.getRangId()).ifPresent(tournament::setRang);
@@ -82,6 +89,7 @@ public class TournamentService {
         return toDTO(saved);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public TournamentDTO update(Integer id, TournamentDTO tournamentDTO) {
         if (!tournamentRepository.existsById(id)) {
             throw new RuntimeException("Tournament not found with id: " + id);
@@ -108,6 +116,7 @@ public class TournamentService {
         return toDTO(updated);
     }
 
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
     public void deleteById(Integer id) {
         if (!tournamentRepository.existsById(id)) {
             throw new RuntimeException("Tournament not found with id: " + id);
@@ -115,6 +124,7 @@ public class TournamentService {
         tournamentRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<TournamentDTO> findByNameContaining(String name, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return tournamentRepository.findByNameContainingIgnoreCase(name, sort).stream()
@@ -122,6 +132,7 @@ public class TournamentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<TournamentDTO> findByRangId(Integer rangId, String sortBy, String sortDirection) {
         Sort sort = createSort(sortBy, sortDirection);
         return tournamentRepository.findByRangId(rangId, sort).stream()
@@ -129,6 +140,7 @@ public class TournamentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Scheduled(cron = "0 0 2 * * ?")
     public void archiveOldTournaments() {
         LocalDateTime now = LocalDateTime.now();
@@ -142,6 +154,7 @@ public class TournamentService {
         tournamentRepository.archiveOldTournaments(seasonEnd);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void manualArchiveOldTournaments() {
         archiveOldTournaments();
     }
