@@ -176,10 +176,18 @@ const loadUpcomingTournaments = async () => {
   try {
     const result = await tournamentsAPI.getTournaments()
     const now = new Date()
-    upcomingTournaments.value = result.data.filter((t: Tournament) => {
+
+    const upcoming = result.data.filter((t: Tournament) => {
       const startDate = new Date(t.startDate)
       return startDate > now && !t.archived
-    }).slice(0, 3)
+    })
+
+    upcoming.sort((a: Tournament, b: Tournament) => {
+      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    })
+
+    upcomingTournaments.value = upcoming.slice(0, 3)
+
     stats.value.tournaments = result.data.length
   } catch (error) {
     console.error('Ошибка при загрузке турниров:', error)
