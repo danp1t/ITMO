@@ -62,14 +62,28 @@
           <div class="field">
             <label class="label has-text-light">Название роли</label>
             <div class="control">
-              <input v-model="newRole.name" class="input dark-input" placeholder="OAPI:ROLE:NewRole">
+              <input
+                v-model="newRole.name"
+                class="input dark-input"
+                placeholder="OAPI:ROLE:NewRole"
+                maxlength="100"
+                required
+              >
             </div>
+            <p class="help has-text-grey-light">Максимум 100 символов</p>
           </div>
           <div class="field">
             <label class="label has-text-light">Описание</label>
             <div class="control">
-              <textarea v-model="newRole.description" class="textarea dark-textarea" rows="3"></textarea>
+              <textarea
+                v-model="newRole.description"
+                class="textarea dark-textarea"
+                rows="3"
+                maxlength="255"
+                required
+              ></textarea>
             </div>
+            <p class="help has-text-grey-light">Максимум 255 символов</p>
           </div>
         </section>
 
@@ -107,6 +121,8 @@
                     class="input dark-input"
                     placeholder="Введите email пользователя"
                     @keyup.enter="searchUser"
+                    maxlength="100"
+                    required
                   >
                 </div>
                 <div class="control">
@@ -115,6 +131,7 @@
                   </button>
                 </div>
               </div>
+              <p class="help has-text-grey-light">Максимум 100 символов</p>
             </div>
 
             <div v-if="searchResult && !searchResult.hasRole" class="notification is-info is-dark mt-3">
@@ -266,6 +283,17 @@ const manageRoleUsers = async (role: Role) => {
 const searchUser = async () => {
   if (!searchEmail.value.trim() || !selectedRole.value) return
 
+  // Валидация email
+  if (!/\S+@\S+\.\S+/.test(searchEmail.value.trim())) {
+    showNotification('Некорректный формат email', 'warning')
+    return
+  }
+
+  if (searchEmail.value.trim().length > 100) {
+    showNotification('Email не должен превышать 100 символов', 'warning')
+    return
+  }
+
   try {
     const response = await adminAPI.getAccountByEmail(searchEmail.value.trim())
     const user = response.data
@@ -325,8 +353,31 @@ const removeRoleFromUser = async (userId: number) => {
 }
 
 const createRole = async () => {
-  if (!newRole.value.name.trim() || !newRole.value.description.trim()) {
-    showNotification('Заполните название и описание роли', 'warning')
+  // Валидация названия роли
+  if (!newRole.value.name.trim()) {
+    showNotification('Название роли обязательно', 'warning')
+    return
+  }
+
+  if (newRole.value.name.trim().length > 100) {
+    showNotification('Название роли не должно превышать 100 символов', 'warning')
+    return
+  }
+
+  // Валидация описания
+  if (!newRole.value.description.trim()) {
+    showNotification('Описание роли обязательно', 'warning')
+    return
+  }
+
+  if (newRole.value.description.trim().length > 255) {
+    showNotification('Описание роли не должно превышать 255 символов', 'warning')
+    return
+  }
+
+  // Проверка формата названия роли (необязательно, но может быть полезно)
+  if (!newRole.value.name.includes('OAPI:ROLE:')) {
+    showNotification('Название роли должно начинаться с "OAPI:ROLE:"', 'warning')
     return
   }
 

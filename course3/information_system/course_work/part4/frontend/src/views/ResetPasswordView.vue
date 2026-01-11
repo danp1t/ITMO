@@ -19,6 +19,7 @@
                       class="input"
                       :class="{ 'is-danger': errors.newPassword }"
                       placeholder="Введите новый пароль"
+                      maxlength="100"
                       required
                     >
                     <span class="icon is-small is-left">
@@ -26,6 +27,7 @@
                     </span>
                   </div>
                   <p v-if="errors.newPassword" class="help is-danger">{{ errors.newPassword }}</p>
+                  <p class="help">Максимум 100 символов</p>
                 </div>
 
                 <div class="field">
@@ -37,6 +39,7 @@
                       class="input"
                       :class="{ 'is-danger': errors.confirmPassword }"
                       placeholder="Повторите новый пароль"
+                      maxlength="100"
                       required
                     >
                     <span class="icon is-small is-left">
@@ -44,6 +47,7 @@
                     </span>
                   </div>
                   <p v-if="errors.confirmPassword" class="help is-danger">{{ errors.confirmPassword }}</p>
+                  <p class="help">Максимум 100 символов</p>
                 </div>
 
                 <div v-if="error" class="notification is-danger is-light mb-4">
@@ -125,6 +129,9 @@ const validateForm = () => {
   } else if (form.newPassword.length < 6) {
     errors.newPassword = 'Пароль должен содержать минимум 6 символов'
     isValid = false
+  } else if (form.newPassword.length > 100) {
+    errors.newPassword = 'Пароль не должен превышать 100 символов'
+    isValid = false
   }
 
   if (!form.confirmPassword) {
@@ -132,6 +139,9 @@ const validateForm = () => {
     isValid = false
   } else if (form.newPassword !== form.confirmPassword) {
     errors.confirmPassword = 'Пароли не совпадают'
+    isValid = false
+  } else if (form.confirmPassword.length > 100) {
+    errors.confirmPassword = 'Подтверждение пароля не должно превышать 100 символов'
     isValid = false
   }
 
@@ -143,11 +153,19 @@ const handleSubmit = async () => {
     return
   }
 
+  const newPassword = form.newPassword.substring(0, 100)
+  const confirmPassword = form.confirmPassword.substring(0, 100)
+
+  if (newPassword !== confirmPassword) {
+    errors.confirmPassword = 'Пароли не совпадают'
+    return
+  }
+
   isLoading.value = true
   error.value = ''
 
   try {
-    const result = await authStore.resetPassword(token.value, form.newPassword)
+    const result = await authStore.resetPassword(token.value, newPassword)
 
     if (result.success) {
       passwordReset.value = true
@@ -157,7 +175,13 @@ const handleSubmit = async () => {
       error.value = result.error || 'Ошибка сброса пароля'
     }
   } catch (err: any) {
-    error.value = 'Произошла ошибка при сбросе пароля'
+    if (err.response?.data) {
+      error.value = err.response.data
+    } else if (err.message) {
+      error.value = err.message
+    } else {
+      error.value = 'Произошла ошибка при сбросе пароля'
+    }
   } finally {
     isLoading.value = false
   }

@@ -45,11 +45,13 @@
                 type="text"
                 placeholder="Поиск по имени или email..."
                 @input="debouncedSearch"
+                maxlength="100"
               >
               <span class="icon is-small is-left">
                 <i class="fas fa-search"></i>
               </span>
             </div>
+            <p class="help has-text-grey-light">Максимум 100 символов</p>
           </div>
         </div>
         <div class="column is-3">
@@ -538,7 +540,7 @@ const filteredUsers = computed(() => {
   let filtered = users.value
 
   if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
+    const query = searchQuery.value.substring(0, 100).toLowerCase()
     filtered = filtered.filter(user =>
       user.name.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query)
@@ -575,7 +577,12 @@ const resetFilters = () => {
   roleFilter.value = 'all'
 }
 
-const debouncedSearch = debounce(() => {}, 300)
+const debouncedSearch = debounce(() => {
+  if (searchQuery.value.length > 100) {
+    searchQuery.value = searchQuery.value.substring(0, 100)
+    showNotification('Поисковый запрос ограничен 100 символами', 'warning')
+  }
+}, 300)
 
 const openUserDetails = async (user: UserWithDetails) => {
   selectedUser.value = user

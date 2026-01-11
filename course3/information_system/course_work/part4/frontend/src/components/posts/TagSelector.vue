@@ -25,11 +25,13 @@
           @input="onSearch"
           @focus="showDropdown = true"
           @blur="onBlur"
+          maxlength="100"
         >
         <span class="icon is-right">
           <i class="fas fa-search"></i>
         </span>
       </div>
+      <p class="help">Максимум 100 символов</p>
     </div>
 
     <div v-if="showDropdown" class="dropdown-menu is-block dark-dropdown">
@@ -111,7 +113,9 @@ const loadPostTags = async () => {
 }
 
 const filteredTags = computed(() => {
-  if (!searchQuery.value.trim()) {
+  const query = searchQuery.value.substring(0, 100).toLowerCase()
+
+  if (!query.trim()) {
     return allTags.value
       .filter(tag => !selectedTags.value.some(st => st.id === tag.id))
       .slice(0, 10)
@@ -119,8 +123,8 @@ const filteredTags = computed(() => {
 
   return allTags.value
     .filter(tag =>
-      tag.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (tag.description && tag.description.toLowerCase().includes(searchQuery.value.toLowerCase()))
+      tag.name.toLowerCase().includes(query) ||
+      (tag.description && tag.description.toLowerCase().includes(query))
     )
     .filter(tag => !selectedTags.value.some(st => st.id === tag.id))
     .slice(0, 10)
@@ -160,6 +164,10 @@ const getTagStyle = (tag: Tag) => {
 }
 
 const onSearch = () => {
+  // Ограничиваем длину поискового запроса
+  if (searchQuery.value.length > 100) {
+    searchQuery.value = searchQuery.value.substring(0, 100)
+  }
   showDropdown.value = true
 }
 

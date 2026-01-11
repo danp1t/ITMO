@@ -16,6 +16,7 @@
                 class="input"
                 :class="{ 'is-danger': errors.email }"
                 placeholder="Введите ваш email"
+                maxlength="100"
                 required
               >
               <span class="icon is-small is-left">
@@ -34,6 +35,7 @@
                 class="input"
                 :class="{ 'is-danger': errors.password }"
                 placeholder="Введите ваш пароль"
+                maxlength="100"
                 required
               >
               <span class="icon is-small is-left">
@@ -110,6 +112,9 @@ const validateForm = () => {
   } else if (!/\S+@\S+\.\S+/.test(form.email)) {
     errors.email = 'Некорректный формат email'
     isValid = false
+  } else if (form.email.length > 100) {
+    errors.email = 'Email не должен превышать 100 символов'
+    isValid = false
   }
 
   if (!form.password) {
@@ -117,6 +122,9 @@ const validateForm = () => {
     isValid = false
   } else if (form.password.length < 6) {
     errors.password = 'Пароль должен содержать минимум 6 символов'
+    isValid = false
+  } else if (form.password.length > 100) {
+    errors.password = 'Пароль не должен превышать 100 символов'
     isValid = false
   }
 

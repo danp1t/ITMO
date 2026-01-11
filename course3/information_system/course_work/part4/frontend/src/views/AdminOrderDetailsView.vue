@@ -46,27 +46,33 @@
                 </div>
               </div>
             </div>
-            <div class="column">
-              <div class="field">
-                <label class="label">Общая сумма</label>
-                <div class="control">
-                  <input v-model="editForm.totalAmount" type="number" class="input">
-                </div>
-              </div>
-            </div>
           </div>
 
           <div class="field">
             <label class="label">Телефон</label>
             <div class="control">
-              <input v-model="editForm.phone" type="tel" class="input">
+              <input
+                v-model="editForm.phone"
+                type="tel"
+                class="input"
+                maxlength="100"
+                @input="truncateField('phone', 100)"
+              >
+              <p class="help">Максимум 100 символов</p>
             </div>
           </div>
 
           <div class="field">
             <label class="label">Адрес доставки</label>
             <div class="control">
-              <textarea v-model="editForm.address" class="textarea" rows="3"></textarea>
+              <textarea
+                v-model="editForm.address"
+                class="textarea"
+                rows="3"
+                maxlength="100"
+                @input="truncateField('address', 100)"
+              ></textarea>
+              <p class="help">Максимум 100 символов</p>
             </div>
           </div>
         </div>
@@ -240,6 +246,12 @@ const hasChanges = computed(() => {
     editForm.address !== order.value.address
 })
 
+const truncateField = (field: keyof typeof editForm, maxLength: number) => {
+  if (typeof editForm[field] === 'string' && editForm[field].length > maxLength) {
+    editForm[field] = editForm[field].substring(0, maxLength)
+  }
+}
+
 const loadOrder = async () => {
   loading.value = true
   error.value = ''
@@ -256,6 +268,10 @@ const loadOrder = async () => {
       editForm.totalAmount = order.value.totalAmount
       editForm.phone = order.value.phone || ''
       editForm.address = order.value.address || ''
+
+      // Обрезаем значения при загрузке, если они превышают лимит
+      if (editForm.phone.length > 100) editForm.phone = editForm.phone.substring(0, 100)
+      if (editForm.address.length > 100) editForm.address = editForm.address.substring(0, 100)
     }
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Не удалось загрузить информацию о заказе'
@@ -270,12 +286,14 @@ const saveChanges = async () => {
 
   saving.value = true
   try {
-    await shopAPI.updateOrder(order.value.id, {
+    const dataToSend = {
       orderStatusId: editForm.orderStatusId,
       totalAmount: editForm.totalAmount,
-      phone: editForm.phone,
-      address: editForm.address
-    })
+      phone: editForm.phone.substring(0, 100),
+      address: editForm.address.substring(0, 100)
+    }
+
+    await shopAPI.updateOrder(order.value.id, dataToSend)
 
     if (order.value) {
       order.value.orderStatusId = editForm.orderStatusId
@@ -372,4 +390,9 @@ watch(() => route.params.id, (newId) => {
   border-bottom: 1px solid #333;
 }
 
+.help {
+  color: #b5b5b5;
+  font-size: 0.85em;
+  margin-top: 0.25em;
+}
 </style>

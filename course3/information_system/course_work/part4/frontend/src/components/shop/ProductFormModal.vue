@@ -1,6 +1,5 @@
 <template>
   <div class="modal" :class="{ 'is-active': isVisible }">
-    <!-- Компонент уведомлений -->
     <AppNotification
       :notification="notification"
       @hide="hideNotification"
@@ -26,8 +25,10 @@
                 required
                 placeholder="Введите название товара"
                 :disabled="isSubmitting"
+                maxlength="100"
               >
             </div>
+            <p class="help">Максимум 100 символов</p>
           </div>
 
           <div class="field">
@@ -40,8 +41,10 @@
                 placeholder="Введите описание товара"
                 rows="3"
                 :disabled="isSubmitting"
+                maxlength="500"
               ></textarea>
             </div>
+            <p class="help">Максимум 500 символов</p>
           </div>
 
           <div class="columns">
@@ -75,11 +78,14 @@
                     class="input"
                     type="number"
                     min="0"
+                    max="1000000"
                     required
                     placeholder="0"
                     :disabled="isSubmitting"
+                    step="1"
                   >
                 </div>
+                <p class="help">Максимум 1,000,000 ₽</p>
               </div>
             </div>
           </div>
@@ -170,8 +176,10 @@
                         required
                         placeholder="Например: S, M, L или 36, 38"
                         :disabled="isSubmitting"
+                        maxlength="50"
                       >
                     </div>
+                    <p class="help">Максимум 50 символов</p>
                   </div>
                 </div>
 
@@ -184,11 +192,14 @@
                         class="input"
                         type="number"
                         min="0"
+                        max="1000000"
                         required
                         placeholder="0"
                         :disabled="isSubmitting"
+                        step="1"
                       >
                     </div>
+                    <p class="help">Максимум 1,000,000 ₽</p>
                   </div>
                 </div>
 
@@ -201,11 +212,14 @@
                         class="input"
                         type="number"
                         min="0"
+                        max="10000"
                         required
                         placeholder="0"
                         :disabled="isSubmitting"
+                        step="1"
                       >
                     </div>
+                    <p class="help">Максимум 10,000 единиц</p>
                   </div>
                 </div>
               </div>
@@ -302,15 +316,23 @@ const formData = ref({
 })
 
 const isFormValid = computed(() => {
-  return formData.value.name.trim() !== '' &&
-    formData.value.description.trim() !== '' &&
+  // Ограничиваем длину полей перед проверкой
+  const name = formData.value.name.trim().substring(0, 100)
+  const description = formData.value.description.trim().substring(0, 500)
+
+  return name !== '' &&
+    description !== '' &&
     formData.value.category !== '' &&
     formData.value.basePrice > 0 &&
-    formData.value.sizes.every(size =>
-      size.sizeName.trim() !== '' &&
-      size.price >= 0 &&
-      size.countItems >= 0
-    )
+    formData.value.basePrice <= 1000000 &&
+    formData.value.sizes.every(size => {
+      const sizeName = size.sizeName.trim().substring(0, 50)
+      return sizeName !== '' &&
+        size.price >= 0 &&
+        size.price <= 1000000 &&
+        size.countItems >= 0 &&
+        size.countItems <= 10000
+    })
 })
 
 const getImageUrl = (image: File) => {
@@ -377,29 +399,39 @@ const removeSize = (index: number) => {
 const submitForm = async () => {
   if (isSubmitting.value || !isFormValid.value) return
 
+  // Ограничиваем длину полей перед отправкой
+  const productData = {
+    name: formData.value.name.trim().substring(0, 100),
+    description: formData.value.description.trim().substring(0, 500),
+    category: formData.value.category,
+    basePrice: Math.min(Math.max(0, formData.value.basePrice), 1000000),
+    popularity: 0
+  }
+
+  const sizesData = formData.value.sizes
+    .filter(size => {
+      const sizeName = size.sizeName.trim().substring(0, 50)
+      const price = Math.min(Math.max(0, size.price), 1000000)
+      const countItems = Math.min(Math.max(0, size.countItems), 10000)
+      return sizeName !== '' && price >= 0 && countItems >= 0
+    })
+    .map(size => ({
+      sizeName: size.sizeName.trim().substring(0, 50),
+      price: Math.min(Math.max(0, size.price), 1000000),
+      countItems: Math.min(Math.max(0, size.countItems), 10000)
+    }))
+
+  // Проверяем, есть ли хотя бы один размер
+  if (sizesData.length === 0) {
+    showNotification('Добавьте хотя бы один размер товара', 'warning')
+    return
+  }
+
   isSubmitting.value = true
 
   try {
     const formDataToSend = new FormData()
-
-    const productData = {
-      name: formData.value.name.trim(),
-      description: formData.value.description.trim(),
-      category: formData.value.category,
-      basePrice: formData.value.basePrice,
-      popularity: 0
-    }
-
     formDataToSend.append('product', JSON.stringify(productData))
-
-    const sizesData = formData.value.sizes
-      .filter(size => size.sizeName.trim() !== '' && size.price >= 0 && size.countItems >= 0)
-      .map(size => ({
-        sizeName: size.sizeName.trim(),
-        price: size.price,
-        countItems: size.countItems
-      }))
-
     formDataToSend.append('sizes', JSON.stringify(sizesData))
 
     selectedImages.value.forEach((image, index) => {

@@ -94,8 +94,11 @@
                 type="text"
                 placeholder="Введите заголовок"
                 :disabled="isSaving"
+                maxlength="100"
+                required
               >
             </div>
+            <p class="help">Максимум 100 символов</p>
           </div>
 
           <div class="field">
@@ -111,8 +114,10 @@
                 @tags-change="handleTagsChange"
                 placeholder="Редактируйте содержимое поста..."
                 @file-upload-error="handleFileUploadError"
+                maxlength="10000"
               />
             </div>
+            <p class="help">Максимум 10,000 символов</p>
           </div>
 
           <div class="field is-grouped mt-4">
@@ -170,8 +175,11 @@
                 placeholder="Напишите комментарий..."
                 rows="3"
                 :disabled="isAddingComment"
+                maxlength="500"
+                required
               ></textarea>
             </div>
+            <p class="help">Максимум 500 символов</p>
           </div>
           <div class="field">
             <div class="control">
@@ -223,8 +231,11 @@
                       class="textarea"
                       rows="3"
                       :disabled="isEditingComment"
+                      maxlength="500"
+                      required
                     ></textarea>
                   </div>
+                  <p class="help">Максимум 500 символов</p>
                 </div>
                 <div class="buttons mt-2">
                   <button
@@ -404,11 +415,19 @@ const toggleLike = async () => {
 const addComment = async () => {
   if (!authStore.user || !post.value || !newComment.value.trim()) return
 
+  // Ограничиваем длину комментария
+  const commentText = newComment.value.trim().substring(0, 500)
+
+  if (commentText.length === 0) {
+    showNotification('Комментарий не может быть пустым', 'warning')
+    return
+  }
+
   isAddingComment.value = true
 
   try {
     const commentData = {
-      userComment: newComment.value.trim(),
+      userComment: commentText,
       postId: post.value.id,
       accountId: authStore.user.id,
     }
@@ -439,6 +458,14 @@ const cancelEditComment = () => {
 const saveEditedComment = async (commentId: number) => {
   if (!editingCommentText.value.trim()) return
 
+  // Ограничиваем длину комментария
+  const commentText = editingCommentText.value.trim().substring(0, 500)
+
+  if (commentText.length === 0) {
+    showNotification('Комментарий не может быть пустым', 'warning')
+    return
+  }
+
   isEditingComment.value = true
 
   try {
@@ -447,7 +474,7 @@ const saveEditedComment = async (commentId: number) => {
 
     const updatedComment: Comment = {
       ...originalComment,
-      userComment: editingCommentText.value.trim()
+      userComment: commentText
     }
 
     await postsAPI.updateComment(commentId, updatedComment)
@@ -492,7 +519,7 @@ const startEdit = () => {
   if (!post.value) return
 
   editForm.value = {
-    title: post.value.title,
+    title: post.value.title.substring(0, 100),
     content: post.value.text,
     tagIds: post.value.tags?.map(tag => tag.id) || []
   }
@@ -519,7 +546,10 @@ const handleFileUploadError = (error: string) => {
 const saveEdit = async () => {
   if (!post.value || !authStore.user) return
 
-  if (!editForm.value.title.trim()) {
+  // Ограничиваем длину заголовка
+  const title = editForm.value.title.trim().substring(0, 100)
+
+  if (!title) {
     showNotification('Введите заголовок поста', 'warning')
     return
   }
@@ -529,11 +559,18 @@ const saveEdit = async () => {
     return
   }
 
+  // Ограничиваем длину контента (удаляем HTML теги для подсчета символов)
+  const textContent = editForm.value.content.replace(/<[^>]*>/g, '')
+  if (textContent.length > 10000) {
+    showNotification('Содержание поста превышает 10,000 символов', 'warning')
+    return
+  }
+
   isSaving.value = true
 
   try {
     const postData: UpdatePostRequest = {
-      title: editForm.value.title,
+      title: title,
       text: editForm.value.content,
       ownerId: post.value.ownerId,
       tags: editForm.value.tagIds.map(id => ({ id }))

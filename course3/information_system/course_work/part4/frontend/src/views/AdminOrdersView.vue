@@ -22,48 +22,100 @@
           <div class="field">
             <label class="label">По ID заказа</label>
             <div class="control">
-              <input v-model="search.orderId" type="number" class="input" placeholder="Введите ID заказа" @input="applyFilters">
+              <input
+                v-model="search.orderId"
+                type="number"
+                class="input"
+                placeholder="Введите ID заказа"
+                @input="applyFilters"
+                min="1"
+                max="999999"
+                step="1"
+              >
             </div>
+            <p class="help">Максимум 999,999</p>
           </div>
         </div>
         <div class="column is-3">
           <div class="field">
             <label class="label">По телефону</label>
             <div class="control">
-              <input v-model="search.phone" type="text" class="input" placeholder="+7 (XXX) XXX-XX-XX" @input="applyFilters">
+              <input
+                v-model="search.phone"
+                type="text"
+                class="input"
+                placeholder="+7 (XXX) XXX-XX-XX"
+                @input="applyFilters"
+                maxlength="20"
+              >
             </div>
+            <p class="help">Максимум 20 символов</p>
           </div>
         </div>
         <div class="column is-3">
           <div class="field">
             <label class="label">По ID клиента</label>
             <div class="control">
-              <input v-model="search.accountId" type="number" class="input" placeholder="ID клиента" @input="applyFilters">
+              <input
+                v-model="search.accountId"
+                type="number"
+                class="input"
+                placeholder="ID клиента"
+                @input="applyFilters"
+                min="1"
+                max="999999"
+                step="1"
+              >
             </div>
+            <p class="help">Максимум 999,999</p>
           </div>
         </div>
         <div class="column is-3">
           <div class="field">
             <label class="label">По адресу</label>
             <div class="control">
-              <input v-model="search.address" type="text" class="input" placeholder="Часть адреса" @input="applyFilters">
+              <input
+                v-model="search.address"
+                type="text"
+                class="input"
+                placeholder="Часть адреса"
+                @input="applyFilters"
+                maxlength="100"
+              >
             </div>
+            <p class="help">Максимум 100 символов</p>
           </div>
         </div>
         <div class="column is-3">
           <div class="field">
             <label class="label">По имени клиента</label>
             <div class="control">
-              <input v-model="search.customerName" type="text" class="input" placeholder="Имя клиента" @input="applyFilters">
+              <input
+                v-model="search.customerName"
+                type="text"
+                class="input"
+                placeholder="Имя клиента"
+                @input="applyFilters"
+                maxlength="100"
+              >
             </div>
+            <p class="help">Максимум 100 символов</p>
           </div>
         </div>
         <div class="column is-3">
           <div class="field">
             <label class="label">По email</label>
             <div class="control">
-              <input v-model="search.email" type="email" class="input" placeholder="Email клиента" @input="applyFilters">
+              <input
+                v-model="search.email"
+                type="email"
+                class="input"
+                placeholder="Email клиента"
+                @input="applyFilters"
+                maxlength="100"
+              >
             </div>
+            <p class="help">Максимум 100 символов</p>
           </div>
         </div>
         <div class="column is-3">
@@ -85,8 +137,18 @@
           <div class="field">
             <label class="label">Сумма от</label>
             <div class="control">
-              <input v-model="filters.minAmount" type="number" class="input" placeholder="0" @input="applyFilters">
+              <input
+                v-model="filters.minAmount"
+                type="number"
+                class="input"
+                placeholder="0"
+                @input="applyFilters"
+                min="0"
+                max="1000000"
+                step="1"
+              >
             </div>
+            <p class="help">Максимум 1,000,000 ₽</p>
           </div>
         </div>
       </div>
@@ -463,41 +525,41 @@ const filteredOrders = computed(() => {
 
   if (search.orderId) {
     const orderId = parseInt(search.orderId)
-    if (!isNaN(orderId)) {
+    if (!isNaN(orderId) && orderId >= 1 && orderId <= 999999) {
       result = result.filter(order => order.id === orderId)
     }
   }
 
   if (search.phone) {
-    const phoneQuery = search.phone.replace(/\D/g, '').toLowerCase()
+    const phoneQuery = search.phone.substring(0, 20).replace(/\D/g, '').toLowerCase()
     result = result.filter(order =>
-      order.phone && order.phone.replace(/\D/g, '').toLowerCase().includes(phoneQuery)
+      order.phone && order.phone.substring(0, 20).replace(/\D/g, '').toLowerCase().includes(phoneQuery)
     )
   }
 
   if (search.accountId) {
     const accountId = parseInt(search.accountId)
-    if (!isNaN(accountId)) {
+    if (!isNaN(accountId) && accountId >= 1 && accountId <= 999999) {
       result = result.filter(order => order.accountId === accountId)
     }
   }
 
   if (search.address) {
-    const addressQuery = search.address.toLowerCase()
+    const addressQuery = search.address.substring(0, 100).toLowerCase()
     result = result.filter(order =>
       order.address && order.address.toLowerCase().includes(addressQuery)
     )
   }
 
   if (search.customerName) {
-    const nameQuery = search.customerName.toLowerCase()
+    const nameQuery = search.customerName.substring(0, 100).toLowerCase()
     result = result.filter(order =>
       order.accountName && order.accountName.toLowerCase().includes(nameQuery)
     )
   }
 
   if (search.email) {
-    const emailQuery = search.email.toLowerCase()
+    const emailQuery = search.email.substring(0, 100).toLowerCase()
     result = result.filter(order =>
       order.email && order.email.toLowerCase().includes(emailQuery)
     )
@@ -524,7 +586,7 @@ const filteredOrders = computed(() => {
 
   if (filters.minAmount) {
     const minAmount = parseFloat(filters.minAmount)
-    if (!isNaN(minAmount)) {
+    if (!isNaN(minAmount) && minAmount >= 0 && minAmount <= 1000000) {
       result = result.filter(order => order.totalAmount >= minAmount)
     }
   }
@@ -614,7 +676,7 @@ const formatTime = (dateString: string) => {
 
 const formatPhone = (phone: string) => {
   if (!phone) return ''
-  const cleaned = phone.replace(/\D/g, '')
+  const cleaned = phone.substring(0, 20).replace(/\D/g, '')
   if (cleaned.length === 11) {
     return `+${cleaned[0]} (${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7, 9)}-${cleaned.slice(9)}`
   }
@@ -634,6 +696,44 @@ const truncateText = (text: string, maxLength: number) => {
 }
 
 const applyFilters = () => {
+  // Ограничиваем значения перед применением фильтров
+  if (search.orderId) {
+    const orderId = parseInt(search.orderId)
+    if (isNaN(orderId) || orderId < 1 || orderId > 999999) {
+      search.orderId = ''
+    }
+  }
+
+  if (search.phone && search.phone.length > 20) {
+    search.phone = search.phone.substring(0, 20)
+  }
+
+  if (search.accountId) {
+    const accountId = parseInt(search.accountId)
+    if (isNaN(accountId) || accountId < 1 || accountId > 999999) {
+      search.accountId = ''
+    }
+  }
+
+  if (search.address && search.address.length > 100) {
+    search.address = search.address.substring(0, 100)
+  }
+
+  if (search.customerName && search.customerName.length > 100) {
+    search.customerName = search.customerName.substring(0, 100)
+  }
+
+  if (search.email && search.email.length > 100) {
+    search.email = search.email.substring(0, 100)
+  }
+
+  if (filters.minAmount) {
+    const minAmount = parseFloat(filters.minAmount)
+    if (isNaN(minAmount) || minAmount < 0 || minAmount > 1000000) {
+      filters.minAmount = ''
+    }
+  }
+
   currentPage.value = 1
 }
 

@@ -84,11 +84,11 @@
                 class="input"
                 :class="{ 'is-danger': errors.link }"
                 placeholder="https://example.com/tournament"
-                maxlength="500"
+                maxlength="250"
               >
             </div>
             <p v-if="errors.link" class="help is-danger">{{ errors.link }}</p>
-            <p v-if="form.link" class="help has-text-grey-light">{{ form.link.length }}/500 символов</p>
+            <p v-if="form.link" class="help has-text-grey-light">{{ form.link.length }}/250 символов</p>
           </div>
         </div>
 
@@ -416,8 +416,8 @@ const validateForm = () => {
   if (form.link && !isValidUrl(form.link)) {
     errors.link = 'Неверный формат URL'
     isValid = false
-  } else if (form.link && form.link.length > 500) {
-    errors.link = 'Ссылка не должна превышать 500 символов'
+  } else if (form.link && form.link.length > 250) {
+    errors.link = 'Ссылка не должна превышать 250 символов'
     isValid = false
   }
 

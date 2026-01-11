@@ -92,11 +92,13 @@
                   type="text"
                   placeholder="Поиск товаров..."
                   @input="debouncedSearch"
+                  maxlength="100"
                 >
                 <span class="icon is-left">
                   <i class="fas fa-search"></i>
                 </span>
               </div>
+              <p class="help">Максимум 100 символов</p>
             </div>
           </div>
         </div>
@@ -156,6 +158,8 @@
                     type="number"
                     placeholder="от"
                     min="0"
+                    max="1000000"
+                    step="1"
                   >
                 </div>
                 <div class="control is-expanded">
@@ -165,9 +169,12 @@
                     type="number"
                     placeholder="до"
                     min="0"
+                    max="1000000"
+                    step="1"
                   >
                 </div>
               </div>
+              <div class="help mb-2">Диапазон: 0 - 1,000,000 ₽</div>
               <button
                 class="button is-primary is-fullwidth mt-2"
                 @click="applyPriceFilter"
@@ -352,7 +359,8 @@ const filteredProducts = computed(() => {
   }
 
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+    // Ограничим длину поискового запроса
+    const query = searchQuery.value.substring(0, 100).toLowerCase()
     result = result.filter(p =>
       p.name.toLowerCase().includes(query) ||
       p.description.toLowerCase().includes(query) ||
@@ -361,17 +369,21 @@ const filteredProducts = computed(() => {
   }
 
   if (priceRange.value.min > 0 || priceRange.value.max > 0) {
+    // Валидация диапазона цен
+    const minPrice = Math.max(0, Math.min(priceRange.value.min || 0, 1000000))
+    const maxPrice = Math.max(0, Math.min(priceRange.value.max || 0, 1000000))
+
     result = result.filter(p => {
       const infos = getProductInfos(p.id)
-      const minPrice = infos.length > 0
+      const productMinPrice = infos.length > 0
         ? Math.min(...infos.map(info => info.price))
         : p.basePrice
-      const maxPrice = infos.length > 0
+      const productMaxPrice = infos.length > 0
         ? Math.max(...infos.map(info => info.price))
         : p.basePrice
 
-      if (priceRange.value.min > 0 && minPrice < priceRange.value.min) return false
-      if (priceRange.value.max > 0 && maxPrice > priceRange.value.max) return false
+      if (minPrice > 0 && productMinPrice < minPrice) return false
+      if (maxPrice > 0 && productMaxPrice > maxPrice) return false
       return true
     })
   }
@@ -461,8 +473,23 @@ const loadProducts = async () => {
 }
 
 const applyFilters = () => {}
+
 const applySorting = () => {}
+
 const applyPriceFilter = () => {
+  // Валидация значений перед применением
+  if (priceRange.value.min < 0) priceRange.value.min = 0
+  if (priceRange.value.max < 0) priceRange.value.max = 0
+  if (priceRange.value.min > 1000000) priceRange.value.min = 1000000
+  if (priceRange.value.max > 1000000) priceRange.value.max = 1000000
+
+  if (priceRange.value.max > 0 && priceRange.value.min > priceRange.value.max) {
+    // Если мин больше макс, меняем местами
+    const temp = priceRange.value.min
+    priceRange.value.min = priceRange.value.max
+    priceRange.value.max = temp
+  }
+
   applyFilters()
 }
 
@@ -480,6 +507,11 @@ const resetFilters = () => {
 }
 
 const debouncedSearch = debounce(() => {
+  // Ограничиваем длину поискового запроса
+  if (searchQuery.value.length > 100) {
+    searchQuery.value = searchQuery.value.substring(0, 100)
+    showNotification('Поисковый запрос ограничен 100 символами', 'warning')
+  }
   applyFilters()
 }, 500)
 

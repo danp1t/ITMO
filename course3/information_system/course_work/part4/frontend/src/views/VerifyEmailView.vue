@@ -33,6 +33,7 @@
                         :class="{ 'is-danger': errors.email }"
                         placeholder="Введите ваш email"
                         :disabled="!!routeEmail"
+                        maxlength="100"
                         required
                       >
                       <span class="icon is-small is-left">
@@ -40,6 +41,7 @@
                       </span>
                     </div>
                     <p v-if="errors.email" class="help is-danger">{{ errors.email }}</p>
+                    <p class="help">Максимум 100 символов</p>
                   </div>
 
                   <div class="field">
@@ -54,6 +56,8 @@
                             :class="{ 'is-danger': errors.code }"
                             placeholder="Введите 6-значный код"
                             maxlength="6"
+                            pattern="[0-9]*"
+                            inputmode="numeric"
                             required
                           >
                         </div>
@@ -160,8 +164,9 @@ const columnClass = computed(() => {
 
 onMounted(() => {
   if (routeEmail.value && routeCode.value) {
-    form.email = routeEmail.value
-    form.code = routeCode.value
+    // Ограничиваем длину email и кода из query параметров
+    form.email = routeEmail.value.substring(0, 100)
+    form.code = routeCode.value.substring(0, 6)
     autoVerifyEmail()
   }
 })
@@ -190,18 +195,34 @@ const validateForm = () => {
   errors.email = ''
   errors.code = ''
 
+  // Ограничиваем длину email перед валидацией
+  if (form.email.length > 100) {
+    form.email = form.email.substring(0, 100)
+  }
+
   if (!form.email) {
     errors.email = 'Email обязателен'
     isValid = false
   } else if (!/\S+@\S+\.\S+/.test(form.email)) {
     errors.email = 'Некорректный формат email'
     isValid = false
+  } else if (form.email.length > 100) {
+    errors.email = 'Email не должен превышать 100 символов'
+    isValid = false
+  }
+
+  // Ограничиваем длину кода перед валидацией
+  if (form.code.length > 6) {
+    form.code = form.code.substring(0, 6)
   }
 
   if (!form.code) {
     errors.code = 'Код подтверждения обязателен'
     isValid = false
   } else if (!/^\d{6}$/.test(form.code)) {
+    errors.code = 'Код должен состоять из 6 цифр'
+    isValid = false
+  } else if (form.code.length !== 6) {
     errors.code = 'Код должен состоять из 6 цифр'
     isValid = false
   }
@@ -214,7 +235,11 @@ const autoVerifyEmail = async () => {
   error.value = ''
 
   try {
-    const result = await authStore.verifyEmail(form.email, form.code)
+    // Ограничиваем длину данных перед отправкой
+    const email = form.email.substring(0, 100)
+    const code = form.code.substring(0, 6)
+
+    const result = await authStore.verifyEmail(email, code)
 
     if (result.success) {
       verificationComplete.value = true
@@ -237,7 +262,11 @@ const handleSubmit = async () => {
   error.value = ''
 
   try {
-    const result = await authStore.verifyEmail(form.email, form.code)
+    // Ограничиваем длину данных перед отправкой
+    const email = form.email.substring(0, 100)
+    const code = form.code.substring(0, 6)
+
+    const result = await authStore.verifyEmail(email, code)
 
     if (result.success) {
       verificationComplete.value = true
@@ -245,7 +274,13 @@ const handleSubmit = async () => {
       error.value = result.error || 'Ошибка подтверждения email'
     }
   } catch (err: any) {
-    error.value = 'Произошла ошибка при подтверждении email'
+    if (err.response?.data) {
+      error.value = err.response.data
+    } else if (err.message) {
+      error.value = err.message
+    } else {
+      error.value = 'Произошла ошибка при подтверждении email'
+    }
   } finally {
     isLoading.value = false
   }
