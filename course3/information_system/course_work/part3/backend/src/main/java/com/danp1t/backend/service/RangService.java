@@ -42,9 +42,27 @@ public class RangService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public RangDTO save(RangDTO rangDTO) {
-        Rang rang = toEntity(rangDTO);
-        Rang saved = rangRepository.save(rang);
-        return toDTO(saved);
+        try {
+            Integer newId = rangRepository.callInsertRangFunction(
+                    rangDTO.getName(),
+                    rangDTO.getDescription()
+            );
+
+            if (newId == null || newId <= 0) {
+                throw new RuntimeException("Failed to insert rang");
+            }
+
+            Rang savedRang = rangRepository.findById(newId)
+                    .orElseThrow(() -> new RuntimeException("Rang not found after insertion"));
+
+            return toDTO(savedRang);
+
+        } catch (Exception e) {
+            if (e.getMessage().contains("already exists")) {
+                throw new RuntimeException("Rang with name '" + rangDTO.getName() + "' already exists");
+            }
+            throw new RuntimeException("Error saving rang: " + e.getMessage());
+        }
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
