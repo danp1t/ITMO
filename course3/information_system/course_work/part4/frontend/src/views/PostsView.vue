@@ -1,5 +1,11 @@
 <template>
   <div class="posts-view">
+    <!-- Компонент уведомлений -->
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="columns">
       <div class="column is-three-quarters">
         <div class="level">
@@ -272,6 +278,7 @@ import TagFilter from '../components/posts/TagFilter.vue'
 import { postsAPI } from '../api/posts'
 import type { Post, UpdatePostRequest, Tag } from '../types/posts'
 import { tagsAPI } from '../api/tags'
+import AppNotification from '@/components/AppNotification.vue'
 
 const authStore = useAuthStore()
 const posts = ref<Post[]>([])
@@ -283,6 +290,18 @@ const sortDirection = ref('desc')
 const isSaving = ref(false)
 
 const MAX_TITLE_LENGTH = 100
+
+interface NotificationState {
+  visible: boolean
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+}
+
+const notification = ref<NotificationState>({
+  visible: false,
+  message: '',
+  type: 'info'
+})
 
 const allTags = ref<Tag[]>([])
 const selectedTagIds = ref<number[]>([])
@@ -336,6 +355,7 @@ const loadPosts = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке постов:', error)
+    showNotification('Ошибка при загрузке постов', 'error')
   } finally {
     loading.value = false
   }
@@ -378,6 +398,7 @@ const loadAllTags = async () => {
     allTags.value = response.data || []
   } catch (error) {
     console.error('Ошибка при загрузке тегов:', error)
+    showNotification('Ошибка при загрузке тегов', 'error')
   }
 }
 
@@ -397,7 +418,7 @@ const clearTagFilters = () => {
 }
 
 const handleFileUploadError = (error: string) => {
-  alert(error)
+  showNotification(error, 'error')
 }
 
 const handleFilesUploaded = (files: Array<{file: File, type: 'image' | 'file' | 'audio'}>) => {
@@ -416,17 +437,17 @@ const createPostWithAttachments = async () => {
   if (!authStore.user) return
 
   if (!newPost.value.title.trim()) {
-    alert('Введите заголовок поста')
+    showNotification('Введите заголовок поста', 'warning')
     return
   }
 
   if (newPost.value.title.length > MAX_TITLE_LENGTH) {
-    alert(`Заголовок не должен превышать ${MAX_TITLE_LENGTH} символов`)
+    showNotification(`Заголовок не должен превышать ${MAX_TITLE_LENGTH} символов`, 'warning')
     return
   }
 
   if (!newPost.value.content.trim() || newPost.value.content === '<p></p>') {
-    alert('Введите содержание поста')
+    showNotification('Введите содержание поста', 'warning')
     return
   }
 
@@ -478,11 +499,12 @@ const createPostWithAttachments = async () => {
     }
 
     await loadPosts()
+    showNotification('Пост успешно создан!', 'success')
 
   } catch (error: any) {
     console.error('Ошибка при создании поста с вложениями:', error)
     const message = error.response?.data?.message || 'Не удалось создать пост'
-    alert(message)
+    showNotification(message, 'error')
   } finally {
     isSaving.value = false
   }
@@ -520,17 +542,17 @@ const updatePost = async () => {
   if (!authStore.user) return
 
   if (!editingPost.value.title.trim()) {
-    alert('Введите заголовок поста')
+    showNotification('Введите заголовок поста', 'warning')
     return
   }
 
   if (editingPost.value.title.length > MAX_TITLE_LENGTH) {
-    alert(`Заголовок не должен превышать ${MAX_TITLE_LENGTH} символов`)
+    showNotification(`Заголовок не должен превышать ${MAX_TITLE_LENGTH} символов`, 'warning')
     return
   }
 
   if (!editingPost.value.content.trim() || editingPost.value.content === '<p></p>') {
-    alert('Введите текст поста')
+    showNotification('Введите текст поста', 'warning')
     return
   }
 
@@ -559,10 +581,11 @@ const updatePost = async () => {
     }
 
     closeEditModal()
+    showNotification('Пост успешно обновлен!', 'success')
   } catch (error: any) {
     console.error('Ошибка при обновлении поста:', error)
     const message = error.response?.data?.message || 'Не удалось обновить пост'
-    alert(message)
+    showNotification(message, 'error')
   } finally {
     isSaving.value = false
   }
@@ -587,11 +610,29 @@ const handleDelete = async (postId: number) => {
   try {
     await postsAPI.deletePost(postId)
     posts.value = posts.value.filter(p => p.id !== postId)
+    showNotification('Пост успешно удален!', 'success')
   } catch (error: any) {
     console.error('Ошибка при удалении поста:', error)
     const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
-    alert(errorMessage)
+    showNotification(errorMessage, 'error')
   }
+}
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  // Автоматически скрыть уведомление через 5 секунд
+  setTimeout(() => {
+    notification.value.visible = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
 }
 
 onMounted(() => {

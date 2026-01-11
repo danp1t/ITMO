@@ -1,5 +1,10 @@
 <template>
   <div class="role-management dark-theme">
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="role-header mb-4">
       <h1 class="title has-text-light">
         <i class="fas fa-user-tag mr-2"></i>
@@ -171,12 +176,19 @@
 import { ref, onMounted } from 'vue'
 import { adminAPI } from '@/api/admin'
 import type { Role } from '@/types/admin'
+import AppNotification from '@/components/AppNotification.vue'
 
 interface User {
   id: number
   name: string
   email: string
   hasRole?: boolean
+}
+
+interface NotificationState {
+  visible: boolean
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
 }
 
 const roles = ref<Role[]>([])
@@ -196,6 +208,12 @@ const newRole = ref({
   description: ''
 })
 
+const notification = ref<NotificationState>({
+  visible: false,
+  message: '',
+  type: 'info'
+})
+
 const loadRoles = async () => {
   loading.value = true
   try {
@@ -207,6 +225,7 @@ const loadRoles = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке ролей:', error)
+    showNotification('Ошибка при загрузке ролей', 'error')
   } finally {
     loading.value = false
   }
@@ -220,6 +239,7 @@ const loadRoleUsers = async (roleId: number) => {
   } catch (error) {
     console.error('Ошибка при загрузке пользователей роли:', error)
     roleUsers.value = []
+    showNotification('Ошибка при загрузке пользователей роли', 'error')
   } finally {
     manageLoading.value = false
   }
@@ -257,12 +277,12 @@ const searchUser = async () => {
         hasRole
       }
     } else {
-      alert('Пользователь не найден')
+      showNotification('Пользователь не найден', 'warning')
       searchResult.value = null
     }
   } catch (error) {
     console.error('Ошибка при поиске пользователя:', error)
-    alert('Ошибка при поиске пользователя')
+    showNotification('Ошибка при поиске пользователя', 'error')
   }
 }
 
@@ -278,9 +298,10 @@ const addRoleToUser = async (userId: number) => {
       searchResult.value.hasRole = true
     }
 
+    showNotification('Роль успешно добавлена пользователю', 'success')
   } catch (error) {
     console.error('Ошибка при добавлении роли:', error)
-    alert('Ошибка при добавлении роли')
+    showNotification('Ошибка при добавлении роли', 'error')
   }
 }
 
@@ -296,22 +317,28 @@ const removeRoleFromUser = async (userId: number) => {
       searchResult.value.hasRole = false
     }
 
+    showNotification('Роль успешно удалена у пользователя', 'success')
   } catch (error) {
     console.error('Ошибка при удалении роли:', error)
-    alert('Ошибка при удалении роли')
+    showNotification('Ошибка при удалении роли', 'error')
   }
 }
 
 const createRole = async () => {
-  if (!newRole.value.name.trim() || !newRole.value.description.trim()) return
+  if (!newRole.value.name.trim() || !newRole.value.description.trim()) {
+    showNotification('Заполните название и описание роли', 'warning')
+    return
+  }
 
   isSaving.value = true
   try {
     await adminAPI.createRole(newRole.value)
     await loadRoles()
     closeModal()
+    showNotification('Роль успешно создана', 'success')
   } catch (error) {
     console.error('Ошибка при создании роли:', error)
+    showNotification('Ошибка при создании роли', 'error')
   } finally {
     isSaving.value = false
   }
@@ -332,6 +359,23 @@ const closeManageUsersModal = () => {
 
 const formatRoleName = (role: string) => {
   return role.replace('OAPI:ROLE:', '')
+}
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  // Автоматически скрыть уведомление через 5 секунд
+  setTimeout(() => {
+    notification.value.visible = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
 }
 
 onMounted(() => {

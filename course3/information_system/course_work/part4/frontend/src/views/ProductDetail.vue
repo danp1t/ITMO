@@ -1,5 +1,10 @@
 <template>
   <div class="product-detail">
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <nav v-if="product" class="breadcrumb mb-5" aria-label="breadcrumbs">
       <ul>
         <li><router-link to="/shop">Магазин</router-link></li>
@@ -255,19 +260,15 @@
         Вернуться в магазин
       </router-link>
     </div>
-
-    <div v-if="showNotification" class="notification is-success is-light fixed-notification">
-      <button class="delete" @click="showNotification = false"></button>
-      <p>Товар успешно добавлен в корзину!</p>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import ProductCard from '../components/shop/ProductCard.vue'
+import AppNotification from './AppNotification.vue'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
 
@@ -275,6 +276,29 @@ const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
 
+// Уведомление
+const notification = reactive({
+  visible: false,
+  message: '',
+  type: 'info' as 'info' | 'success' | 'warning' | 'error'
+})
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.message = message
+  notification.type = type
+  notification.visible = true
+
+  // Автоматическое скрытие через 5 секунд
+  setTimeout(() => {
+    hideNotification()
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.visible = false
+}
+
+// Данные
 const product = ref<Product | null>(null)
 const productInfos = ref<ProductInfo[]>([])
 const loading = ref(true)
@@ -284,7 +308,7 @@ const activeImageIndex = ref(0)
 const selectedSize = ref<ProductInfo | null>(null)
 const quantity = ref(1)
 const isAddingToCart = ref(false)
-const showNotification = ref(false)
+
 const relatedProductsInfos = ref<Map<number, ProductInfo[]>>(new Map())
 const relatedProducts = ref<Product[]>([])
 
@@ -388,6 +412,7 @@ const loadProduct = async () => {
   } catch (err) {
     console.error('Ошибка при загрузке товара:', err)
     error.value = true
+    showNotification('Не удалось загрузить информацию о товаре', 'error')
   } finally {
     loading.value = false
   }
@@ -410,6 +435,7 @@ const loadRelatedProducts = async () => {
     }
   } catch (err) {
     console.error('Ошибка при загрузке похожих товаров:', err)
+    showNotification('Не удалось загрузить похожие товары', 'error')
   }
 }
 
@@ -477,13 +503,10 @@ const addToCart = async () => {
       cartStore.addItem(product.value, productInfo, quantity.value)
     }
 
-    showNotification.value = true
-    setTimeout(() => {
-      showNotification.value = false
-    }, 3000)
+    showNotification('Товар успешно добавлен в корзину!', 'success')
   } catch (err) {
     console.error('Ошибка при добавлении в корзину:', err)
-    alert('Не удалось добавить товар в корзину')
+    showNotification('Не удалось добавить товар в корзину', 'error')
   } finally {
     isAddingToCart.value = false
   }
@@ -622,25 +645,6 @@ watch(() => route.params.id, () => {
 .button.is-outlined:hover {
   background-color: #667eea;
   color: white;
-}
-
-.fixed-notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
 }
 
 .related-products {

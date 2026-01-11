@@ -1,5 +1,11 @@
 <template>
   <div class="modal" :class="{ 'is-active': isVisible }">
+    <!-- Компонент уведомлений -->
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="modal-background" @click="$emit('close')"></div>
 
     <div class="modal-card">
@@ -250,6 +256,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { shopAPI } from '@/api/shop.ts'
+import AppNotification from '@/components/AppNotification.vue'
 
 interface Props {
   isVisible: boolean
@@ -260,6 +267,12 @@ interface Emits {
   (e: 'product-added'): void
 }
 
+interface NotificationState {
+  visible: boolean
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+}
+
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
@@ -267,6 +280,11 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isSubmitting = ref(false)
 
 const selectedImages = ref<File[]>([])
+const notification = ref<NotificationState>({
+  visible: false,
+  message: '',
+  type: 'info'
+})
 
 const formData = ref({
   name: '',
@@ -315,14 +333,14 @@ const handleImageSelect = (event: Event) => {
 
     const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
-      alert('Некоторые файлы превышают максимальный размер 5MB')
+      showNotification('Некоторые файлы превышают максимальный размер 5MB', 'warning')
       input.value = ''
       return
     }
 
     const invalidFiles = files.filter(file => !file.type.startsWith('image/'))
     if (invalidFiles.length > 0) {
-      alert('Можно загружать только изображения (JPG, PNG, GIF)')
+      showNotification('Можно загружать только изображения (JPG, PNG, GIF)', 'warning')
       input.value = ''
       return
     }
@@ -393,9 +411,8 @@ const submitForm = async () => {
 
     emit('product-added')
     emit('close')
-
+    showNotification('Товар успешно добавлен!', 'success')
     resetForm()
-
 
   } catch (error: any) {
     console.error('Ошибка при добавлении товара:', error)
@@ -409,7 +426,7 @@ const submitForm = async () => {
       errorMessage = error.message
     }
 
-    alert(errorMessage)
+    showNotification(errorMessage, 'error')
   } finally {
     isSubmitting.value = false
   }
@@ -435,6 +452,23 @@ const resetForm = () => {
     URL.revokeObjectURL(URL.createObjectURL(image))
   })
   selectedImages.value = []
+}
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  // Автоматически скрыть уведомление через 5 секунд
+  setTimeout(() => {
+    notification.value.visible = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
 }
 
 watch(() => props.isVisible, (newValue) => {

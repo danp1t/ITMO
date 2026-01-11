@@ -1,5 +1,10 @@
 <template>
   <div class="shop-view">
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="shop-header mb-5">
       <div class="level">
         <div class="level-left">
@@ -252,13 +257,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { debounce } from 'lodash'
 import { useCartStore } from '../stores/cart'
 import { useAuthStore } from '../stores/auth'
 import ProductCard from '../components/shop/ProductCard.vue'
 import CartSidebar from '../components/shop/CartSidebar.vue'
 import ProductFormModal from '../components/shop/ProductFormModal.vue'
+import AppNotification from './AppNotification.vue'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
 import ProductEditModal from "@/components/shop/ProductEditModal.vue";
@@ -266,6 +272,29 @@ import ProductEditModal from "@/components/shop/ProductEditModal.vue";
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 
+// Уведомление
+const notification = reactive({
+  visible: false,
+  message: '',
+  type: 'info' as 'info' | 'success' | 'warning' | 'error'
+})
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.message = message
+  notification.type = type
+  notification.visible = true
+
+  // Автоматическое скрытие через 5 секунд
+  setTimeout(() => {
+    hideNotification()
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.visible = false
+}
+
+// Данные
 const products = ref<Product[]>([])
 const productInfos = ref<ProductInfo[]>([])
 const loading = ref(false)
@@ -289,6 +318,7 @@ const openEditModal = (productId: number) => {
 
 const onProductUpdated = () => {
   loadProducts()
+  showNotification('Товар успешно обновлен', 'success')
 }
 
 const onProductDeleted = (productId: number) => {
@@ -298,6 +328,8 @@ const onProductDeleted = (productId: number) => {
   if (showEditProductModal.value && editingProductId.value === productId) {
     showEditProductModal.value = false
   }
+
+  showNotification('Товар успешно удален', 'success')
 }
 
 const categories = computed(() => {
@@ -419,7 +451,7 @@ const loadProducts = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке товаров:', error)
-    alert('Не удалось загрузить товары. Пожалуйста, попробуйте позже.')
+    showNotification('Не удалось загрузить товары. Пожалуйста, попробуйте позже.', 'error')
   } finally {
     loading.value = false
   }
@@ -454,14 +486,8 @@ const toggleCart = () => {
 
 const onProductAdded = () => {
   loadProducts()
-
-  showNotification.value = true
-  setTimeout(() => {
-    showNotification.value = false
-  }, 3000)
+  showNotification('Товар успешно добавлен', 'success')
 }
-
-const showNotification = ref(false)
 
 onMounted(() => {
   loadProducts()

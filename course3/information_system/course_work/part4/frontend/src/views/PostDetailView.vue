@@ -1,5 +1,10 @@
 <template>
   <div class="post-detail-view">
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div v-if="loading" class="has-text-centered">
       <i class="fas fa-spinner fa-spin fa-2x"></i>
       <p>Загрузка поста...</p>
@@ -283,11 +288,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import RichTextEditor from '../components/posts/RichTextEditor.vue'
 import TagList from '../components/posts/TagList.vue'
+import AppNotification from './AppNotification.vue'
 import { postsAPI } from '../api/posts'
 import type { Post, Comment, UpdatePostRequest } from '../types/posts'
 
@@ -295,6 +301,29 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
+// Уведомление
+const notification = reactive({
+  visible: false,
+  message: '',
+  type: 'info' as 'info' | 'success' | 'warning' | 'error'
+})
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.message = message
+  notification.type = type
+  notification.visible = true
+
+  // Автоматическое скрытие через 5 секунд
+  setTimeout(() => {
+    hideNotification()
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.visible = false
+}
+
+// Данные
 const post = ref<Post | null>(null)
 const comments = ref<Comment[]>([])
 const loading = ref(false)
@@ -331,6 +360,7 @@ const loadPost = async () => {
     post.value = response.data
   } catch (error) {
     console.error('Ошибка при загрузке поста:', error)
+    showNotification('Не удалось загрузить пост', 'error')
   } finally {
     loading.value = false
   }
@@ -358,10 +388,14 @@ const toggleLike = async () => {
 
     await postsAPI.likePost(post.value.id)
 
+    const action = isLiked.value ? 'лайк поставлен' : 'лайк убран'
+    showNotification(`Ваш ${action}`, 'success')
+
   } catch (error) {
     isLiked.value = !isLiked.value
     post.value.countLike += isLiked.value ? -1 : 1
     console.error('Ошибка при оценке поста:', error)
+    showNotification('Не удалось поставить лайк', 'error')
   } finally {
     isLiking.value = false
   }
@@ -382,8 +416,10 @@ const addComment = async () => {
     await postsAPI.createComment(commentData)
     newComment.value = ''
     await loadComments()
+    showNotification('Комментарий добавлен', 'success')
   } catch (error) {
     console.error('Ошибка при добавлении комментария:', error)
+    showNotification('Не удалось добавить комментарий', 'error')
   } finally {
     isAddingComment.value = false
   }
@@ -422,8 +458,10 @@ const saveEditedComment = async (commentId: number) => {
     }
 
     cancelEditComment()
+    showNotification('Комментарий обновлен', 'success')
   } catch (error) {
     console.error('Ошибка при обновлении комментария:', error)
+    showNotification('Не удалось обновить комментарий', 'error')
   } finally {
     isEditingComment.value = false
   }
@@ -441,8 +479,10 @@ const deleteComment = async (commentId: number) => {
   try {
     await postsAPI.deleteComment(commentId)
     comments.value = comments.value.filter(c => c.id !== commentId)
+    showNotification('Комментарий удален', 'success')
   } catch (error) {
     console.error('Ошибка при удалении комментария:', error)
+    showNotification('Не удалось удалить комментарий', 'error')
   } finally {
     isDeletingComment.value = null
   }
@@ -473,19 +513,19 @@ const cancelEdit = () => {
 }
 
 const handleFileUploadError = (error: string) => {
-  alert(error)
+  showNotification(error, 'error')
 }
 
 const saveEdit = async () => {
   if (!post.value || !authStore.user) return
 
   if (!editForm.value.title.trim()) {
-    alert('Введите заголовок поста')
+    showNotification('Введите заголовок поста', 'warning')
     return
   }
 
   if (!editForm.value.content.trim() || editForm.value.content === '<p></p>') {
-    alert('Введите содержание поста')
+    showNotification('Введите содержание поста', 'warning')
     return
   }
 
@@ -505,10 +545,11 @@ const saveEdit = async () => {
     post.value = updatedResponse.data
 
     isEditing.value = false
+    showNotification('Пост успешно обновлен', 'success')
   } catch (error: any) {
     console.error('Ошибка при обновлении поста:', error)
     const message = error.response?.data?.message || 'Не удалось обновить пост'
-    alert(message)
+    showNotification(message, 'error')
   } finally {
     isSaving.value = false
   }
@@ -519,15 +560,20 @@ const confirmDelete = async () => {
     return
   }
 
+  if (!confirm('Вы уверены, что хотите удалить этот пост? Это действие нельзя отменить.')) {
+    return
+  }
+
   isDeleting.value = true
 
   try {
     await postsAPI.deletePost(post.value.id)
     router.push('/posts')
+    showNotification('Пост успешно удален', 'success')
   } catch (error: any) {
     console.error('Ошибка при удалении поста:', error)
     const errorMessage = error.response?.data?.message || 'Не удалось удалить пост'
-    alert(errorMessage)
+    showNotification(errorMessage, 'error')
   } finally {
     isDeleting.value = false
   }

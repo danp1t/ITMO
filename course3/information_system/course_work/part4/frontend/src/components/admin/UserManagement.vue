@@ -500,6 +500,7 @@ const loadUsers = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке пользователей:', error)
+    showNotification('Ошибка при загрузке пользователей', 'error')
     users.value = []
   } finally {
     loading.value = false
@@ -512,6 +513,7 @@ const loadAvailableRoles = async () => {
     availableRoles.value = response.data || []
   } catch (error) {
     console.error('Ошибка при загрузке ролей:', error)
+    showNotification('Ошибка при загрузке ролей', 'error')
     availableRoles.value = []
   }
 }
@@ -525,6 +527,7 @@ const loadUserDetails = async (userId: number) => {
     await loadAvailableRoles()
   } catch (error) {
     console.error('Ошибка при загрузке детальной информации:', error)
+    showNotification('Ошибка при загрузке информации о пользователе', 'error')
     userDetails.value = null
   } finally {
     loadingUserDetails.value = false
@@ -599,9 +602,10 @@ const toggleUserStatus = async (user: UserWithDetails) => {
     await adminAPI.toggleUserStatus(user.id, newStatus)
     user.enabled = newStatus
     await loadUsers()
+    showNotification(`Статус пользователя успешно изменен на "${newStatus ? 'активен' : 'заблокирован'}"`, 'success')
   } catch (error) {
     console.error('Ошибка при изменении статуса:', error)
-    alert('Не удалось изменить статус пользователя')
+    showNotification('Не удалось изменить статус пользователя', 'error')
   } finally {
     togglingStatus.value = false
   }
@@ -686,9 +690,10 @@ const removeRole = async (roleToRemove: Role) => {
       users.value[userIndex].roles = updatedRoles
     }
 
+    showNotification(`Роль "${formatRoleName(roleToRemove.name)}" успешно удалена`, 'success')
   } catch (error) {
     console.error('Ошибка при удалении роли:', error)
-    alert('Не удалось удалить роль')
+    showNotification('Не удалось удалить роль', 'error')
   }
 }
 
@@ -716,7 +721,10 @@ const getRoleTagClass = (role: string) => {
 }
 
 onMounted(async () => {
-  if (!authStore.canManageUsers) return
+  if (!authStore.canManageUsers) {
+    showNotification('У вас недостаточно прав для управления пользователями', 'warning')
+    return
+  }
   await loadUsers()
 })
 </script>

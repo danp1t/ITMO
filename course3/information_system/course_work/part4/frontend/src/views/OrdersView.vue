@@ -1,5 +1,11 @@
 <template>
   <div class="orders-view">
+    <!-- Компонент уведомлений -->
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="container">
       <div class="has-text-centered mb-5">
         <h1 class="title is-2">Мои заказы</h1>
@@ -207,14 +213,26 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { shopAPI } from '../api/shop'
 import type { Order, OrderStatus } from '../types/shop'
+import AppNotification from '@/components/AppNotification.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
+
+interface NotificationState {
+  visible: boolean
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+}
 
 const orders = ref<Order[]>([])
 const orderStatuses = ref<OrderStatus[]>([])
 const loading = ref(false)
 const cancellingOrderId = ref<number | null>(null)
+const notification = ref<NotificationState>({
+  visible: false,
+  message: '',
+  type: 'info'
+})
 
 const selectedStatus = ref<number | null>(null)
 
@@ -234,6 +252,7 @@ const loadOrders = async () => {
 
   } catch (error) {
     console.error('Ошибка при загрузке заказов:', error)
+    showNotification('Ошибка при загрузке заказов', 'error')
   } finally {
     loading.value = false
   }
@@ -293,7 +312,6 @@ const canCancelOrder = (order: Order) => {
 }
 
 const cancelOrder = async (order: Order) => {
-
   cancellingOrderId.value = order.id
 
   try {
@@ -324,11 +342,13 @@ const cancelOrder = async (order: Order) => {
       orders.value[orderIndex].orderStatusName = 'cancelled'
     }
 
+    showNotification('Заказ успешно отменен', 'success')
+
   } catch (error: any) {
     console.error('Ошибка при отмене заказа:', error)
     console.error('Полный ответ ошибки:', error.response)
     const message = error.response?.data?.message || 'Не удалось отменить заказ'
-    alert(message)
+    showNotification(message, 'error')
   } finally {
     cancellingOrderId.value = null
   }
@@ -340,6 +360,23 @@ const viewOrderDetails = (order: Order) => {
 
 const filterByStatus = (statusId: number | null) => {
   selectedStatus.value = statusId
+}
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  // Автоматически скрыть уведомление через 5 секунд
+  setTimeout(() => {
+    notification.value.visible = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
 }
 
 onMounted(() => {
@@ -412,7 +449,6 @@ onMounted(() => {
 .empty-state {
   padding: 3rem 1rem;
 }
-
 
 .button.is-primary:hover {
   opacity: 0.9;

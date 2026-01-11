@@ -134,6 +134,7 @@ interface Props {
 interface Emits {
   (e: 'edit', productId: number): void
   (e: 'delete', productId: number): void
+  (e: 'notification', data: { message: string, type: 'info' | 'success' | 'warning' | 'error' }): void
 }
 
 const props = defineProps<Props>()
@@ -226,6 +227,10 @@ const addToCart = async () => {
   try {
     if (availableSizes.value.length > 0 && selectedSize.value) {
       cartStore.addItem(props.product, selectedSize.value, 1)
+      emit('notification', {
+        message: 'Товар успешно добавлен в корзину!',
+        type: 'success'
+      })
     } else {
       const productInfo: ProductInfo = {
         id: props.product.id,
@@ -235,11 +240,18 @@ const addToCart = async () => {
         price: props.product.basePrice
       }
       cartStore.addItem(props.product, productInfo, 1)
+      emit('notification', {
+        message: 'Товар успешно добавлен в корзину!',
+        type: 'success'
+      })
     }
 
   } catch (error) {
     console.error('Ошибка при добавлении в корзину:', error)
-    alert('Не удалось добавить товар в корзину')
+    emit('notification', {
+      message: 'Не удалось добавить товар в корзину',
+      type: 'error'
+    })
   } finally {
     isAddingToCart.value = false
   }
@@ -254,8 +266,17 @@ const handleDelete = async () => {
   try {
     await shopAPI.deleteProduct(props.product.id)
     emit('delete', props.product.id)
-  } catch (error) {
+    emit('notification', {
+      message: 'Товар успешно удален!',
+      type: 'success'
+    })
+  } catch (error: any) {
     console.error('Ошибка при удалении товара:', error)
+    const errorMessage = error.response?.data?.message || 'Не удалось удалить товар'
+    emit('notification', {
+      message: errorMessage,
+      type: 'error'
+    })
   } finally {
     isDeleting.value = false
   }

@@ -1,5 +1,11 @@
 <template>
   <div class="checkout-view">
+    <!-- Компонент уведомлений -->
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="container">
       <div class="has-text-centered mb-5">
         <h1 class="title is-2">Оформление заказа</h1>
@@ -352,11 +358,24 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useCartStore } from '../stores/cart'
 import { shopAPI } from '../api/shop'
+import AppNotification from '@/components/AppNotification.vue'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
 const phoneInput = ref<HTMLInputElement>()
+
+interface NotificationState {
+  visible: boolean
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+}
+
+const notification = ref<NotificationState>({
+  visible: false,
+  message: '',
+  type: 'info'
+})
 
 const form = reactive({
   name: '',
@@ -542,11 +561,12 @@ const validateForm = () => {
 
 const submitOrder = async () => {
   if (!validateForm()) {
+    showNotification('Пожалуйста, заполните все обязательные поля', 'warning')
     return
   }
 
   if (cartStore.isEmpty) {
-    alert('Корзина пуста')
+    showNotification('Корзина пуста', 'warning')
     return
   }
 
@@ -584,15 +604,33 @@ const submitOrder = async () => {
     const response = await shopAPI.createOrder(orderData)
     saveUserAddress()
     cartStore.clearCart()
+    showNotification('Заказ успешно оформлен!', 'success')
     router.push(`/shop/orders/${response.data.id}`)
 
   } catch (error: any) {
     console.error('Ошибка при оформлении заказа:', error)
     const message = error.response?.data?.message || 'Произошла ошибка при оформлении заказа'
-    alert(message)
+    showNotification(message, 'error')
   } finally {
     isSubmitting.value = false
   }
+}
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  // Автоматически скрыть уведомление через 5 секунд
+  setTimeout(() => {
+    notification.value.visible = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
 }
 
 onMounted(() => {

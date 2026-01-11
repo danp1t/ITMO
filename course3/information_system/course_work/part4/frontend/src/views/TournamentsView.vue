@@ -1,5 +1,11 @@
 <template>
   <div class="tournaments-view">
+    <!-- Компонент уведомлений -->
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="mb-5">
       <h1 class="title is-2">Соревнования по художественной гимнастике</h1>
       <p class="subtitle is-5 has-text-grey">
@@ -135,6 +141,7 @@ import TournamentForm from '../components/tournaments/TournamentForm.vue'
 import TournamentDetailModal from '../components/tournaments/TournamentDetailModal.vue'
 import { tournamentsAPI } from '../api/tournaments'
 import type { Tournament, Rang } from '../types/tournaments'
+import AppNotification from '@/components/AppNotification.vue'
 
 const allTournaments = ref<Tournament[]>([])
 const rangs = ref<Rang[]>([])
@@ -154,6 +161,18 @@ const showDetailModal = ref(false)
 const editingTournament = ref<Tournament | null>(null)
 const selectedTournament = ref<Tournament | null>(null)
 
+interface NotificationState {
+  visible: boolean
+  message: string
+  type: 'info' | 'success' | 'warning' | 'error'
+}
+
+const notification = ref<NotificationState>({
+  visible: false,
+  message: '',
+  type: 'info'
+})
+
 const loadTournaments = async () => {
   loading.value = true
   try {
@@ -161,7 +180,7 @@ const loadTournaments = async () => {
     allTournaments.value = result.data
   } catch (error) {
     console.error('Ошибка при загрузке турниров:', error)
-    alert('Не удалось загрузить турниры')
+    showNotification('Не удалось загрузить турниры', 'error')
   } finally {
     loading.value = false
   }
@@ -173,6 +192,7 @@ const loadRangs = async () => {
     rangs.value = response.data
   } catch (error) {
     console.error('Ошибка при загрузке рангов:', error)
+    showNotification('Ошибка при загрузке рангов', 'error')
   }
 }
 
@@ -247,6 +267,7 @@ const filteredAndSortedTournaments = computed(() => {
     if (aValue > bValue) return 1 * direction
     return 0
   })
+
 
   return filtered
 })
@@ -330,15 +351,17 @@ const handleFormSubmit = async (tournamentData: any) => {
   try {
     if (editingTournament.value) {
       await tournamentsAPI.updateTournament(editingTournament.value.id, tournamentData)
+      showNotification('Турнир успешно обновлен!', 'success')
     } else {
       await tournamentsAPI.createTournament(tournamentData)
+      showNotification('Турнир успешно создан!', 'success')
     }
 
     closeFormModal()
     await loadTournaments()
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при сохранении турнира'
-    alert(message)
+    showNotification(message, 'error')
   }
 }
 
@@ -346,10 +369,28 @@ const deleteTournament = async (tournament: Tournament) => {
   try {
     await tournamentsAPI.deleteTournament(tournament.id)
     await loadTournaments()
+    showNotification('Турнир успешно удален!', 'success')
   } catch (error: any) {
     const message = error.response?.data?.message || 'Ошибка при удалении турнира'
-    alert(message)
+    showNotification(message, 'error')
   }
+}
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.value = {
+    visible: true,
+    message,
+    type
+  }
+
+  // Автоматически скрыть уведомление через 5 секунд
+  setTimeout(() => {
+    notification.value.visible = false
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.value.visible = false
 }
 
 onMounted(() => {

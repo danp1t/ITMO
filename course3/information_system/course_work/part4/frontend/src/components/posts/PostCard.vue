@@ -188,6 +188,7 @@ const emit = defineEmits<{
   edit: [post: Post]
   like: [postId: number]
   delete: [postId: number]
+  notification: [{ message: string, type: 'info' | 'success' | 'warning' | 'error' }]
 }>()
 
 const router = useRouter()
@@ -424,7 +425,10 @@ const formatDate = (dateString: string) => {
 
 const toggleLike = async () => {
   if (!authStore.isAuthenticated) {
-    alert('Для оценки постов необходимо войти в систему')
+    emit('notification', {
+      message: 'Для оценки постов необходимо войти в систему',
+      type: 'warning'
+    })
     return
   }
 
@@ -449,7 +453,10 @@ const toggleLike = async () => {
       : currentLikeCount.value - 1
 
     console.error('Ошибка при оценке поста:', error)
-    alert(error.response?.data?.message || 'Не удалось поставить лайк')
+    emit('notification', {
+      message: error.response?.data?.message || 'Не удалось поставить лайк',
+      type: 'error'
+    })
   } finally {
     isLiking.value = false
   }
@@ -468,7 +475,10 @@ const deletePost = async () => {
     emit('delete', props.post.id)
   } catch (error: any) {
     console.error('Ошибка при удалении поста:', error)
-    alert(error.response?.data?.message || 'Не удалось удалить пост')
+    emit('notification', {
+      message: error.response?.data?.message || 'Не удалось удалить пост',
+      type: 'error'
+    })
   } finally {
     isDeleting.value = false
   }
@@ -487,12 +497,32 @@ const copyToClipboard = async () => {
     shareUrlInput.value.select()
     try {
       await navigator.clipboard.writeText(postUrl.value)
-      alert('Ссылка скопирована в буфер обмена!')
       showShareModal.value = false
+      emit('notification', {
+        message: 'Ссылка скопирована в буфер обмена!',
+        type: 'success'
+      })
     } catch (err) {
-      document.execCommand('copy')
-      alert('Ссылка скопирована в буфер обмена!')
-      showShareModal.value = false
+      try {
+        const successful = document.execCommand('copy')
+        if (successful) {
+          showShareModal.value = false
+          emit('notification', {
+            message: 'Ссылка скопирована в буфер обмена!',
+            type: 'success'
+          })
+        } else {
+          emit('notification', {
+            message: 'Не удалось скопировать ссылку',
+            type: 'error'
+          })
+        }
+      } catch (err2) {
+        emit('notification', {
+          message: 'Не удалось скопировать ссылку',
+          type: 'error'
+        })
+      }
     }
   }
 }

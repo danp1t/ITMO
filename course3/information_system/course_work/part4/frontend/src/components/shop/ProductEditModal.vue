@@ -284,6 +284,7 @@ interface Emits {
   (e: 'close'): void
   (e: 'product-updated'): void
   (e: 'product-deleted', productId: number): void
+  (e: 'notification', data: { message: string, type: 'info' | 'success' | 'warning' | 'error' }): void
 }
 
 const props = defineProps<Props>()
@@ -359,7 +360,10 @@ const loadProduct = async () => {
     existingImages.value = product.images || []
   } catch (error) {
     console.error('Ошибка при загрузке товара:', error)
-    alert('Не удалось загрузить данные товара')
+    emit('notification', {
+      message: 'Не удалось загрузить данные товара',
+      type: 'error'
+    })
     closeModal()
   }
 }
@@ -380,14 +384,20 @@ const handleImageSelect = (event: Event) => {
 
     const oversizedFiles = files.filter(file => file.size > 5 * 1024 * 1024)
     if (oversizedFiles.length > 0) {
-      alert('Некоторые файлы превышают максимальный размер 5MB')
+      emit('notification', {
+        message: 'Некоторые файлы превышают максимальный размер 5MB',
+        type: 'warning'
+      })
       input.value = ''
       return
     }
 
     const invalidFiles = files.filter(file => !file.type.startsWith('image/'))
     if (invalidFiles.length > 0) {
-      alert('Можно загружать только изображения (JPG, PNG, GIF)')
+      emit('notification', {
+        message: 'Можно загружать только изображения (JPG, PNG, GIF)',
+        type: 'warning'
+      })
       input.value = ''
       return
     }
@@ -450,6 +460,10 @@ const submitForm = async () => {
         await shopAPI.deleteProductImage(props.productId, imagePath)
       } catch (error) {
         console.warn('Не удалось удалить изображение:', imagePath, error)
+        emit('notification', {
+          message: `Не удалось удалить изображение: ${imagePath}`,
+          type: 'warning'
+        })
       }
     }
 
@@ -460,6 +474,10 @@ const submitForm = async () => {
         await shopAPI.uploadProductImage(props.productId, imageFormData)
       } catch (error) {
         console.warn('Не удалось загрузить изображение:', imageFile.name, error)
+        emit('notification', {
+          message: `Не удалось загрузить изображение: ${imageFile.name}`,
+          type: 'warning'
+        })
       }
     }
 
@@ -481,10 +499,18 @@ const submitForm = async () => {
         }
       } catch (error) {
         console.warn('Не удалось обновить размер:', size, error)
+        emit('notification', {
+          message: `Не удалось обновить размер: ${size.sizeName}`,
+          type: 'warning'
+        })
       }
     }
 
     emit('product-updated')
+    emit('notification', {
+      message: 'Товар успешно обновлен!',
+      type: 'success'
+    })
 
     setTimeout(() => {
       isSubmitting.value = false
@@ -499,7 +525,10 @@ const submitForm = async () => {
     } else if (error.response?.status === 404) {
       errorMessage = 'Товар не найден'
     }
-    alert(errorMessage)
+    emit('notification', {
+      message: errorMessage,
+      type: 'error'
+    })
     isSubmitting.value = false
   }
 }
@@ -512,6 +541,10 @@ const deleteProduct = async () => {
   try {
     await shopAPI.deleteProduct(props.productId)
     emit('product-deleted', props.productId)
+    emit('notification', {
+      message: 'Товар успешно удален!',
+      type: 'success'
+    })
     setTimeout(() => {
       isSubmitting.value = false
       closeModal()
@@ -522,7 +555,10 @@ const deleteProduct = async () => {
     if (error.response?.status === 404) {
       errorMessage = 'Товар не найден'
     }
-    alert(errorMessage)
+    emit('notification', {
+      message: errorMessage,
+      type: 'error'
+    })
     isSubmitting.value = false
   }
 }

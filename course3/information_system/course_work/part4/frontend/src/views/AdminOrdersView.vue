@@ -1,5 +1,10 @@
 <template>
   <div class="admin-orders-view dark-theme">
+    <AppNotification
+      :notification="notification"
+      @hide="hideNotification"
+    />
+
     <div class="content-header">
       <h1 class="title">Управление заказами</h1>
       <div class="content-actions">
@@ -342,9 +347,33 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { shopAPI } from '@/api/shop'
 import type { Order, OrderStatus } from '@/types/shop'
+import AppNotification from './AppNotification.vue'
 
 const authStore = useAuthStore()
 
+// Уведомление
+const notification = reactive({
+  visible: false,
+  message: '',
+  type: 'info' as 'info' | 'success' | 'warning' | 'error'
+})
+
+const showNotification = (message: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+  notification.message = message
+  notification.type = type
+  notification.visible = true
+
+  // Автоматическое скрытие через 5 секунд
+  setTimeout(() => {
+    hideNotification()
+  }, 5000)
+}
+
+const hideNotification = () => {
+  notification.visible = false
+}
+
+// Данные
 const orders = ref<Order[]>([])
 const orderStatuses = ref<OrderStatus[]>([])
 const loading = ref(false)
@@ -394,7 +423,7 @@ const loadOrders = async () => {
     }
   } catch (error) {
     console.error('Ошибка при загрузке заказов:', error)
-    alert('Не удалось загрузить список заказов')
+    showNotification('Не удалось загрузить список заказов', 'error')
   } finally {
     loading.value = false
   }
@@ -543,7 +572,6 @@ const getStatusClass = (statusId: number): string => {
 }
 
 const cancelOrder = async (order: Order) => {
-
   cancellingOrderId.value = order.id
   try {
     await shopAPI.updateOrder(order.id, {
@@ -559,10 +587,12 @@ const cancelOrder = async (order: Order) => {
       orders.value[orderIndex].orderStatusId = 5
     }
 
+    showNotification('Заказ успешно отменен', 'success')
+
   } catch (error: any) {
     console.error('Ошибка при отмене заказа:', error)
     const message = error.response?.data?.message || 'Не удалось отменить заказ'
-    alert(`Ошибка: ${message}`)
+    showNotification(`Ошибка: ${message}`, 'error')
   } finally {
     cancellingOrderId.value = null
   }
