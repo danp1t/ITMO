@@ -343,11 +343,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { shopAPI } from '@/api/shop'
 import type { Order, OrderStatus } from '@/types/shop'
-import AppNotification from './AppNotification.vue'
+import AppNotification from '../components/AppNotification.vue'
 
 const authStore = useAuthStore()
 

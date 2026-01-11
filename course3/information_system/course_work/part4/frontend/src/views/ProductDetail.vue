@@ -268,7 +268,7 @@ import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import ProductCard from '../components/shop/ProductCard.vue'
-import AppNotification from './AppNotification.vue'
+import AppNotification from '../components/AppNotification.vue'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
 

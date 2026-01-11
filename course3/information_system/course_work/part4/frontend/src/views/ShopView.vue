@@ -264,7 +264,7 @@ import { useAuthStore } from '../stores/auth'
 import ProductCard from '../components/shop/ProductCard.vue'
 import CartSidebar from '../components/shop/CartSidebar.vue'
 import ProductFormModal from '../components/shop/ProductFormModal.vue'
-import AppNotification from './AppNotification.vue'
+import AppNotification from '../components/AppNotification.vue'
 import { shopAPI } from '../api/shop'
 import type { Product, ProductInfo } from '../types/shop'
 import ProductEditModal from "@/components/shop/ProductEditModal.vue";
@@ -272,7 +272,6 @@ import ProductEditModal from "@/components/shop/ProductEditModal.vue";
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 
-// Уведомление
 const notification = reactive({
   visible: false,
   message: '',
@@ -284,7 +283,6 @@ const showNotification = (message: string, type: 'info' | 'success' | 'warning' 
   notification.type = type
   notification.visible = true
 
-  // Автоматическое скрытие через 5 секунд
   setTimeout(() => {
     hideNotification()
   }, 5000)

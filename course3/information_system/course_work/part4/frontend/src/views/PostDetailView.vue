@@ -293,7 +293,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import RichTextEditor from '../components/posts/RichTextEditor.vue'
 import TagList from '../components/posts/TagList.vue'
-import AppNotification from './AppNotification.vue'
+import AppNotification from '../components/AppNotification.vue'
 import { postsAPI } from '../api/posts'
 import type { Post, Comment, UpdatePostRequest } from '../types/posts'
 

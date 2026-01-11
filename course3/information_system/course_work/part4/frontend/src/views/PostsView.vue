@@ -37,7 +37,7 @@
               </p>
             </div>
 
-            <div v-else class="notification is-light is-small">
+            <div v-else class="notification is-dark is-small">
               <p class="is-size-7">
                 <i class="fas fa-sign-in-alt mr-1"></i>
                 <router-link to="/login" class="has-text-primary">

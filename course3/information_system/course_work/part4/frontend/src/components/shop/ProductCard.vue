@@ -25,10 +25,10 @@
         <div class="level-left">
           <div class="price-info">
             <p class="price has-text-weight-bold">
-              {{ minPrice }} ₽
               <span v-if="hasMultiplePrices" class="has-text-grey is-size-7">
                 от
               </span>
+              {{ minPrice }} ₽
             </p>
           </div>
         </div>
