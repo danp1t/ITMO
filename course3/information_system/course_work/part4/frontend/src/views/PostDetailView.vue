@@ -560,10 +560,6 @@ const confirmDelete = async () => {
     return
   }
 
-  if (!confirm('Вы уверены, что хотите удалить этот пост? Это действие нельзя отменить.')) {
-    return
-  }
-
   isDeleting.value = true
 
   try {
