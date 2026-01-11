@@ -81,6 +81,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/**").authenticated()
 
                         .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/rangs").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tags").permitAll()
 
                         .anyRequest().authenticated()
 
