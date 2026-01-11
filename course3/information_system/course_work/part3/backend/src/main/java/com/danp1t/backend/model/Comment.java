@@ -18,7 +18,7 @@ public class Comment {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "user_comment")
+    @Column(name = "user_comment", columnDefinition = "TEXT")
     private String userComment;
 
     @ManyToOne()

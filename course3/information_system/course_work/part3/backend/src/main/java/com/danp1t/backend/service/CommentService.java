@@ -111,10 +111,13 @@ public class CommentService {
     }
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
-    public CommentDTO save(CommentDTO commentDTO) {
-        Comment comment = toEntity(commentDTO);
-        Comment saved = commentRepository.save(comment);
-        return toDTO(saved);
+    public Integer save(CommentDTO commentDTO) {
+
+        return commentRepository.createComment(
+                commentDTO.getUserComment(),
+                commentDTO.getPostId(),
+                commentDTO.getAccountId()
+        );
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
