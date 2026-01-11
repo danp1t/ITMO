@@ -331,24 +331,14 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public byte[] getProductImage(String path) throws IOException {
-        System.out.println("Получение изображения по пути: " + path);
-
         String relativePath = toRelativePath(path);
-        System.out.println("Относительный путь: " + relativePath);
-
         String normalizedPath = relativePath.replace('/', '\\');
-        System.out.println("Нормализованный путь для файловой системы: " + normalizedPath);
-
         Path filePath = Paths.get("uploads", normalizedPath).toAbsolutePath().normalize();
-        System.out.println("Полный путь к файлу: " + filePath);
-
         if (!Files.exists(filePath)) {
-            System.err.println("Файл не существует: " + filePath);
             throw new IOException("Файл не найден: " + filePath);
         }
 
         byte[] data = Files.readAllBytes(filePath);
-        System.out.println("Файл прочитан, размер: " + data.length + " байт");
         return data;
     }
 
