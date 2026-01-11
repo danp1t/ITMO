@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: my-spring-app
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env
+      base-path: /actuator
+    enabled-by-default: true
+  
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+    prometheus:
+      enabled: true
+  
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+        step: 1m
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      sla:
+        http.server.requests: 100ms, 500ms, 1s, 2s
+    tags:
+      application: ${spring.application.name}
+      environment: ${ENVIRONMENT:local}
+  
+  server:
+    port: 8080
+
+logging:
+  level:
+    org.springframework.boot.actuate: DEBUG

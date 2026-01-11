@@ -1,0 +1,13 @@
+# prometheus/alert_rules.yml
+groups:
+  - name: spring_boot_alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) / rate(http_server_requests_seconds_count[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Высокий уровень ошибок в приложении {{ $labels.application }}"
+          description: "Уровень ошибок: {{ $value | humanizePercentage }}"

@@ -1,0 +1,20 @@
+{
+  "dashboard": {
+    "title": "Spring Boot Overview",
+    "tags": ["spring-boot", "micrometer"],
+    "timezone": "browser",
+    "panels": [],
+    "templating": {
+      "list": [
+        {
+          "name": "application",
+          "query": "label_values(application)",
+          "datasource": "Prometheus",
+          "type": "query"
+        }
+      ]
+    }
+  },
+  "folderTitle": "Spring Boot",
+  "overwrite": true
+}

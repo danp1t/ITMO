@@ -80,6 +80,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/orders").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/**").authenticated()
 
+                        .requestMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+
                         .anyRequest().authenticated()
 
                 );

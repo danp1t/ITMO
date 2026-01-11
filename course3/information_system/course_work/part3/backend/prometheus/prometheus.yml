@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Мониторинг твоего Spring Boot приложения (указывай свой порт)
+  - job_name: 'spring-boot-app'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']  # Твой локальный Spring Boot
+        labels:
+          application: 'my-spring-app'
+          environment: 'local'
+
+  # Мониторинг Prometheus самого себя
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
