@@ -252,6 +252,7 @@
     <CartSidebar
       :is-visible="showCart"
       @close="showCart = false"
+      @notification="handleCartNotification"
     />
   </div>
 </template>
@@ -305,6 +306,10 @@ const inStockOnly = ref(false)
 const showCart = ref(false)
 
 const showAddProductModal = ref(false)
+
+const handleCartNotification = (data: { message: string, type: 'info' | 'success' | 'warning' | 'error' }) => {
+  showNotification(data.message, data.type)
+}
 
 const showEditProductModal = ref(false)
 const editingProductId = ref<number | null>(null)

@@ -10,6 +10,10 @@ export const shopAPI = {
     return apiClient.get<ProductDetail>(`/api/products/${id}/view`)
   },
 
+  getProductInfoById(id: number) {
+    return apiClient.get<ProductInfo>(`/api/product-infos/${id}`)
+  },
+
   updateProduct(id: number, data: Partial<Product>) {
     return apiClient.put<Product>(`/api/products/${id}`, data)
   },

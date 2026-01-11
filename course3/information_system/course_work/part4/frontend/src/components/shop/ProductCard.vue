@@ -222,6 +222,22 @@ const onSizeChange = () => {
 const addToCart = async () => {
   if (!canAddToCart.value) return
 
+  if (availableSizes.value.length > 0 && selectedSize.value) {
+    if (selectedSize.value.countItems === 0) {
+      emit('notification', {
+        message: 'Этот размер временно отсутствует в наличии',
+        type: 'warning'
+      })
+      return
+    }
+  } else if (totalStock.value === 0) {
+    emit('notification', {
+      message: 'Товар временно отсутствует в наличии',
+      type: 'warning'
+    })
+    return
+  }
+
   isAddingToCart.value = true
 
   try {

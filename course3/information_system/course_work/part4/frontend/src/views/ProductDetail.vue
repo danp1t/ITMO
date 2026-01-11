@@ -123,7 +123,6 @@
               </div>
             </div>
           </div>
-
           <div class="field" v-if="selectedSize">
             <label class="label">Количество:</label>
             <div class="control">
@@ -134,9 +133,9 @@
                     @click="decreaseQuantity"
                     :disabled="quantity <= 1"
                   >
-                    <span class="icon is-small">
-                      <i class="fas fa-minus"></i>
-                    </span>
+          <span class="icon is-small">
+            <i class="fas fa-minus"></i>
+          </span>
                   </button>
                 </div>
                 <div class="control">
@@ -147,6 +146,7 @@
                     min="1"
                     :max="selectedSize.countItems"
                     style="width: 100px; text-align: center"
+                    @change="validateQuantity"
                   >
                 </div>
                 <div class="control">
@@ -155,15 +155,15 @@
                     @click="increaseQuantity"
                     :disabled="quantity >= selectedSize.countItems"
                   >
-                    <span class="icon is-small">
-                      <i class="fas fa-plus"></i>
-                    </span>
+          <span class="icon is-small">
+            <i class="fas fa-plus"></i>
+          </span>
                   </button>
                 </div>
                 <div class="control">
-                  <span class="tag is-info ml-3">
-                    Доступно: {{ selectedSize.countItems }} шт.
-                  </span>
+        <span class="tag is-info ml-3">
+          Доступно: {{ selectedSize.countItems }} шт.
+        </span>
                 </div>
               </div>
             </div>
@@ -487,6 +487,12 @@ const increaseQuantity = () => {
 const addToCart = async () => {
   if (!canAddToCart.value || !product.value) return
 
+  if (selectedSize.value && quantity.value > selectedSize.value.countItems) {
+    showNotification(`Нельзя добавить больше ${selectedSize.value.countItems} шт.`, 'error')
+    quantity.value = selectedSize.value.countItems
+    return
+  }
+
   isAddingToCart.value = true
 
   try {
@@ -519,6 +525,15 @@ const buyNow = () => {
     })
   }
 }
+
+const validateQuantity = () => {
+  if (selectedSize.value && quantity.value > selectedSize.value.countItems) {
+    quantity.value = selectedSize.value.countItems
+    showNotification(`Максимальное количество: ${selectedSize.value.countItems}`, 'warning')
+  }
+}
+
+
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU', {

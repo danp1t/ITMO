@@ -1182,7 +1182,6 @@ onMounted(() => {
   padding: 2px 4px;
 }
 
-/* Адаптивность для развернутого вида */
 @media (max-width: 768px) {
   .post-content-preview.expanded {
     font-size: 0.95em;

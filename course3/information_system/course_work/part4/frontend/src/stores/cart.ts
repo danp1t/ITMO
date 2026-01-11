@@ -33,9 +33,30 @@ export const useCartStore = defineStore('cart', () => {
       item => item.productId === product.id && item.productInfoId === productInfo.id
     )
 
+    const availableQuantity = productInfo.countItems
+    let finalQuantity = quantity
+
     if (existingItemIndex !== -1) {
-      items.value[existingItemIndex].quantity += quantity
+      const currentItem = items.value[existingItemIndex]
+      const totalRequested = currentItem.quantity + quantity
+
+      if (totalRequested > availableQuantity) {
+        // Если превышает, устанавливаем максимально возможное
+        finalQuantity = availableQuantity - currentItem.quantity
+        if (finalQuantity <= 0) {
+          // Если уже достигнут максимум
+          throw new Error(`Максимальное количество: ${availableQuantity}`)
+        }
+      }
+      items.value[existingItemIndex].quantity += finalQuantity
     } else {
+      if (quantity > availableQuantity) {
+        quantity = availableQuantity
+      }
+      if (quantity <= 0) {
+        throw new Error('Товар отсутствует в наличии')
+      }
+
       items.value.push({
         productId: product.id,
         productInfoId: productInfo.id,
