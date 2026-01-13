@@ -5,7 +5,6 @@ import com.danp1t.backend.exception.ResourceNotFoundException;
 import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Role;
 import com.danp1t.backend.repository.AccountRepository;
-import com.danp1t.backend.repository.RoleRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,9 +25,6 @@ public class AccountService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private RoleService roleService;
@@ -128,7 +124,7 @@ public class AccountService {
         account.setVerificationCode(verificationCode);
         account.setVerificationCodeExpiry(LocalDateTime.now().plusHours(24));
 
-        Role userRole = roleRepository.findByName("ROLE_USER");
+        Role userRole = roleService.findByName("ROLE_USER");
         if (userRole != null) {
             account.setRoles(List.of(userRole));
         }

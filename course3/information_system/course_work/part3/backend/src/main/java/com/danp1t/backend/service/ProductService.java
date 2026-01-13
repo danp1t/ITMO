@@ -5,7 +5,6 @@ import com.danp1t.backend.dto.ProductDetailDTO;
 import com.danp1t.backend.dto.ProductInfoDTO;
 import com.danp1t.backend.model.Product;
 import com.danp1t.backend.model.ProductInfo;
-import com.danp1t.backend.repository.ProductInfoRepository;
 import com.danp1t.backend.repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +25,6 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
-
-    @Autowired
-    private ProductInfoRepository productInfoRepository;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -225,7 +221,7 @@ public class ProductService {
                 productInfo.setPrice(((Number) sizeData.get("price")).intValue());
                 productInfo.setCountItems(((Number) sizeData.get("countItems")).intValue());
 
-                productInfoRepository.save(productInfo);
+                productRepository.saveProductInfo(productInfo);
             }
         }
 

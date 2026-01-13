@@ -4,9 +4,7 @@ import com.danp1t.backend.dto.*;
 import com.danp1t.backend.model.Account;
 import com.danp1t.backend.model.Post;
 import com.danp1t.backend.model.Tag;
-import com.danp1t.backend.repository.AccountRepository;
 import com.danp1t.backend.repository.PostRepository;
-import com.danp1t.backend.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -23,12 +21,6 @@ public class PostService {
 
     @Autowired
     private PostRepository postRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private TagRepository tagRepository;
 
     private static final String SORT_BY_CREATED_AT = "createdAt";
 
@@ -168,7 +160,7 @@ public class PostService {
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public PostDTO save(PostDTO postDTO, String currentUserEmail) {
-        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+        Account currentUser = postRepository.findAccountByEmailWithRoles(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean canPublish = currentUser.getRoles().stream()
@@ -182,7 +174,7 @@ public class PostService {
         post.setOwner(currentUser);
 
         if (postDTO.getTags() != null && !postDTO.getTags().isEmpty()) {
-            List<Tag> tags = tagRepository.findAllById(
+            List<Tag> tags = postRepository.findTagsByIds(
                     postDTO.getTags().stream()
                             .map(TagDTO::getId)
                             .collect(Collectors.toList())
@@ -199,7 +191,7 @@ public class PostService {
         Post existingPost = postRepository.findByIdWithOwner(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
 
-        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+        Account currentUser = postRepository.findAccountByEmailWithRoles(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isOwner = existingPost.getOwner().getEmail().equals(currentUserEmail);
@@ -214,7 +206,7 @@ public class PostService {
         existingPost.setText(postDTO.getText());
 
         if (postDTO.getTags() != null) {
-            List<Tag> tags = tagRepository.findAllById(
+            List<Tag> tags = postRepository.findTagsByIds(
                     postDTO.getTags().stream()
                             .map(TagDTO::getId)
                             .collect(Collectors.toList())
@@ -231,7 +223,7 @@ public class PostService {
         Post existingPost = postRepository.findByIdWithOwner(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
 
-        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+        Account currentUser = postRepository.findAccountByEmailWithRoles(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isOwner = existingPost.getOwner().getEmail().equals(currentUserEmail);
@@ -284,7 +276,7 @@ public class PostService {
         Post post = postRepository.findByIdWithOwner(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+        Account currentUser = postRepository.findAccountByEmailWithRoles(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isOwner = post.getOwner().getEmail().equals(currentUserEmail);
@@ -295,7 +287,7 @@ public class PostService {
             throw new SecurityException("Not authorized to edit this post");
         }
 
-        Tag tag = tagRepository.findById(tagId)
+        Tag tag = postRepository.findTagById(tagId)
                 .orElseThrow(() -> new RuntimeException("Tag not found"));
 
         if (!post.getTags().contains(tag)) {
@@ -309,7 +301,7 @@ public class PostService {
         Post post = postRepository.findByIdWithOwner(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
 
-        Account currentUser = accountRepository.findByEmail(currentUserEmail)
+        Account currentUser = postRepository.findAccountByEmailWithRoles(currentUserEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         boolean isOwner = post.getOwner().getEmail().equals(currentUserEmail);
@@ -320,7 +312,7 @@ public class PostService {
             throw new SecurityException("Not authorized to edit this post");
         }
 
-        Tag tag = tagRepository.findById(tagId)
+        Tag tag = postRepository.findTagById(tagId)
                 .orElseThrow(() -> new RuntimeException("Tag not found"));
 
         post.getTags().remove(tag);
@@ -335,5 +327,10 @@ public class PostService {
         return post.getTags().stream()
                 .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getDescription()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Post> findEntityById(Integer id) {
+        return postRepository.findById(id);
     }
 }

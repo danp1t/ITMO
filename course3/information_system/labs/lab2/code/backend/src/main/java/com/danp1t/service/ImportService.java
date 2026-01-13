@@ -46,6 +46,7 @@ public class ImportService {
 
         Session session = null;
         Transaction transaction = null;
+        List<Organization> organizations = parseAndValidateXml(xmlStream);
 
         try {
             session = sessionFactory.openSession();
@@ -59,7 +60,6 @@ public class ImportService {
                 throw new UserNotFoundException(String.valueOf(detachedUser.getId()));
             }
 
-            List<Organization> organizations = parseAndValidateXml(xmlStream);
             Set<String> uniqueTriplets = new HashSet<>();
 
             for (Organization organization : organizations) {
