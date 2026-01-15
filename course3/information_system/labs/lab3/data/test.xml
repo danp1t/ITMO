@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<organizations>
+    <organization>
+        <name>Компания А334323324362Ы</name>
+        <annualTurnover>1500000.50</annualTurnover>
+        <employeesCount>250</employeesCount>
+        <rating>8</rating>
+        <type>COMMERCIAL</type>
+        <coordinates>
+            <x>10.5</x>
+            <y>20.75</y>
+        </coordinates>
+        <officialAddress>
+            <x>55.7558</x>
+            <y>37.6173</y>
+            <z>-6</z>
+            <name>Москва, Кремль</name>
+        </officialAddress>
+        <postalAddress>
+            <street>ул. Тверская</street>
+            <zipCode>101000</zipCode>
+        </postalAddress>
+    </organization>
+    <organization>
+        <name>Организация Б685432332322326Ы</name>
+        <annualTurnover>750000.25</annualTurnover>
+        <employeesCount>120</employeesCount>
+        <rating>6</rating>
+        <type>GOVERNMENT</type>
+        <coordinates>
+            <x>30.0</x>
+            <y>15.3</y>
+        </coordinates>
+        <officialAddress>
+            <x>59.9343</x>
+            <y>30.3351</y>
+            <z>-6</z>
+            <name>Санкт-Петербург, Дворцовая площадь</name>
+        </officialAddress>
+        <postalAddress>
+            <street>Невский проспект</street>
+            <zipCode>190000</zipCode>
+        </postalAddress>
+    </organization>
+</organizations>
