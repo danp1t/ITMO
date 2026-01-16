@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import org.hibernate.query.Query;
 
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.List;
 
 @ApplicationScoped
@@ -269,36 +270,74 @@ public class OrganizationRepository {
                             "LEFT JOIN FETCH o.postalAddress " +
                             "WHERE 1=1");
 
+            System.out.println("DEBUG: Построение запроса с параметрами:");
+            System.out.println("  search: " + search);
+            System.out.println("  type: " + type);
+            System.out.println("  sortBy: " + sortBy);
+            System.out.println("  sortOrder: " + sortOrder);
+
             if (search != null && !search.trim().isEmpty()) {
                 hql.append(" AND LOWER(o.name) LIKE LOWER(:search)");
+                System.out.println("DEBUG: Добавлен поиск по имени");
             }
 
             if (type != null && !type.trim().isEmpty()) {
-                hql.append(" AND o.type = :type");
+                try {
+                    OrganizationType orgType = OrganizationType.valueOf(type);
+                    hql.append(" AND o.type = :type");
+                    System.out.println("DEBUG: Добавлен фильтр по типу: " + orgType);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("ERROR: Неверный тип организации: " + type);
+                    throw new IllegalArgumentException("Неверный тип организации: " + type, e);
+                }
             }
 
             if (sortBy != null && !sortBy.trim().isEmpty()) {
+                // Проверяем, что sortBy является допустимым полем
+                String[] allowedSortFields = {"id", "name", "annualTurnover", "employeesCount", "rating", "creationDate"};
+                boolean isValidField = Arrays.asList(allowedSortFields).contains(sortBy);
+
+                if (!isValidField) {
+                    throw new IllegalArgumentException("Недопустимое поле для сортировки: " + sortBy);
+                }
+
                 String order = "asc".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
                 hql.append(" ORDER BY o.").append(sortBy).append(" ").append(order);
+                System.out.println("DEBUG: Добавлена сортировка по " + sortBy + " " + order);
             } else {
                 hql.append(" ORDER BY o.id ASC");
+                System.out.println("DEBUG: Добавлена сортировка по умолчанию (id ASC)");
             }
+
+            System.out.println("DEBUG: Сформированный HQL: " + hql.toString());
 
             Query<Organization> query = session.createQuery(hql.toString(), Organization.class);
 
             if (search != null && !search.trim().isEmpty()) {
                 query.setParameter("search", "%" + search + "%");
+                System.out.println("DEBUG: Параметр search установлен: %" + search + "%");
             }
 
             if (type != null && !type.trim().isEmpty()) {
                 query.setParameter("type", OrganizationType.valueOf(type));
+                System.out.println("DEBUG: Параметр type установлен: " + OrganizationType.valueOf(type));
             }
 
             query.setFirstResult(offset);
             query.setMaxResults(limit);
+            System.out.println("DEBUG: Пагинация: offset=" + offset + ", limit=" + limit);
 
-            return query.list();
+            List<Organization> result = query.list();
+            System.out.println("DEBUG: Найдено организаций: " + result.size());
+
+            return result;
+
         } catch (Exception e) {
+            System.err.println("ERROR в findAllWithFilters:");
+            System.err.println("  Сообщение: " + e.getMessage());
+            System.err.println("  Причина: " + e.getCause());
+            System.err.println("  Стек:");
+            e.printStackTrace();
             throw new RuntimeException("Ошибка поиска организаций с фильтрами: " + e.getMessage(), e);
         }
     }

@@ -1,13 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.2">
     <deployment>
-        <exclusions>
-            <module name="org.ehcache" />
-            <module name="org.ehcache.core" />
-            <module name="org.ehcache.api" />
-        </exclusions>
         <dependencies>
+            <!-- Даем доступ к jdk.unsupported для Ehcache -->
             <module name="jdk.unsupported" />
+
+            <!-- WildFly предоставляет JAXB, не нужно включать в WAR -->
+            <module name="javax.xml.bind.api" services="export"/>
+
+            <!-- Используем JAXB из WildFly -->
+            <module name="com.sun.xml.bind" services="export"/>
+
+            <!-- Для Hibernate и Ehcache -->
+            <module name="org.hibernate" export="true"/>
+            <module name="org.hibernate.orm" services="export"/>
         </dependencies>
+
+        <!-- Исключаем модули, которые конфликтуют с WildFly -->
+        <exclusions>
+            <module name="javaee.api" />
+            <module name="javax.ws.rs.api" />
+            <module name="javax.servlet.api" />
+        </exclusions>
     </deployment>
 </jboss-deployment-structure>
