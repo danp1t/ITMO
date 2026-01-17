@@ -42,7 +42,7 @@ public class ImportService {
     private OrganizationRepository organizationRepository;
 
     @Inject
-    private MinioService minioService;
+    private TransactionalFileService transactionalFileService;
 
     @Inject
     private SessionFactory sessionFactory;
@@ -52,38 +52,25 @@ public class ImportService {
 
         Session session = null;
         Transaction transaction = null;
-        String fileKey = null;
+        String tempFileKey = null;
+        Long operationId = null;
 
         try {
-            // Сначала сохраняем файл в MinIO
+            // 1. Парсим и валидируем XML (еще не сохраняем файл)
             byte[] xmlBytes = xmlStream.readAllBytes();
-            fileKey = minioService.uploadFile(
-                    new ByteArrayInputStream(xmlBytes),
-                    fileName,
-                    "application/xml",
-                    detachedUser.getId().longValue()
-            );
-
-            // Затем парсим и обрабатываем
             List<Organization> organizations = parseAndValidateXml(new ByteArrayInputStream(xmlBytes));
 
             session = sessionFactory.openSession();
             transaction = session.beginTransaction();
 
+            // 2. Находим пользователя
             User user = importOperationRepository.findUserById(detachedUser.getId(), session);
             if (user == null) {
                 throw new UserNotFoundException(String.valueOf(detachedUser.getId()));
             }
 
-            Set<String> uniqueTriplets = new HashSet<>();
-
-            for (Organization organization : organizations) {
-                checkUniquenessInFile(organization, uniqueTriplets);
-            }
-
             ImportOperation operation = new ImportOperation();
             operation.setFileName(fileName);
-            operation.setFileKey(fileKey); // Сохраняем ключ файла
             operation.setImportDate(LocalDateTime.now());
             operation.setUser(user);
             operation.setStatus("PROCESSING");
@@ -91,6 +78,23 @@ public class ImportService {
 
             importOperationRepository.saveWithSession(operation, session);
             session.flush();
+
+            operationId = operation.getId();
+
+            tempFileKey = transactionalFileService.saveFileWithTransaction(
+                    new ByteArrayInputStream(xmlBytes),
+                    fileName,
+                    "application/xml",
+                    detachedUser.getId().longValue(),
+                    operationId
+            );
+
+            operation.setFileKey(tempFileKey);
+            importOperationRepository.mergeWithSession(operation, session);
+            Set<String> uniqueTriplets = new HashSet<>();
+            for (Organization organization : organizations) {
+                checkUniquenessInFile(organization, uniqueTriplets);
+            }
 
             for (Organization organization : organizations) {
                 checkUniquenessInDatabase(organization, session);
@@ -107,38 +111,39 @@ public class ImportService {
             importOperationRepository.mergeWithSession(operation, session);
 
             transaction.commit();
-            return operation;
+
+            transactionalFileService.confirmFileSave(tempFileKey);
+
+            session = sessionFactory.openSession();
+            transaction = session.beginTransaction();
+
+            ImportOperation finalOperation = importOperationRepository.findById(operationId.intValue());
+            finalOperation.setFileKey(transactionalFileService.getPermanentKey(tempFileKey));
+            importOperationRepository.mergeWithSession(finalOperation, session);
+
+            transaction.commit();
+
+            return finalOperation;
 
         } catch (Exception e) {
-            // Удаляем файл из MinIO если была ошибка
-            if (fileKey != null) {
+            if (transaction != null) {
                 try {
-                    minioService.deleteFile(fileKey);
-                } catch (IOException ex) {
-                    // Логируем, но не прерываем основную ошибку
-                    System.err.println("Ошибка удаления файла из MinIO: " + ex.getMessage());
+                    transaction.rollback();
+                } catch (Exception rollbackEx) {
+                    System.err.println("Ошибка отката транзакции БД: " + rollbackEx.getMessage());
                 }
             }
 
-            if (transaction != null) {
-                transaction.rollback();
+            if (tempFileKey != null) {
+                try {
+                    transactionalFileService.rollbackFileSave(tempFileKey);
+                } catch (IOException rollbackEx) {
+                    System.err.println("Ошибка отката сохранения файла: " + rollbackEx.getMessage());
+                }
             }
 
             String errorMessage = "Ошибка при импорте: " + e.getMessage();
-
-            Session errorSession = sessionFactory.openSession();
-            Transaction errorTransaction = errorSession.beginTransaction();
-            try {
-                importOperationRepository.createFailedImportOperation(detachedUser, fileName, errorMessage, errorSession);
-                errorTransaction.commit();
-            } catch (Exception ex) {
-                if (errorTransaction != null) {
-                    errorTransaction.rollback();
-                }
-                throw new ImportException(errorMessage, e);
-            } finally {
-                errorSession.close();
-            }
+            saveErrorOperation(detachedUser, fileName, errorMessage);
 
             throw new ImportException(errorMessage, e);
         } finally {
@@ -372,5 +377,21 @@ public class ImportService {
 
     public ImportOperation getImportOperationById(Integer operationId) {
         return importOperationRepository.findById(operationId);
+    }
+
+    private void saveErrorOperation(User detachedUser, String fileName, String errorMessage) {
+        Session errorSession = sessionFactory.openSession();
+        Transaction errorTransaction = errorSession.beginTransaction();
+        try {
+            importOperationRepository.createFailedImportOperation(detachedUser, fileName, errorMessage, errorSession);
+            errorTransaction.commit();
+        } catch (Exception ex) {
+            if (errorTransaction != null) {
+                errorTransaction.rollback();
+            }
+            System.err.println("Ошибка сохранения информации об ошибке: " + ex.getMessage());
+        } finally {
+            errorSession.close();
+        }
     }
 }

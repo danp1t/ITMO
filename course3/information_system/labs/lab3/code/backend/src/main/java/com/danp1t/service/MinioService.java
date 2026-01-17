@@ -2,8 +2,8 @@ package com.danp1t.service;
 
 import com.danp1t.config.MinioConfig;
 import io.minio.*;
-import io.minio.errors.*;
 import io.minio.http.Method;
+import io.minio.messages.Tags;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -21,13 +21,18 @@ public class MinioService {
     @Inject
     private MinioConfig minioConfig;
 
-    public String uploadFile(InputStream inputStream, String originalFileName,
-                             String contentType, Long userId) throws IOException {
+    // Существующий метод для обратной совместимости
+    public void uploadFile(InputStream inputStream, String originalFileName,
+                           String contentType, Long userId) throws IOException {
+        uploadFileWithKey(inputStream, generateFileName(originalFileName, userId),
+                contentType, userId, originalFileName);
+    }
+
+    // Новый метод для сохранения с указанным ключом
+    public void uploadFileWithKey(InputStream inputStream, String objectKey,
+                                  String contentType, Long userId, String originalFileName) throws IOException {
         try {
             MinioClient minioClient = minioConfig.getClient();
-
-            // Генерируем уникальное имя файла
-            String uniqueFileName = generateFileName(originalFileName, userId);
 
             // Создаем метаданные
             Map<String, String> metadata = new HashMap<>();
@@ -39,23 +44,23 @@ public class MinioService {
             int available = inputStream.available();
             long objectSize = (available > 0) ? available : -1;
 
-            // Загружаем файл
+            // Загружаем файл под указанным ключом
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(minioConfig.getBucketName())
-                            .object(uniqueFileName)
+                            .object(objectKey)
                             .stream(inputStream, objectSize, -1)
                             .contentType(contentType)
                             .userMetadata(metadata)
                             .build()
             );
 
-            return uniqueFileName;
         } catch (Exception e) {
             throw new IOException("Ошибка загрузки файла в MinIO", e);
         }
     }
 
+    // Остальные методы остаются без изменений...
     public InputStream downloadFile(String fileName) throws IOException {
         try {
             MinioClient minioClient = minioConfig.getClient();
@@ -132,5 +137,94 @@ public class MinioService {
 
         return String.format("import-%s-%s-%s%s",
                 userId, timestamp, uuid, fileExtension);
+    }
+
+    public void copyFile(String sourceKey, String destinationKey) throws IOException {
+        try {
+            MinioClient minioClient = minioConfig.getClient();
+
+            CopySource source = CopySource.builder()
+                    .bucket(minioConfig.getBucketName())
+                    .object(sourceKey)
+                    .build();
+
+            minioClient.copyObject(
+                    CopyObjectArgs.builder()
+                            .bucket(minioConfig.getBucketName())
+                            .object(destinationKey)
+                            .source(source)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new IOException("Failed to copy file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Добавляет теги к файлу
+     */
+    public void addFileTags(String fileKey, String key, String value) throws IOException {
+        try {
+            MinioClient minioClient = minioConfig.getClient();
+
+            // Сначала получаем существующие теги
+            Tags existingTags = minioClient.getObjectTags(
+                    GetObjectTagsArgs.builder()
+                            .bucket(minioConfig.getBucketName())
+                            .object(fileKey)
+                            .build()
+            );
+
+            // Создаем новый Map с существующими тегами
+            Map<String, String> tags = new HashMap<>();
+            if (existingTags != null) {
+                existingTags.get().forEach(tags::put);
+            }
+
+            // Добавляем/обновляем тег
+            tags.put(key, value);
+
+            minioClient.setObjectTags(
+                    SetObjectTagsArgs.builder()
+                            .bucket(minioConfig.getBucketName())
+                            .object(fileKey)
+                            .tags(tags)
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new IOException("Failed to add tags to file: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Получает теги файла
+     */
+    public Map<String, String> getFileTags(String fileKey) throws IOException {
+        try {
+            MinioClient minioClient = minioConfig.getClient();
+
+            Tags tags = minioClient.getObjectTags(
+                    GetObjectTagsArgs.builder()
+                            .bucket(minioConfig.getBucketName())
+                            .object(fileKey)
+                            .build()
+            );
+
+            Map<String, String> result = new HashMap<>();
+            if (tags != null) {
+                tags.get().forEach((k, v) -> result.put(k, v));
+            }
+            return result;
+        } catch (Exception e) {
+            throw new IOException("Failed to get file tags: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Перемещает файл (копирует и удаляет оригинал)
+     */
+    public void moveFile(String sourceKey, String destinationKey) throws IOException {
+        copyFile(sourceKey, destinationKey);
+        deleteFile(sourceKey);
     }
 }
