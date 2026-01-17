@@ -4,6 +4,7 @@ import OrganizationsTable from '@/components/OrganizationTable.vue'
 import SpecialOperations from '@/components/SpecialOperations.vue'
 import MassImport from '@/components/Import.vue'
 import ImportHistory from '@/components/ImportHistory.vue'
+import CacheStatistics from '@/components/CacheStatistics.vue'
 import Login from '@/components/LoginForm.vue'
 import Register from '@/components/RegisterForm.vue'
 
@@ -13,6 +14,7 @@ export default {
     SpecialOperations,
     MassImport,
     ImportHistory,
+    CacheStatistics,
     Login,
     Register,
     Header
@@ -108,12 +110,19 @@ export default {
       >
         История импорта
       </button>
+      <button
+          @click="currentView = 'cacheStatistics'"
+          :class="{ active: currentView === 'cacheStatistics' }"
+      >
+        Статистика кэша
+      </button>
     </nav>
 
     <OrganizationsTable v-if="currentView === 'organizations'" />
     <SpecialOperations v-if="currentView === 'specialOperations'" />
     <MassImport v-if="currentView === 'massImport'" />
     <ImportHistory v-if="currentView === 'importHistory'" />
+    <CacheStatistics v-if="currentView === 'cacheStatistics'" />
   </div>
 </template>
 

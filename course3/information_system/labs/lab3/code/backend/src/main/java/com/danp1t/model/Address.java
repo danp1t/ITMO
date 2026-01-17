@@ -2,8 +2,10 @@ package com.danp1t.model;
 
 import com.danp1t.error.NotNullError;
 import com.danp1t.error.StringTooLongError;
+import com.danp1t.interceptor.CacheStatistic;
 import com.danp1t.interfaces.NeedValidate;
 
+@CacheStatistic
 public class Address implements NeedValidate {
 
     private Long id;

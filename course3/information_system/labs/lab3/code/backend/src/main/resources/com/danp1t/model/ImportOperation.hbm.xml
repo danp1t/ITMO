@@ -5,6 +5,7 @@
 
 <hibernate-mapping>
     <class name="com.danp1t.model.ImportOperation" table="import_operations">
+        <cache usage="nonstrict-read-write" region="com.danp1t.model.ImportOperation"/>
         <id name="id" column="id" type="long">
             <generator class="identity"/>
         </id>

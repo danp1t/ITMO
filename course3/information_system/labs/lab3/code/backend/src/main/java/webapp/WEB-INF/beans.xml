@@ -4,4 +4,8 @@
        xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/beans_4_1.xsd"
        version="3.0" bean-discovery-mode="all">
 
+    <interceptors>
+        <class>com.danp1t.interceptor.CacheStatisticInterceptor</class>
+    </interceptors>
+
 </beans>

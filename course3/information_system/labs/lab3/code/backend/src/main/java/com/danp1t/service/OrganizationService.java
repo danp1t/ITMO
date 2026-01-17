@@ -12,6 +12,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,15 +33,29 @@ public class OrganizationService {
 
         try {
             session = sessionFactory.openSession();
+
             session.doWork(connection -> {
-                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+                try {
+                    boolean originalAutoCommit = connection.getAutoCommit();
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(true);
+                    }
+
+                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(false);
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException("Failed to set transaction isolation", e);
+                }
             });
+
             transaction = session.beginTransaction();
 
             checkOrganizationUniqueness(organization, null, session);
-
             saveRelatedEntities(organization, session);
-
             organizationRepository.save(organization, session);
 
             transaction.commit();
@@ -144,7 +159,21 @@ public class OrganizationService {
         try {
             session = sessionFactory.openSession();
             session.doWork(connection -> {
-                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+                try {
+                    boolean originalAutoCommit = connection.getAutoCommit();
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(true);
+                    }
+
+                    connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(false);
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException("Failed to set transaction isolation", e);
+                }
             });
             transaction = session.beginTransaction();
 

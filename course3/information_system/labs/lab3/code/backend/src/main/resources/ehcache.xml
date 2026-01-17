@@ -44,6 +44,13 @@
         <heap unit="entries">200</heap>
     </cache>
 
+    <cache alias="com.danp1t.model.ImportOperation">
+        <expiry>
+            <ttl unit="minutes">60</ttl>
+        </expiry>
+        <heap unit="entries">200</heap>
+    </cache>
+
     <cache alias="com.danp1t.model.User">
         <expiry>
             <ttl unit="minutes">60</ttl>

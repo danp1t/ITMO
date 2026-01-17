@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,7 +52,21 @@ public class ImportService {
         try {
             session = sessionFactory.openSession();
             session.doWork(connection -> {
-                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+                try {
+                    boolean originalAutoCommit = connection.getAutoCommit();
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(true);
+                    }
+
+                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(false);
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException("Failed to set transaction isolation", e);
+                }
             });
             transaction = session.beginTransaction();
 

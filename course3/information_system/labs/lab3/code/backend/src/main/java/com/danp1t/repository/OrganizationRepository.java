@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import org.hibernate.query.Query;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -163,7 +164,21 @@ public class OrganizationRepository {
         Transaction transaction = null;
         try {
             session.doWork(connection -> {
-                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+                try {
+                    boolean originalAutoCommit = connection.getAutoCommit();
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(true);
+                    }
+
+                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(false);
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException("Failed to set transaction isolation", e);
+                }
             });
             transaction = session.beginTransaction();
 
@@ -220,7 +235,21 @@ public class OrganizationRepository {
         Transaction transaction = null;
         try {
             session.doWork(connection -> {
-                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+                try {
+                    boolean originalAutoCommit = connection.getAutoCommit();
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(true);
+                    }
+
+                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+                    if (!originalAutoCommit) {
+                        connection.setAutoCommit(false);
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException("Failed to set transaction isolation", e);
+                }
             });
             transaction = session.beginTransaction();
 

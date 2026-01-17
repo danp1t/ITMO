@@ -3,8 +3,10 @@ package com.danp1t.model;
 import com.danp1t.error.NotNullError;
 import com.danp1t.error.ValueTooBigError;
 import com.danp1t.error.ValueTooSmallError;
+import com.danp1t.interceptor.CacheStatistic;
 import com.danp1t.interfaces.NeedValidate;
 
+@CacheStatistic
 public class Coordinates implements NeedValidate {
 
     private Long id;

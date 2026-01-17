@@ -15,7 +15,6 @@
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.source>21</maven.compiler.source>
         <junit.version>5.11.0</junit.version>
-        <hibernate.version>6.4.8.Final</hibernate.version>
     </properties>
 
     <dependencies>
@@ -31,7 +30,7 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
+            <version>6.6.40.Final</version>
         </dependency>
 
         <dependency>
@@ -101,7 +100,7 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-jcache</artifactId>
-            <version>${hibernate.version}</version>
+            <version>6.6.40.Final</version>
         </dependency>
 
         <!-- PostgreSQL -->

@@ -1,10 +1,12 @@
 package com.danp1t.model;
 
 import com.danp1t.error.*;
+import com.danp1t.interceptor.CacheStatistic;
 import com.danp1t.interfaces.NeedValidate;
 
 import java.time.LocalDate;
 
+@CacheStatistic
 public class Organization implements NeedValidate {
     private Integer id;
     private String name;

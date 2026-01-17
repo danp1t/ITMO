@@ -1,7 +1,10 @@
 package com.danp1t.model;
 
+import com.danp1t.interceptor.CacheStatistic;
+
 import java.time.LocalDateTime;
 
+@CacheStatistic
 public class ImportOperation {
 
     private Long id;
