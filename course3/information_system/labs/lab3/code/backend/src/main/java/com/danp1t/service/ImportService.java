@@ -20,6 +20,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
+
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -40,6 +42,9 @@ public class ImportService {
     private OrganizationRepository organizationRepository;
 
     @Inject
+    private MinioService minioService;
+
+    @Inject
     private SessionFactory sessionFactory;
 
     public ImportOperation importOrganizationsFromXml(InputStream xmlStream, User detachedUser, String fileName)
@@ -47,27 +52,22 @@ public class ImportService {
 
         Session session = null;
         Transaction transaction = null;
-        List<Organization> organizations = parseAndValidateXml(xmlStream);
+        String fileKey = null;
 
         try {
+            // Сначала сохраняем файл в MinIO
+            byte[] xmlBytes = xmlStream.readAllBytes();
+            fileKey = minioService.uploadFile(
+                    new ByteArrayInputStream(xmlBytes),
+                    fileName,
+                    "application/xml",
+                    detachedUser.getId().longValue()
+            );
+
+            // Затем парсим и обрабатываем
+            List<Organization> organizations = parseAndValidateXml(new ByteArrayInputStream(xmlBytes));
+
             session = sessionFactory.openSession();
-            session.doWork(connection -> {
-                try {
-                    boolean originalAutoCommit = connection.getAutoCommit();
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(true);
-                    }
-
-                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(false);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException("Failed to set transaction isolation", e);
-                }
-            });
             transaction = session.beginTransaction();
 
             User user = importOperationRepository.findUserById(detachedUser.getId(), session);
@@ -83,6 +83,7 @@ public class ImportService {
 
             ImportOperation operation = new ImportOperation();
             operation.setFileName(fileName);
+            operation.setFileKey(fileKey); // Сохраняем ключ файла
             operation.setImportDate(LocalDateTime.now());
             operation.setUser(user);
             operation.setStatus("PROCESSING");
@@ -93,9 +94,7 @@ public class ImportService {
 
             for (Organization organization : organizations) {
                 checkUniquenessInDatabase(organization, session);
-
                 saveRelatedEntities(organization, session);
-
                 organizationRepository.save(organization, session);
 
                 if (organizations.indexOf(organization) % 20 == 0) {
@@ -111,6 +110,16 @@ public class ImportService {
             return operation;
 
         } catch (Exception e) {
+            // Удаляем файл из MinIO если была ошибка
+            if (fileKey != null) {
+                try {
+                    minioService.deleteFile(fileKey);
+                } catch (IOException ex) {
+                    // Логируем, но не прерываем основную ошибку
+                    System.err.println("Ошибка удаления файла из MinIO: " + ex.getMessage());
+                }
+            }
+
             if (transaction != null) {
                 transaction.rollback();
             }
@@ -126,24 +135,12 @@ public class ImportService {
                 if (errorTransaction != null) {
                     errorTransaction.rollback();
                 }
-                if (e instanceof UserNotFoundException) {
-                    throw (UserNotFoundException) e;
-                } else if (e instanceof InvalidXmlException) {
-                    throw (InvalidXmlException) e;
-                } else {
-                    throw new ImportException(errorMessage, e);
-                }
+                throw new ImportException(errorMessage, e);
             } finally {
                 errorSession.close();
             }
 
-            if (e instanceof UserNotFoundException) {
-                throw (UserNotFoundException) e;
-            } else if (e instanceof InvalidXmlException) {
-                throw (InvalidXmlException) e;
-            } else {
-                throw new ImportException(errorMessage, e);
-            }
+            throw new ImportException(errorMessage, e);
         } finally {
             if (session != null && session.isOpen()) {
                 session.close();
@@ -371,5 +368,9 @@ public class ImportService {
         } else {
             return importOperationRepository.findByUser(user);
         }
+    }
+
+    public ImportOperation getImportOperationById(Integer operationId) {
+        return importOperationRepository.findById(operationId);
     }
 }

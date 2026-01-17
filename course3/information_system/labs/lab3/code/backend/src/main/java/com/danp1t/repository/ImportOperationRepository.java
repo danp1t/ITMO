@@ -72,4 +72,12 @@ public class ImportOperationRepository {
             throw new RuntimeException("Ошибка создания записи об ошибке импорта: " + e.getMessage(), e);
         }
     }
+
+    public ImportOperation findById(Integer id) {
+        try (Session session = sessionFactory.openSession()) {
+            return session.get(ImportOperation.class, id);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка получения операции импорта: " + e.getMessage(), e);
+        }
+    }
 }

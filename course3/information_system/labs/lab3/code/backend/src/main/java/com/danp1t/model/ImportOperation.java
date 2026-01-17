@@ -9,6 +9,7 @@ public class ImportOperation {
 
     private Long id;
     private String fileName;
+    private String fileKey;
     private LocalDateTime importDate;
     private String status;
     private Integer recordsAdded;
@@ -34,6 +35,9 @@ public class ImportOperation {
 
     public LocalDateTime getImportDate() { return importDate; }
     public void setImportDate(LocalDateTime importDate) { this.importDate = importDate; }
+
+    public String getFileKey() { return fileKey; }
+    public void setFileKey(String fileKey) { this.fileKey = fileKey; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

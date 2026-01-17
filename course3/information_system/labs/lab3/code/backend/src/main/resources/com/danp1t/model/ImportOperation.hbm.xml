@@ -14,6 +14,10 @@
             <column name="file_name" not-null="true" length="255"/>
         </property>
 
+        <property name="fileKey" type="string">
+            <column name="file_key" not-null="true" length="255"/>
+        </property>
+
         <property name="importDate" type="java.time.LocalDateTime">
             <column name="import_date" not-null="true"/>
         </property>

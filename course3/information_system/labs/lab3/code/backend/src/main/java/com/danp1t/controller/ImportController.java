@@ -4,6 +4,7 @@ import com.danp1t.model.ImportOperation;
 import com.danp1t.model.User;
 import com.danp1t.service.AuthService;
 import com.danp1t.service.ImportService;
+import com.danp1t.service.MinioService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -11,6 +12,7 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +27,9 @@ public class ImportController {
 
     @Inject
     private AuthService authService;
+
+    @Inject
+    private MinioService minioService;
 
     @POST
     @Path("/xml")
@@ -138,6 +143,7 @@ public class ImportController {
                         dto.put("id", op.getId());
                         dto.put("fileName", op.getFileName());
                         dto.put("importDate", op.getImportDate().toString());
+                        dto.put("fileKey", op.getFileKey());
                         dto.put("status", op.getStatus());
                         dto.put("recordsAdded", op.getRecordsAdded());
                         dto.put("errorMessage", op.getErrorMessage());
@@ -159,5 +165,148 @@ public class ImportController {
                     .entity(errorResponse)
                     .build();
         }
+    }
+
+    @GET
+    @Path("/download/{operationId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadImportFile(
+            @PathParam("operationId") Integer operationId,
+            @HeaderParam("Authorization") String authHeader) {
+
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(Map.of("error", "Требуется авторизация"))
+                        .build();
+            }
+
+            String token = authHeader.substring(7);
+            User user = authService.getUserFromToken(token);
+            if (user == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(Map.of("error", "Недействительный токен"))
+                        .build();
+            }
+
+            // Найти операцию импорта
+            // Для простоты, здесь нужно будет добавить метод findById в репозиторий
+            ImportOperation operation = findImportOperationById(operationId);
+
+            if (operation == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("error", "Операция импорта не найдена"))
+                        .build();
+            }
+
+            // Проверка прав доступа (только владелец или ADMIN)
+            if (!"ADMIN".equals(user.getRole()) && !operation.getUser().getId().equals(user.getId())) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(Map.of("error", "Нет доступа к файлу"))
+                        .build();
+            }
+
+            if (operation.getFileKey() == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("error", "Файл не найден в хранилище"))
+                        .build();
+            }
+
+            // Получаем файл из MinIO
+            InputStream fileStream = minioService.downloadFile(operation.getFileKey());
+
+            // Получаем оригинальное имя файла из метаданных
+            String originalFileName = operation.getFileName();
+
+            return Response.ok(fileStream)
+                    .header("Content-Disposition",
+                            "attachment; filename=\"" + originalFileName + "\"")
+                    .header("Content-Type", "application/xml")
+                    .build();
+
+        } catch (IOException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Ошибка при получении файла: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponse)
+                    .build();
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Ошибка: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponse)
+                    .build();
+        }
+    }
+
+    @GET
+    @Path("/file-url/{operationId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFileDownloadUrl(
+            @PathParam("operationId") Integer operationId,
+            @HeaderParam("Authorization") String authHeader) {
+
+        try {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(Map.of("error", "Требуется авторизация"))
+                        .build();
+            }
+
+            String token = authHeader.substring(7);
+            User user = authService.getUserFromToken(token);
+            if (user == null) {
+                return Response.status(Response.Status.UNAUTHORIZED)
+                        .entity(Map.of("error", "Недействительный токен"))
+                        .build();
+            }
+
+            ImportOperation operation = findImportOperationById(operationId);
+
+            if (operation == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("error", "Операция импорта не найдена"))
+                        .build();
+            }
+
+            if (!"ADMIN".equals(user.getRole()) && !operation.getUser().getId().equals(user.getId())) {
+                return Response.status(Response.Status.FORBIDDEN)
+                        .entity(Map.of("error", "Нет доступа к файлу"))
+                        .build();
+            }
+
+            if (operation.getFileKey() == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity(Map.of("error", "Файл не найден в хранилище"))
+                        .build();
+            }
+
+            // Генерируем пресигненый URL для прямого доступа
+            String downloadUrl = minioService.getPresignedUrl(operation.getFileKey(), 15); // 15 минут
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("downloadUrl", downloadUrl);
+            response.put("fileName", operation.getFileName());
+            response.put("expiresIn", "15 минут");
+
+            return Response.ok(response).build();
+
+        } catch (IOException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Ошибка при генерации ссылки: " + e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(errorResponse)
+                    .build();
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Ошибка: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity(errorResponse)
+                    .build();
+        }
+    }
+
+    private ImportOperation findImportOperationById(Integer operationId) {
+        return importService.getImportOperationById(operationId);
     }
 }
