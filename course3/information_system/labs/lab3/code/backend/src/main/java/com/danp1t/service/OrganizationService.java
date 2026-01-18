@@ -12,7 +12,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -318,5 +317,25 @@ public class OrganizationService {
                 totalCount,
                 size
         );
+    }
+
+    public boolean existsByNameAndCoordinatesAndAddress(String name, Coordinates coordinates, Address address, Session session) {
+        return organizationRepository.existsByNameAndCoordinatesAndAddress(name, coordinates, address, session);
+    }
+
+    public void saveCoordinates(Coordinates coordinates, Session session) {
+        organizationRepository.saveCoordinates(coordinates, session);
+    }
+
+    public void saveLocation(Location location, Session session) {
+        organizationRepository.saveLocation(location, session);
+    }
+
+    public void saveAddress(Address address, Session session) {
+        organizationRepository.saveAddress(address, session);
+    }
+
+    public void save(Organization organization, Session session) {
+        organizationRepository.save(organization, session);
     }
 }

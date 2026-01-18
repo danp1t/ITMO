@@ -20,7 +20,7 @@
         </elementProp>
       </ThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Создание организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization</stringProp>
@@ -40,22 +40,19 @@
   &quot;coordinates&quot;: {&#xd;
     &quot;id&quot;: 6,&#xd;
     &quot;x&quot;: 744,&#xd;
-    &quot;y&quot;: 455,&#xd;
-    &quot;displayName&quot;: &quot;X: 744.0, Y: 455.0&quot;&#xd;
+    &quot;y&quot;: 455&#xd;
   },&#xd;
   &quot;officialAddress&quot;: {&#xd;
     &quot;id&quot;: 7,&#xd;
     &quot;x&quot;: 2,&#xd;
     &quot;y&quot;: 0,&#xd;
     &quot;z&quot;: 32,&#xd;
-    &quot;name&quot;: &quot;KIJ&quot;,&#xd;
-    &quot;displayName&quot;: &quot;KIJ&quot;&#xd;
+    &quot;name&quot;: &quot;KIJ&quot;&#xd;
   },&#xd;
   &quot;postalAddress&quot;: {&#xd;
     &quot;id&quot;: 1,&#xd;
     &quot;street&quot;: &quot;Kronva&quot;,&#xd;
-    &quot;zipCode&quot;: &quot;432921&quot;,&#xd;
-    &quot;displayName&quot;: &quot;Kronva, 432921&quot;&#xd;
+    &quot;zipCode&quot;: &quot;432921&quot;&#xd;
   },&#xd;
   &quot;type&quot;: &quot;COMMERCIAL&quot;&#xd;
 }</stringProp>
@@ -105,7 +102,7 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -252,7 +249,7 @@ if (token) {
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
             <collectionProp name="HeaderManager.headers">
               <elementProp name="" elementType="Header">
                 <stringProp name="Header.name">Authorization</stringProp>
@@ -262,7 +259,7 @@ if (token) {
           </HeaderManager>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -299,7 +296,7 @@ if (token) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+        <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager">
           <collectionProp name="HeaderManager.headers">
             <elementProp name="" elementType="Header">
               <stringProp name="Header.name">Content-Type</stringProp>
@@ -312,7 +309,7 @@ if (token) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -349,7 +346,7 @@ if (token) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results" enabled="true">
+        <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Graph Results">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -418,22 +415,19 @@ if (token) {
   &quot;coordinates&quot;: {&#xd;
     &quot;id&quot;: 6,&#xd;
     &quot;x&quot;: 744,&#xd;
-    &quot;y&quot;: 455,&#xd;
-    &quot;displayName&quot;: &quot;X: 744.0, Y: 455.0&quot;&#xd;
+    &quot;y&quot;: 455&#xd;
   },&#xd;
   &quot;officialAddress&quot;: {&#xd;
     &quot;id&quot;: 7,&#xd;
     &quot;x&quot;: 2,&#xd;
     &quot;y&quot;: 0,&#xd;
     &quot;z&quot;: 32,&#xd;
-    &quot;name&quot;: &quot;KIJ&quot;,&#xd;
-    &quot;displayName&quot;: &quot;KIJ&quot;&#xd;
+    &quot;name&quot;: &quot;KIJ&quot;&#xd;
   },&#xd;
   &quot;postalAddress&quot;: {&#xd;
     &quot;id&quot;: 1,&#xd;
     &quot;street&quot;: &quot;Kronva&quot;,&#xd;
-    &quot;zipCode&quot;: &quot;432921&quot;,&#xd;
-    &quot;displayName&quot;: &quot;Kronva, 432921&quot;&#xd;
+    &quot;zipCode&quot;: &quot;432921&quot;&#xd;
   },&#xd;
   &quot;type&quot;: &quot;COMMERCIAL&quot;&#xd;
 }</stringProp>
@@ -580,7 +574,7 @@ if (objectId != null) {
           <stringProp name="scriptLanguage">groovy</stringProp>
         </JSR223PreProcessor>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Обновление организации" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Обновление организации">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/organization/${organizationId}</stringProp>
@@ -817,7 +811,7 @@ if (objectId != null) {
         </ResultCollector>
         <hashTree/>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Пункт 3. Одновременное создание объектов" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Пункт 3. Одновременное создание объектов">
         <intProp name="ThreadGroup.num_threads">2</intProp>
         <intProp name="ThreadGroup.ramp_time">0</intProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
@@ -848,22 +842,19 @@ if (objectId != null) {
   &quot;coordinates&quot;: {&#xd;
     &quot;id&quot;: 6,&#xd;
     &quot;x&quot;: 744,&#xd;
-    &quot;y&quot;: 455,&#xd;
-    &quot;displayName&quot;: &quot;X: 744.0, Y: 455.0&quot;&#xd;
+    &quot;y&quot;: 455&#xd;
   },&#xd;
   &quot;officialAddress&quot;: {&#xd;
     &quot;id&quot;: 7,&#xd;
     &quot;x&quot;: 2,&#xd;
     &quot;y&quot;: 0,&#xd;
     &quot;z&quot;: 32,&#xd;
-    &quot;name&quot;: &quot;KIJ&quot;,&#xd;
-    &quot;displayName&quot;: &quot;KIJ&quot;&#xd;
+    &quot;name&quot;: &quot;KIJ&quot;&#xd;
   },&#xd;
   &quot;postalAddress&quot;: {&#xd;
     &quot;id&quot;: 1,&#xd;
     &quot;street&quot;: &quot;Kronva&quot;,&#xd;
-    &quot;zipCode&quot;: &quot;432921&quot;,&#xd;
-    &quot;displayName&quot;: &quot;Kronva, 432921&quot;&#xd;
+    &quot;zipCode&quot;: &quot;432921&quot;&#xd;
   },&#xd;
   &quot;type&quot;: &quot;COMMERCIAL&quot;&#xd;
 }</stringProp>
@@ -873,7 +864,7 @@ if (objectId != null) {
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree/>
-        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor">
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="JSR223 PreProcessor" enabled="true">
           <stringProp name="scriptLanguage">groovy</stringProp>
           <stringProp name="parameters"></stringProp>
           <stringProp name="filename"></stringProp>
@@ -969,7 +960,7 @@ if (token) {
           </collectionProp>
         </HeaderManager>
         <hashTree/>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Импорт XML" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Импорт XML">
           <stringProp name="HTTPSampler.domain">localhost</stringProp>
           <stringProp name="HTTPSampler.port">20041</stringProp>
           <stringProp name="HTTPSampler.path">/lab1/api/api/import/xml</stringProp>
@@ -1003,7 +994,7 @@ if (token) {
           </HeaderManager>
           <hashTree/>
         </hashTree>
-        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>
@@ -1040,7 +1031,7 @@ if (token) {
           <stringProp name="filename"></stringProp>
         </ResultCollector>
         <hashTree/>
-        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
             <name>saveConfig</name>

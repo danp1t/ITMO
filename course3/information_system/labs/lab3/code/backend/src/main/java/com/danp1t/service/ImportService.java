@@ -39,7 +39,7 @@ public class ImportService {
     private ImportOperationRepository importOperationRepository;
 
     @Inject
-    private OrganizationRepository organizationRepository;
+    private OrganizationService organizationService;
 
     @Inject
     private TransactionalFileService transactionalFileService;
@@ -100,7 +100,7 @@ public class ImportService {
             for (Organization organization : organizations) {
                 checkUniquenessInDatabase(organization, session);
                 saveRelatedEntities(organization, session);
-                organizationRepository.save(organization, session);
+                organizationService.save(organization, session);
 
                 if (organizations.indexOf(organization) % 20 == 0) {
                     session.flush();
@@ -186,7 +186,7 @@ public class ImportService {
             throw new InvalidXmlException("Для проверки уникальности должны быть заполнены: название, координаты и адрес");
         }
 
-        boolean existsInDb = organizationRepository.existsByNameAndCoordinatesAndAddress(
+        boolean existsInDb = organizationService.existsByNameAndCoordinatesAndAddress(
                 name, coords, address, session);
 
         if (existsInDb) {
@@ -200,13 +200,13 @@ public class ImportService {
 
     private void saveRelatedEntities(Organization organization, Session session) {
         if (organization.getCoordinates() != null && organization.getCoordinates().getId() == null) {
-            organizationRepository.saveCoordinates(organization.getCoordinates(), session);
+            organizationService.saveCoordinates(organization.getCoordinates(), session);
         }
         if (organization.getOfficialAddress() != null && organization.getOfficialAddress().getId() == null) {
-            organizationRepository.saveLocation(organization.getOfficialAddress(), session);
+            organizationService.saveLocation(organization.getOfficialAddress(), session);
         }
         if (organization.getPostalAddress() != null && organization.getPostalAddress().getId() == null) {
-            organizationRepository.saveAddress(organization.getPostalAddress(), session);
+            organizationService.saveAddress(organization.getPostalAddress(), session);
         }
     }
 

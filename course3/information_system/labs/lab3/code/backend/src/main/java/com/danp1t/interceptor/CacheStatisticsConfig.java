@@ -51,8 +51,6 @@ public class CacheStatisticsConfig {
         summary.append("=== Cache Statistics Summary ===\n");
         summary.append("L2 Cache Hits: ").append(statistics.getSecondLevelCacheHitCount()).append("\n");
         summary.append("L2 Cache Misses: ").append(statistics.getSecondLevelCacheMissCount()).append("\n");
-        summary.append("Query Cache Hits: ").append(statistics.getQueryCacheHitCount()).append("\n");
-        summary.append("Query Cache Misses: ").append(statistics.getQueryCacheMissCount()).append("\n");
 
         return summary.toString();
     }

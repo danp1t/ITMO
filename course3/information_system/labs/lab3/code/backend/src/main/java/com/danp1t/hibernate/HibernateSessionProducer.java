@@ -5,25 +5,42 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.registry.StandardServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.enterprise.inject.Produces;
+import java.util.ArrayList;
+import java.util.List;
 
 @ApplicationScoped
 public class HibernateSessionProducer {
 
-    private SessionFactory sessionFactory;
+    private static SessionFactory sessionFactory;
+    private static final List<Session> activeSessions = new ArrayList<>();
+    private static boolean simulateDBFailure = false;
 
     @ApplicationScoped
     @Produces
     public SessionFactory createSessionFactory() {
-        if (sessionFactory == null) {
+        if (sessionFactory == null || sessionFactory.isClosed()) {
             StandardServiceRegistry registry = null;
             try {
-                registry = new StandardServiceRegistryBuilder()
-                        .configure("hibernate.cfg.xml")
-                        .build();
+                String dbUsername = "s409425";
+
+                if (simulateDBFailure) {
+                    dbUsername = "wrong_user_" + System.currentTimeMillis();
+                }
+
+                StandardServiceRegistryBuilder registryBuilder =
+                        new StandardServiceRegistryBuilder()
+                                .configure("hibernate.cfg.xml");
+
+                if (dbUsername != null && !dbUsername.isEmpty()) {
+                    registryBuilder.applySetting("hibernate.connection.username", dbUsername);
+                }
+
+                registry = registryBuilder.build();
 
                 MetadataSources metadataSources = new MetadataSources(registry);
 
@@ -58,14 +75,57 @@ public class HibernateSessionProducer {
     @RequestScoped
     @Produces
     public Session createSession(SessionFactory sessionFactory) {
-        return sessionFactory.openSession();
+        Session session = sessionFactory.openSession();
+        synchronized (activeSessions) {
+            activeSessions.add(session);
+        }
+        return session;
     }
 
     @PreDestroy
     public void close() {
+        closeSessionFactory();
+    }
+
+    public static void simulateDBFailure(boolean simulate) {
+        simulateDBFailure = simulate;
+    }
+
+    public static void resetSessionFactory() {
+        closeAllSessions();
+        if (sessionFactory != null) {
+            sessionFactory.close();
+        }
+        sessionFactory = null;
+    }
+
+    public static void closeAllSessions() {
+        synchronized (activeSessions) {
+            for (Session session : activeSessions) {
+                try {
+                    if (session != null && session.isOpen()) {
+                        session.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            activeSessions.clear();
+        }
+
+        if (sessionFactory != null) {
+            try {
+                sessionFactory.getStatistics().clear();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void closeSessionFactory() {
+        closeAllSessions();
         if (sessionFactory != null && !sessionFactory.isClosed()) {
             sessionFactory.close();
-            System.out.println("Hibernate SessionFactory закрыт");
         }
     }
 }

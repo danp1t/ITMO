@@ -35,7 +35,6 @@ public class MinioConfig {
                     .credentials(accessKey, secretKey)
                     .build();
 
-            // Исправленные вызовы
             boolean found = minioClient.bucketExists(
                     BucketExistsArgs.builder().bucket(bucketName).build()
             );
