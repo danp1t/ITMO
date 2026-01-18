@@ -56,14 +56,15 @@ public class ImportService {
         Long operationId = null;
 
         try {
-            // 1. Парсим и валидируем XML (еще не сохраняем файл)
             byte[] xmlBytes = xmlStream.readAllBytes();
             List<Organization> organizations = parseAndValidateXml(new ByteArrayInputStream(xmlBytes));
 
             session = sessionFactory.openSession();
+            session.doWork(connection -> {
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            });
             transaction = session.beginTransaction();
 
-            // 2. Находим пользователя
             User user = importOperationRepository.findUserById(detachedUser.getId(), session);
             if (user == null) {
                 throw new UserNotFoundException(String.valueOf(detachedUser.getId()));

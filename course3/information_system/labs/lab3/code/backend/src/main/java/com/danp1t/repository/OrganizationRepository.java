@@ -163,22 +163,9 @@ public class OrganizationRepository {
         Session session = sessionFactory.openSession();
         Transaction transaction = null;
         try {
+
             session.doWork(connection -> {
-                try {
-                    boolean originalAutoCommit = connection.getAutoCommit();
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(true);
-                    }
-
-                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(false);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException("Failed to set transaction isolation", e);
-                }
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             });
             transaction = session.beginTransaction();
 
@@ -235,21 +222,7 @@ public class OrganizationRepository {
         Transaction transaction = null;
         try {
             session.doWork(connection -> {
-                try {
-                    boolean originalAutoCommit = connection.getAutoCommit();
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(true);
-                    }
-
-                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(false);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException("Failed to set transaction isolation", e);
-                }
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             });
             transaction = session.beginTransaction();
 
@@ -322,7 +295,6 @@ public class OrganizationRepository {
             }
 
             if (sortBy != null && !sortBy.trim().isEmpty()) {
-                // Проверяем, что sortBy является допустимым полем
                 String[] allowedSortFields = {"id", "name", "annualTurnover", "employeesCount", "rating", "creationDate"};
                 boolean isValidField = Arrays.asList(allowedSortFields).contains(sortBy);
 

@@ -4,15 +4,12 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <!-- Driver и URL базы данных -->
         <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
         <property name="hibernate.connection.url">jdbc:postgresql://pg:5432/studs</property>
         <property name="hibernate.connection.username">s409425</property>
 
-        <!-- Настройка HikariCP как провайдера пула соединений -->
         <property name="hibernate.connection.provider_class">com.zaxxer.hikari.hibernate.HikariConnectionProvider</property>
 
-        <!-- Настройки HikariCP -->
         <property name="hibernate.hikari.minimumIdle">5</property>
         <property name="hibernate.hikari.maximumPoolSize">20</property>
         <property name="hibernate.hikari.idleTimeout">300000</property>
@@ -20,9 +17,8 @@
         <property name="hibernate.hikari.maxLifetime">1800000</property>
         <property name="hibernate.hikari.connectionTestQuery">SELECT 1</property>
         <property name="hibernate.hikari.poolName">HibernateHikariCP</property>
-        <property name="hibernate.hikari.autoCommit">false</property>
+        <property name="hibernate.hikari.autoCommit">true</property>
 
-        <!-- Диалект и другие настройки Hibernate -->
         <property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>

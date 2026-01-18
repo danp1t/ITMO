@@ -35,23 +35,8 @@ public class OrganizationService {
             session = sessionFactory.openSession();
 
             session.doWork(connection -> {
-                try {
-                    boolean originalAutoCommit = connection.getAutoCommit();
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(true);
-                    }
-
-                    connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(false);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException("Failed to set transaction isolation", e);
-                }
+                connection.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             });
-
             transaction = session.beginTransaction();
 
             checkOrganizationUniqueness(organization, null, session);
@@ -159,21 +144,7 @@ public class OrganizationService {
         try {
             session = sessionFactory.openSession();
             session.doWork(connection -> {
-                try {
-                    boolean originalAutoCommit = connection.getAutoCommit();
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(true);
-                    }
-
-                    connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-
-                    if (!originalAutoCommit) {
-                        connection.setAutoCommit(false);
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException("Failed to set transaction isolation", e);
-                }
+                connection.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             });
             transaction = session.beginTransaction();
 

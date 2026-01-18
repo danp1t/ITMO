@@ -1,12 +1,12 @@
 <template>
   <div class="organization-form-wrapper">
     <div v-if="serverError" class="server-error">
-        <div class="error-content">
-          <h4>Ошибка создания организации</h4>
-          <p>{{ serverError }}</p>
-        </div>
-        <button class="close-error" @click="serverError = ''">×</button>
+      <div class="error-content">
+        <h4>Ошибка создания организации</h4>
+        <p>{{ serverError }}</p>
       </div>
+      <button class="close-error" @click="serverError = ''">×</button>
+    </div>
     <BaseForm
         title="Создание организации"
         :fields-config="fieldsConfig"
@@ -114,8 +114,6 @@
             </span>
           </div>
         </div>
-
-
 
         <div v-if="hasSelectedEntities" class="selected-summary">
           <h4>Выбранные данные:</h4>
@@ -398,13 +396,36 @@ export default {
 
       this.isSubmitting = true
 
+      const cleanObject = (obj) => {
+        if (!obj || typeof obj !== 'object') return obj;
+
+        const jsonString = JSON.stringify(obj, (key, value) => {
+          if (key === 'displayName' || key.startsWith('[[') || key.endsWith(']]')) {
+            return undefined;
+          }
+          return value;
+        });
+
+        return JSON.parse(jsonString);
+      };
+
       const dataToSend = {
         ...formData,
-        coordinates: this.formData.coordinates,
-        officialAddress: this.formData.officialAddress,
-        postalAddress: this.formData.postalAddress,
+        annualTurnover: parseFloat(formData.annualTurnover),
+        employeesCount: parseInt(formData.employeesCount),
+        rating: parseInt(formData.rating),
+        coordinates: cleanObject(this.formData.coordinates),
+        officialAddress: cleanObject(this.formData.officialAddress),
+        postalAddress: cleanObject(this.formData.postalAddress),
         type: this.formData.type
       }
+
+      // Удаляем null значения для необязательных полей
+      if (dataToSend.coordinates === null) delete dataToSend.coordinates;
+      if (dataToSend.officialAddress === null) delete dataToSend.officialAddress;
+      if (dataToSend.postalAddress === null) delete dataToSend.postalAddress;
+
+      console.log('Очищенные данные:', JSON.stringify(dataToSend, null, 2));
 
       try {
         const response = await this.$axios?.post('/api/organization', dataToSend)
@@ -413,6 +434,7 @@ export default {
         this.resetForm()
       } catch (error) {
         console.error('Ошибка при создании организации:', error)
+        console.error('Полная ошибка:', error.response?.data);
         this.handleServerError(error)
         this.$emit('error', error)
       } finally {
@@ -475,11 +497,11 @@ export default {
 </script>
 
 <style scoped>
- .organization-form-wrapper {
-   max-width: 900px;
-   margin: 0 auto;
-   padding: 20px;
- }
+.organization-form-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
 
 .form-section-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

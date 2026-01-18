@@ -80,25 +80,6 @@
       </div>
     </div>
 
-    <div class="stats-section" v-if="originalHistory.length > 0">
-      <div class="stat-card">
-        <div class="stat-value">{{ stats.total }}</div>
-        <div class="stat-label">Всего операций</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-success">{{ stats.success }}</div>
-        <div class="stat-label">Успешно</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-failed">{{ stats.failed }}</div>
-        <div class="stat-label">С ошибкой</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ stats.totalRecords }}</div>
-        <div class="stat-label">Всего записей</div>
-      </div>
-    </div>
-
     <div class="history-table-container">
       <div class="table-wrapper">
         <div class="table-header">
