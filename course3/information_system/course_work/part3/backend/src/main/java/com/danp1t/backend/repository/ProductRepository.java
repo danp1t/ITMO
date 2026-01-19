@@ -20,6 +20,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     Optional<Product> findByIdWithProductInfos(@Param("id") Integer id);
 
     @Modifying
-    @Query(value = "INSERT INTO product_info (product_id, size_name, count_items, price) VALUES (:#{#productInfo.product.id}, :#{#productInfo.sizeName}, :#{#productInfo.countItems}, :#{#productInfo.price})", nativeQuery = true)
+    @Query(value = "INSERT INTO \"ProductInfo\" (product_id, size_name, count_items, price) VALUES (:#{#productInfo.product.id}, :#{#productInfo.sizeName}, :#{#productInfo.countItems}, :#{#productInfo.price})", nativeQuery = true)
     void saveProductInfo(@Param("productInfo") ProductInfo productInfo);
 }
