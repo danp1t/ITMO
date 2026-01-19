@@ -25,10 +25,10 @@
         <div class="level-left">
           <div class="price-info">
             <p class="price has-text-weight-bold">
-              <span v-if="hasMultiplePrices" class="has-text-grey is-size-7">
-                от
+              {{ product.basePrice }} ₽
+              <span v-if="hasMultipleSizes && hasPriceRange" class="has-text-grey is-size-7 ml-1">
+                (от {{ minPrice }} ₽ за размер)
               </span>
-              {{ minPrice }} ₽
             </p>
           </div>
         </div>
@@ -165,7 +165,7 @@ const getProductImageUrl = () => {
 
 const handleImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
-  img.src = 'https://placehold.co/400x300?text=%D0%98%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5+%D1%82%D0%BE%D0%B2%D0%B0%D1%80%D0%B0'
+  img.src = 'https://placehold.co/400x300?text=%D0%98%D0%B7%D0%BE%D0%B1%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5+%D1%82%D0%BE%D0%B2%D0%B0%D1%80%D0%B0'
 }
 
 const totalStock = computed(() => {
@@ -178,6 +178,16 @@ const availableSizes = computed(() => {
   return props.productInfos.filter(info => info.countItems > 0)
 })
 
+const hasMultipleSizes = computed(() => {
+  return props.productInfos && props.productInfos.length > 1
+})
+
+const hasMultiplePrices = computed(() => {
+  if (!props.productInfos || props.productInfos.length <= 1) return false
+  const prices = props.productInfos.map(info => info.price)
+  return new Set(prices).size > 1
+})
+
 const minPrice = computed(() => {
   if (!props.productInfos || props.productInfos.length === 0) {
     return props.product.basePrice
@@ -185,10 +195,9 @@ const minPrice = computed(() => {
   return Math.min(...props.productInfos.map(info => info.price))
 })
 
-const hasMultiplePrices = computed(() => {
-  if (!props.productInfos || props.productInfos.length <= 1) return false
-  const prices = props.productInfos.map(info => info.price)
-  return new Set(prices).size > 1
+const hasPriceRange = computed(() => {
+  if (!props.productInfos || props.productInfos.length === 0) return false
+  return hasMultiplePrices.value && minPrice.value < props.product.basePrice
 })
 
 const isOutOfStock = computed(() => totalStock.value === 0)
@@ -217,6 +226,8 @@ const truncateDescription = (description: string) => {
 }
 
 const onSizeChange = () => {
+  // При изменении размера можно обновить отображаемую цену
+  // Но в текущем дизайне мы показываем только минимальную цену
 }
 
 const addToCart = async () => {
@@ -361,13 +372,14 @@ if (availableSizes.value.length > 0) {
 
 .price-info {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
 }
 
 .price {
   color: #949cae;
   font-size: 1.25rem;
+  display: flex;
+  align-items: center;
 }
 
 .tag.is-success {

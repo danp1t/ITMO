@@ -86,13 +86,13 @@
             <div class="level-left">
               <div>
                 <p class="title is-2">
-                  <span v-if="hasMultiplePrices" class="subtitle is-3">
-                    от
+                  {{ product.basePrice }} ₽
+                  <span v-if="hasMultipleSizes && hasPriceRange" class="subtitle is-3 ml-2">
+                    (от {{ minPrice }} ₽ за размер)
                   </span>
-                  {{ minPrice }} ₽
                 </p>
-                <p v-if="hasMultiplePrices" class="has-text-grey">
-                  Диапазон цен: {{ minPrice }} - {{ maxPrice }} ₽
+                <p v-if="hasMultipleSizes" class="has-text-grey">
+                  Цены на размеры: от {{ minPrice }} до {{ maxPrice }} ₽
                 </p>
               </div>
             </div>
@@ -133,9 +133,9 @@
                     @click="decreaseQuantity"
                     :disabled="quantity <= 1"
                   >
-          <span class="icon is-small">
-            <i class="fas fa-minus"></i>
-          </span>
+                    <span class="icon is-small">
+                      <i class="fas fa-minus"></i>
+                    </span>
                   </button>
                 </div>
                 <div class="control">
@@ -155,15 +155,15 @@
                     @click="increaseQuantity"
                     :disabled="quantity >= selectedSize.countItems"
                   >
-          <span class="icon is-small">
-            <i class="fas fa-plus"></i>
-          </span>
+                    <span class="icon is-small">
+                      <i class="fas fa-plus"></i>
+                    </span>
                   </button>
                 </div>
                 <div class="control">
-        <span class="tag is-info ml-3">
-          Доступно: {{ selectedSize.countItems }} шт.
-        </span>
+                  <span class="tag is-info ml-3">
+                    Доступно: {{ selectedSize.countItems }} шт.
+                  </span>
                 </div>
               </div>
             </div>
@@ -333,7 +333,7 @@ const productImages = computed(() => {
       return `/api/products/images/${img}`
     })
   }
-  return ['https://placehold.co/800x600?text=%D0%9D%D0%B5%D1%82+%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D1%8F']
+  return ['https://placehold.co/800x600?text=%D0%9D%D0%B5%D1%82+%D0%B8%D0%B7%D0%BE%D0%B1%D1%80%D0%B0%D0%B6%D0%B5%D0%BD%D0%B8%D0%B8']
 })
 
 const totalStock = computed(() => {
@@ -350,6 +350,10 @@ const sortedProductInfos = computed(() => {
     if (a.countItems > 0 && b.countItems === 0) return -1
     return a.sizeName.localeCompare(b.sizeName)
   })
+})
+
+const hasMultipleSizes = computed(() => {
+  return productInfos.value.length > 1
 })
 
 const minPrice = computed(() => {
@@ -374,6 +378,11 @@ const hasMultiplePrices = computed(() => {
   return new Set(prices).size > 1
 })
 
+const hasPriceRange = computed(() => {
+  if (!product.value || productInfos.value.length === 0) return false
+  return hasMultiplePrices.value && minPrice.value < product.value.basePrice
+})
+
 const isOutOfStock = computed(() => totalStock.value === 0)
 
 const canAddToCart = computed(() => {
@@ -389,7 +398,9 @@ const addToCartText = computed(() => {
   if (availableSizes.value.length > 0 && !selectedSize.value) {
     return 'Выберите размер'
   }
-  const price = selectedSize.value ? selectedSize.value.price : minPrice.value
+
+  // Используем цену выбранного размера или базовую цену
+  const price = selectedSize.value ? selectedSize.value.price : product.value?.basePrice || 0
   return `Добавить в корзину (${price * quantity.value} ₽)`
 })
 
@@ -532,8 +543,6 @@ const validateQuantity = () => {
     showNotification(`Максимальное количество: ${selectedSize.value.countItems}`, 'warning')
   }
 }
-
-
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('ru-RU', {
