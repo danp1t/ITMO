@@ -24,7 +24,6 @@ public class CacheStatisticInterceptor {
 
     @PostConstruct
     public void init() {
-        // Проверяем, включена ли статистика в настройках
         statistics = sessionFactory.getStatistics();
         statisticsEnabled = statistics.isStatisticsEnabled();
 
@@ -41,16 +40,13 @@ public class CacheStatisticInterceptor {
             return context.proceed();
         }
 
-        // Сохраняем начальные значения
         long secondLevelCacheHitCountBefore = statistics.getSecondLevelCacheHitCount();
         long secondLevelCacheMissCountBefore = statistics.getSecondLevelCacheMissCount();
         long queryCacheHitCountBefore = statistics.getQueryCacheHitCount();
         long queryCacheMissCountBefore = statistics.getQueryCacheMissCount();
 
-        // Выполняем метод
         Object result = context.proceed();
 
-        // Вычисляем разницу
         long secondLevelCacheHitCountAfter = statistics.getSecondLevelCacheHitCount();
         long secondLevelCacheMissCountAfter = statistics.getSecondLevelCacheMissCount();
         long queryCacheHitCountAfter = statistics.getQueryCacheHitCount();
@@ -61,7 +57,6 @@ public class CacheStatisticInterceptor {
         long queryCacheHits = queryCacheHitCountAfter - queryCacheHitCountBefore;
         long queryCacheMisses = queryCacheMissCountAfter - queryCacheMissCountBefore;
 
-        // Логируем статистику
         logStatistics(
                 context.getMethod().getName(),
                 secondLevelCacheHits,
@@ -74,13 +69,11 @@ public class CacheStatisticInterceptor {
     }
 
     private CacheStatistic getCacheStatisticAnnotation(InvocationContext context) {
-        // Проверяем аннотацию на методе
         CacheStatistic methodAnnotation = context.getMethod().getAnnotation(CacheStatistic.class);
         if (methodAnnotation != null) {
             return methodAnnotation;
         }
 
-        // Проверяем аннотацию на классе
         return context.getTarget().getClass().getAnnotation(CacheStatistic.class);
     }
 
@@ -110,7 +103,6 @@ public class CacheStatisticInterceptor {
 
     @PreDestroy
     public void destroy() {
-        // При желании можно залогировать общую статистику при завершении
         if (statisticsEnabled) {
             logOverallStatistics();
         }
@@ -137,7 +129,6 @@ public class CacheStatisticInterceptor {
             logMessage.append(String.format("Overall Query Cache Hit Ratio: %.2f%%\n", queryHitRatio));
         }
 
-        // Статистика по регионам кэша
         logMessage.append("\n=== Cache Region Statistics ===\n");
         String[] secondLevelCacheRegionNames = statistics.getSecondLevelCacheRegionNames();
         for (String region : secondLevelCacheRegionNames) {

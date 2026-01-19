@@ -1,11 +1,13 @@
 package com.danp1t.repository;
 
 import com.danp1t.model.*;
+import jakarta.persistence.QueryHint;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.hibernate.jpa.AvailableHints;
 import org.hibernate.query.Query;
 
 import java.sql.Connection;
