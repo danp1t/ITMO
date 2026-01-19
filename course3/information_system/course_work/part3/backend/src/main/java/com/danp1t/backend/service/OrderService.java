@@ -4,7 +4,7 @@ import com.danp1t.backend.dto.OrderDTO;
 import com.danp1t.backend.dto.ProductDTO;
 import com.danp1t.backend.dto.OrderItemDTO;
 import com.danp1t.backend.model.*;
-import com.danp1t.backend.repository.OrderRepository;
+import com.danp1t.backend.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,18 @@ public class OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private OrderStatusRepository orderStatusRepository;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ProductInfoRepository productInfoRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -105,11 +117,11 @@ public class OrderService {
             }
         }
 
-        OrderStatus pendingStatus = orderRepository.findOrderStatusByName("pending")
+        OrderStatus pendingStatus = orderStatusRepository.findByName("pending")
                 .orElseThrow(() -> new RuntimeException("Pending status not found"));
         order.setOrderStatus(pendingStatus);
 
-        Account account = orderRepository.findAccountById(orderDTO.getAccountId())
+        Account account = accountRepository.findById(orderDTO.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found"));
         order.setAccount(account);
 
@@ -120,7 +132,7 @@ public class OrderService {
                     .collect(Collectors.toList());
 
             if (!productIds.isEmpty()) {
-                List<Product> products = orderRepository.findProductsByIds(productIds);
+                List<Product> products = productRepository.findAllById(productIds);
                 order.setProducts(products);
             }
         }
@@ -140,7 +152,7 @@ public class OrderService {
     @Transactional(propagation = Propagation.MANDATORY, isolation = Isolation.REPEATABLE_READ)
     protected void updateProductStock(List<OrderItemDTO> orderItems) {
         for (OrderItemDTO orderItem : orderItems) {
-            ProductInfo productInfo = orderRepository.findProductInfoById(orderItem.getProductInfoId())
+            ProductInfo productInfo = productInfoRepository.findById(orderItem.getProductInfoId())
                     .orElseThrow(() -> new RuntimeException("ProductInfo not found with id: " + orderItem.getProductInfoId()));
 
             if (productInfo.getCountItems() < orderItem.getQuantity()) {
@@ -149,7 +161,7 @@ public class OrderService {
             }
 
             productInfo.setCountItems(productInfo.getCountItems() - orderItem.getQuantity());
-            orderRepository.saveProductInfo(productInfo);
+            productInfoRepository.save(productInfo);
         }
     }
 
@@ -195,7 +207,7 @@ public class OrderService {
         existingOrder.setNotes(orderDTO.getNotes());
 
         if (!existingOrder.getOrderStatus().getId().equals(orderDTO.getOrderStatusId())) {
-            OrderStatus status = orderRepository.findOrderStatusById(orderDTO.getOrderStatusId())
+            OrderStatus status = orderStatusRepository.findById(orderDTO.getOrderStatusId())
                     .orElseThrow(() -> new RuntimeException("OrderStatus not found"));
             existingOrder.setOrderStatus(status);
         }

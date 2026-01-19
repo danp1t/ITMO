@@ -83,7 +83,6 @@ public class ProductInfoService {
 
         existingProductInfo.setSizeName(productInfoDTO.getSizeName());
         existingProductInfo.setCountItems(productInfoDTO.getCountItems());
-        existingProductInfo.setPrice(productInfoDTO.getPrice());
 
         ProductInfo updated = productInfoRepository.save(existingProductInfo);
         return toDTO(updated);

@@ -5,6 +5,8 @@ import com.danp1t.backend.model.Attachment;
 import com.danp1t.backend.model.Post;
 import com.danp1t.backend.model.TypeAttachment;
 import com.danp1t.backend.repository.AttachmentRepository;
+import com.danp1t.backend.repository.PostRepository;
+import com.danp1t.backend.repository.TypeAttachmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,10 +25,10 @@ public class AttachmentService {
     private AttachmentRepository attachmentRepository;
 
     @Autowired
-    private PostService postService;
+    private PostRepository postRepository;
 
     @Autowired
-    private TypeAttachmentService typeAttachmentService;
+    private TypeAttachmentRepository typeAttachmentRepository;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -49,7 +51,7 @@ public class AttachmentService {
         attachment.setPath(dto.getPath());
 
         if (dto.getPostId() != null) {
-            Post post = postService.findEntityById(dto.getPostId())
+            Post post = postRepository.findById(dto.getPostId())
                     .orElseThrow(() -> new RuntimeException("Post not found with id: " + dto.getPostId()));
             attachment.setPost(post);
         } else {
@@ -57,7 +59,7 @@ public class AttachmentService {
         }
 
         if (dto.getTypeAttachmentId() != null) {
-            TypeAttachment typeAttachment = typeAttachmentService.findById(dto.getTypeAttachmentId())
+            TypeAttachment typeAttachment = typeAttachmentRepository.findById(dto.getTypeAttachmentId())
                     .orElseThrow(() -> new RuntimeException("TypeAttachment not found with id: " + dto.getTypeAttachmentId()));
             attachment.setTypeAttachment(typeAttachment);
         } else {
@@ -77,16 +79,6 @@ public class AttachmentService {
     @Transactional(readOnly = true)
     public Optional<AttachmentDTO> findById(Integer id) {
         return attachmentRepository.findById(id).map(this::toDTO);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Attachment> findEntityById(Integer id) {
-        return attachmentRepository.findById(id);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<Attachment> findByIdWithDetails(Integer id) {
-        return attachmentRepository.findByIdWithDetails(id);
     }
 
     @Transactional(readOnly = true)
@@ -131,11 +123,11 @@ public class AttachmentService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public AttachmentDTO uploadFile(MultipartFile file, Integer postId, Integer typeAttachmentId) {
-        Post post = postService.findEntityById(postId)
+        Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
         System.out.printf("Uploading file: %s\n", file.getOriginalFilename());
 
-        TypeAttachment typeAttachment = typeAttachmentService.findById(typeAttachmentId)
+        TypeAttachment typeAttachment = typeAttachmentRepository.findById(typeAttachmentId)
                 .orElseThrow(() -> new RuntimeException("TypeAttachment not found with id: " + typeAttachmentId));
         System.out.printf("Uploading file: %s\n", typeAttachment.getName());
 
